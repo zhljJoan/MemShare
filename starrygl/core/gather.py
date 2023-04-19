@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from typing import *
 
 from .route import Route, GatherWork
+from .cache import EmbeddingCache
 
 
 class GatherContext:
@@ -18,46 +19,74 @@ class GatherContext:
         self.this = this
         self.route = route
         self.async_op = async_op
-    
-    def gather(self,
-        values: Tensor,
-        active: Optional[Tensor] = None,
-    ) -> Tuple[Tensor, Tensor]:
-        values, active = GatherFunction.apply(values, active)
-        return values, active
 
-class Gather:
-    def __init__(self) -> None:
-        self.cache: Dict[str, Tensor] = {}
+class Gather(nn.Module):
+    def __init__(self,
+        num_nodes: int,
+        num_features: Optional[int] = None,
+        beta: float = 1.0,
+    ) -> None:
+        super().__init__()
+        self.num_nodes = num_nodes
+        self.num_features = num_features
+        self.beta = beta
+        if num_features is None:
+            self.register_buffer("last_embd", torch.zeros(num_nodes))
+        else:
+            self.register_buffer("last_embd", torch.zeros(num_nodes, num_features))
         self.last_fw_work: Optional[GatherWork] = None
         self.last_bw_work: Optional[GatherWork] = None
+        self.reset_parameters()
     
-    def __call__(self,
+    def forward(self,
         values: Tensor,
         active: Optional[Tensor],
         route: Route,
         async_op: bool = False,
     ) -> Tuple[Tensor, Tensor]:
-        with self._gather_manager(route=route, async_op=async_op) as gtx:
-            values, active = gtx.gather(values=values, active=active)
-        return values, active
+        with self._gather_manager(route=route, async_op=async_op):
+            return GatherFunction.apply(values, active)
     
-    def clear(self):
-        self.cache.clear()
-        self.last_fw_work = None
-        self.last_bw_work = None
+    def reset_parameters(self):
+        last_embd = self.get_buffer("last_embd")
+        nn.init.normal_(last_embd, mean=0, std=1)
+    
+    def fuse_embeddings(self,
+        values: Tensor,
+        active: Optional[Tensor] = None,
+        inplace: bool = False,
+    ) -> Tensor:
+        last_embd = self.get_buffer("last_embd")
+        return GatherFuseFunction.apply(values, active, last_embd, self.beta, inplace, self.training)
+        # if not inplace:
+        #     last_embd = last_embd.clone()
+            
+        # if active is None:
+        #     if self.beta != 1.0:
+        #         values = values * self.beta + last_embd * (1 - self.beta)
+        #     last_embd[:] = values
+        # else:
+        #     if values.size(0) == active.size(0):
+        #         values = values[active]
+        #     if self.beta != 1.0:
+        #         values = values * self.beta + last_embd[active] * (1 - self.beta)
+        #     last_embd[active] = values
+        # return last_embd
     
     @contextmanager
     def _gather_manager(self, route: Route, async_op: bool):
         global _global_gather_context
-        prev_gtx = _global_gather_context
+        stacked = _global_gather_context
 
         try:
             _global_gather_context = GatherContext(
-                this=self, route=route, async_op=async_op)
+                this=self,
+                route=route,
+                async_op=async_op,
+            )
             yield _global_gather_context
         finally:
-            _global_gather_context = prev_gtx
+            _global_gather_context = stacked
 
 class GatherFunction(autograd.Function):
     @staticmethod
@@ -66,88 +95,114 @@ class GatherFunction(autograd.Function):
         values: Tensor,
         active: Optional[Tensor] = None,
     ):
-        gtx = _last_global_gather_context()
-        this: Gather = gtx.this
-        route: Route = gtx.route
-
-        fw_key = "__forward_activation__"
-        cached = this.cache.get(fw_key)
-        if cached is None:
-            cached = torch.zeros(
-                size=(route.dst_size,) + values.shape[1:],
-                dtype=values.dtype,
-                device=values.device,
-            )
+        gather_ctx = _last_global_gather_context()
+        this: Gather = gather_ctx.this
+        route: Route = gather_ctx.route
+        async_op: bool = gather_ctx.async_op
         
-        current_work = route.gather_forward(values, active, async_op=gtx.async_op)
-        if gtx.async_op:
+        current_work = route.gather_forward(values, active, async_op=async_op)
+        if async_op:
             work = this.last_fw_work or current_work
             this.last_fw_work = current_work
         else:
             work = current_work
         
-        recv_values = work.get_values()
-        recv_active = work.get_active()
-
-        cached[recv_active] = recv_values
-        this.cache[fw_key] = cached
+        recv_values, recv_active = work.get()
+        recv_values = this.fuse_embeddings(
+            values=recv_values,
+            active=recv_active,
+            inplace=True,
+        )
         
-        # 如果输入的values是收缩过的，求解梯度的时候需要去除空洞
-        if active is not None and values.size(0) < active.size(0):
-            ctx.shrink_values = True
-            ctx.save_for_backward(active, recv_active)
-        else:
-            ctx.shrink_values = False
-            ctx.save_for_backward(recv_active)
-        ctx.gtx = gtx
-
-        return cached, recv_active
+        if this.training:
+            # 如果输入的values是收缩过的，求解梯度的时候需要去除空洞
+            if active is not None and values.size(0) < active.size(0):
+                ctx.shrink_grad = True
+                ctx.save_for_backward(active, recv_active)
+            else:
+                ctx.shrink_grad = False
+                ctx.save_for_backward(recv_active)
+            ctx.this = this
+            ctx.route = route
+            ctx.async_op = async_op
+        return recv_values, recv_active
 
     @staticmethod
     def backward(
         ctx: autograd.function.FunctionCtx,
         grad_values: Tensor,
-        grad_active: Optional[Tensor], # always None
+        grad_active: Optional[Tensor],
     ):
-        gtx: GatherContext = ctx.gtx
-        this: Gather = gtx.this
-        route: Route = gtx.route
-
-        # 返回的梯度是否需要去空洞
-        shrink_values: bool = ctx.shrink_values
+        this: Gather = ctx.this
+        route: Route = ctx.route
+        async_op: bool = ctx.async_op
+        shrink_grad: bool = ctx.shrink_grad
+        
         with torch.no_grad():
             # # 反向传播激活值是沿着前向传播的反方向进行
-            if shrink_values:
-                active, recv_active = ctx.saved_tensors
+            if shrink_grad:
+                recv_active, grad_active = ctx.saved_tensors
             else:
-                recv_active, = ctx.saved_tensors
-            
-            bw_key = "__backward_gradient__"
-            cached = this.cache.get(bw_key)
-            if cached is None:
-                cached = torch.zeros(
-                    size=(route.src_size,) + grad_values.shape[1:],
-                    dtype=grad_values.dtype,
-                    device=grad_values.device,
-                )
-            
-            current_work = route.gather_backward(grad_values, recv_active, async_op=gtx.async_op)
-            if gtx.async_op:
+                grad_active, = ctx.saved_tensors
+
+            current_work = route.gather_backward(grad_values, grad_active, async_op=async_op)
+            if async_op:
                 work = this.last_bw_work or current_work
                 this.last_bw_work = current_work
             else:
                 work = current_work
             
-            recv_grad_values = work.get_values()
-            recv_grad_active = work.get_active()
+            recv_values = work.get_values()
             
-            cached[recv_grad_active] = recv_grad_values
-            this.cache[bw_key] = cached
+            if shrink_grad:
+                recv_values = recv_values[recv_active]
+            return recv_values, None
 
-            if shrink_values:
-                return cached[active], None
+
+class GatherFuseFunction(autograd.Function):
+    @staticmethod
+    def forward(
+        ctx: autograd.function.FunctionCtx,
+        values: Tensor,
+        active: Optional[Tensor],
+        last_embd: Tensor,
+        beta: float,
+        inplace: bool,
+        training: bool,
+    ):
+        if not inplace:
+            last_embd = last_embd.clone()
+        ctx.beta = beta
+        
+        if active is None:
+            if beta != 1.0:
+                values = values * beta + last_embd * (1 - beta)
+            last_embd[:] = values
+            ctx.shrink_grad = False
+        else:
+            if values.size(0) == active.size(0):
+                values = values[active]
+                ctx.shrink_grad = False
             else:
-                return cached, None
+                if training:
+                    ctx.save_for_backward(active)
+                ctx.shrink_grad = True
+                
+            if beta != 1.0:
+                values = values * beta + last_embd[active] * (1 - beta)
+            last_embd[active] = values
+        return last_embd
+
+    @staticmethod
+    def backward(
+        ctx: autograd.function.FunctionCtx,
+        grad: Tensor,
+    ):
+        if ctx.shrink_grad:
+            active, = ctx.saved_tensors
+            return grad[active] * ctx.beta, None, None, None, None, None
+        else:
+            return grad * ctx.beta, None, None, None, None, None
 
 
 #### private functions

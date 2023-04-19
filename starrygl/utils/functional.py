@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 from torch import Tensor
-from core.distributed import PGraph
+from ..graph import DistGraph
 
 from typing import *
 from .metrics import *
@@ -10,20 +10,14 @@ from .metrics import *
 def train_epoch(
     model: nn.Module,
     opt: torch.optim.Optimizer,
-    g: PGraph,
-    x: Tensor,
-    y: Tensor,
-    w: Optional[Tensor] = None,
+    g: DistGraph,
     mask: Optional[Tensor] = None,
 ) -> float:
     model.train()
     criterion = nn.CrossEntropyLoss()
 
-    if w is None:
-        pred: Tensor = model(g, x)
-    else:
-        pred: Tensor = model(g, x, edge_attr = w)
-    targ: Tensor = y
+    pred: Tensor = model(g)
+    targ: Tensor = g.ndata["y"]
     
     if mask is not None:
         pred = pred[mask]
@@ -43,20 +37,14 @@ def train_epoch(
 @torch.no_grad()
 def eval_epoch(
     model: nn.Module,
-    g: PGraph,
-    x: Tensor,
-    y: Tensor,
-    w: Optional[Tensor] = None,
+    g: DistGraph,
     mask: Optional[Tensor] = None,
 ) -> Tuple[float, float]:
     model.eval()
     criterion = nn.CrossEntropyLoss()
     
-    if w is None:
-        pred: Tensor = model(g, x)
-    else:
-        pred: Tensor = model(g, x, edge_attr = w)
-    targ: Tensor = y
+    pred: Tensor = model(g)
+    targ: Tensor = g.ndata["y"]
     
     if mask is not None:
         pred = pred[mask]

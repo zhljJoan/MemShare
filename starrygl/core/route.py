@@ -48,6 +48,9 @@ class GatherWork:
         if not self._waited:
             self._wait()
         return self._active_buffer
+    
+    def get(self) -> Tuple[Tensor, Optional[Tensor]]:
+        return self.get_values(), self.get_active()
 
 
 class Route:
@@ -214,9 +217,9 @@ class Route:
                 )
             
         if async_op and with_nccl():
-            _stream = _get_stream()
-            _stream.wait_stream(torch.cuda.current_stream())
-            with torch.cuda.stream(_stream):
+            stream = get_stream()
+            stream.wait_stream(torch.cuda.current_stream())
+            with torch.cuda.stream(stream):
                 return async_run()
         else:
             return async_run()
@@ -225,13 +228,17 @@ class Route:
         values: Tensor,
         active: Optional[Tensor],
         async_op: bool = False,
+        return_active: bool = True,
     ):
         bkw = dict(dtype=torch.bool, device=values.device)
         fkw = dict(dtype=values.dtype, device=values.device)
 
         s = (self.dst_size,) + values.shape[1:]
         values_buffer = torch.zeros(s, **fkw)
-        active_buffer = torch.zeros(self.dst_size, **bkw)
+        if return_active:
+            active_buffer = torch.zeros(self.dst_size, **bkw)
+        else:
+            active_buffer = None
 
         return self._gather_impl(
             values_buffer=values_buffer,
@@ -247,13 +254,17 @@ class Route:
         values: Tensor,
         active: Optional[Tensor],
         async_op: bool = False,
+        return_active: bool = True,
     ):
         bkw = dict(dtype=torch.bool, device=values.device)
         fkw = dict(dtype=values.dtype, device=values.device)
         
         s = (self.src_size,) + values.shape[1:]
         values_buffer = torch.zeros(s, **fkw)
-        active_buffer = torch.zeros(self.src_size, **bkw)
+        if return_active:
+            active_buffer = torch.zeros(self.src_size, **bkw)
+        else:
+            active_buffer = None
 
         return self._gather_impl(
             values_buffer=values_buffer,
@@ -305,7 +316,7 @@ def _spread_values(values: Tensor, active: Tensor) -> Tensor:
 
 # 创建一个新的stream，专用于Gather异步通信
 _STREAM: Optional[torch.cuda.Stream] = None
-def _get_stream() -> torch.cuda.Stream:
+def get_stream() -> torch.cuda.Stream:
     global _STREAM
     if _STREAM is None:
         _STREAM = torch.cuda.Stream()

@@ -4,15 +4,25 @@ import torch.distributed as dist
 
 import os
 
+from .degree import compute_degree, compute_gcn_norm
+from .sync_bn import SyncBatchNorm
+from ..core import with_gloo, with_nccl
+
 def convert_parallel_model(
     net: nn.Module,
     find_unused_parameters=False,
 ) -> nn.parallel.DistributedDataParallel:
-    if dist.get_backend() == "nccl":
-        net = torch.nn.SyncBatchNorm.convert_sync_batchnorm(net)
+    net = SyncBatchNorm.convert_sync_batchnorm(net)
     net = nn.parallel.DistributedDataParallel(net,
         find_unused_parameters=find_unused_parameters,
+        broadcast_buffers=False,
     )
+    for name, buffer in net.named_buffers():
+        if name.endswith("last_embd"):
+            continue
+        if name.endswith("grad_norm"):
+            continue
+        dist.broadcast(buffer, src=0)
     return net
 
 def init_process_group(backend: str = "gloo") -> torch.device:
