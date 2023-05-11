@@ -10,7 +10,7 @@ from typing import *
 
 from starrygl.graph import DistGraph
 from .gat_conv import GATConv
-from .utils import ShrinkData
+from .utils import ShrinkHelper
 
 
 
@@ -38,29 +38,36 @@ class ShrinkGATConv(GATConv):
             **kwargs
         )
 
-    def forward(self, g: DistGraph) -> Tuple[Tensor, Tensor]:
-        m = g.ndata.get("m")
-        if m is None:
-            return super().forward(g), None
+    def forward(self,
+        g: DistGraph,
+        sh: Optional[ShrinkHelper] = None,
+        dst_idx: Optional[Tensor] = None,
+    ) -> Tensor:
+        if sh is None and dst_idx is None:
+            return super().forward(g)
         
+        if sh is None:
+            sh = ShrinkHelper(g, dst_idx)
+            
         H, C = self.heads, self.out_channels
         x = g.ndata["x"]
         
-        s = ShrinkData(g, m)
-        x = x[s.src_mask]
-        edge_index = s.edge_index
+        src_x = x[sh.src_idx]
+        dst_x = x[sh.dst_idx]
+        edge_index = sh.edges
 
-        x = (x @ self.weight).view(-1, H, C)
+        src_x = (src_x @ self.weight).view(-1, H, C)
+        dst_x = (dst_x @ self.weight).view(-1, H, C)
         
-        alpha_j = (x * self.att_src).sum(dim=-1)
+        alpha_i = (src_x * self.att_src).sum(dim=-1)
         alpha_j = alpha_j[edge_index[0]]
 
-        alpha_i = (x * self.att_dst).sum(dim=-1)
+        alpha_i = (dst_x * self.att_dst).sum(dim=-1)
         alpha_i = alpha_i[edge_index[1]]
 
         if self.edge_dim is not None:
             edge_attr = g.edata["edge_attr"]
-            edge_attr = edge_attr[s.edge_mask]
+            edge_attr = edge_attr[sh.edge_idx]
             if edge_attr.dim() == 1:
                 edge_attr = edge_attr.view(-1, 1)
             
@@ -73,13 +80,13 @@ class ShrinkGATConv(GATConv):
         alpha = softmax(
             src=alpha,
             index=edge_index[1],
-            num_nodes=s.dst_size,
+            num_nodes=sh.dst_size,
         )
 
         alpha = F.dropout(alpha, p=self.dropout, training=self.training)
         
         x = x[edge_index[0]] * alpha.view(-1, H, 1)
-        x = scatter_sum(x, edge_index[1], dim=0, dim_size=s.dst_size)
+        x = scatter_sum(x, edge_index[1], dim=0, dim_size=sh.dst_size)
 
         if self.concat:
             x = x.view(-1, H * C)
@@ -88,5 +95,5 @@ class ShrinkGATConv(GATConv):
         
         if self.bias is not None:
             x += self.bias
-        return x, s.dst_mask
+        return x
 

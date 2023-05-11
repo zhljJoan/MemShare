@@ -1,53 +1,45 @@
-import torch
+# import torch
 
-from torch import Tensor
-from typing import *
-
-from starrygl.graph import DistGraph
+# from torch import Tensor
+# from typing import *
 
 
-class ShrinkData:
-    def __init__(self, g: DistGraph, m: Tensor) -> None:
-        edge_index = g.edge_index
+
+# class ShrinkHelper:
+#     def __init__(self, g, dst_idx: Tensor) -> None:
+#         from starrygl.graph import DistGraph
+#         g: DistGraph = g
+
+#         self.device = dst_idx.device
         
-        # src_to_dst edge's mask
-        m = m[edge_index[0]]
+#         dst_m = torch.zeros(g.dst_size, dtype=torch.bool, device=self.device)
+#         dst_m.index_fill_(0, dst_idx, 1)
         
-        # dst's mask
-        m = edge_index[1][m]
-        dst_m: Tensor = torch.zeros(g.dst_size, dtype=torch.bool, device=m.device).index_fill_(0, m, 1)
-        self.dst_mask = dst_m
+#         edge_idx = torch.where(dst_m[g.edge_index[1]])[0]
+#         edge_index = g.edge_index[:, edge_idx]
         
-        # dst_to_src edge's mask
-        m = dst_m[edge_index[1]]
-        self.edge_mask = m
+#         src_idx = edge_index[0]
+#         src_m = torch.zeros(g.src_size, dtype=torch.bool, device=self.device)
+#         src_m.index_fill_(0, src_idx, 1)
+#         src_idx = torch.where(src_m)[0]
         
-        # src's mask
-        edge_index = edge_index[:,m]
-        src_m: Tensor = torch.zeros(g.src_size, dtype=torch.bool, device=m.device).index_fill_(0, edge_index[0], 1)
-        self.src_mask = src_m
+#         imp = torch.empty(max(g.src_size, g.dst_size), dtype=torch.long, device=self.device)
         
-        self._src_size = src_m.count_nonzero()
-        self._dst_size = dst_m.count_nonzero()
+#         imp[src_idx] = torch.arange(src_idx.size(0), dtype=torch.long, device=self.device)
+#         src = imp[edge_index[0]]
         
-        # print(f"{dst_m.size()}_{self._dst_size}")
+#         imp[dst_idx] = torch.arange(dst_idx.size(0), dtype=torch.long, device=self.device)
+#         dst = imp[edge_index[1]]
         
-        # edge_index
-        imp = torch.empty(g.src_size, dtype=torch.long, device=m.device)
-        imp[src_m] = torch.arange(self._src_size, dtype=torch.long, device=m.device)
-        src = imp[edge_index[0]]
+#         self.src_idx = src_idx
+#         self.dst_idx = dst_idx
+#         self.edge_idx = edge_idx
+#         self.edges = torch.vstack([src, dst])
         
-        imp = torch.empty(g.dst_size, dtype=torch.long, device=m.device)
-        imp[dst_m] = torch.arange(self._dst_size, dtype=torch.long, device=m.device)
-        dst = imp[edge_index[1]]
-        
-        self.edge_index = torch.vstack([src, dst])
+#     @property
+#     def src_size(self) -> int:
+#         return self.src_idx.size(0)
     
-    @property
-    def src_size(self) -> int:
-        return self._src_size.item()
-    
-    @property
-    def dst_size(self) -> int:
-        return self._dst_size.item()
-        
+#     @property
+#     def dst_size(self) -> int:
+#         return self.dst_idx.size(0)

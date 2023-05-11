@@ -30,12 +30,14 @@ class Works:
 def all_to_all(
     output_tensor_list: List[Tensor],
     input_tensor_list: List[Tensor],
+    group: Optional[Any] = None,
 ) -> Works:
     assert len(output_tensor_list) == len(input_tensor_list)
     if with_nccl():
         work = dist.all_to_all(
             output_tensor_list=output_tensor_list,
             input_tensor_list=input_tensor_list,
+            group=group,
             async_op=True,
         )
         return Works(work)
@@ -48,8 +50,8 @@ def all_to_all(
             send_i = (rank + i) % world_size
             recv_i = (rank - i + world_size) % world_size
 
-            send_w = dist.isend(input_tensor_list[send_i], send_i)
-            recv_w = dist.irecv(output_tensor_list[recv_i], recv_i)
+            send_w = dist.isend(input_tensor_list[send_i], send_i, group=group)
+            recv_w = dist.irecv(output_tensor_list[recv_i], recv_i, group=group)
 
             works.push(recv_w, send_w)
         output_tensor_list[rank][:] = input_tensor_list[rank]

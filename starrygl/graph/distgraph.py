@@ -5,26 +5,23 @@ from torch import Tensor
 from typing import *
 
 from contextlib import contextmanager
-import torch_sparse
+# import torch_sparse
 
 from .ndata import NData
 from .edata import EData
 from .utils import init_local_edge_index
-from ..core import Route
+from ..core import MessageCache, Route
 
 
 class DistGraph:
     def __init__(self,
         ids: Tensor,
         edge_index: Tensor,
-        args: Dict[str, Any] = {},
-        device: Union[torch.device, str, int, None] = None,
+        num_features: int,
+        num_layers: int,
+        cache_device: str = "cpu",
+        **args: Dict[str, Any],
     ):
-        # graph's target device
-        if device is None:
-            device = ids.device
-        self.device = torch.device(device)
-        
         # build local_edge_index
         dst_ids = ids
         src_ids, local_edge_index = init_local_edge_index(
@@ -34,8 +31,15 @@ class DistGraph:
         
         self._src_ids = src_ids
         self._dst_ids = dst_ids
-        self._local_edge_index = local_edge_index
-        self._local_edge_ptr: Optional[Tensor] = None
+        self._message_cache = MessageCache(
+            src_ids=src_ids,
+            dst_ids=dst_ids,
+            edge_index=local_edge_index,
+            num_features=num_features,
+            num_layers=num_layers,
+            cache_device=cache_device,
+            bipartite=False,
+        )
 
         # node's attributes
         self.ndata = NData(
@@ -49,24 +53,30 @@ class DistGraph:
         )
 
         # graph's attributes
-        self.args = args
+        self.args = dict(args)
+    
+    def to(self, device):
+        self._message_cache.to(device)
+        return self
+    
+    def cache_data_to(self, device):
+        self._message_cache.cached_data_to(device)
+    
+    @property
+    def cache(self) -> MessageCache:
+        return self._message_cache
 
-        # route table
-        self.route = Route(dst_ids, src_ids)
+    @property
+    def route(self) -> Route:
+        return self._message_cache.route
+    
+    @property
+    def device(self) -> torch.device:
+        return self.edge_index.device
     
     @property
     def edge_index(self) -> Tensor:
-        if self._local_edge_index.device != self.device:
-            self._local_edge_index = self._local_edge_index.to(self.device)
-        return self._local_edge_index
-    
-    @property
-    def edge_ptr(self) -> Optional[Tensor]:
-        if self._local_edge_ptr is None:
-            return None
-        if self._local_edge_ptr.device != self.device:
-            self._local_edge_ptr = self._local_edge_ptr.to(self.device)
-        return self._local_edge_ptr
+        return self._message_cache.edge_index
     
     @property
     def src_ids(self) -> Tensor:
@@ -87,16 +97,6 @@ class DistGraph:
     @property
     def dst_size(self) -> int:
         return self._dst_ids.size(0)
-    
-    @torch.no_grad()
-    def gather(self, values: Tensor, direct: str = "dst_to_src") -> Tensor:
-        if direct == "dst_to_src":
-            work = self.route.gather_forward(values, None, async_op=False, return_active=False)
-        elif direct == "src_to_dst":
-            work = self.route.gather_backward(values, None, async_op=False, return_active=False)
-        else:
-            raise ValueError(f"direct must be 'src_to_dst' or 'dst_to_src', but got '{direct}'")
-        return work.get_values()
     
     @contextmanager
     def scoped_manager(self):

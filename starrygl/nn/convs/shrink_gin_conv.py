@@ -8,7 +8,7 @@ from typing import *
 
 from starrygl.graph import DistGraph
 from .gin_conv import GINConv
-from .utils import ShrinkData
+from .utils import ShrinkHelper
 
 
 
@@ -30,17 +30,25 @@ class ShrinkGINConv(GINConv):
             **kwargs
         )
 
-    def forward(self, g: DistGraph) -> Tuple[Tensor, Tensor]:
-        m = g.ndata.get("m")
-        if m is None:
-            return super().forward(g), None
+    def forward(self,
+        g: DistGraph,
+        sh: Optional[ShrinkHelper] = None,
+        dst_idx: Optional[Tensor] = None,
+    ) -> Tensor:
+        if sh is None and dst_idx is None:
+            return super().forward(g)
         
+        if sh is None:
+            sh = ShrinkHelper(g, dst_idx)
+
         x = g.ndata["x"]
         
-        s = ShrinkData(g, m)
-        edge_index = s.edge_index
+        sh = ShrinkHelper(g, dst_idx)
         
-        z = x[s.src_mask][edge_index[0]]
-        z = scatter_sum(z, edge_index[1], dim=0, dim_size=s.dst_size)
-        x = z + (1 + self.eps) * x[s.dst_mask]
-        return self.nn(x), s.dst_mask
+        src_x = x[sh.src_idx]
+        dst_x = x[sh.dst_idx]
+        edge_index = sh.edges
+        
+        z = scatter_sum(src_x[edge_index[0]], index=edge_index[1], dim=0, dim_size=sh.dst_size)
+        x = z + (1 + self.eps) * dst_x
+        return self.nn(x)

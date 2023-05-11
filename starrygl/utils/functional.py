@@ -22,7 +22,7 @@ def train_epoch(
     if mask is not None:
         pred = pred[mask]
         targ = targ[mask]
-        
+    
     loss: Tensor = criterion(pred, targ)
 
     opt.zero_grad()

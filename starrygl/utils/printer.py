@@ -13,4 +13,4 @@ def main_print(*args, **kwargs):
     rank = dist.get_rank()
     if rank == 0:
         print(*args, **kwargs)
-    dist.barrier()
+    # dist.barrier()

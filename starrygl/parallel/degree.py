@@ -6,7 +6,7 @@ from typing import *
 from torch_scatter import scatter_sum
 
 from ..graph.distgraph import DistGraph
-from ..core.gather import Gather
+# from ..core.gather import Gather
 
 
 def compute_degree(g: DistGraph) -> Tuple[Tensor, Tensor]:

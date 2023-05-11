@@ -7,6 +7,7 @@ import os
 from .degree import compute_degree, compute_gcn_norm
 from .sync_bn import SyncBatchNorm
 from ..core import with_gloo, with_nccl
+from ..core.route import get_executor
 
 def convert_parallel_model(
     net: nn.Module,
@@ -20,7 +21,7 @@ def convert_parallel_model(
     for name, buffer in net.named_buffers():
         if name.endswith("last_embd"):
             continue
-        if name.endswith("grad_norm"):
+        if name.endswith("last_w"):
             continue
         dist.broadcast(buffer, src=0)
     return net
@@ -37,4 +38,6 @@ def init_process_group(backend: str = "gloo") -> torch.device:
         torch.cuda.set_device(device)
     else:
         device = torch.device("cpu")
+    
+    get_executor() # initialize route executor
     return device

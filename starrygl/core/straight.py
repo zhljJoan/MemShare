@@ -1,139 +1,203 @@
-import torch
-import torch.nn as nn
-import torch.autograd as autograd
+# import torch
+# import torch.nn as nn
+# import torch.autograd as autograd
 
-from torch import Tensor
-from contextlib import contextmanager
-from typing import *
+# from torch import Tensor
+# from contextlib import contextmanager
+# from typing import *
 
 
-class StraightContext:
-    def __init__(self, this) -> None:
-        self.this = this
 
-class Straight(nn.Module):
-    def __init__(self,
-        num_nodes: int,
-        p: int = 2,
-        dim: int = -1,
-        beta: float = 1.0,
-    ) -> None:
-        super().__init__()
-        self.num_nodes = num_nodes
-        self.norm_p = p
-        self.norm_dim = dim
-        self.norm_beta = beta
-        self.register_buffer("grad_norm", torch.ones(num_nodes))
+# class StraightContext:
+#     def __init__(self, this, g) -> None:
+#         self.this = this
+#         self.g = g
+
+# class Straight(nn.Module):
+#     def __init__(self,
+#         num_nodes: int,
+#         num_samples: int,
+#         norm_kwargs: Optional[Dict[str, Any]] = None,
+#         beta: float = 1.0,
+#         prev: Optional[List[Any]] = None,
+#     ) -> None:
+#         super().__init__()
+#         assert num_samples <= num_nodes
+#         self.num_nodes = num_nodes
+#         self.num_samples = num_samples
+#         self.norm_kwargs = norm_kwargs or dict(p=2, dim=-1)
+#         self.beta = beta
+#         self.prev = prev
         
-        self.reset_parameters()
+#         self.register_buffer("last_w", torch.ones(num_nodes))
+
+#         self._next_idx = None
+#         self._next_shrink_helper = None
+
+#         self.reset_parameters()
     
-    def reset_parameters(self):
-        grad_norm = self.get_buffer("grad_norm")
-        nn.init.constant_(grad_norm, 1.0)
+#     def reset_parameters(self):
+#         last_w = self.get_buffer("last_w")
+#         nn.init.constant_(last_w, 1.0)
     
-    def forward(self, values: Tensor, active: Optional[Tensor] = None) -> Tensor:
-        with self._manager(self):
-            return StraightFunction.apply(values, active)
+#     def forward(self,
+#         val: Tensor,
+#         idx: Optional[Tensor],
+#         g,
+#     ) -> Tensor:
+#         with self._manager(self, g):
+#             return StraightFunction.apply(val, idx)
     
-    def multinomial(self,
-        num_samples: int,
-        replacement: bool = False,
-    ) -> Tensor:
-        w = self.get_buffer("grad_norm")
-        if num_samples <= 0:
-            return torch.arange(self.num_nodes, dtype=torch.long, device=w.device)
+#     def pop_next_shrink_helper(self) -> Tuple[Optional[Tensor], Any]:
+#         if not self.training:
+#             return None, None
         
-        # print(w)
-        w = w / w.sum()
-        return torch.multinomial(w, num_samples=num_samples, replacement=replacement)
-    
-    def multinomial_mask(self,
-        num_samples: int,
-        replacement: bool = False,
-    ) -> Tensor:
-        device = self.get_buffer("grad_norm").device
-        if num_samples <= 0:
-            return torch.ones(self.num_nodes, dtype=torch.bool, device=device)
+#         next_idx = self._next_idx
+#         self._next_idx = None
+
+#         next_sh = self._next_shrink_helper
+#         self._next_shrink_helper = None
         
-        w = self.multinomial(num_samples, replacement)
-        m = torch.zeros(self.num_nodes, dtype=torch.bool, device=device)
-        m[w] = True
-        return m
+#         return next_idx, next_sh
     
-    @contextmanager
-    def _manager(self, this):
-        global _global_straight_context
-        stacked = _global_straight_context
-
-        try:
-            _global_straight_context = StraightContext(this=this)
-            yield _global_straight_context
-        finally:
-            _global_straight_context = stacked
+#     def _sample_next(self) -> Tensor:
+#         w = self.get_buffer("last_w")
+#         if self._next_idx is None:
+#             if self.num_samples < w.size(0):
+#                 self._next_idx = self.sample_impl(w)
+#             else:
+#                 self._next_idx = torch.arange(w.size(0), dtype=torch.long, device=w.device)
+#         elif self.num_samples < self._next_idx.size(0):
+#             idx = self.sample_impl(w[self._next_idx])
+#             self._next_idx = self._next_idx[idx]
+#         return self._next_idx
     
+#     def sample_impl(self, w: Tensor) -> Tensor:
+#         w = w / w.sum()
+#         return torch.multinomial(w, num_samples=self.num_samples, replacement=False)
 
-class StraightFunction(autograd.Function):
-    @staticmethod
-    def forward(
-        ctx: autograd.function.FunctionCtx,
-        values: Tensor,
-        active: Optional[Tensor],
-    ):
-        stx = _last_global_straight_context()
-        this: Straight = stx.this
-        if this.training:
-            ctx.this = this
-            ctx.save_for_backward(active)
-        return values
-
-    @staticmethod
-    def backward(
-        ctx: autograd.function.FunctionCtx,
-        grad: Tensor,
-    ):
-        this: Straight = ctx.this
-        active,  = ctx.saved_tensors
+#     # def multinomial(self,
+#     #     num_samples: int,
+#     #     replacement: bool = False,
+#     # ) -> Tensor:
+#     #     w = self.get_buffer("last_w")
+#     #     if num_samples <= 0:
+#     #         return torch.arange(self.num_nodes, dtype=torch.long, device=w.device)
         
-        grad_norm = this.get_buffer("grad_norm")
-        if this.norm_beta != 1.0:
-            grad_norm.mul_(this.norm_beta)
+#     #     w = w / w.sum()
+#     #     return torch.multinomial(w, num_samples=num_samples, replacement=replacement)
+    
+#     # def multinomial_mask(self,
+#     #     num_samples: int,
+#     #     replacement: bool = False,
+#     # ) -> Tensor:
+#     #     w = self.get_buffer("last_w")
+#     #     if num_samples <= 0:
+#     #         return torch.ones(self.num_nodes, dtype=torch.bool, device=w.device)
         
-        if active is None:
-            x = grad.detach()
-            x = x.norm(p=this.norm_p, dim=this.norm_dim)
-            grad_norm[:] = x
-        else:
-            if grad.size(0) == grad_norm.size(0):
-                x = grad.detach()[active]
-            else:
-                x = grad.detach()
-            x = x.norm(p=this.norm_p, dim=this.norm_dim)
-            grad_norm[active] = x
-        return grad, None
-
-#### private functions
-_global_straight_context: Optional[StraightContext] = None
-def _last_global_straight_context() -> StraightContext:
-    global _global_straight_context
-    assert _global_straight_context is not None
-    return _global_straight_context
-
-
-if __name__ == "__main__":
-    s = Straight(3, beta=1.1)
-    x = torch.rand(3, 10).requires_grad_()
-    m = torch.tensor([0, 1, 0], dtype=torch.bool)
-
-    s(x).sum().backward()
-    print(s.grad_norm)
-    print(s.multinomial(2))
-
-    s(x, m).sum().backward()
-    print(s.grad_norm)
-    print(s.multinomial(2))
+#     #     w = self.multinomial(num_samples, replacement)
+#     #     m = torch.zeros(self.num_nodes, dtype=torch.bool, device=w.device)
+#     #     m[w] = True
+#     #     return m
     
-    s(x[m], m).sum().backward()
-    print(s.grad_norm)
-    print(s.multinomial(2))
+#     @contextmanager
+#     def _manager(self, this, g):
+#         global _global_straight_context
+#         stacked = _global_straight_context
+
+#         try:
+#             _global_straight_context = StraightContext(this=this, g=g)
+#             yield _global_straight_context
+#         finally:
+#             _global_straight_context = stacked
     
-    print(s.multinomial_mask(2))
+
+# class StraightFunction(autograd.Function):
+#     @staticmethod
+#     def forward(
+#         ctx: autograd.function.FunctionCtx,
+#         val: Tensor,
+#         idx: Optional[Tensor],
+#     ):
+#         from ..graph import DistGraph
+
+#         stx = _last_global_straight_context()
+#         this: Straight = stx.this
+#         g: DistGraph = stx.g
+        
+#         last_w = this.get_buffer("last_w")
+#         if idx is None:
+#             assert val.size(0) == last_w.size(0)
+#         else:
+#             assert val.size(0) == idx.size(0)
+            
+#         if this.training:
+#             ctx.this = this
+#             ctx.g = g
+#             ctx.save_for_backward(idx)
+#         return val
+
+#     @staticmethod
+#     def backward(
+#         ctx: autograd.function.FunctionCtx,
+#         grad: Tensor,
+#     ):
+#         from ..graph import DistGraph
+
+#         this: Straight = ctx.this
+#         g: DistGraph = ctx.g
+#         idx,  = ctx.saved_tensors
+        
+#         last_w = this.get_buffer("last_w")
+#         if this.beta != 1.0:
+#             last_w.mul_(this.beta)
+            
+#         norm = grad.norm(**this.norm_kwargs)
+#         if idx is None:
+#             last_w[:] = norm
+#         else:
+#             last_w[idx] = norm
+        
+#         if this.prev is not None or this._next_idx is None:
+#             from ..nn.convs.utils import ShrinkHelper
+#             dst_idx = this._sample_next()
+        
+#         if this.prev is not None and this._next_idx is not None:
+#             this._next_shrink_helper = ShrinkHelper(g, dst_idx)
+            
+#             src_idx = this._next_shrink_helper.src_idx
+#             work = g.route.gather_backward(
+#                 src_idx, src_idx, async_op=False, return_idx=True)
+
+#             prev_dst_idx = work.get_idx()
+#             for p in this.prev:
+#                 assert isinstance(p, Straight)
+#                 p._next_idx = prev_dst_idx
+#         return grad, None
+
+# #### private functions
+# _global_straight_context: Optional[StraightContext] = None
+# def _last_global_straight_context() -> StraightContext:
+#     global _global_straight_context
+#     assert _global_straight_context is not None
+#     return _global_straight_context
+
+
+# if __name__ == "__main__":
+#     s = Straight(3, beta=1.1)
+#     x = torch.rand(3, 10).requires_grad_()
+#     m = torch.tensor([0, 1, 0], dtype=torch.bool)
+
+#     s(x).sum().backward()
+#     print(s.grad_norm)
+#     print(s.multinomial(2))
+
+#     s(x, m).sum().backward()
+#     print(s.grad_norm)
+#     print(s.multinomial(2))
+    
+#     s(x[m], m).sum().backward()
+#     print(s.grad_norm)
+#     print(s.multinomial(2))
+    
+#     print(s.multinomial_mask(2))
