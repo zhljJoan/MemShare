@@ -6,7 +6,7 @@ import torch.distributed.rpc as rpc
 import os
 from typing import *
 
-from .degree import compute_in_degree, compute_out_degree, compute_gcn_norm
+# from .degree import compute_in_degree, compute_out_degree, compute_gcn_norm
 from .sync_bn import SyncBatchNorm
 
 def convert_parallel_model(

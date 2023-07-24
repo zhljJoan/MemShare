@@ -138,7 +138,10 @@ class NodeHandle:
         return x, fut
 
     def async_select(self, src: Union[Tensor, TensorBuffer], idx: Tensor) -> torch.futures.Future[Tensor]:
-        fut = torch.futures.Future(devices=[self._device])
+        if self._device != torch.device("cpu"):
+            fut = torch.futures.Future(devices=[self._device])
+        else:
+            fut = torch.futures.Future()
         def run():
             try:
                 with torch.no_grad():
@@ -157,7 +160,10 @@ class NodeHandle:
     
     def async_update(self, src: Union[Tensor, TensorBuffer], val: Tensor, idx: Tensor, ops: str = "mov") -> torch.futures.Future:
         assert ops in ["mov", "add"]
-        fut = torch.futures.Future(devices=[self._device])
+        if self._device != torch.device("cpu"):
+            fut = torch.futures.Future(devices=[self._device])
+        else:
+            fut = torch.futures.Future()
         def run():
             try:
                 with torch.no_grad():
