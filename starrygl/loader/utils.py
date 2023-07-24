@@ -50,11 +50,6 @@ def calc_max_ids(*ids: Tensor) -> int:
     x = [t.max().item() if t.numel() > 0 else 0 for t in ids]
     return max(*x)
 
-def collect_feat0(src_ids: Tensor, dst_ids: Tensor, feat0: Tensor):
-    device = get_compute_device()
-    route = Route(dst_ids.to(device), src_ids.to(device))
-    return route.forward_a2a(feat0.to(device))[0].to(feat0.device)
-
 def local_partition_fn(dst_size: Tensor, edge_index: Tensor, num_parts: int) -> Tensor:
     edge_index = edge_index[:, edge_index[0] < dst_size]
     return metis_partition(edge_index, dst_size, num_parts)[0]
