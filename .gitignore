@@ -160,6 +160,8 @@ cython_debug/
 #.idea/
 
 cora/
+/dataset
 /test_*
 /*.ipynb
 /s.py
+/third_party
