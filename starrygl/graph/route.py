@@ -31,33 +31,48 @@ class Route:
             group=group,
         )
     
-    def new_subroute(self, dst_mask: Tensor):
+    def subroute(self,
+        dst_mask: Tensor,
+        src_mask: Optional[Tensor] = None,
+    ):
         if dst_mask.dtype != torch.bool:
             dst_mask = Route.__expand_index_to_mask(dst_mask, self.dst_len)
         assert dst_mask.size(0) == self.dst_len
 
-        fw_dst_masks, work = self.all_to_all_fw(
-            input_tensor_list=[dst_mask[self.fw_table(i)[0]] for i in range(self.num_parts)],
-            async_op=True,
-        )
+        if src_mask is None:
+            fw_dst_masks, work = self.all_to_all_fw(
+                input_tensor_list=[dst_mask[self.fw_table(i)[0]] for i in range(self.num_parts)],
+                async_op=True,
+            )
+        else:
+            if src_mask.dtype != torch.bool:
+                src_mask = Route.__expand_index_to_mask(src_mask, self.src_len)
+            assert src_mask.size(0) == self.src_len
         
         fw_tables: List[Tensor] = []
         for i in range(self.num_parts):
             m = dst_mask[self.fw_table(i)[0]]
             fw_tables.append(self.fw_table(i)[:,m])
-        
-        work.wait()
 
         bw_tables: List[Tensor] = []
-        for i, m in enumerate(fw_dst_masks):
-            bw_tables.append(self.bw_table(i)[:,m])
-        
-        return Route(
+        if src_mask is None:
+            src_mask = torch.zeros(self.src_len, dtype=dst_mask.dtype, device=dst_mask.device)
+            
+            work.wait()
+            for i, m in enumerate(fw_dst_masks):
+                src_mask[self.bw_table(i)[0]] |= m
+                bw_tables.append(self.bw_table(i)[:,m])
+        else:
+            for i in range(self.num_parts):
+                m = src_mask[self.bw_table(i)[0]]
+                bw_tables.append(self.bw_table(i)[:,m])
+
+        return dst_mask, Route(
             src_len=self.src_len,
             dst_len=self.dst_len,
             **Route.__tables_to_indptr(fw_tables, bw_tables),
             group=self.group,
-        )
+        ), src_mask, dst_mask
     
     def reverse_route(self):
         return Route(
@@ -67,6 +82,43 @@ class Route:
             bw_ptr=self._fw_ptr, bw_ind=self._fw_ind,
             group=self.group,
         )
+    
+    def filter_nodes(self,
+        dst_mask: Tensor,
+        src_mask: Optional[Tensor] = None,
+    ):
+        if dst_mask.dtype != torch.bool:
+            dst_mask = Route.__expand_index_to_mask(dst_mask, self.dst_len)
+        assert dst_mask.size(0) == self.dst_len
+
+        new_dst_len = dst_mask.count_nonzero().item()
+
+        xmp = torch.empty(self.dst_len, dtype=torch.long, device=dst_mask.device)
+        xmp.fill_((2**62-1)*2+1)
+        xmp[dst_mask] = torch.arange(new_dst_len, dtype=torch.long, device=dst_mask.device)
+
+        fw_dst_masks, fw_m_work = self.all_to_all_fw(
+            input_tensor_list=[dst_mask[self.fw_table(i)[0]] for i in range(self.num_parts)],
+            async_op=True,
+        )
+
+        # fw_dst_inds, fw_i_work = 
+
+        # if src_mask is None:
+        #     fw_dst_masks, work = self.all_to_all_fw(
+        #         input_tensor_list=[dst_mask[self.fw_table(i)[0]] for i in range(self.num_parts)],
+        #         async_op=True,
+        #     )
+        # else:
+        #     if src_mask.dtype != torch.bool:
+        #         src_mask = Route.__expand_index_to_mask(src_mask, self.src_len)
+        #     assert src_mask.size(0) == self.src_len
+
+    def filter_edges(self,
+        edge_mask: Tensor,
+        edge_index: Tensor,
+    ):
+        pass
     
     def __init__(self,
         src_len: int, dst_len: int,
@@ -150,6 +202,22 @@ class Route:
         for i, t in enumerate(xs):
             out[self.fw_table(i)[0]] += t
         return out
+    
+    def get_src_part_ids(self) -> Tensor:
+        xs = self.all_to_all_fw(
+            [
+                torch.full(
+                    (self.fw_table(i).size(1),), self.part_id,
+                    dtype=torch.long, device=self.ctx.device,
+                )
+                for i in range(self.num_parts)
+            ],
+            async_op=False,
+        )
+        out = torch.full((self.src_len,), 2**16-1, dtype=torch.long, device=self.ctx.device)
+        for i, t in enumerate(xs):
+            out[self.bw_table(i)[0]] = t
+        return out.int() & 0xFFFF
     
     def all_to_all_fw(self, input_tensor_list: List[Tensor], async_op: bool = False):
         output_tensor_list: List[Tensor] = []
@@ -334,4 +402,4 @@ class RouteAlltoAll(autograd.Function):
         grad: Tensor,
     ) -> Tensor:
         route: Route = ctx.saved_route
-        return route.bw_tensor(grad)
+        return route.bw_tensor(grad), None
