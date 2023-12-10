@@ -10,7 +10,7 @@ from typing import *
 import logging
 
 from .cclib import all_to_all_v
-from .rpc import rpc_remote_call
+from .rpc import rpc_remote_call, rpc_remote_void_call
 
 
 
@@ -153,6 +153,9 @@ class DistributedContext:
     
     def remote_call(self, method, rref: rpc.RRef, *args, **kwargs):
         return rpc_remote_call(method, rref, *args, **kwargs)
+    
+    def remote_void_call(self, method, rref: rpc.RRef, *args, **kwargs):
+        return rpc_remote_void_call(method, rref, *args, **kwargs)
     
     def all_to_all_v(self,
         output_tensor_list: List[Tensor],

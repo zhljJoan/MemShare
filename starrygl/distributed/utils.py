@@ -39,47 +39,27 @@ class TensorAccessor:
     def async_index_copy_(self, dim: int, index: Tensor, source: Tensor, rref: Optional[rpc.RRef] = None):
         if rref is None:
             rref = self.rref
-        return self.ctx.remote_call(TensorAccessor._index_copy_, rref, dim=dim, index=index, source=source)
+        return self.ctx.remote_void_call(Tensor.index_copy_, rref, dim=dim, index=index, source=source)
 
     def async_index_add_(self, dim: int, index: Tensor, source: Tensor, rref: Optional[rpc.RRef] = None):
         if rref is None:
             rref = self.rref
-        return self.ctx.remote_call(TensorAccessor._index_add_, rref, dim=dim, index=index, source=source)
+        return self.ctx.remote_void_call(Tensor.index_add_, rref, dim=dim, index=index, source=source)
     
     def async_index_fill_(self, dim: int, index: Tensor, value: Number, rref: Optional[rpc.RRef] = None):
         if rref is None:
             rref = self.rref
-        return self.ctx.remote_call(TensorAccessor._index_fill_, rref, dim=dim, index=index, value=value)
+        return self.ctx.remote_void_call(Tensor.index_fill_, rref, dim=dim, index=index, value=value)
 
     def async_fill_(self, value: Number, rref: Optional[rpc.RRef] = None):
         if rref is None:
             rref = self.rref
-        return self.ctx.remote_call(TensorAccessor._fill_, rref, value=value)
+        return self.ctx.remote_void_call(Tensor.fill_, rref, value=value)
 
     def async_zero_(self, rref: Optional[rpc.RRef] = None):
         if rref is None:
             rref = self.rref
-        self.ctx.remote_call(TensorAccessor._zero_, rref)
-    
-    @staticmethod
-    def _index_copy_(self: Tensor, dim: int, index: Tensor, source: Tensor):
-        self.index_copy_(dim=dim, index=index, source=source)
-    
-    @staticmethod
-    def _index_add_(self: Tensor, dim: int, index: Tensor, source: Tensor):
-        self.index_add_(dim=dim, index=index, source=source)
-
-    @staticmethod
-    def _index_fill_(self: Tensor, dim: int, index: Tensor, value: Number):
-        self.index_fill_(dim=dim, index=index, value=value)
-    
-    @staticmethod
-    def _fill_(self: Tensor, value: Number):
-        self.fill_(value=value)
-    
-    @staticmethod
-    def _zero_(self: Tensor):
-        self.zero_()
+        self.ctx.remote_void_call(Tensor.zero_, rref)
 
 
 class DistInt:
