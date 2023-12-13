@@ -45,8 +45,8 @@ def all_to_all_v(
     assert len(output_tensor_list) == world_size
     assert len(input_tensor_list) == world_size
 
-    if group is None:
-        group = dist.distributed_c10d._get_default_group()
+    # if group is None:
+    #     group = dist.distributed_c10d._get_default_group()
     backend = dist.get_backend(group)
 
     if backend == "nccl":
@@ -101,20 +101,28 @@ def all_to_all_v(
             return work
         work.wait()
 
-    # else:
-    #     assert backend == "gloo", f"backend must be nccl, mpi or gloo"
+def all_to_all_s(
+    output_tensor: Tensor,
+    input_tensor: Tensor,
+    output_rowptr: List[int],
+    input_rowptr: List[int],
+    group: Optional[Any] = None,
+    async_op: bool = False,
+):
+    # rank = dist.get_rank(group)
+    world_size = dist.get_world_size(group)
 
-    #     rank = dist.get_rank(group)
-    #     world_size = dist.get_world_size(group)
+    assert len(output_rowptr) == len(input_rowptr)
+    assert len(output_rowptr) == world_size + 1
 
-    #     p2p_op_list: List[dist.P2POp] = []
-    #     for i in range(1, world_size):
-    #         send_i = (rank + i) % world_size
-    #         recv_i = (rank - i + world_size) % world_size
+    output_sizes = [t-s for s, t in zip(output_rowptr, output_rowptr[1:])]
+    input_sizes = [t-s for s, t in zip(input_rowptr, input_rowptr[1:])]
 
-    #         p2p_op_list.extend([
-    #             dist.P2POp(dist.isend, input_tensor_list[send_i], send_i, group=group),
-    #             dist.P2POp(dist.irecv, output_tensor_list[recv_i], recv_i, group=group),
-    #         ])
-    #     dist.batch_isend_irecv(p2p_op_list)
-    #     output_tensor_list[rank][:] = input_tensor_list[rank]
+    return dist.all_to_all_single(
+        output=output_tensor,
+        input=input_tensor,
+        output_split_sizes=output_sizes,
+        input_split_sizes=input_sizes,
+        group=group,
+        async_op=async_op,
+    )
