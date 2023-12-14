@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir -p build && cd build
+mkdir -p build starrygl/lib && cd build
 cmake .. \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DCMAKE_PREFIX_PATH="/home/hwj/.miniconda3/envs/sgl/lib/python3.10/site-packages" \
