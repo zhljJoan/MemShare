@@ -7,7 +7,7 @@ from typing import *
 
 __all__ = [
     "uvm_empty",
-    "uvm_share_",
+    "uvm_share",
     "uvm_advise",
     "uvm_prefetch",
     "cudaMemoryAdvise",
@@ -22,17 +22,17 @@ def uvm_empty(*sizes: int, dtype: torch.dtype, device: Any):
     
     size_bytes = torch.Size(sizes).numel() * dtype.itemsize
 
+    # default strides
     dims = len(sizes)
     strides = [1] * dims
     for i in range(1, dims):
         strides[dims-i-1] = strides[dims-i] * sizes[dims-i]
     strides = torch.Size(strides)
-    print(strides)
 
     storage = starrygl.ops.uvm_storage_new(size_bytes, device.index)
     return torch.empty(0, dtype=dtype, device=device).set_(storage, 0, sizes, strides)
 
-def uvm_share_(x: Tensor, device: Any):
+def uvm_share(x: Tensor, device: Any):
     device = torch.device(device)
     if device.type == "cpu":
         storage = starrygl.ops.uvm_storage_to_cpu(x.untyped_storage())
