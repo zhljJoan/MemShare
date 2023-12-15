@@ -93,6 +93,8 @@ class DistIndex:
     @property
     def dist(self) -> Tensor:
         return self.data
+    def to(self,device) -> Tensor:
+        return DistIndex(self.data.to(device))
 
 
 class DistributedTensor:
@@ -108,11 +110,26 @@ class DistributedTensor:
             local_sizes.append(n)
         self.num_nodes = DistInt(local_sizes)
         self.num_parts = DistInt([1] * len(self.rrefs))
+
+
+    @property
+    def dtype(self):
+        return self.accessor.data.dtype
+    
+    @property
+    def device(self):
+        return self.accessor.data.device
+    
+    def to(self,device):
+        return self.accessor.data.to(device)
+    
+    def __getitem__(self,index):
+        return self.accessor.data[index]
     
     @property
     def ctx(self):
         return self.accessor.ctx
-    
+
     def index_select(self, dist_index: Union[Tensor, DistIndex]):
         if isinstance(dist_index, Tensor):
             dist_index = DistIndex(dist_index)
