@@ -4,7 +4,10 @@ from torch_geometric.utils import add_remaining_self_loops, to_undirected
 import os.path as osp
 import sys
 
-from starrygl.utils.partition import partition_save
+from starrygl.utils.data import partition_pyg
+
+import logging
+logging.getLogger().setLevel(logging.INFO)
 
 if __name__ == "__main__":
     data = Planetoid("/mnt/nfs/hwj/pyg_datasets/Planetoid/Cora", "Cora")[0]
@@ -17,11 +20,11 @@ if __name__ == "__main__":
     print(f"num_features: {data.num_features}")
     
     num_parts_list = [1, 2, 3, 5, 7, 9, 11]
-    algos = ["metis", "random"]
+    algos = ["metis", 'mt-metis', "random"]
     
     root = osp.splitext(osp.abspath(__file__))[0]
     print(f"root: {root}")
     for num_parts in num_parts_list:
         for algo in algos:
             print(f"======== {num_parts} + {algo} ========")
-            partition_save(root, data, num_parts, algo)
+            partition_pyg(root, data, num_parts, algo)

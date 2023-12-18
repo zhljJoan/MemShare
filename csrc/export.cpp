@@ -1,5 +1,6 @@
 #include "extension.h"
 #include "uvm.h"
+#include "partition.h"
 
 torch::Tensor add(torch::Tensor a, torch::Tensor b) {
     return a + b;
@@ -12,6 +13,9 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     m.def("uvm_storage_to_cpu", &uvm_storage_to_cpu, "share uvm storage with cpu");
     m.def("uvm_storage_advise", &uvm_storage_advise, "apply cudaMemAdvise() to uvm storage");
     m.def("uvm_storage_prefetch", &uvm_storage_prefetch, "apply cudaMemPrefetchAsync() to uvm storage");
+
+    m.def("metis_partition", &metis_partition, "metis graph partition");
+    m.def("mt_metis_partition", &mt_metis_partition, "multi-threaded metis graph partition");
 
     py::enum_<cudaMemoryAdvise>(m, "cudaMemoryAdvise")
         .value("cudaMemAdviseSetAccessedBy", cudaMemoryAdvise::cudaMemAdviseSetAccessedBy)
