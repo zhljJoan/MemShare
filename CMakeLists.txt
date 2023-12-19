@@ -100,3 +100,20 @@ endif()
 if (WITH_MTMETIS)
     target_link_libraries(${PROJECT_NAME} PRIVATE mtmetis)
 endif()
+
+
+# add libsampler.so
+set(SAMLPER_NAME "${PROJECT_NAME}_sampler")
+
+file(GLOB_RECURSE SAMPLER_SRCS "csrc/sampler/*.cpp")
+add_library(${SAMLPER_NAME} SHARED ${SAMPLER_SRCS})
+
+target_include_directories(${SAMLPER_NAME} PRIVATE "csrc/sampler/include")
+
+target_link_libraries(${SAMLPER_NAME} PRIVATE ${TORCH_LIBRARIES})
+target_compile_definitions(${SAMLPER_NAME} PRIVATE -DTORCH_EXTENSION_NAME=lib${SAMLPER_NAME})
+
+if(WITH_PYTHON)
+    find_library(TORCH_PYTHON_LIBRARY torch_python PATHS "${TORCH_INSTALL_PREFIX}/lib")
+    target_link_libraries(${SAMLPER_NAME} PRIVATE ${TORCH_PYTHON_LIBRARY})
+endif()
