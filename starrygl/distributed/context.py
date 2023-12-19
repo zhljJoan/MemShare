@@ -11,7 +11,7 @@ from contextlib import contextmanager
 
 import logging
 
-from .rpc import rpc_remote_call, rpc_remote_void_call
+from .rpc import *
 
 
 
@@ -157,6 +157,9 @@ class DistributedContext:
     
     def remote_void_call(self, method, rref: rpc.RRef, *args, **kwargs):
         return rpc_remote_void_call(method, rref, *args, **kwargs)
+    
+    def remote_exec(self, method, rref: rpc.RRef, *args, **kwargs):
+        return rpc_remote_exec(method, rref, *args, **kwargs)
     
     @contextmanager
     def use_stream(self, stream: torch.cuda.Stream, with_event: bool = True):
