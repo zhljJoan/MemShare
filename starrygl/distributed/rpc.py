@@ -4,6 +4,10 @@ import torch.distributed.rpc as rpc
 from torch import Tensor
 from typing import *
 
+__all__ = [
+    "rpc_remote_call",
+    "rpc_remote_void_call",
+]
 
 def rpc_remote_call(method, rref: rpc.RRef, *args, **kwargs):
     args = (method, rref) + args

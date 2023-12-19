@@ -11,7 +11,6 @@ from contextlib import contextmanager
 
 import logging
 
-from .cclib import all_to_all_v, all_to_all_s
 from .rpc import rpc_remote_call, rpc_remote_void_call
 
 
@@ -158,76 +157,6 @@ class DistributedContext:
     
     def remote_void_call(self, method, rref: rpc.RRef, *args, **kwargs):
         return rpc_remote_void_call(method, rref, *args, **kwargs)
-    
-    # def all_to_all_v(self,
-    #     output_tensor_list: List[Tensor],
-    #     input_tensor_list: List[Tensor],
-    #     group: Any = None,
-    #     async_op: bool = False,
-    # ):
-    #     return all_to_all_v(
-    #         output_tensor_list,
-    #         input_tensor_list,
-    #         group=group,
-    #         async_op=async_op,
-    #     )
-    
-    # def all_to_all_g(self,
-    #     input_tensor_list: List[Tensor],
-    #     group: Any = None,
-    #     async_op: bool = False,
-    # ):
-    #     send_sizes = [t.size(0) for t in input_tensor_list]
-    #     recv_sizes = self.get_all_to_all_recv_sizes(send_sizes, group)
-        
-    #     output_tensor_list: List[Tensor] = []
-    #     for s, t in zip(recv_sizes, input_tensor_list):
-    #         output_tensor_list.append(
-    #             torch.empty(s, *t.shape[1:], dtype=t.dtype, device=t.device),
-    #         )
-        
-    #     work = all_to_all_v(
-    #         output_tensor_list,
-    #         input_tensor_list,
-    #         group=group,
-    #         async_op=async_op,
-    #     )
-
-    #     if async_op:
-    #         assert work is not None
-    #         return output_tensor_list, work
-    #     else:
-    #         return output_tensor_list
-    
-    # def all_to_all_s(self,
-    #     output_tensor: Tensor,
-    #     input_tensor: Tensor,
-    #     output_rowptr: List[int],
-    #     input_rowptr: List[int],
-    #     group: Any = None,
-    #     async_op: bool = False,
-    # ):
-    #     return all_to_all_s(
-    #         output_tensor, input_tensor,
-    #         output_rowptr, input_rowptr,
-    #         group=group, async_op=async_op,
-    #     )
-    
-    # def get_all_to_all_recv_sizes(self,
-    #     send_sizes: List[int],
-    #     group: Optional[Any] = None,
-    # ) -> List[int]:
-    #     world_size = dist.get_world_size(group)
-    #     assert len(send_sizes) == world_size
-
-    #     if dist.get_backend(group) == "gloo":
-    #         send_t = torch.tensor(send_sizes, dtype=torch.long)
-    #     else:
-    #         send_t = torch.tensor(send_sizes, dtype=torch.long, device=self.device)
-    #     recv_t = torch.empty_like(send_t)
-
-    #     dist.all_to_all_single(recv_t, send_t, group=group)
-    #     return recv_t.tolist()
     
     @contextmanager
     def use_stream(self, stream: torch.cuda.Stream, with_event: bool = True):
