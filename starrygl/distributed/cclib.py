@@ -45,8 +45,6 @@ def all_to_all_v(
     assert len(output_tensor_list) == world_size
     assert len(input_tensor_list) == world_size
 
-    # if group is None:
-    #     group = dist.distributed_c10d._get_default_group()
     backend = dist.get_backend(group)
 
     if backend == "nccl":

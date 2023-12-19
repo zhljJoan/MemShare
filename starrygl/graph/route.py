@@ -2,13 +2,18 @@ import torch
 import torch.autograd as autograd
 import torch.distributed as dist
 
-from multiprocessing.pool import ThreadPool
-
 from torch import Tensor
 from typing import *
 
-from starrygl.distributed import DistributedContext
+from starrygl.distributed.cclib import all_to_all_s, all_to_all_v
 
+
+__all__ = [
+    "Route",
+    "RouteWork",
+    "RouteWorkCache",
+    "RouteAlltoAll",
+]
 
 
 class Route:
@@ -31,50 +36,51 @@ class Route:
             group=group,
         )
     
-    def subroute(self,
-        dst_mask: Tensor,
+    def filter(self,
+        dst_mask: Optional[Tensor] = None,
         src_mask: Optional[Tensor] = None,
+        remap: bool = False,
     ):
-        if dst_mask.dtype != torch.bool:
-            dst_mask = Route.__expand_index_to_mask(dst_mask, self.dst_len)
-        assert dst_mask.size(0) == self.dst_len
-
-        if src_mask is None:
-            fw_dst_masks, work = self.all_to_all_fw(
-                input_tensor_list=[dst_mask[self.fw_table(i)[0]] for i in range(self.num_parts)],
-                async_op=True,
-            )
+        if dst_mask is None:
+            if src_mask is None:
+                raise ValueError("please provide at least one parameter.")
+            else:
+                assert src_mask.dtype == torch.bool
+                assert src_mask.numel() == self.src_len
+                dst_mask = self.bw_tensor(src_mask.long()) != 0
         else:
-            if src_mask.dtype != torch.bool:
-                src_mask = Route.__expand_index_to_mask(src_mask, self.src_len)
-            assert src_mask.size(0) == self.src_len
-        
-        fw_tables: List[Tensor] = []
-        for i in range(self.num_parts):
-            m = dst_mask[self.fw_table(i)[0]]
-            fw_tables.append(self.fw_table(i)[:,m])
-
-        bw_tables: List[Tensor] = []
-        if src_mask is None:
-            src_mask = torch.zeros(self.src_len, dtype=dst_mask.dtype, device=dst_mask.device)
-            
-            work.wait()
-            for i, m in enumerate(fw_dst_masks):
-                src_mask[self.bw_table(i)[0]] |= m
-                bw_tables.append(self.bw_table(i)[:,m])
-        else:
-            for i in range(self.num_parts):
-                m = src_mask[self.bw_table(i)[0]]
-                bw_tables.append(self.bw_table(i)[:,m])
-
-        return dst_mask, Route(
+            assert dst_mask.dtype == torch.bool
+            assert dst_mask.numel() == self.dst_len
+            tmp_src_mask = self.fw_tensor(dst_mask.long()) != 0
+            if src_mask is None:
+                src_mask = tmp_src_mask
+            else:
+                tmp_src_mask &= src_mask
+                src_mask = tmp_src_mask
+                dst_mask = self.bw_tensor(src_mask.long()) != 0
+        fw_ptr, fw_ind = Route.__filter_ind_and_ptr(self._fw_ptr, self._fw_ind, dst_mask)
+        bw_ptr, bw_ind = Route.__filter_ind_and_ptr(self._bw_ptr, self._bw_ind, src_mask)
+        route = Route(
             src_len=self.src_len,
             dst_len=self.dst_len,
-            **Route.__tables_to_indptr(fw_tables, bw_tables),
+            fw_ptr=fw_ptr, fw_ind=fw_ind,
+            bw_ptr=bw_ptr, bw_ind=bw_ind,
             group=self.group,
-        ), src_mask, dst_mask
+        )
+
+        if remap:
+            fw_ind, dst_len = Route.__remap_ind(route._fw_ind, dst_mask)
+            bw_ind, src_len = Route.__remap_ind(route._bw_ind, src_mask)
+            route = Route(
+                src_len=src_len,
+                dst_len=dst_len,
+                fw_ptr=route._fw_ptr, fw_ind=fw_ind,
+                bw_ptr=route._bw_ptr, bw_ind=bw_ind,
+                group=route.group,
+            )
+        return dst_mask, src_mask, route
     
-    def reverse_route(self):
+    def rev(self):
         return Route(
             src_len=self.dst_len,
             dst_len=self.src_len,
@@ -83,62 +89,21 @@ class Route:
             group=self.group,
         )
     
-    def filter_nodes(self,
-        dst_mask: Tensor,
-        src_mask: Optional[Tensor] = None,
-    ):
-        if dst_mask.dtype != torch.bool:
-            dst_mask = Route.__expand_index_to_mask(dst_mask, self.dst_len)
-        assert dst_mask.size(0) == self.dst_len
-
-        new_dst_len = dst_mask.count_nonzero().item()
-
-        xmp = torch.empty(self.dst_len, dtype=torch.long, device=dst_mask.device)
-        xmp.fill_((2**62-1)*2+1)
-        xmp[dst_mask] = torch.arange(new_dst_len, dtype=torch.long, device=dst_mask.device)
-
-        fw_dst_masks, fw_m_work = self.all_to_all_fw(
-            input_tensor_list=[dst_mask[self.fw_table(i)[0]] for i in range(self.num_parts)],
-            async_op=True,
-        )
-
-        # fw_dst_inds, fw_i_work = 
-
-        # if src_mask is None:
-        #     fw_dst_masks, work = self.all_to_all_fw(
-        #         input_tensor_list=[dst_mask[self.fw_table(i)[0]] for i in range(self.num_parts)],
-        #         async_op=True,
-        #     )
-        # else:
-        #     if src_mask.dtype != torch.bool:
-        #         src_mask = Route.__expand_index_to_mask(src_mask, self.src_len)
-        #     assert src_mask.size(0) == self.src_len
-
-    def filter_edges(self,
-        edge_mask: Tensor,
-        edge_index: Tensor,
-    ):
-        pass
-    
     def __init__(self,
         src_len: int, dst_len: int,
         fw_ptr: List[int], fw_ind: Tensor,
         bw_ptr: List[int], bw_ind: Tensor,
         group: Any,
     ) -> None:
-        self._ctx = DistributedContext.get_default_context()
+        assert len(fw_ptr) == len(bw_ptr)
         self._src_len = src_len
         self._dst_len = dst_len
-        self._fw_ptr = fw_ptr
+        self._fw_ptr = tuple(fw_ptr)
         self._fw_ind = fw_ind
-        self._bw_ptr = bw_ptr
+        self._bw_ptr = tuple(bw_ptr)
         self._bw_ind = bw_ind
         self._group = group
-    
-    @property
-    def ctx(self):
-        return self._ctx
-    
+
     @property
     def group(self):
         return self._group
@@ -164,104 +129,84 @@ class Route:
         self._bw_ind = self._bw_ind.to(device)
         return self
     
-    def fw_table(self, i: int):
-        return self._fw_ind[:,self._fw_ptr[i]:self._fw_ptr[i+1]]
+    # def fw_table(self, i: int):
+    #     return self._fw_ind[self._fw_ptr[i]:self._fw_ptr[i+1]]
     
-    def bw_table(self, i: int):
-        return self._bw_ind[:,self._bw_ptr[i]:self._bw_ptr[i+1]]
+    # def bw_table(self, i: int):
+    #     return self._bw_ind[self._bw_ptr[i]:self._bw_ptr[i+1]]
     
-    def apply(self, data: Tensor) -> Tensor:
-        return RouteAlltoAll.apply(data, self)
+    def apply(self,
+        data: Tensor,
+        cache: Optional['RouteWorkCache'] = None,
+        cache_key: Optional[str] = None,
+    ) -> Tensor:
+        return RouteAlltoAll.apply(data, self, cache, cache_key)
     
-    def fw_tensor(self, data: Tensor) -> Tensor:
+    @torch.no_grad()
+    def fw_tensor(self, data: Tensor, async_op: bool = False):
         assert data.size(0) == self.dst_len
-        xs = self.all_to_all_fw(
-            [data[self.fw_table(i)[0]] for i in range(self.num_parts)],
-            async_op=False,
-        )
 
-        out = torch.zeros(
-            self.src_len, *data.shape[1:],
+        output_tensor = torch.empty(
+            self._bw_ind.numel(), *data.shape[1:],
             dtype=data.dtype, device=data.device,
         )
-        for i, t in enumerate(xs):
-            out[self.bw_table(i)[0]] += t
-        return out
+
+        work = all_to_all_s(
+            output_tensor, data[self._fw_ind],
+            self._bw_ptr, self._fw_ptr,
+            group=self.group,
+            async_op=async_op,
+        )
+        work = RouteWork(
+            work if async_op else None,
+            self._bw_ptr, self._bw_ind,
+            self.src_len, output_tensor,
+        )
+        return work if async_op else work.wait()
     
-    def bw_tensor(self, data: Tensor) -> Tensor:
+    @torch.no_grad()
+    def bw_tensor(self, data: Tensor, async_op: bool = False):
         assert data.size(0) == self.src_len
-        xs = self.all_to_all_bw(
-            [data[self.bw_table(i)[0]] for i in range(self.num_parts)],
-            async_op=False,
-        )
 
-        out = torch.zeros(
-            self.dst_len, *data.shape[1:],
+        output_tensor = torch.empty(
+            self._fw_ind.numel(), *data.shape[1:],
             dtype=data.dtype, device=data.device,
         )
-        for i, t in enumerate(xs):
-            out[self.fw_table(i)[0]] += t
-        return out
+
+        work = all_to_all_s(
+            output_tensor, data[self._bw_ind],
+            self._fw_ptr, self._bw_ptr,
+            group=self.group,
+            async_op=async_op,
+        )
+        work = RouteWork(
+            work if async_op else None,
+            self._fw_ptr, self._fw_ind,
+            self.dst_len, output_tensor,
+        )
+        return work if async_op else work.wait()
     
+    @torch.no_grad()
     def get_src_part_ids(self) -> Tensor:
-        xs = self.all_to_all_fw(
-            [
-                torch.full(
-                    (self.fw_table(i).size(1),), self.part_id,
-                    dtype=torch.long, device=self.ctx.device,
-                )
-                for i in range(self.num_parts)
-            ],
-            async_op=False,
-        )
-        out = torch.full((self.src_len,), 2**16-1, dtype=torch.long, device=self.ctx.device)
-        for i, t in enumerate(xs):
-            out[self.bw_table(i)[0]] = t
-        return out.int() & 0xFFFF
-    
-    def all_to_all_fw(self, input_tensor_list: List[Tensor], async_op: bool = False):
-        output_tensor_list: List[Tensor] = []
-        for i in range(self.num_parts):
-            t = input_tensor_list[i]
-            assert t.size(0) == self._fw_ptr[i+1] - self._fw_ptr[i]
+        input_tensor = torch.full_like(self._fw_ind, self.part_id)
+        output_tensor = torch.empty_like(self._bw_ind)
 
-            s = self._bw_ptr[i+1] - self._bw_ptr[i]
-            output_tensor_list.append(
-                torch.empty(s, *t.shape[1:], dtype=t.dtype, device=t.device)
-            )
-        
-        work = self.ctx.all_to_all_v(
-            output_tensor_list,
-            input_tensor_list,
-            group=self.group, async_op=async_op,
+        all_to_all_s(
+            output_tensor, input_tensor,
+            self._bw_ptr, self._fw_ptr,
+            group=self.group,
         )
 
-        if async_op:
-            return output_tensor_list, work
-        else:
-            return output_tensor_list
-    
-    def all_to_all_bw(self, input_tensor_list: List[Tensor], async_op: bool = False):
-        output_tensor_list: List[Tensor] = []
-        for i in range(self.num_parts):
-            t = input_tensor_list[i]
-            assert t.size(0) == self._bw_ptr[i+1] - self._bw_ptr[i]
-            
-            s = self._fw_ptr[i+1] - self._fw_ptr[i]
-            output_tensor_list.append(
-                torch.empty(s, *t.shape[1:], dtype=t.dtype, device=t.device)
-            )
-        
-        work = self.ctx.all_to_all_v(
-            output_tensor_list,
-            input_tensor_list,
-            group=self.group, async_op=async_op,
+        out = torch.full(
+            (self.src_len,), 2**16-1,
+            dtype=self._bw_ind.dtype,
+            device=self._bw_ind.device,
         )
-
-        if async_op:
-            return output_tensor_list, work
-        else:
-            return output_tensor_list
+        for s, t in zip(self._bw_ptr, self._bw_ptr[1:]):
+            ind = self._bw_ind[s:t]
+            assert (out[ind] == 2**16-1).all(), f"some vertices exist in more than one partition"
+            out[ind] = output_tensor[s:t] & 0xFF
+        return out
 
     @staticmethod
     def _build_route_tables(
@@ -274,8 +219,6 @@ class Route:
         assert dst_ids.dtype == torch.long
         assert src_ids.dim() == 1
         assert dst_ids.dim() == 1
-
-        ctx = DistributedContext.get_default_context()
 
         src_len = src_ids.size(0)
         dst_len = dst_ids.size(0)
@@ -292,6 +235,7 @@ class Route:
         all_dst_lens: List[int] = [None] * world_size
         dist.all_gather_object(all_dst_lens, dst_len, group=group)
 
+        # all_reduce number of nodes
         num_nodes = torch.zeros(1, **ikw)
         if src_ids.numel() > 0:
             num_nodes = src_ids.max().max(num_nodes)
@@ -342,25 +286,54 @@ class Route:
             src_ind = smp[ind]
             dst_ind = xmp[ind]
 
-            # 此时只有bw_route是正常的，fw_route需要发送给src_ids所在分区
-            fw_tables.append(torch.vstack([dst_ind, src_ind]))
-            bw_tables.append(torch.vstack([src_ind, dst_ind]))
+            fw_tables.append(dst_ind)
+            bw_tables.append(src_ind)
+
+        fw_tables = Route.__backward_fw_tables(fw_tables, group=group)
         
-        fw_tables = [t.t().contiguous() for t in fw_tables]
-        fw_tables = ctx.all_to_all_g(fw_tables, group=group)
-        fw_tables = [t.t().contiguous() for t in fw_tables]
-        
-        # 非二分图，每个点添加自环
+        # add self-loops if not bipartite graph
         if not bipartite:
             rank_ind = torch.arange(dst_len, **ikw)
-            fw_tables[rank] = bw_tables[rank] = torch.vstack([rank_ind, rank_ind])
+            fw_tables[rank] = bw_tables[rank] = rank_ind
         return fw_tables, bw_tables
     
     @staticmethod
-    def __expand_index_to_mask(index: Tensor, len: int) -> Tensor:
-        mask = torch.zeros(len, dtype=torch.bool, device=index.device)
-        mask[index] = True
-        return mask
+    def __filter_ind_and_ptr(ptr: List[int], ind: Tensor, mask: Tensor) -> Tuple[List[int], Tensor]:
+        m = mask[ind]
+        new_ptr: List[int] = [0]
+        new_ind: List[Tensor] = []
+        for s, t in zip(ptr, ptr[1:]):
+            new_ind.append(ind[s:t][m[s:t]])
+            new_ptr.append(new_ptr[-1] + new_ind[-1].numel())
+        return new_ptr, torch.cat(new_ind, dim=0)
+    
+    @staticmethod
+    def __remap_ind(ind: Tensor, mask: Tensor) -> Tuple[Tensor, int]:
+        n: int = mask.count_nonzero().item()
+        imp = torch.full((mask.numel(),), (2**62-1)*2+1, dtype=ind.dtype, device=ind.device)
+        imp[mask] = torch.arange(n, dtype=ind.dtype, device=ind.device)
+        return ind, int(n)
+    
+    @staticmethod
+    def __backward_fw_tables(
+        fw_tables: List[Tensor],
+        group: Any,
+    ) -> List[Tensor]:
+        rank = dist.get_rank(group)
+        world_size = dist.get_world_size(group)
+
+        send_sizes = [t.size() for t in fw_tables]
+        recv_sizes = [None] * world_size
+
+        dist.all_gather_object(recv_sizes, send_sizes, group=group)
+        recv_sizes = [s[rank] for s in recv_sizes]
+
+        fixed_tables = []
+        for s, t in zip(recv_sizes, fw_tables):
+            t = torch.empty(*s, dtype=t.dtype, device=t.device)
+            fixed_tables.append(t)
+        all_to_all_v(fixed_tables, fw_tables, group=group)
+        return fixed_tables
     
     @staticmethod
     def __tables_to_indptr(
@@ -369,21 +342,101 @@ class Route:
     ):
         fw_ptr: List[int] = [0]
         for t in fw_tables:
-            last_n = fw_ptr[-1]
-            fw_ptr.append(last_n + t.size(1))
-        fw_ind = torch.cat(fw_tables, dim=1)
+            assert t.dim() == 1
+            fw_ptr.append(fw_ptr[-1] + t.numel())
+        fw_ind = torch.cat(fw_tables, dim=0)
         
         bw_ptr: List[int] = [0]
         for t in bw_tables:
-            last_n = bw_ptr[-1]
-            bw_ptr.append(last_n + t.size(1))
-        bw_ind = torch.cat(bw_tables, dim=1)
+            assert t.dim() == 1
+            bw_ptr.append(bw_ptr[-1] + t.numel())
+        bw_ind = torch.cat(bw_tables, dim=0)
 
         return {
             "fw_ptr": fw_ptr, "bw_ptr": bw_ptr,
             "fw_ind": fw_ind, "bw_ind": bw_ind,
         }
 
+class RouteWork:
+    def __init__(self,
+        work: Any,
+        ptr: List[int],
+        ind: Tensor,
+        len: int,
+        recv_t: Tensor,
+    ) -> None:
+        self._work = work
+        self._ptr = ptr
+        self._ind = ind
+        self._len = len
+        self._recv_t = recv_t
+
+        if self._work is None:
+            self._reduce()
+    
+    def _reduce(self):
+        out = torch.zeros(
+            self._len, *self._recv_t.shape[1:],
+            dtype=self._recv_t.dtype,
+            device=self._recv_t.device,
+        )
+        for s, t in zip(self._ptr, self._ptr[1:]):
+            ind = self._ind[s:t]
+            out[ind] += self._recv_t[s:t]
+
+        self._work = None
+        self._ptr = None
+        self._ind = None
+        self._len = None
+        self._recv_t = out
+
+    def wait(self) -> Tensor:
+        if self._work is None:
+            return self._recv_t
+        self._work.wait()
+        self._reduce()
+        return self._recv_t
+
+
+class RouteWorkCache:
+    def __init__(self,
+        enable_fw: bool = True,
+        enable_bw: bool = True,
+    ) -> None:
+        self.enable_fw = enable_fw
+        self.enable_bw = enable_bw
+        self._cached_works: Dict[str, RouteWork] = {}
+    
+    def enable_fw_(self, enable: bool = True):
+        self.enable_fw = enable
+        return self
+    
+    def enable_bw_(self, enable: bool = True):
+        self.enable_bw = enable
+        return self
+    
+    def wait(self):
+        for work in self._cached_works.values():
+            work.wait()
+    
+    def clear(self):
+        self._cached_works.clear()
+
+    def get_and_set(self,
+        key: str,
+        work: RouteWork,
+        bw: bool = False,
+    ) -> Optional[RouteWork]:
+        if bw and self.enable_bw:
+            key = key + "_bw"
+        elif not bw and self.enable_fw:
+            key = key + "_fw"
+        else:
+            return work
+        t = self._cached_works.get(key, work)
+        self._cached_works[key] = work
+        return t
+    
 
 class RouteAlltoAll(autograd.Function):
     @staticmethod
@@ -391,10 +444,18 @@ class RouteAlltoAll(autograd.Function):
         ctx: autograd.function.FunctionCtx,
         x: Tensor,
         route: Route,
+        cache: Optional[RouteWorkCache],
+        cache_key: Optional[str],
     ):
         ctx.saved_route = route
-        return route.fw_tensor(x)
-        
+        ctx.saved_cache = cache
+        ctx.saved_cache_key = cache_key
+        if cache is None or cache_key is None:
+            return route.fw_tensor(x)
+        else:
+            work = route.fw_tensor(x, async_op=True)
+            work = cache.get_and_set(cache_key, work, bw=False)
+            return work.wait()
 
     @staticmethod
     def backward(
@@ -402,4 +463,13 @@ class RouteAlltoAll(autograd.Function):
         grad: Tensor,
     ) -> Tensor:
         route: Route = ctx.saved_route
-        return route.bw_tensor(grad), None
+        cache: Optional[RouteWorkCache] = ctx.saved_cache
+        cache_key: Optional[str] = ctx.saved_cache_key
+
+        if cache is None or cache_key is None:
+            return route.bw_tensor(grad), None, None, None
+        else:
+            work = route.bw_tensor(grad, async_op=True)
+            work = cache.get_and_set(cache_key, work, bw=True)
+            return work.wait(), None, None, None
+        

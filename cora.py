@@ -4,7 +4,7 @@ from torch_geometric.utils import add_remaining_self_loops, to_undirected
 import os.path as osp
 import sys
 
-from starrygl.utils.data import partition_pyg
+from starrygl.graph import GraphData
 
 import logging
 logging.getLogger().setLevel(logging.INFO)
@@ -18,7 +18,9 @@ if __name__ == "__main__":
     print(f"num_nodes: {data.num_nodes}")
     print(f"num_edges: {data.num_edges}")
     print(f"num_features: {data.num_features}")
-    
+
+    data = GraphData.from_pyg_data(data)
+
     num_parts_list = [1, 2, 3, 5, 7, 9, 11]
     algos = ["metis", 'mt-metis', "random"]
     
@@ -27,4 +29,4 @@ if __name__ == "__main__":
     for num_parts in num_parts_list:
         for algo in algos:
             print(f"======== {num_parts} + {algo} ========")
-            partition_pyg(root, data, num_parts, algo)
+            data.save_partition(root, num_parts, algo)
