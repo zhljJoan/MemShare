@@ -1,6 +1,8 @@
 from typing import List, Tuple
 import torch
 import torch.distributed as dist
+from starrygl.distributed.utils import DistributedTensor
+from starrygl.module.memorys import MailBox
 from starrygl.sample.graph_core import DataSet
 from starrygl.sample.graph_core import GraphData
 from starrygl.sample.sample_core.base import BaseSampler, NegativeSampling
@@ -40,7 +42,7 @@ def prepare_input(node_feat, edge_feat, mem_embedding,mfgs,dist_nid,dist_eid):
                     #print(idx.shape[0],b.srcdata['mem_ts'].shape)
         return mfgs
 
-def to_block(graph: GraphData, data, sample_out, mailbox = None,device = torch.device('cuda')):
+def to_block(graph: GraphData, data, sample_out, mailbox:MailBox = None,device = torch.device('cuda')):
 
     if len(sample_out) > 1:
         sample_out,metadata = sample_out
@@ -55,7 +57,6 @@ def to_block(graph: GraphData, data, sample_out, mailbox = None,device = torch.d
     dist_eid,eid_inv = dist_eid.unique(return_inverse=True)
     src_node = graph.sample_graph['edge_index'][0,eid_tensor*2].to(graph.nids_mapper.device)
     src_ts = None  
-    edge_feat = graph._get_edge_attr(dist_eid)
     if metadata is None:
         root_node = data.nodes.to(graph.nids_mapper.device)
         root_len = [root_node.shape[0]]
@@ -74,9 +75,24 @@ def to_block(graph: GraphData, data, sample_out, mailbox = None,device = torch.d
     nid_tensor = torch.cat([root_node,src_node],dim = 0)
     dist_nid = nid_mapper[nid_tensor].to(device)
     dist_nid,nid_inv = dist_nid.unique(return_inverse = True)
-    node_feat = graph._get_node_attr(dist_nid)
+    if isinstance(graph.edge_attr,DistributedTensor):
+        local_index, input_split,output_split = graph.edge_attr.gather_select_index(dist_eid)
+        edge_feat = graph.edge_attr.scatter_data(local_index,input_split=input_split,out_split=output_split)
+    else:
+        edge_feat = graph._get_edge_attr(dist_eid)
+    local_index = None
+    if isinstance(graph.x,DistributedTensor):
+        local_index, input_split,output_split = graph.x.gather_select_index(dist_nid)
+        node_feat = graph.x.scatter_data(local_index,input_split=input_split,out_split=output_split)
+    else:
+        node_feat = graph._get_node_attr(dist_nid)
     if mailbox is not None:
-        mem = mailbox._get_memory(dist_nid)
+        if torch.distributed.get_world_size() > 1:
+            if node_feat is None:
+                local_index, input_split,output_split = mailbox.node_memory.gather_select_index(dist_nid)
+            mem = mailbox.gather_memory(local_index,input_split,output_split)
+        else:
+            mem = mailbox.get_memory(dist_nid)
     else:
         mem = None
 
@@ -120,28 +136,28 @@ def to_block(graph: GraphData, data, sample_out, mailbox = None,device = torch.d
         return data,mfgs,metadata
   
     data,mfgs,metadata = build_block()
-    if dist.get_world_size() > 1:  
-        if(node_feat is None):
-            node_feat = torch.futures.Future()
-            node_feat.set_result(None)
-        if(edge_feat is None):
-            edge_feat = torch.futures.Future()
-            edge_feat.set_result(None) 
-        if(mem is None):
-            mem = torch.futures.Future()
-            mem.set_result(None)
-        def callback(fs,mfgs,dist_nid,dist_eid):
-            node_feat,edge_feat,mem_embedding = fs.value()
-            node_feat = node_feat.value()
-            edge_feat = edge_feat.value()
-            mem_embedding = mem_embedding.value()
-            return prepare_input(node_feat,edge_feat,mem_embedding,mfgs,dist_nid,dist_eid)
-        cal = lambda fut: callback(fs=fut,mfgs = mfgs,dist_nid = dist_nid,dist_eid =dist_eid)
-        return data,torch.futures.collect_all([node_feat,edge_feat,mem]).then(cal),metadata
-    else:
-        mfgs = prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
+    #if dist.get_world_size() > 1:  
+    #    if(node_feat is None):
+    #        node_feat = torch.futures.Future()
+    #        node_feat.set_result(None)
+    #    if(edge_feat is None):
+    #        edge_feat = torch.futures.Future()
+    #        edge_feat.set_result(None) 
+    #    if(mem is None):
+    #        mem = torch.futures.Future()
+    #        mem.set_result(None)
+    #    def callback(fs,mfgs,dist_nid,dist_eid):
+    #        node_feat,edge_feat,mem_embedding = fs.value()
+    #        node_feat = node_feat.value()
+    #        edge_feat = edge_feat.value()
+    #        mem_embedding = mem_embedding.value()
+    #        return prepare_input(node_feat,edge_feat,mem_embedding,mfgs,dist_nid,dist_eid)
+    #    cal = lambda fut: callback(fs=fut,mfgs = mfgs,dist_nid = dist_nid,dist_eid =dist_eid)
+    #    return data,torch.futures.collect_all([node_feat,edge_feat,mem]).then(cal),metadata
+    #else:
+    mfgs = prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
         #return build_block(node_feat,edge_feat,mem)#data,mfgs,metadata
-        return data,mfgs,metadata
+    return data,mfgs,metadata
 
 
 def graph_sample(graph, sampler:BaseSampler,

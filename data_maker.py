@@ -118,6 +118,8 @@ partition_save('./dataset/here/'+data_name, data, 1, 'metis_for_tgnn',
                edge_weight_dict=edge_weight_dict)
 partition_save('./dataset/here/'+data_name, data, 2, 'metis_for_tgnn',
                edge_weight_dict=edge_weight_dict)
+partition_save('./dataset/here/'+data_name, data, 4, 'metis_for_tgnn',
+               edge_weight_dict=edge_weight_dict)
 #
 # partition_save('./dataset/here/'+data_name, data, 4, 'metis_for_tgnn',
 # edge_weight_dict=edge_weight_dict )

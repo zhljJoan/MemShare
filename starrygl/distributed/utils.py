@@ -15,6 +15,7 @@ class TensorAccessor:
         self._data = data
         self._ctx = DistributedContext.get_default_context()
         self._rref = rpc.RRef(data)
+        self._rref.confirmed_by_owner
 
     @property
     def data(self):
@@ -28,6 +29,20 @@ class TensorAccessor:
     def ctx(self):
         return self._ctx
     
+    def all_gather_index(self,index,input_split) -> Tensor:
+        out_split = torch.empty_like(input_split)
+        torch.distributed.all_to_all_single(out_split,input_split)
+        input_split = list(input_split)
+        output = torch.empty([out_split.sum()],dtype = index.dtype,device = index.device)
+        out_split = list(out_split)
+        torch.distributed.all_to_all_single(output,index,out_split,input_split)
+        return output,out_split,input_split
+    
+    def all_gather_data(self,index,input_split,out_split):
+        output = torch.empty([int(Tensor(out_split).sum().item()),*self._data.shape[1:]],dtype = self._data.dtype,device = 'cuda')#self._data.device)
+        torch.distributed.all_to_all_single(output,self.data[index.to(self.data.device)].to('cuda'),output_split_sizes = out_split,input_split_sizes = input_split)
+        return output
+
     def all_gather_rrefs(self) -> List[rpc.RRef]:
         return self.ctx.all_gather_remote_objects(self.rref)
 
@@ -101,7 +116,6 @@ class DistributedTensor:
     def __init__(self, data: Tensor) -> None:
         self.accessor = TensorAccessor(data)
         self.rrefs = self.accessor.all_gather_rrefs()
-
         # self.num_parts = len(self.rrefs)
 
         local_sizes = []
@@ -110,6 +124,7 @@ class DistributedTensor:
             local_sizes.append(n)
         self.num_nodes = DistInt(local_sizes)
         self.num_parts = DistInt([1] * len(self.rrefs))
+        self.distptr = torch.tensor([((part_ids & 0xFFFF) << 48) for part_ids in range(self.num_parts()+1)],device = 'cuda')#data.device)
 
 
     @property
@@ -129,7 +144,18 @@ class DistributedTensor:
     @property
     def ctx(self):
         return self.accessor.ctx
-
+    
+    def gather_select_index(self,dist_index: Union[Tensor,DistIndex]):
+        if isinstance(dist_index, Tensor):
+            dist_index = DistIndex(dist_index)
+        data = dist_index.data
+        posptr = torch.searchsorted(data,self.distptr,right = False)
+        input_split = posptr[1:] - posptr[:-1]
+        return self.accessor.all_gather_index(DistIndex(data).loc,input_split)
+    
+    def scatter_data(self,local_index,input_split,out_split):
+        return self.accessor.all_gather_data(local_index,input_split=input_split,out_split=out_split)
+    
     def index_select(self, dist_index: Union[Tensor, DistIndex]):
         if isinstance(dist_index, Tensor):
             dist_index = DistIndex(dist_index)
@@ -139,6 +165,10 @@ class DistributedTensor:
 
         futs: List[torch.futures.Future] = []
         for i in range(self.num_parts()):
+            #if i != torch.distributed.get_rank():
+            #    continue
+            #f = torch.futures.Future()
+            #f.set_result(self.accessor.data[index[part_idx == i]])
             f = self.accessor.async_index_select(0, index[part_idx == i], self.rrefs[i])
             futs.append(f)
 
@@ -150,6 +180,7 @@ class DistributedTensor:
                     result = torch.empty(
                         part_idx.size(0), *t.shape[1:], dtype=t.dtype, device=t.device,
                     )
+                
                 result[part_idx == i] = t
             return result
         return torch.futures.collect_all(futs).then(callback)

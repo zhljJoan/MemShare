@@ -66,7 +66,8 @@ class DistributedDataLoader:
         if train is True:
             self._get_expected_idx(self.dataset.len)
         else:
-            self.expected_idx = int(math.ceil(self.dataset.len/self.batch_size))
+            self._get_expected_idx(self.dataset.len,op = dist.ReduceOp.MAX)
+            #self.expected_idx = int(math.ceil(self.dataset.len/self.batch_size))
               
     def __iter__(self):
         if self.chunk_size is None:
@@ -102,18 +103,19 @@ class DistributedDataLoader:
             self.neg_sampler.set_next_pos(self.current_pos)
         return self
 
-    def _get_expected_idx(self,data_size):
+    def _get_expected_idx(self,data_size,op = dist.ReduceOp.MIN):
         world_size = dist.get_world_size()
         self.expected_idx = data_size // self.batch_size if self.drop_last is True else int(math.ceil(data_size/self.batch_size))
 
         if dist.get_world_size() > 1:
             num_epochs = torch.tensor([self.expected_idx],dtype = torch.long,device=self.device) 
-            dist.all_reduce(num_epochs, op=dist.ReduceOp.MIN)
+            print(num_epochs)
+            dist.all_reduce(num_epochs, op=op)
             self.expected_idx = int(num_epochs.item())
 
     def _next_data(self):   
         if self.current_pos >= self.dataset.len:
-            return None
+            return self.input_dataset._get_empty()
 
         if self.current_pos + self.batch_size > self.input_dataset.len:
             if self.drop_last:
@@ -132,7 +134,7 @@ class DistributedDataLoader:
         return next_data
     
     def __next__(self):
-        if(dist.get_world_size() == 1):
+        if(dist.get_world_size() > 0):
             if self.recv_idxs < self.expected_idx:
                 data = self._next_data()
                 batch_data = graph_sample(self.graph,
@@ -165,6 +167,12 @@ class DistributedDataLoader:
                                           next_data,self.neg_sampler,
                                           self.mailbox,
                                           self.device)
+                    batch_data[1].wait()
+                    self.submitted = self.submitted + 1
+                    self.num_pending = self.num_pending + 1
+                    self.recv_idxs += 1
+                    self.num_pending -= 1
+                    return batch_data[0],batch_data[1].value(),batch_data[2]
                     self.result_queue.append(batch_data)
                     self.submitted = self.submitted + 1
                     self.num_pending = self.num_pending + 1

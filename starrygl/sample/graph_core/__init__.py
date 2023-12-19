@@ -23,16 +23,16 @@ class GraphData():
         world_size = dist.get_world_size()
         if hasattr(pdata,'x') and pdata.x is not None:
             if world_size > 1:
-                self.x = DistributedTensor(pdata.x.to(self.device))
+                self.x = DistributedTensor(pdata.x.to(self.device).to(torch.float))
             else:
                 self.x = pdata.x.to(device).to(torch.float)
         else:
             self.x = None
         if hasattr(pdata,'edge_attr') and pdata.edge_attr is not None:
             if world_size > 1:
-                self.edge_attr = DistributedTensor(pdata.edge_attr.to(self.device))
+                self.edge_attr = DistributedTensor(pdata.edge_attr.to('cpu').to(torch.float))
             else:
-                self.edge_attr = pdata.edge_attr.to('cuda').to(torch.float)
+                self.edge_attr = pdata.edge_attr.to('cpu').to(torch.float)
         else:
             self.edge_attr = None
 
@@ -43,13 +43,14 @@ class GraphData():
             return self.x[ids]
         else:
             return self.x.index_select(ids)
-    def _get_edge_attr(self,ids):
+    def _get_edge_attr(self,ids,):
         if self.edge_attr is None:
             return None
         elif dist.get_world_size() == 1:
-            return self.edge_attr[ids.to('cpu')].to('cuda')
+            return self.edge_attr[ids]
         else:
             return self.edge_attr.index_select(ids)
+
 
 class DataSet:
     def __init__(self,nodes = None,
@@ -69,6 +70,16 @@ class DataSet:
         for k, v in kwargs.items():
             assert isinstance(v,torch.Tensor) and v.shape[0]==self.len
             setattr(self, k, v.to(device))
+    def _get_empty(self):
+        nodes = torch.empty([],dtype = self.nodes.dtype,device= self.nodes.device)if hasattr(self,'nodes') else None
+        edges = torch.empty([[],[]],dtype = self.edges.dtype,device= self.edge.device)if hasattr(self,'edges') else None
+        d = DataSet(nodes,edges)
+        for k,v in self.__dict__.items():
+            if k == 'edges' or k=='nodes' or k == 'len':
+                continue
+            else:
+                setattr(d,k,torch.empty([]))
+        return d
 
     #@staticmethod
     def get_next(self,indx):

@@ -214,7 +214,7 @@ class SharedMailBox():
         return index,memory,ts
     
 
-    def _get_memory(self,index):
+    def get_memory(self,index):
         if self.num_parts == 1:
             return self.node_memory.accessor.data[index],\
                     self.node_memory_ts.accessor.data[index],\
@@ -234,6 +234,9 @@ class SharedMailBox():
                 #print(memory.shape[0])
                 return memory,memory_ts,mail,mail_ts
             return torch.futures.collect_all([memory,memory_ts,mail,mail_ts]).then(callback)
-        
-
+    def gather_memory(self,index,input_split,out_split):
+        return self.node_memory.scatter_data(index,input_split,out_split),\
+                self.node_memory_ts.scatter_data(index,input_split,out_split),\
+                self.mailbox.scatter_data(index,input_split,out_split),\
+                self.mailbox_ts.scatter_data(index,input_split,out_split)
 

@@ -82,8 +82,9 @@ def main():
     ctx = DistributedContext.init(backend="nccl", use_gpu=True)
     device_id = torch.cuda.current_device()
     print('use cuda on',device_id)
-    pdata = partition_load("./dataset/here/WIKI", algo="metis_for_tgnn")    
+    pdata = partition_load("./dataset/here/GDELT", algo="metis_for_tgnn")    
     graph = GraphData(pdata = pdata)
+
     sample_graph = TemporalNeighborSampleGraph(sample_graph = pdata.sample_graph,mode = 'full')
     mailbox = SharedMailBox(pdata.ids.shape[0], memory_param, dim_edge_feat = pdata.edge_attr.shape[1] if pdata.edge_attr is not None else 0)
     sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=1, fanout=[10],graph_data=sample_graph, workers=10,policy = 'recent',graph_name = "wiki_train")
@@ -102,17 +103,17 @@ def main():
     trainloader = DistributedDataLoader(graph,train_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
-                                        batch_size = 2000,
+                                        batch_size = 1000,
                                         shuffle=False,
                                         drop_last=True,
                                         chunk_size = None,
                                         train=True,
-                                        queue_size = 100,
+                                        queue_size = 1000,
                                         mailbox = mailbox)
     testloader = DistributedDataLoader(graph,test_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
-                                        batch_size = 2000,
+                                        batch_size = 1000,
                                         shuffle=False,
                                         drop_last=False,
                                         chunk_size = None,
@@ -122,7 +123,7 @@ def main():
     valloader = DistributedDataLoader(graph,val_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
-                                        batch_size = 2000,
+                                        batch_size = 1000,
                                         shuffle=False,
                                         drop_last=False,
                                         chunk_size = None,
@@ -158,9 +159,9 @@ def main():
         with torch.no_grad():
             total_loss = 0
             signal = torch.tensor([0],dtype = int,device = device)
+            
             for roots,mfgs,metadata in loader:
-                signal[0] = 0
-                dist.all_reduce(signal,async_op=False)
+                
                 pred_pos, pred_neg = model(mfgs,metadata)
                 total_loss += creterion(pred_pos, torch.ones_like(pred_pos))
                 total_loss += creterion(pred_neg, torch.zeros_like(pred_neg))
@@ -190,32 +191,28 @@ def main():
                                                  src,dst,ts,edge_feats,
                                                  model.module.memory_updater.last_updated_memory,
                                                  )
-                    #mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
-            if mode == 'val':
-                val_losses.append(float(total_loss))
-            while(signal[0].item() != dist.get_world_size()):
-                signal[0] = 1
-                dist.all_reduce(signal,async_op=False)
-                if(signal[0].item() == dist.get_world_size()):
-                    break
-                if mailbox is not None:
-                    mailbox.set_mailbox_all_to_all(torch.tensor([],device = device).reshape(-1),
-                                                   torch.tensor([],device = device).reshape(-1,mailbox.memory_size),
-                                                   torch.tensor([],device = device).reshape(-1),
-                                                   torch.tensor([],device = device).reshape(-1,mailbox.mailbox.accessor.data.size(2)),
-                                                   torch.tensor([],device = device).reshape(-1),
-                                                   reduce_Op = 'max')
+                    mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
+                
 
-        ap = float(torch.tensor(aps).mean())
-        if neg_samples > 1:
-            auc_mrr = float(torch.cat(aucs_mrrs).mean())
-        else:
-            auc_mrr = float(torch.tensor(aucs_mrrs).mean())
+        #ap = float(torch.tensor(aps).mean())
+        #if neg_samples > 1:
+        #    auc_mrr = float(torch.cat(aucs_mrrs).mean())
+        #else:
+        #    auc_mrr = float(torch.tensor(aucs_mrrs).mean())
+        world_size = dist.get_world_size()
+        apc = torch.empty([loader.expected_idx*world_size],dtype = torch.float,device='cuda')
+        auc_mrr = torch.empty([loader.expected_idx*world_size],dtype = torch.float,device = 'cuda')
+        dist.all_gather_into_tensor(apc,torch.tensor(aps,device ='cuda',dtype=torch.float))
+        dist.all_gather_into_tensor(auc_mrr,torch.tensor(aucs_mrrs,device ='cuda',dtype=torch.float))
+        ap = float(torch.tensor(apc).mean())
+        auc_mrr = float(torch.tensor(auc_mrr).mean())
         return ap, auc_mrr
     
     creterion = torch.nn.BCEWithLogitsLoss()
+
     optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'])
     for e in range(train_param['epoch']):
+        torch.cuda.synchronize()
         epoch_start_time = time.time()
         train_aps = list()
         print('Epoch {:d}:'.format(e))
@@ -229,14 +226,18 @@ def main():
             model.module.memory_updater.last_updated_ts = None
         for roots,mfgs,metadata in trainloader:
             t_prep_s = time.time()
-            optimizer.zero_grad()
+            
             with torch.cuda.stream(train_stream):
+
+                optimizer.zero_grad()
                 pred_pos, pred_neg = model(mfgs,metadata)
+                
                 loss = creterion(pred_pos, torch.ones_like(pred_pos))
                 loss += creterion(pred_neg, torch.zeros_like(pred_neg))
                 total_loss += float(loss)
                 loss.backward()
                 optimizer.step()
+                #torch.cuda.synchronize()
                 t_prep_s = time.time()
                 y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
                 y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
@@ -262,7 +263,9 @@ def main():
                                                  src,dst,ts,edge_feats,
                                                  model.module.memory_updater.last_updated_memory,
                                                  )
-                    #mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
+                    
+                    mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
+                
         torch.cuda.synchronize()
         time_prep = time.time() - epoch_start_time
         avg_time += time.time() - epoch_start_time
