@@ -149,6 +149,9 @@ def batch_send(
     group: Any = None,
     async_op: bool = False,
 ):
+    if len(tensors) == 0:
+        return BatchWork(None, None)
+    
     # tensors = tuple(t.data for t in tensors)
     backend = dist.get_backend(group)
 
@@ -171,6 +174,9 @@ def batch_recv(
     group: Any = None,
     async_op: bool = False,
 ):
+    if len(tensors) == 0:
+        return BatchWork(None, None)
+    
     # tensors = tuple(t.data for t in tensors)
     backend = dist.get_backend(group)
 
