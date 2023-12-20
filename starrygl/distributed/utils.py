@@ -140,8 +140,11 @@ class DistributedTensor:
         for rref in self.rrefs:
             n = self.ctx.remote_call(Tensor.size, rref, dim=0).wait()
             local_sizes.append(n)
-        self._num_nodes = DistInt(local_sizes)
-        self._num_parts = DistInt([1] * len(self.rrefs))
+        self._num_nodes: int = sum(local_sizes)
+        self._num_part_nodes: Tuple[int,...] = tuple(int(s) for s in local_sizes)
+
+        self._part_id: int = self.accessor.ctx.rank
+        self._num_parts: int = self.accessor.ctx.world_size
 
     @property
     def dtype(self):
@@ -152,11 +155,19 @@ class DistributedTensor:
         return self.accessor.data.device
     
     @property
-    def num_nodes(self) -> DistInt:
+    def num_nodes(self) -> int:
         return self._num_nodes
     
     @property
-    def num_parts(self) -> DistInt:
+    def num_part_nodes(self) -> tuple[int,...]:
+        return self._num_part_nodes
+    
+    @property
+    def part_id(self) -> int:
+        return self._part_id
+    
+    @property
+    def num_parts(self) -> int:
         return self._num_parts
     
     def to(self,device):
@@ -235,7 +246,7 @@ class DistributedTensor:
         index = dist_index.loc
 
         futs: List[torch.futures.Future] = []
-        for i in range(self.num_parts()):
+        for i in range(self.num_parts):
             f = self.accessor.async_index_select(0, index[part_idx == i], self.rrefs[i])
             futs.append(f)
 

@@ -8,6 +8,9 @@ from torch import Tensor
 from typing import *
 
 
+__all__ = [
+    "SyncBatchNorm",
+]
 
 class SyncBatchNorm(nn.Module):
     def __init__(self,

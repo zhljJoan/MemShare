@@ -5,7 +5,7 @@ from torch import Tensor
 from typing import *
 
 from starrygl.distributed import DistributedContext
-from starrygl.graph import *
+from starrygl.data import *
 
 from torch_scatter import scatter_sum
 
@@ -75,5 +75,15 @@ if __name__ == "__main__":
     ctx.sync_print(r2.rev().apply(src_ones).detach())
     # dst_true = torch.ones(route.dst_len, dtype=torch.float, device=ctx.device)
     # ctx.sync_print(route.fw_tensor(dst_true, "max"))
+
+    spb = g.to_sparse()
+    x = torch.randn(g.node("dst").num_nodes, 64, device=ctx.device).requires_grad_()
+    ctx.sync_print(x[:,0])
+
+    y = spb.apply(x)
+    ctx.sync_print(y[:,0])
+
+    y.sum().backward()
+    ctx.sync_print(x.grad[:,0])
 
     ctx.shutdown()
