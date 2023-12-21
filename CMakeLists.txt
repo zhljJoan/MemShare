@@ -110,6 +110,7 @@ add_library(${SAMLPER_NAME} SHARED ${SAMPLER_SRCS})
 
 target_include_directories(${SAMLPER_NAME} PRIVATE "csrc/sampler/include")
 
+target_compile_options(${SAMLPER_NAME} PRIVATE -O3)
 target_link_libraries(${SAMLPER_NAME} PRIVATE ${TORCH_LIBRARIES})
 target_compile_definitions(${SAMLPER_NAME} PRIVATE -DTORCH_EXTENSION_NAME=lib${SAMLPER_NAME})
 

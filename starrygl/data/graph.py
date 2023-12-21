@@ -8,13 +8,15 @@ from pathlib import Path
 
 from torch_sparse import SparseTensor
 from starrygl.utils.partition import *
-from .route import Route
+from starrygl.parallel.route import Route
+from starrygl.parallel.sparse import SparseBlocks
+
+from .utils import init_vc_edge_index
 
 import logging
 
 __all__ = [
     "GraphData",
-    "init_vc_edge_index",
 ]
 
 
@@ -84,6 +86,17 @@ class GraphData:
         src_ids = self.node("src")["raw_ids"]
         dst_ids = self.node("dst")["raw_ids"]
         return Route.from_raw_indices(src_ids, dst_ids, group=group)
+    
+    def to_sparse(self, key: Optional[str] = None, group: Any = None) -> SparseBlocks:
+        src_ids = self.node("src")["raw_ids"]
+        dst_ids = self.node("dst")["raw_ids"]
+        edge_index = self.edge_index()
+        edge_index = torch.vstack([
+            src_ids[edge_index[0]],
+            dst_ids[edge_index[1]],
+        ])
+        edge_attr = None if key is None else self.edge()[key]
+        return SparseBlocks.from_raw_indices(dst_ids, edge_index, edge_attr=edge_attr, group=group)
     
     @property
     def is_heterogeneous(self) -> bool:
@@ -194,15 +207,6 @@ class GraphData:
                 raw_dst_ids, local_edges, bipartite=True,
             )
 
-            # g = GraphData(
-            #     edge_indices={
-            #         ("src", "@", "dst"): local_edges,
-            #     },
-            #     num_nodes={
-            #         "src": raw_src_ids.numel(),
-            #         "dst": raw_dst_ids.numel(),
-            #     }
-            # )
             g = GraphData.from_bipartite(
                 local_edges,
                 raw_src_ids=raw_src_ids,
@@ -321,139 +325,3 @@ class EdgeData:
     def to(self, device: Any) -> 'EdgeData':
         self._data = {k:v.to(device) for k,v in self._data.items()}
         return self
-
-
-def init_vc_edge_index(
-    dst_ids: Tensor,
-    edge_index: Tensor,
-    bipartite: bool = True,
-) -> Tuple[Tensor, Tensor]:
-    ikw = dict(dtype=torch.long, device=dst_ids.device)
-
-    local_num_nodes = torch.zeros(1, **ikw)
-    if dst_ids.numel() > 0:
-        local_num_nodes = dst_ids.max().max(local_num_nodes)
-    if edge_index.numel() > 0:
-        local_num_nodes = edge_index.max().max(local_num_nodes)
-    local_num_nodes = local_num_nodes.item() + 1
-
-    xmp: Tensor = torch.zeros(local_num_nodes, **ikw)
-    xmp[edge_index[1].unique()] += 0b01
-    xmp[dst_ids.unique()] += 0b10
-    if not (xmp != 0x01).all():
-        raise RuntimeError(f"must be vertex-cut partition graph")
-    
-    if bipartite:
-        src_ids = edge_index[0].unique()
-    else:
-        xmp.fill_(0)
-        xmp[edge_index[0]] = 1
-        xmp[dst_ids] = 0
-        src_ids = torch.cat([dst_ids, torch.where(xmp > 0)[0]], dim=-1)
-
-    xmp.fill_((2**62-1)*2+1)
-    xmp[src_ids] = torch.arange(src_ids.size(0), **ikw)
-    src = xmp[edge_index[0]]
-    
-    xmp.fill_((2**62-1)*2+1)
-    xmp[dst_ids] = torch.arange(dst_ids.size(0), **ikw)
-    dst = xmp[edge_index[1]]
-    
-    local_edge_index = torch.vstack([src, dst])
-    return src_ids, local_edge_index
-
-
-# def partition_load(root: str, part_id: int, num_parts: int, algo: str = "metis") -> GraphData:
-#     p = Path(root).expanduser().resolve() / f"{algo}_{num_parts}" / f"{part_id:03d}"
-#     return torch.load(p.__str__())
-
-
-# def partition_pyg(root: str, data, num_parts: int, algo: str = "metis"):
-#     root_path = Path(root).expanduser().resolve()
-#     base_path = root_path / f"{algo}_{num_parts}"
-
-#     if base_path.exists():
-#         shutil.rmtree(base_path.__str__())
-#     base_path.mkdir(parents=True, exist_ok=True)
-    
-#     for i, g in enumerate(partition_pyg_data(data, num_parts, algo)):
-#         logging.info(f"saving partition data: {i+1}/{num_parts}")
-#         torch.save(g, (base_path / f"{i:03d}").__str__())
-
-
-# def partition_pyg_data(data, num_parts: int, algo: str = "metis") -> Iterator[GraphData]:
-#     from torch_geometric.data import Data
-#     assert isinstance(data, Data), f"must be Data class in pyg"
-    
-#     logging.info(f"running partition aglorithm: {algo}")
-    
-#     num_nodes: int = data.num_nodes
-#     num_edges: int = data.num_edges
-#     edge_index: Tensor = data.edge_index
-
-#     if algo == "metis":
-#         node_parts = metis_partition(edge_index, num_nodes, num_parts)
-#     elif algo == "mt-metis":
-#         node_parts = mt_metis_partition(edge_index, num_nodes, num_parts)
-#     elif algo == "random":
-#         node_parts = random_partition(edge_index, num_nodes, num_parts)
-#     else:
-#         raise ValueError(f"unknown partition algorithm: {algo}")
-    
-#     if data.y.dtype == torch.long:
-#         if data.y.dim() == 1:
-#             num_classes = data.y.max().item() + 1
-#         else:
-#             num_classes = data.y.size(1)
-#     else:
-#         num_classes = None
-
-#     for i in range(num_parts):
-#         npart_mask = node_parts == i
-#         epart_mask = npart_mask[edge_index[1]]
-
-#         local_edges = edge_index[:, epart_mask]
-
-#         raw_src_ids: Tensor = local_edges[0].unique()
-#         raw_dst_ids: Tensor = torch.where(npart_mask)[0]
-        
-#         M: int = raw_src_ids.max().item() + 1
-#         imap = torch.full((M,), (2**62-1)*2+1).type_as(raw_src_ids)
-#         imap[raw_src_ids] = torch.arange(raw_src_ids.numel()).type_as(raw_src_ids)
-#         local_src = imap[local_edges[0]]
-        
-#         M: int = raw_dst_ids.max().item() + 1
-#         imap = torch.full((M,), (2**62-1)*2+1).type_as(raw_dst_ids)
-#         imap[raw_dst_ids] = torch.arange(raw_dst_ids.numel()).type_as(raw_dst_ids)
-#         local_dst = imap[local_edges[1]]
-
-#         local_edges = torch.vstack([local_src, local_dst])
-
-#         g = GraphData(
-#             edge_indices={
-#                 ("src", "@", "dst"): local_edges,
-#             },
-#             num_nodes={
-#                 "src": raw_src_ids.numel(),
-#                 "dst": raw_dst_ids.numel(),
-#             },
-#         )
-#         g.node("src")["raw_ids"] = raw_src_ids
-#         g.node("dst")["raw_ids"] = raw_dst_ids
-
-#         if num_classes is not None:
-#             g.meta()["num_classes"] = num_classes
-
-#         for key, val in data:
-#             if key == "edge_index":
-#                 continue
-#             elif isinstance(val, Tensor):
-#                 if val.size(0) == num_nodes:
-#                     g.node("dst")[key] = val[npart_mask]
-#                 elif val.size(0) == num_edges:
-#                     g.edge()[key] = val[epart_mask]
-#             elif isinstance(val, SparseTensor):
-#                 pass
-#             else:
-#                 g.meta()[key] = val
-#         yield g

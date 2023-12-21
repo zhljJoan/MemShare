@@ -8,33 +8,45 @@ __all__ = [
     "all_to_all_v",
     "all_to_all_s",
     "BatchWork",
+    "batch_send",
+    "batch_recv",
 ]
 
 
 class BatchWork:
-    def __init__(self, works, buffer_tensor_list) -> None:
-        if isinstance(works, (list, tuple)):
-            assert len(works) // 2 == len(buffer_tensor_list)
+    def __init__(self,
+        works: Optional[List[Any]],
+        buffer_tensor_list: Optional[List[Tuple[Tensor, Optional[Tensor]]]],
+        step: int = 1,
+    ) -> None:
+        if works is None:
+            self._step = None
+            self._works = None
+            self._buffer_tensor_list = None
+        else:
+            if buffer_tensor_list:
+                assert len(works) // step == len(buffer_tensor_list)
+            self._step = step
             self._works = works
             self._buffer_tensor_list = buffer_tensor_list
-        else:
-            assert self._buffer_tensor_list is None
-            self._works = works
-            self._buffer_tensor_list = None
     
     def wait(self):
         if self._works is None:
             return
-        if isinstance(self._works, (list, tuple)):
-            for i, w in enumerate(self._works):
+        
+        for i, w in enumerate(self._works):
+            if w is not None:
                 w.wait()
-                if i % 2 == 0:
-                    continue
-                out, buf = self._buffer_tensor_list[i // 2]
+
+            if (i + 1) % self._step != 0:
+                continue
+
+            if self._buffer_tensor_list:
+                out, buf = self._buffer_tensor_list[i // self._step]
                 if buf is not None:
                     out.copy_(buf)
-        else:
-            self._works.wait()
+
+        self._step = None
         self._works = None
         self._buffer_tensor_list = None
 
@@ -60,7 +72,7 @@ def all_to_all_v(
             group=group,
             async_op=async_op,
         )
-        return BatchWork(work, None) if async_op else None
+        return BatchWork([work], None) if async_op else None
     
     elif backend == "mpi":
         work = dist.all_to_all(
@@ -69,7 +81,7 @@ def all_to_all_v(
             group=group,
             async_op=async_op,
         )
-        return BatchWork(work, None) if async_op else None
+        return BatchWork([work], None) if async_op else None
     
     else:
         assert backend == "gloo", f"backend must be nccl, mpi or gloo"
@@ -98,7 +110,7 @@ def all_to_all_v(
                 dist.irecv(recv_b, recv_i, group=group),
             ])
         
-        work = BatchWork(p2p_op_works, buffer_tensor_list)
+        work = BatchWork(p2p_op_works, buffer_tensor_list, 2)
         output_tensor_list[rank].copy_(input_tensor_list[rank])
 
         if async_op:
@@ -130,3 +142,61 @@ def all_to_all_s(
         group=group,
         async_op=async_op,
     )
+
+def batch_send(
+    *tensors: Tensor,
+    dst: int,
+    group: Any = None,
+    async_op: bool = False,
+):
+    if len(tensors) == 0:
+        return BatchWork(None, None)
+    
+    # tensors = tuple(t.data for t in tensors)
+    backend = dist.get_backend(group)
+
+    if async_op:
+        works = []
+        for t in tensors:
+            if backend == "gloo" and t.is_cuda:
+                t = t.cpu()
+            works.append(dist.isend(t, dst=dst, group=group))
+        return BatchWork(works, None)
+    else:
+        for t in tensors:
+            if backend == "gloo" and t.is_cuda:
+                t = t.cpu()
+            dist.send(t, dst=dst, group=group)
+
+def batch_recv(
+    *tensors: Tensor,
+    src: int,
+    group: Any = None,
+    async_op: bool = False,
+):
+    if len(tensors) == 0:
+        return BatchWork(None, None)
+    
+    # tensors = tuple(t.data for t in tensors)
+    backend = dist.get_backend(group)
+
+    if async_op:
+        works = []
+        output_tensor_list = []
+        for t in tensors:
+            if backend == "gloo" and t.is_cuda:
+                b = torch.empty_like(t, device="cpu")
+                works.append(dist.irecv(b, src=src, group=group))
+            else:
+                b = None
+                works.append(dist.irecv(t, src=src, group=group))
+            output_tensor_list.append((t, b))
+        return BatchWork(works, output_tensor_list, 1)
+    else:
+        for t in tensors:
+            if backend == "gloo" and t.is_cuda:
+                b = torch.empty_like(t, device="cpu")
+                dist.recv(b, src=src, group=group)
+                t.copy_(b)
+            else:
+                dist.recv(t, src=src, group=group)

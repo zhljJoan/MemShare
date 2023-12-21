@@ -2,12 +2,8 @@
 #include "uvm.h"
 #include "partition.h"
 
-torch::Tensor add(torch::Tensor a, torch::Tensor b) {
-    return a + b;
-}
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
-    m.def("add", &add, "a function implemented using pybind11");
     m.def("uvm_storage_new", &uvm_storage_new, "return storage of unified virtual memory");
     m.def("uvm_storage_to_cuda", &uvm_storage_to_cuda, "share uvm storage with another cuda device");
     m.def("uvm_storage_to_cpu", &uvm_storage_to_cpu, "share uvm storage with cpu");

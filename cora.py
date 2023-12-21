@@ -4,7 +4,7 @@ from torch_geometric.utils import add_remaining_self_loops, to_undirected
 import os.path as osp
 import sys
 
-from starrygl.graph import GraphData
+from starrygl.data import GraphData
 
 import logging
 logging.getLogger().setLevel(logging.INFO)

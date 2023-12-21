@@ -17,7 +17,6 @@ class TensorAccessor:
         self._data = data
         self._ctx = DistributedContext.get_default_context()
         self._rref = rpc.RRef(data)
-        self._rref.confirmed_by_owner
 
     @property
     def data(self):
@@ -30,20 +29,6 @@ class TensorAccessor:
     @property
     def ctx(self):
         return self._ctx
-    
-    # def all_gather_index(self,index,input_split) -> Tensor:
-    #     out_split = torch.empty_like(input_split)
-    #     torch.distributed.all_to_all_single(out_split,input_split)
-    #     input_split = list(input_split)
-    #     output = torch.empty([out_split.sum()],dtype = index.dtype,device = index.device)
-    #     out_split = list(out_split)
-    #     torch.distributed.all_to_all_single(output,index,out_split,input_split)
-    #     return output,out_split,input_split
-    
-    # def all_gather_data(self,index,input_split,out_split):
-    #     output = torch.empty([int(Tensor(out_split).sum().item()),*self._data.shape[1:]],dtype = self._data.dtype,device = 'cuda')#self._data.device)
-    #     torch.distributed.all_to_all_single(output,self.data[index.to(self.data.device)].to('cuda'),output_split_sizes = out_split,input_split_sizes = input_split)
-    #     return output
 
     def all_gather_rrefs(self) -> List[rpc.RRef]:
         return self.ctx.all_gather_remote_objects(self.rref)
@@ -51,32 +36,55 @@ class TensorAccessor:
     def async_index_select(self, dim: int, index: Tensor, rref: Optional[rpc.RRef] = None):
         if rref is None:
             rref = self.rref
-        return self.ctx.remote_call(Tensor.index_select, rref, dim=dim, index=index)
+        return self.ctx.remote_exec(TensorAccessor._index_select, rref, dim=dim, index=index)
 
     def async_index_copy_(self, dim: int, index: Tensor, source: Tensor, rref: Optional[rpc.RRef] = None):
         if rref is None:
             rref = self.rref
-        return self.ctx.remote_void_call(Tensor.index_copy_, rref, dim=dim, index=index, source=source)
+        return self.ctx.remote_exec(TensorAccessor._index_copy_, rref, dim=dim, index=index, source=source)
 
     def async_index_add_(self, dim: int, index: Tensor, source: Tensor, rref: Optional[rpc.RRef] = None):
         if rref is None:
             rref = self.rref
-        return self.ctx.remote_void_call(Tensor.index_add_, rref, dim=dim, index=index, source=source)
+        return self.ctx.remote_exec(TensorAccessor._index_add_, rref, dim=dim, index=index, source=source)
     
-    def async_index_fill_(self, dim: int, index: Tensor, value: Number, rref: Optional[rpc.RRef] = None):
-        if rref is None:
-            rref = self.rref
-        return self.ctx.remote_void_call(Tensor.index_fill_, rref, dim=dim, index=index, value=value)
+    @staticmethod
+    def _index_select(data: Tensor, dim: int, index: Tensor):
+        stream = TensorAccessor.get_stream()
+        with torch.cuda.stream(stream):
+            data = data.index_select(dim, index)
+            fut = torch.futures.Future()
+            fut.set_result(data)
+        return fut
+    
+    @staticmethod
+    def _index_copy_(data: Tensor, dim: int, index: Tensor, source: Tensor):
+        stream = TensorAccessor.get_stream()
+        with torch.cuda.stream(stream):
+            data.index_copy_(dim, index, source)
+            fut = torch.futures.Future()
+            fut.set_result(None)
+        return fut
 
-    def async_fill_(self, value: Number, rref: Optional[rpc.RRef] = None):
-        if rref is None:
-            rref = self.rref
-        return self.ctx.remote_void_call(Tensor.fill_, rref, value=value)
+    @staticmethod
+    def _index_add_(data: Tensor, dim: int, index: Tensor, source: Tensor):
+        stream = TensorAccessor.get_stream()
+        with torch.cuda.stream(stream):
+            data.index_add_(dim, index, source)
+            fut = torch.futures.Future()
+            fut.set_result(None)
+        return fut
 
-    def async_zero_(self, rref: Optional[rpc.RRef] = None):
-        if rref is None:
-            rref = self.rref
-        self.ctx.remote_void_call(Tensor.zero_, rref)
+    @staticmethod
+    def get_stream() -> Optional[torch.cuda.Stream]:
+        global _TENSOR_ACCESSOR_STREAM
+        if torch.cuda.is_available():
+            return None
+        if _TENSOR_ACCESSOR_STREAM is None:
+            _TENSOR_ACCESSOR_STREAM = torch.cuda.Stream()
+        return _TENSOR_ACCESSOR_STREAM
+
+_TENSOR_ACCESSOR_STREAM: Optional[torch.cuda.Stream] = None
 
 
 class DistInt:
@@ -132,8 +140,11 @@ class DistributedTensor:
         for rref in self.rrefs:
             n = self.ctx.remote_call(Tensor.size, rref, dim=0).wait()
             local_sizes.append(n)
-        self._num_nodes = DistInt(local_sizes)
-        self._num_parts = DistInt([1] * len(self.rrefs))
+        self._num_nodes: int = sum(local_sizes)
+        self._num_part_nodes: Tuple[int,...] = tuple(int(s) for s in local_sizes)
+
+        self._part_id: int = self.accessor.ctx.rank
+        self._num_parts: int = self.accessor.ctx.world_size
 
     @property
     def dtype(self):
@@ -144,11 +155,19 @@ class DistributedTensor:
         return self.accessor.data.device
     
     @property
-    def num_nodes(self) -> DistInt:
+    def num_nodes(self) -> int:
         return self._num_nodes
     
     @property
-    def num_parts(self) -> DistInt:
+    def num_part_nodes(self) -> tuple[int,...]:
+        return self._num_part_nodes
+    
+    @property
+    def part_id(self) -> int:
+        return self._part_id
+    
+    @property
+    def num_parts(self) -> int:
         return self._num_parts
     
     def to(self,device):
@@ -227,11 +246,7 @@ class DistributedTensor:
         index = dist_index.loc
 
         futs: List[torch.futures.Future] = []
-        for i in range(self.num_parts()):
-            #if i != torch.distributed.get_rank():
-            #    continue
-            #f = torch.futures.Future()
-            #f.set_result(self.accessor.data[index[part_idx == i]])
+        for i in range(self.num_parts):
             f = self.accessor.async_index_select(0, index[part_idx == i], self.rrefs[i])
             futs.append(f)
 
@@ -276,16 +291,3 @@ class DistributedTensor:
             futs.append(f)
         return torch.futures.collect_all(futs)
     
-    def index_fill_(self, dist_index: Union[Tensor, DistIndex], value: Number):
-        if isinstance(dist_index, Tensor):
-            dist_index = DistIndex(dist_index)
-
-        part_idx = dist_index.part
-        index = dist_index.loc
-
-        futs: List[torch.futures.Future] = []
-        for i in range(self.num_parts()):
-            mask = part_idx == i
-            f = self.accessor.async_index_fill_(0, index[mask], value, self.rrefs[i])
-            futs.append(f)
-        return torch.futures.collect_all(futs)
