@@ -122,13 +122,18 @@ def test():
     sam_edge = 0
     pre = time.time()
 
-
+    min_than_ten = 0
+    min_than_ten_sum = 0
+    seed_node_sum = 0
     for _, rows in tqdm(df.groupby(df.index // args.batch_size), total=len(df) // args.batch_size):
             # root_nodes = torch.tensor(np.concatenate([rows.src.values, rows.dst.values, neg_link_sampler.sample(len(rows))])).long()
             # ts = torch.tensor(np.concatenate([rows.time.values, rows.time.values, rows.time.values]).astype(np.float32))
             # outi = sampler.sample_from_nodes(root_nodes, ts=ts)
             edges = torch.tensor(np.stack([rows.src.values, rows.dst.values])).long()
             outi, meta = sampler.sample_from_edges(edges=edges, ets=torch.tensor(rows.time.values).float(), neg_sampling=neg_link_sampler)
+            # min_than_ten += (torch.tensor(tnb.deg)[meta['seed']]<10).sum()
+            # min_than_ten_sum += ((torch.tensor(tnb.deg)[meta['seed']])[torch.tensor(tnb.deg)[meta['seed']]<10]).sum()
+            # seed_node_sum += meta['seed'].size(0)
             tot_time += outi[0].tot_time
             sam_time += outi[0].sample_time
             # print(outi[0].sample_edge_num)
@@ -149,6 +154,10 @@ def test():
     # print('node:', out[23][1].sample_nodes)
     # print('node_ts:', out[23][1].sample_nodes_ts)
     # print('edge_index_list:', out[0][0].edge_index)
+    # print("min_than_ten", min_than_ten)
+    # print("min_than_ten_sum", min_than_ten_sum)
+    # print("seed_node_sum", seed_node_sum)
+    # print("predict edge_num", (seed_node_sum-min_than_ten)*9+min_than_ten_sum)
     
 if __name__ == "__main__":
     test()

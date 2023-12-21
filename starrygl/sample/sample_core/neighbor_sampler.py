@@ -7,18 +7,16 @@ import torch
 import torch.multiprocessing as mp
 from typing import Optional, Tuple
 
-import graph_store
-from distparser import SampleType, NUM_SAMPLER
-from base import BaseSampler, NegativeSampling, SampleOutput
+from .base import BaseSampler, NegativeSampling, SampleOutput, SampleType
 # from sample_cores import ParallelSampler, get_neighbors, heads_unique
 from starrygl.lib.libstarrygl_ops_sampler import ParallelSampler, get_neighbors
 from torch.distributed.rpc import rpc_async
 
-def outer_sample(graph_name, nodes, ts, fanout_index, with_outer_sample = SampleType.Outer):# 默认此时继续向外采样
-    local_sampler = graph_store.get_local_sampler(graph_name)
-    assert local_sampler is not None, 'Local_sampler is None!!!'
-    out = local_sampler.sample_from_nodes(nodes, with_outer_sample, ts, fanout_index)
-    return out
+# def outer_sample(graph_name, nodes, ts, fanout_index, with_outer_sample = SampleType.Outer):# 默认此时继续向外采样
+#     local_sampler = get_local_sampler(graph_name)
+#     assert local_sampler is not None, 'Local_sampler is None!!!'
+#     out = local_sampler.sample_from_nodes(nodes, with_outer_sample, ts, fanout_index)
+#     return out
 
 class NeighborSampler(BaseSampler):
     def __init__(
