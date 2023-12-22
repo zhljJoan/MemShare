@@ -1,0 +1,3 @@
+[submodule "csrc/partition/neighbor_clustering"]
+	path = csrc/partition/neighbor_clustering
+	url = https://gitee.com/onlynagesha/graph-partition-v4
