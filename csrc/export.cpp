@@ -12,6 +12,9 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 
     m.def("metis_partition", &metis_partition, "metis graph partition");
     m.def("mt_metis_partition", &mt_metis_partition, "multi-threaded metis graph partition");
+    // Note: the switch WITH_MULTITHREADING=ON shall be triggered during compilation
+    // to enable multi-threading functionality.
+    m.def("ldg_partition", &ldg_partition, "(multi-threaded optionally) LDG graph partition");
 
     py::enum_<cudaMemoryAdvise>(m, "cudaMemoryAdvise")
         .value("cudaMemAdviseSetAccessedBy", cudaMemoryAdvise::cudaMemAdviseSetAccessedBy)

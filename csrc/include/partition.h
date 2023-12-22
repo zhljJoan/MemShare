@@ -22,3 +22,11 @@ at::Tensor mt_metis_partition(
     int64_t num_workers,
     bool recursive
 );
+
+at::Tensor ldg_partition(
+    at::Tensor edges,
+    at::optional<at::Tensor> vertex_weights,
+    at::optional<at::Tensor> initial_partition,
+    int64_t num_parts,
+    int64_t num_workers
+);

@@ -6,6 +6,7 @@ option(WITH_PYTHON "Link to Python when building" ON)
 option(WITH_CUDA "Link to CUDA when building" ON)
 option(WITH_METIS "Link to METIS when building" ON)
 option(WITH_MTMETIS "Link to multi-threaded METIS when building" ON)
+option(WITH_LDG "Link to (multi-threaded optionally) LDG when building" ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -54,7 +55,8 @@ if(WITH_METIS)
 
     include_directories(${METIS_INCLUDE_DIRS})
 
-    add_library(metis SHARED "csrc/partition/metis.cpp")
+    add_library(metis SHARED "csrc/partition/metis.cpp"
+            csrc/partition/neighbor_clustering.cpp)
     target_link_libraries(metis PRIVATE ${TORCH_LIBRARIES})
     target_link_libraries(metis PRIVATE ${GKLIB_LIBRARIES})
     target_link_libraries(metis PRIVATE ${METIS_LIBRARIES})
@@ -78,6 +80,11 @@ if(WITH_MTMETIS)
     target_compile_definitions(mtmetis PRIVATE -DMTMETIS_64BIT_PARTITIONS)
 endif()
 
+if (WITH_LDG)
+    # Imports neighbor-clustering based (e.g. LDG algorithm) graph partitioning implementation
+    add_subdirectory(./csrc/partition/neighbor_clustering)
+endif ()
+
 include_directories("csrc/include")
 add_library(${PROJECT_NAME} SHARED csrc/export.cpp)
 
@@ -94,13 +101,19 @@ if (WITH_CUDA)
 endif()
 
 if (WITH_METIS)
+    message(STATUS "Current project '${PROJECT_NAME}' uses METIS graph partitioning algorithm.")
     target_link_libraries(${PROJECT_NAME} PRIVATE metis)
 endif()
 
 if (WITH_MTMETIS)
+    message(STATUS "Current project '${PROJECT_NAME}' uses multi-threaded METIS graph partitioning algorithm.")
     target_link_libraries(${PROJECT_NAME} PRIVATE mtmetis)
 endif()
 
+if (WITH_LDG)
+    message(STATUS "Current project '${PROJECT_NAME}' uses LDG graph partitioning algorithm.")
+    target_link_libraries(${PROJECT_NAME} PRIVATE ldg-vertex-partition)
+endif()
 
 # add libsampler.so
 set(SAMLPER_NAME "${PROJECT_NAME}_sampler")
