@@ -20,14 +20,16 @@ at::Tensor ldg_partition(at::Tensor edges,
         auto vertex_weights_clone = vertex_weights->clone();
         if (initial_partition.has_value()) {
             auto initial_partition_clone = initial_partition->clone();
-            return vp::ldg_partition_v_init(edges_clone, vertex_weights_clone, initial_partition_clone, params);
+            vp::ldg_partition_v_init(edges_clone, vertex_weights_clone, initial_partition_clone, params);
+            return initial_partition_clone;
         } else {
             return vp::ldg_partition_v(edges_clone, vertex_weights_clone, params);
         }
     } else {
         if (initial_partition.has_value()) {
             auto initial_partition_clone = initial_partition->clone();
-            return vp::ldg_partition_init(edges_clone, initial_partition_clone, params);
+            vp::ldg_partition_init(edges_clone, initial_partition_clone, params);
+            return initial_partition_clone;
         } else {
             return vp::ldg_partition(edges_clone, params);
         }

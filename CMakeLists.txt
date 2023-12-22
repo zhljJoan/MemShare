@@ -6,7 +6,7 @@ option(WITH_PYTHON "Link to Python when building" ON)
 option(WITH_CUDA "Link to CUDA when building" ON)
 option(WITH_METIS "Link to METIS when building" ON)
 option(WITH_MTMETIS "Link to multi-threaded METIS when building" ON)
-option(WITH_LDG "Link to (multi-threaded optionally) LDG when building" OFF)
+option(WITH_LDG "Link to (multi-threaded optionally) LDG when building" ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -82,12 +82,13 @@ endif()
 if (WITH_LDG)
     # Imports neighbor-clustering based (e.g. LDG algorithm) graph partitioning implementation
     add_definitions(-DWITH_LDG)
+    set(LDG_DIR "csrc/partition/neighbor_clustering")
     
-    add_library(ldg_partition SHARED "csrc/partition/neighbor_clustering.cpp")
+    add_library(ldg_partition SHARED "csrc/partition/ldg.cpp")
     target_link_libraries(ldg_partition PRIVATE ${TORCH_LIBRARIES})
 
-    add_subdirectory("csrc/partition/neighbor_clustering")
-    target_include_directories(ldg_partition PRIVATE ldg-vertex-partition)
+    add_subdirectory(${LDG_DIR})
+    target_include_directories(ldg_partition PRIVATE ${LDG_DIR})
     target_link_libraries(ldg_partition PRIVATE ldg-vertex-partition)
 endif ()
 
