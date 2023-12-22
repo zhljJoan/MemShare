@@ -1,3 +1,4 @@
+#include <torch/all.h>
 #include "neighbor_clustering/vertex_partition/vertex_partition.h"
 #include "neighbor_clustering/vertex_partition/params.h"
 
