@@ -1,3 +1,4 @@
+set(CMAKE_SOURCE_DIR "/mnt/data/")
 cmake_minimum_required(VERSION 3.15)
 
 project(starrygl_ops VERSION 0.1)
@@ -45,7 +46,7 @@ if(WITH_METIS)
     add_definitions(-DWITH_METIS)
     set(GKLIB_DIR "${CMAKE_SOURCE_DIR}/third_party/GKlib")
     set(METIS_DIR "${CMAKE_SOURCE_DIR}/third_party/METIS")
-
+    message(${METIS_DIR})
     set(GKLIB_INCLUDE_DIRS "${GKLIB_DIR}/include")
     file(GLOB_RECURSE GKLIB_LIBRARIES "${GKLIB_DIR}/lib/lib*.a")
 
@@ -104,10 +105,10 @@ endif()
 
 # add libsampler.so
 set(SAMLPER_NAME "${PROJECT_NAME}_sampler")
-
+set(BOOST_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/third_party/boost_1_83_0")
+include_directories(${BOOST_INCLUDE_DIRS})
 file(GLOB_RECURSE SAMPLER_SRCS "csrc/sampler/*.cpp")
 add_library(${SAMLPER_NAME} SHARED ${SAMPLER_SRCS})
-
 target_include_directories(${SAMLPER_NAME} PRIVATE "csrc/sampler/include")
 
 target_compile_options(${SAMLPER_NAME} PRIVATE -O3)

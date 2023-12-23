@@ -25,24 +25,7 @@ import os
 
 from starrygl.sample.data_loader import DistributedDataLoader
 from starrygl.sample.batch_data import SAMPLE_TYPE
-"""
-test command 
-python test.py --world_size 2 --rank 0 
---world_size', default=4, type=int, metavar='W',
-                    help='number of workers')
-parser.add_argument('--rank', default=0, type=int, metavar='W',
-                    help='rank of the worker')
-parser.add_argument('--log_interval', type=int, default=10, metavar='N',
-                    help='interval between training status logs')
-parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
-                    help='how much to value future rewards')
-parser.add_argument('--seed', type=int, default=1, metavar='S',
-                    help='random seed  for reproducibility')
-parser.add_argument('--num_sampler', type=int, default=10, metavar='S',
-                    help='number of samplers')
-parser.add_argument('--queue_size', type=int, default=10, metavar='S',
-                    help='sampler queue size')
-"""
+
 parser = argparse.ArgumentParser(
     description="RPC Reinforcement Learning Example",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -50,6 +33,8 @@ parser = argparse.ArgumentParser(
 parser.add_argument('--rank', default=0, type=str, metavar='W',
                     help='name of dataset')
 parser.add_argument('--world_size', default=1, type=int, metavar='W',
+                    help='number of negative samples')
+parser.add_argument('--dataname', default=1, type=str, metavar='W',
                     help='number of negative samples')
 args = parser.parse_args()
 from sklearn.metrics import average_precision_score, roc_auc_score
@@ -82,7 +67,7 @@ def main():
     ctx = DistributedContext.init(backend="nccl", use_gpu=True)
     device_id = torch.cuda.current_device()
     print('use cuda on',device_id)
-    pdata = partition_load("./dataset/here/GDELT", algo="metis_for_tgnn")    
+    pdata = partition_load("./dataset/here/{}".format(args.dataname), algo="metis_for_tgnn")    
     graph = GraphData(pdata = pdata)
 
     sample_graph = TemporalNeighborSampleGraph(sample_graph = pdata.sample_graph,mode = 'full')
@@ -174,10 +159,12 @@ def main():
                     dst = metadata['dst_pos_index']
                     
                     ts = roots.ts
-                    if(graph.edge_attr.device == torch.device('cpu')):
-                        edge_feats = graph.edge_attr[roots.eids.to('cpu')].to('cuda') if graph.edge_attr is not None else None
+                    if graph.edge_attr is None:
+                        edge_feats = None
+                    elif(graph.edge_attr.device == torch.device('cpu')):
+                        edge_feats = graph.edge_attr[roots.eids.to('cpu')].to('cuda')
                     else:
-                        edge_feats = graph.edge_attr[roots.eids] if graph.edge_attr is not None else None
+                        edge_feats = graph.edge_attr[roots.eids] 
                     dist_index_mapper = mfgs[0][0].srcdata['ID']
                     root_index = torch.cat((src,dst))
                     last_updated_nid = model.module.memory_updater.last_updated_nid[root_index]
@@ -247,10 +234,12 @@ def main():
                     dst = metadata['dst_pos_index']
                     
                     ts = roots.ts
-                    if(graph.edge_attr.device == torch.device('cpu')):
-                        edge_feats = graph.edge_attr[roots.eids.to('cpu')].to('cuda') if graph.edge_attr is not None else None
+                    if graph.edge_attr is None:
+                        edge_feats = None
+                    elif(graph.edge_attr.device == torch.device('cpu')):
+                        edge_feats = graph.edge_attr[roots.eids.to('cpu')].to('cuda')
                     else:
-                        edge_feats = graph.edge_attr[roots.eids] if graph.edge_attr is not None else None
+                        edge_feats = graph.edge_attr[roots.eids] 
                     dist_index_mapper = mfgs[0][0].srcdata['ID']
                     root_index = torch.cat((src,dst))
                     last_updated_nid = model.module.memory_updater.last_updated_nid[root_index]

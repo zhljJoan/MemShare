@@ -4,7 +4,7 @@ import os.path as osp
 import torch
 import torch.distributed as dist
 from torch_geometric.data import Data
-class GraphData():
+class GraphStore():
     def __init__(self, pdata, device = torch.device('cuda'), all_on_gpu = False):
         self.device = device
         self.ids = pdata.ids.to(device)
@@ -14,8 +14,8 @@ class GraphData():
         else:
             self.edge_ts = None
         self.sample_graph = pdata.sample_graph
-        self.nids_mapper = build_mapper(nids=pdata.ids.to(device)).data.to('cpu')
-        self.eids_mapper = build_mapper(nids=pdata.eids.to(device)).data.to('cpu')
+        self.nids_mapper = build_mapper(nids=pdata.ids.to(device)).dist.to('cpu')
+        self.eids_mapper = build_mapper(nids=pdata.eids.to(device)).dist.to('cpu')
         if all_on_gpu:
             self.nids_mapper = self.nids_mapper.to(device)
             self.eids_mapper = self.eids_mapper.to(device)
@@ -30,9 +30,9 @@ class GraphData():
             self.x = None
         if hasattr(pdata,'edge_attr') and pdata.edge_attr is not None:
             if world_size > 1:
-                self.edge_attr = DistributedTensor(pdata.edge_attr.to('cpu').to(torch.float))
+                self.edge_attr = DistributedTensor(pdata.edge_attr.to('cuda').to(torch.float))
             else:
-                self.edge_attr = pdata.edge_attr.to('cpu').to(torch.float)
+                self.edge_attr = pdata.edge_attr.to('cuda').to(torch.float)
         else:
             self.edge_attr = None
 
@@ -106,7 +106,7 @@ class DataSet:
                 setattr(d,k,v[indx])
         return d
     
-class TemporalGraphData():
+class TemporalGraphData(GraphStore):
     def __init__(self,pdata,device):
         super(TemporalGraphData,self).__init__(pdata,device)
     def _set_temporal_batch_cache(self,size,pin_size):
@@ -117,7 +117,7 @@ class TemporalGraphData():
 
 
 
-class TemporalNeighborSampleGraph(GraphData):
+class TemporalNeighborSampleGraph(GraphStore):
     def __init__(self, sample_graph=None, mode='full', eids_mapper=None):
         self.edge_index = sample_graph['edge_index']
         self.num_edges = self.edge_index.shape[1]

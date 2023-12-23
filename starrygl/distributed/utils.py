@@ -17,6 +17,7 @@ class TensorAccessor:
         self._data = data
         self._ctx = DistributedContext.get_default_context()
         self._rref = rpc.RRef(data)
+        self.stream = torch.cuda.Stream()
 
     @property
     def data(self):
@@ -29,6 +30,12 @@ class TensorAccessor:
     @property
     def ctx(self):
         return self._ctx
+    @staticmethod
+    @rpc.functions.async_execution
+    def _index_selet(self):
+        fut = torch.futures.Future()
+        fut.set_result(None)
+        return fut
 
     def all_gather_rrefs(self) -> List[rpc.RRef]:
         return self.ctx.all_gather_remote_objects(self.rref)
@@ -180,7 +187,7 @@ class DistributedTensor:
     def ctx(self):
         return self.accessor.ctx
     
-    def all_to_all_ind2ptr(self, dist_index: Union[Tensor, DistIndex]) -> Dict[str, Union[List[int], Tensor]]:
+    def all_to_all_ind2ptr(self, dist_index: Union[Tensor, DistIndex],group = None) -> Dict[str, Union[List[int], Tensor]]:
         if isinstance(dist_index, Tensor):
             dist_index = DistIndex(dist_index)
         send_ptr = torch.ops.torch_sparse.ind2ptr(dist_index.part, self.num_parts())
@@ -196,7 +203,7 @@ class DistributedTensor:
         recv_ptr = recv_ptr.tolist()
 
         recv_ind = torch.full((recv_ptr[-1],), (2**62-1)*2+1, dtype=dist_index.dtype, device=dist_index.device)
-        all_to_all_s(recv_ind, dist_index.loc, send_ptr, recv_ptr)
+        all_to_all_s(recv_ind, dist_index.loc, recv_ptr, send_ptr,group=group)
         
         return {
             "send_ptr": send_ptr,
@@ -209,6 +216,7 @@ class DistributedTensor:
         send_ptr: Optional[List[int]] = None,
         recv_ptr: Optional[List[int]] = None,
         recv_ind: Optional[List[int]] = None,
+        group = None
     ) -> Tensor:
         if dist_index is not None:
             dist_dict = self.all_to_all_ind2ptr(dist_index)
@@ -218,7 +226,7 @@ class DistributedTensor:
         
         data = self.accessor.data[recv_ind]
         recv = torch.empty(send_ptr[-1], *data.shape[1:], dtype=data.dtype, device=data.device)
-        all_to_all_s(recv, data, send_ptr, recv_ptr)
+        all_to_all_s(recv, data, send_ptr, recv_ptr,group=group)
         return recv
     
     def all_to_all_set(self,
@@ -227,6 +235,7 @@ class DistributedTensor:
         send_ptr: Optional[List[int]] = None,
         recv_ptr: Optional[List[int]] = None,
         recv_ind: Optional[List[int]] = None,
+        group = None
     ):
         if dist_index is not None:
             dist_dict = self.all_to_all_ind2ptr(dist_index)
@@ -235,7 +244,7 @@ class DistributedTensor:
             recv_ind = dist_dict["recv_ind"]
         
         recv = torch.empty(recv_ptr[-1], *data.shape[1:], dtype=data.dtype, device=data.device)
-        all_to_all_s(recv, data, recv_ptr, send_ptr)
+        all_to_all_s(recv, data, recv_ptr, send_ptr,group=group)
         self.accessor.data.index_copy_(0, recv_ind, recv)
     
     def index_select(self, dist_index: Union[Tensor, DistIndex]):

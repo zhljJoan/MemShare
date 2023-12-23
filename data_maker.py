@@ -44,14 +44,14 @@ def load_feat(d, rand_de=0, rand_dn=0):
 
 
 data_name = args.data_name
-g = np.load('../tgl_main/DATA/'+data_name+'/ext_full.npz')
-df = pd.read_csv('../tgl_main/DATA/'+data_name+'/edges.csv')
-if os.path.exists('../tgl_main/DATA/'+data_name+'/node_features.pt'):
-    n_feat = torch.load('../tgl_main/DATA/'+data_name+'/node_features.pt')
+g = np.load('/mnt/nfs/fzz/TGL-DATA/'+data_name+'/ext_full.npz')
+df = pd.read_csv('/mnt/nfs/fzz/TGL-DATA/'+data_name+'/edges.csv')
+if os.path.exists('/mnt/nfs/fzz/TGL-DATA/'+data_name+'/node_features.pt'):
+    n_feat = torch.load('/mnt/nfs/fzz/TGL-DATA/'+data_name+'/node_features.pt')
 else:
     n_feat = None
-if os.path.exists('../tgl_main/DATA/'+data_name+'/edge_features.pt'):
-    e_feat = torch.load('../tgl_main/DATA/'+data_name+'/edge_features.pt')
+if os.path.exists('/mnt/nfs/fzz/TGL-DATA/'+data_name+'/edge_features.pt'):
+    e_feat = torch.load('/mnt/nfs/fzz/TGL-DATA/'+data_name+'/edge_features.pt')
 else:
     e_feat = None
 

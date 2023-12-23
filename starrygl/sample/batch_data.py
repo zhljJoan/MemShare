@@ -7,6 +7,8 @@ from starrygl.sample.graph_core import DataSet
 from starrygl.sample.graph_core import GraphData
 from starrygl.sample.sample_core.base import BaseSampler, NegativeSampling
 import dgl
+
+from starrygl.sample.stream_manager import PipelineManager, getPipelineManger
 """
 入参不变，出参变为：
 sample_from_nodes
@@ -42,7 +44,7 @@ def prepare_input(node_feat, edge_feat, mem_embedding,mfgs,dist_nid,dist_eid):
                     #print(idx.shape[0],b.srcdata['mem_ts'].shape)
         return mfgs
 
-def to_block(graph: GraphData, data, sample_out, mailbox:MailBox = None,device = torch.device('cuda')):
+def to_block(graph: GraphData, data, sample_out, mailbox:MailBox = None,device = torch.device('cuda'),group = None):
 
     if len(sample_out) > 1:
         sample_out,metadata = sample_out
@@ -76,26 +78,25 @@ def to_block(graph: GraphData, data, sample_out, mailbox:MailBox = None,device =
     dist_nid = nid_mapper[nid_tensor].to(device)
     dist_nid,nid_inv = dist_nid.unique(return_inverse = True)
     if isinstance(graph.edge_attr,DistributedTensor):
-        local_index, input_split,output_split = graph.edge_attr.gather_select_index(dist_eid)
-        edge_feat = graph.edge_attr.scatter_data(local_index,input_split=input_split,out_split=output_split)
+        ind_dict = graph.edge_attr.all_to_all_ind2ptr(dist_eid,group = group)
+        edge_feat = graph.edge_attr.all_to_all_get(group = group,**ind_dict)
     else:
         edge_feat = graph._get_edge_attr(dist_eid)
-    local_index = None
+    ind_dict = None
     if isinstance(graph.x,DistributedTensor):
-        local_index, input_split,output_split = graph.x.gather_select_index(dist_nid)
-        node_feat = graph.x.scatter_data(local_index,input_split=input_split,out_split=output_split)
+        ind_dict = graph.x.all_to_all_ind2ptr(dist_nid,group = group)
+        node_feat = graph.x.all_to_all_get(group = group,**ind_dict)
     else:
         node_feat = graph._get_node_attr(dist_nid)
     if mailbox is not None:
         if torch.distributed.get_world_size() > 1:
             if node_feat is None:
-                local_index, input_split,output_split = mailbox.node_memory.gather_select_index(dist_nid)
-            mem = mailbox.gather_memory(local_index,input_split,output_split)
+                ind_dict = mailbox.node_memory.all_to_all_ind2ptr(dist_nid,group = group)
+            mem = mailbox.gather_memory(**ind_dict)
         else:
             mem = mailbox.get_memory(dist_nid)
     else:
         mem = None
-
     def build_block():
         mfgs = list()
         col = torch.arange(0,root_len,device = device)
@@ -110,23 +111,12 @@ def to_block(graph: GraphData, data, sample_out, mailbox:MailBox = None,device =
                                  device = device)
             idx = nid_inv[0:row_len + elen]
             e_idx = eid_inv[col_len:col_len+elen]
-            b.srcdata['ID'] = idx#dist_nid[idx]
+            b.srcdata['ID'] = idx
             if sample_out[r].delta_ts().shape[0] > 0:
                 b.edata['dt'] = sample_out[r].delta_ts().to(device)
             if src_ts is not None:
                 b.srcdata['ts'] = src_ts[0:row_len + eid_len[r]]
-            b.edata['ID'] = e_idx#dist_eid[e_idx]
-            #if edge_feat is not None:
-            #    b.edata['f'] = edge_feat[e_idx]
-            #if r == len(eid_len)-1:
-            #    if node_feat is not None:
-            #        b.srcdata['h'] = node_feat[idx]
-            #    if mem_embedding is not None:
-            #        node_memory,node_memory_ts,mailbox,mailbox_ts = mem_embedding
-            #        b.srcdata['mem'] = node_memory[idx]
-            #        b.srcdata['mem_ts'] = node_memory_ts[idx]
-            #        b.srcdata['mem_input'] = mailbox[idx].cuda().reshape(b.srcdata['ID'].shape[0], -1)
-            #        b.srcdata['mail_ts'] = mailbox_ts[idx]
+            b.edata['ID'] = e_idx
             col = row
             col_len += eid_len[r]
             row_len += eid_len[r]
@@ -134,27 +124,7 @@ def to_block(graph: GraphData, data, sample_out, mailbox:MailBox = None,device =
         mfgs = list(map(list, zip(*[iter(mfgs)])))
         mfgs.reverse()
         return data,mfgs,metadata
-  
     data,mfgs,metadata = build_block()
-    #if dist.get_world_size() > 1:  
-    #    if(node_feat is None):
-    #        node_feat = torch.futures.Future()
-    #        node_feat.set_result(None)
-    #    if(edge_feat is None):
-    #        edge_feat = torch.futures.Future()
-    #        edge_feat.set_result(None) 
-    #    if(mem is None):
-    #        mem = torch.futures.Future()
-    #        mem.set_result(None)
-    #    def callback(fs,mfgs,dist_nid,dist_eid):
-    #        node_feat,edge_feat,mem_embedding = fs.value()
-    #        node_feat = node_feat.value()
-    #        edge_feat = edge_feat.value()
-    #        mem_embedding = mem_embedding.value()
-    #        return prepare_input(node_feat,edge_feat,mem_embedding,mfgs,dist_nid,dist_eid)
-    #    cal = lambda fut: callback(fs=fut,mfgs = mfgs,dist_nid = dist_nid,dist_eid =dist_eid)
-    #    return data,torch.futures.collect_all([node_feat,edge_feat,mem]).then(cal),metadata
-    #else:
     mfgs = prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
         #return build_block(node_feat,edge_feat,mem)#data,mfgs,metadata
     return data,mfgs,metadata
@@ -164,9 +134,15 @@ def graph_sample(graph, sampler:BaseSampler,
                       sample_fn, data, 
                       neg_sampling = None,
                       mailbox = None,
-                      device = torch.device('cuda')):
+                      device = torch.device('cuda'),
+                      async_op = False):
     out = sample_fn(sampler,data,neg_sampling)
-    return to_block(graph,data,out,mailbox,device)
+    if async_op == False:
+        return to_block(graph,data,out,mailbox,device)
+    else:
+        manger =  getPipelineManger()
+        future = manger.submit('lookup',to_block,graph,data,out,mailbox,device)
+        return future
 
 def sample_from_nodes(sampler:BaseSampler,  data:DataSet, **kwargs):
     out = sampler.sample_from_nodes(nodes=data.nodes.reshape(-1))

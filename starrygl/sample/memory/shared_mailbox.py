@@ -1,4 +1,6 @@
+from typing import Union
 from typing import List
+from typing import Optional
 import torch
 from torch.distributed import rpc
 import torch_scatter
@@ -118,7 +120,7 @@ class SharedMailBox():
 
     def set_mailbox_all_to_all(self,index,memory,
                                memory_ts,mail,mail_ts,
-                               reduce_Op = None):
+                               reduce_Op = None,group = None):
         #futs: List[torch.futures.Future] = []
         if self.num_parts == 1:
             dist_index = DistIndex(index)
@@ -132,7 +134,7 @@ class SharedMailBox():
                                           device = self.device)
             indic = torch.searchsorted(index,self.partptr,right=False)
             scatter_len_list = indic[1:] - indic[0:-1]
-            torch.distributed.all_to_all_single(gather_len_list,scatter_len_list)
+            torch.distributed.all_to_all_single(gather_len_list,scatter_len_list,group = group)
             input_split = scatter_len_list.tolist()
             output_split = gather_len_list.tolist()
             gather_id_list = torch.empty(
@@ -143,7 +145,7 @@ class SharedMailBox():
             output_split = gather_len_list.tolist()
             torch.distributed.all_to_all_single(
                 gather_id_list,index,output_split_sizes=output_split, 
-                input_split_sizes=input_split)
+                input_split_sizes=input_split,group = group)
             index = gather_id_list
             gather_memory = torch.empty(
                 [gather_len_list.sum(),memory.shape[1]],
@@ -160,22 +162,81 @@ class SharedMailBox():
             torch.distributed.all_to_all_single(
                 gather_memory,memory,
                 output_split_sizes=output_split, 
-                input_split_sizes=input_split)
+                input_split_sizes=input_split,group = group)
             torch.distributed.all_to_all_single(
                 gather_memory_ts,memory_ts,
                 output_split_sizes=output_split, 
-                input_split_sizes=input_split)
+                input_split_sizes=input_split,group = group)
             torch.distributed.all_to_all_single(
                 gather_mail,mail,
                 output_split_sizes=output_split, 
-                input_split_sizes=input_split)
+                input_split_sizes=input_split,group = group)
             torch.distributed.all_to_all_single(
                 gather_mail_ts,mail_ts,
                 output_split_sizes=output_split, 
-                input_split_sizes=input_split)
+                input_split_sizes=input_split,group = group)
             self.set_mailbox_local(DistIndex(index).loc,gather_mail,gather_mail_ts,Reduce_Op = reduce_Op)
             self.set_memory_local(DistIndex(index).loc,gather_memory,gather_memory_ts, Reduce_Op = reduce_Op)
 
+    def set_mailbox_all_to_all(self,index,memory,
+                               memory_ts,mail,mail_ts,
+                               reduce_Op = None,group = None):
+        #futs: List[torch.futures.Future] = []
+        if self.num_parts == 1:
+            dist_index = DistIndex(index)
+            part_idx = dist_index.part
+            index = dist_index.loc
+            self.set_mailbox_local(index,mail,mail_ts)
+            self.set_memory_local(index,memory,memory_ts)
+        else:
+            gather_len_list = torch.empty([self.num_parts],
+                                          dtype = int,
+                                          device = self.device)
+            indic = torch.searchsorted(index,self.partptr,right=False)
+            scatter_len_list = indic[1:] - indic[0:-1]
+            torch.distributed.all_to_all_single(gather_len_list,scatter_len_list,group = group)
+            input_split = scatter_len_list.tolist()
+            output_split = gather_len_list.tolist()
+            gather_id_list = torch.empty(
+                [gather_len_list.sum()],
+                dtype = torch.long,
+                device = self.device)
+            input_split = scatter_len_list.tolist()
+            output_split = gather_len_list.tolist()
+            torch.distributed.all_to_all_single(
+                gather_id_list,index,output_split_sizes=output_split, 
+                input_split_sizes=input_split,group = group)
+            index = gather_id_list
+            gather_memory = torch.empty(
+                [gather_len_list.sum(),memory.shape[1]],
+                dtype = memory.dtype,device = self.device)
+            gather_memory_ts = torch.empty(
+                [gather_len_list.sum()],
+                dtype = memory_ts.dtype,device = self.device)
+            gather_mail = torch.empty(
+                [gather_len_list.sum(),mail.shape[1]],
+                dtype = mail.dtype,device = self.device)
+            gather_mail_ts = torch.empty(
+                [gather_len_list.sum()],
+                dtype = mail_ts.dtype,device = self.device)
+            torch.distributed.all_to_all_single(
+                gather_memory,memory,
+                output_split_sizes=output_split, 
+                input_split_sizes=input_split,group = group)
+            torch.distributed.all_to_all_single(
+                gather_memory_ts,memory_ts,
+                output_split_sizes=output_split, 
+                input_split_sizes=input_split,group = group)
+            torch.distributed.all_to_all_single(
+                gather_mail,mail,
+                output_split_sizes=output_split, 
+                input_split_sizes=input_split,group = group)
+            torch.distributed.all_to_all_single(
+                gather_mail_ts,mail_ts,
+                output_split_sizes=output_split, 
+                input_split_sizes=input_split,group = group)
+            self.set_mailbox_local(DistIndex(index).loc,gather_mail,gather_mail_ts,Reduce_Op = reduce_Op)
+            self.set_memory_local(DistIndex(index).loc,gather_memory,gather_memory_ts, Reduce_Op = reduce_Op)
 
     def get_update_mail(self,dist_indx_mapper,
                  src,dst,ts,edge_feats,
@@ -234,9 +295,16 @@ class SharedMailBox():
                 #print(memory.shape[0])
                 return memory,memory_ts,mail,mail_ts
             return torch.futures.collect_all([memory,memory_ts,mail,mail_ts]).then(callback)
-    def gather_memory(self,index,input_split,out_split):
-        return self.node_memory.scatter_data(index,input_split,out_split),\
-                self.node_memory_ts.scatter_data(index,input_split,out_split),\
-                self.mailbox.scatter_data(index,input_split,out_split),\
-                self.mailbox_ts.scatter_data(index,input_split,out_split)
+    def gather_memory(
+            self,
+            dist_index: Union[torch.Tensor, DistIndex, None] = None,
+            send_ptr: Optional[List[int]] = None,
+            recv_ptr: Optional[List[int]] = None,
+            recv_ind: Optional[List[int]] = None,
+            group = None
+        ):
+        return self.node_memory.all_to_all_get(dist_index,send_ptr,recv_ptr,recv_ind,group),\
+                self.node_memory_ts.all_to_all_get(dist_index,send_ptr,recv_ptr,recv_ind,group),\
+                self.mailbox.all_to_all_get(dist_index,send_ptr,recv_ptr,recv_ind,group),\
+                self.mailbox_ts.all_to_all_get(dist_index,send_ptr,recv_ptr,recv_ind,group)
 

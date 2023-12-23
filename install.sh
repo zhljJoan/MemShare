@@ -3,9 +3,9 @@
 mkdir -p build && cd build
 cmake .. \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-    -DCMAKE_PREFIX_PATH="/home/hwj/.miniconda3/envs/sgl/lib/python3.10/site-packages" \
-    -DPython3_ROOT_DIR="/home/hwj/.miniconda3/envs/sgl" \
-    -DCUDA_TOOLKIT_ROOT_DIR="/home/hwj/.local/cuda-11.8" \
+    -DCMAKE_PREFIX_PATH="/home/zlj/.miniconda3/envs/dgnn/lib/python3.10/site-packages" \
+    -DPython3_ROOT_DIR="/home/zlj/.miniconda3/envs/dgnn" \
+    -DCUDA_TOOLKIT_ROOT_DIR="/home/zlj/local/cuda-12.2" \
 && make -j32 \
 && rm -rf ../starrygl/lib \
 && mkdir ../starrygl/lib \

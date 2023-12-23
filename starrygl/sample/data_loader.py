@@ -148,7 +148,7 @@ class DistributedDataLoader:
                 return batch_data
             else :
                 raise StopIteration
-        else :
+        if self.queue_size > 0 :
             num_reqs = min(self.queue_size - self.num_pending,self.expected_idx - self.submitted)
             for _ in range(num_reqs):
                 if len(self.result_queue)>0:
