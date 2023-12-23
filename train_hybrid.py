@@ -39,7 +39,7 @@ def prepare_data(root: str, num_parts, part_algo: str = "metis"):
     logging.info(f"GraphData.node().keys(): {g.node().keys()}")
     logging.info(f"GraphData.edge().keys(): {g.edge().keys()}")
 
-    g.save_partition(root, num_parts, part_algo)
+    g.save_partition(root, num_parts, algorithm=part_algo)
     return g
 
 class SimpleConv(pyg_nn.MessagePassing):
