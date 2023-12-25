@@ -166,8 +166,8 @@ cython_debug/
 *.pt
 /nohup.out
 
-/cora
 /dataset
 /test_*
 /*.ipynb
 /third_party
+!/third_party/ldg_partition
