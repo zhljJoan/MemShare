@@ -1,3 +1,3 @@
 from .route import *
-from .sequence import *
+from .timeline import SequencePipe
 from .sparse import *

@@ -10,7 +10,6 @@ from typing import *
 from starrygl.distributed import DistributedContext
 from starrygl.data import GraphData
 from starrygl.parallel import Route, SequencePipe
-from starrygl.parallel.sequence import STensor
 from starrygl.parallel.utils import *
 
 import torch_geometric.nn as pyg_nn
@@ -129,7 +128,6 @@ if __name__ == "__main__":
     hybrid_matrix = ctx.get_hybrid_matrix()
     if hybrid_matrix.size(0) == 1:
         hybrid_matrix = hybrid_matrix.view(2, -1)
-    ctx.sync_print(hybrid_matrix)
     # sp is sequence parallel
     # pp is partition parallel
     sp_group, pp_group = ctx.new_hybrid_subgroups(hybrid_matrix)
