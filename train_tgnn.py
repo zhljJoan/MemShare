@@ -7,7 +7,7 @@ from starrygl.distributed.utils import DistIndex
 from starrygl.module.modules import GeneralModel
 
 from starrygl.module.utils import parse_config
-from starrygl.sample.graph_core import DataSet, GraphData, TemporalNeighborSampleGraph
+from starrygl.sample.graph_core import DataSet, DistributedGraphStore, TemporalNeighborSampleGraph
 from starrygl.sample.memory.shared_mailbox import SharedMailBox
 from starrygl.sample.sample_core.base import NegativeSampling
 from starrygl.sample.sample_core.neighbor_sampler import NeighborSampler
@@ -67,8 +67,8 @@ def main():
     ctx = DistributedContext.init(backend="nccl", use_gpu=True)
     device_id = torch.cuda.current_device()
     print('use cuda on',device_id)
-    pdata = partition_load("./dataset/here/{}".format(args.dataname), algo="metis_for_tgnn")    
-    graph = GraphData(pdata = pdata)
+    pdata = partition_load("/mnt/data/part_data/dataset/here/{}".format(args.dataname), algo="metis_for_tgnn")    
+    graph = DistributedGraphStore(pdata = pdata)
 
     sample_graph = TemporalNeighborSampleGraph(sample_graph = pdata.sample_graph,mode = 'full')
     mailbox = SharedMailBox(pdata.ids.shape[0], memory_param, dim_edge_feat = pdata.edge_attr.shape[1] if pdata.edge_attr is not None else 0)
@@ -145,7 +145,7 @@ def main():
             total_loss = 0
             signal = torch.tensor([0],dtype = int,device = device)
             
-            for roots,mfgs,metadata in loader:
+            for roots,mfgs,metadata,sample_time in loader:
                 
                 pred_pos, pred_neg = model(mfgs,metadata)
                 total_loss += creterion(pred_pos, torch.ones_like(pred_pos))
@@ -196,10 +196,11 @@ def main():
         return ap, auc_mrr
     
     creterion = torch.nn.BCEWithLogitsLoss()
-
     optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'])
     for e in range(train_param['epoch']):
         torch.cuda.synchronize()
+        write_back_time = 0
+        fetch_time = 0
         epoch_start_time = time.time()
         train_aps = list()
         print('Epoch {:d}:'.format(e))
@@ -211,7 +212,8 @@ def main():
             model.module.memory_updater.last_updated_nid = None
             model.module.memory_updater.last_updated_memory = None
             model.module.memory_updater.last_updated_ts = None
-        for roots,mfgs,metadata in trainloader:
+        for roots,mfgs,metadata,sample_time in trainloader:
+            fetch_time +=sample_time/1000
             t_prep_s = time.time()
             
             with torch.cuda.stream(train_stream):
@@ -252,8 +254,12 @@ def main():
                                                  src,dst,ts,edge_feats,
                                                  model.module.memory_updater.last_updated_memory,
                                                  )
-                    
+                    start_event = torch.cuda.Event(enable_timing=True)
+                    end_event = torch.cuda.Event(enable_timing=True)
+                    start_event.record()
                     mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
+                    end_event.record()
+                    write_back_time += start_event.elapsed_time(end_event)/1000
                 
         torch.cuda.synchronize()
         time_prep = time.time() - epoch_start_time
@@ -264,6 +270,7 @@ def main():
         ap, auc = eval('val')
         print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f}'.format(total_loss,train_ap, ap, auc))
         print('\ttotal time:{:.2f}s  prep time:{:.2f}s'.format(time.time()-epoch_start_time, time_prep))    
+        print('\t fetch time:{:.2f}s write back time:{:.2f}s',format(fetch_time,write_back_time))
           
     model.eval()
     if mailbox is not None:

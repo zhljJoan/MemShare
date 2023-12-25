@@ -4,7 +4,7 @@ import os.path as osp
 import torch
 import torch.distributed as dist
 from torch_geometric.data import Data
-class GraphStore():
+class DistributedGraphStore:
     def __init__(self, pdata, device = torch.device('cuda'), all_on_gpu = False):
         self.device = device
         self.ids = pdata.ids.to(device)
@@ -67,6 +67,7 @@ class DataSet:
         if labels is not None:
             self.labels = labels
         self.len = self.nodes.shape[0] if nodes is not None else self.edges.shape[1] 
+        print(self.edges.shape,self.len)
         for k, v in kwargs.items():
             assert isinstance(v,torch.Tensor) and v.shape[0]==self.len
             setattr(self, k, v.to(device))
@@ -106,9 +107,9 @@ class DataSet:
                 setattr(d,k,v[indx])
         return d
     
-class TemporalGraphData(GraphStore):
+class DistributedTemporalGraphData(DistributedGraphStore):
     def __init__(self,pdata,device):
-        super(TemporalGraphData,self).__init__(pdata,device)
+        super(DistributedTemporalGraphData,self).__init__(pdata,device)
     def _set_temporal_batch_cache(self,size,pin_size):
         pass
     def _load_feature_to_cuda(self,ids):
@@ -117,7 +118,7 @@ class TemporalGraphData(GraphStore):
 
 
 
-class TemporalNeighborSampleGraph(GraphStore):
+class TemporalNeighborSampleGraph(DistributedGraphStore):
     def __init__(self, sample_graph=None, mode='full', eids_mapper=None):
         self.edge_index = sample_graph['edge_index']
         self.num_edges = self.edge_index.shape[1]

@@ -16,7 +16,8 @@ class TensorAccessor:
 
         self._data = data
         self._ctx = DistributedContext.get_default_context()
-        self._rref = rpc.RRef(data)
+        if self._ctx._use_rpc is True:
+            self._rref = rpc.RRef(data)
         self.stream = torch.cuda.Stream()
 
     @property
@@ -141,14 +142,15 @@ class DistIndex:
 class DistributedTensor:
     def __init__(self, data: Tensor) -> None:
         self.accessor = TensorAccessor(data)
-        self.rrefs = self.accessor.all_gather_rrefs()
+        if hasattr(self,'_rref'): 
+            self.rrefs = self.accessor.all_gather_rrefs()
 
-        local_sizes = []
-        for rref in self.rrefs:
-            n = self.ctx.remote_call(Tensor.size, rref, dim=0).wait()
-            local_sizes.append(n)
-        self._num_nodes: int = sum(local_sizes)
-        self._num_part_nodes: Tuple[int,...] = tuple(int(s) for s in local_sizes)
+            local_sizes = []
+            for rref in self.rrefs:
+                n = self.ctx.remote_call(Tensor.size, rref, dim=0).wait()
+                local_sizes.append(n)
+            self._num_nodes: int = sum(local_sizes)
+            self._num_part_nodes: Tuple[int,...] = tuple(int(s) for s in local_sizes)
 
         self._part_id: int = self.accessor.ctx.rank
         self._num_parts: int = self.accessor.ctx.world_size
@@ -166,7 +168,7 @@ class DistributedTensor:
         return self._num_nodes
     
     @property
-    def num_part_nodes(self) -> tuple[int,...]:
+    def num_part_nodes(self) -> Tuple[int,...]:
         return self._num_part_nodes
     
     @property

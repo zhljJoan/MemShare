@@ -66,9 +66,12 @@ class DistributedDataLoader:
         if train is True:
             self._get_expected_idx(self.dataset.len)
         else:
-            self._get_expected_idx(self.dataset.len,op = dist.ReduceOp.MAX)
-            #self.expected_idx = int(math.ceil(self.dataset.len/self.batch_size))
-              
+            if torch.distributed.get_rank() == 0:
+                #self._get_expected_idx(self.dataset.len,op = dist.ReduceOp.MAX)
+                self.expected_idx = int(math.ceil(self.dataset.len/self.batch_size))
+            else:
+                self.expected_idx = 0
+                  
     def __iter__(self):
         if self.chunk_size is None:
             if self.shuffle:
@@ -134,6 +137,9 @@ class DistributedDataLoader:
         return next_data
     
     def __next__(self):
+        start_event = torch.cuda.Event(enable_timing=True)
+        end_event = torch.cuda.Event(enable_timing=True)
+        start_event.record()
         if(dist.get_world_size() > 0):
             if self.recv_idxs < self.expected_idx:
                 data = self._next_data()
@@ -145,7 +151,9 @@ class DistributedDataLoader:
                                           self.device)
                 self.recv_idxs += 1
                 assert batch_data is not None
-                return batch_data
+                end_event.record()
+                sample_time = start_event.elapsed_time(end_event)
+                return batch_data,sample_time
             else :
                 raise StopIteration
         if self.queue_size > 0 :

@@ -4,7 +4,7 @@ import torch.distributed as dist
 from starrygl.distributed.utils import DistributedTensor
 from starrygl.module.memorys import MailBox
 from starrygl.sample.graph_core import DataSet
-from starrygl.sample.graph_core import GraphData
+from starrygl.sample.graph_core import DistributedGraphStore
 from starrygl.sample.sample_core.base import BaseSampler, NegativeSampling
 import dgl
 
@@ -44,7 +44,7 @@ def prepare_input(node_feat, edge_feat, mem_embedding,mfgs,dist_nid,dist_eid):
                     #print(idx.shape[0],b.srcdata['mem_ts'].shape)
         return mfgs
 
-def to_block(graph: GraphData, data, sample_out, mailbox:MailBox = None,device = torch.device('cuda'),group = None):
+def to_block(graph: DistributedGraphStore, data, sample_out, mailbox:MailBox = None,device = torch.device('cuda'),group = None):
 
     if len(sample_out) > 1:
         sample_out,metadata = sample_out
