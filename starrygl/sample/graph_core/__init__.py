@@ -16,6 +16,7 @@ class DistributedGraphStore:
         self.sample_graph = pdata.sample_graph
         self.nids_mapper = build_mapper(nids=pdata.ids.to(device)).dist.to('cpu')
         self.eids_mapper = build_mapper(nids=pdata.eids.to(device)).dist.to('cpu')
+        torch.cuda.empty_cache()
         if all_on_gpu:
             self.nids_mapper = self.nids_mapper.to(device)
             self.eids_mapper = self.eids_mapper.to(device)

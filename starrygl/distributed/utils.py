@@ -192,7 +192,7 @@ class DistributedTensor:
     def all_to_all_ind2ptr(self, dist_index: Union[Tensor, DistIndex],group = None) -> Dict[str, Union[List[int], Tensor]]:
         if isinstance(dist_index, Tensor):
             dist_index = DistIndex(dist_index)
-        send_ptr = torch.ops.torch_sparse.ind2ptr(dist_index.part, self.num_parts())
+        send_ptr = torch.ops.torch_sparse.ind2ptr(dist_index.part, self.num_parts)
         
         send_sizes = send_ptr[1:] - send_ptr[:-1]
         recv_sizes = torch.empty_like(send_sizes)
@@ -282,7 +282,7 @@ class DistributedTensor:
         index = dist_index.loc
 
         futs: List[torch.futures.Future] = []
-        for i in range(self.num_parts()):
+        for i in range(self.num_parts):
             mask = part_idx == i
             f = self.accessor.async_index_copy_(0, index[mask], source[mask], self.rrefs[i])
             futs.append(f)
@@ -296,7 +296,7 @@ class DistributedTensor:
         index = dist_index.loc
 
         futs: List[torch.futures.Future] = []
-        for i in range(self.num_parts()):
+        for i in range(self.num_parts):
             mask = part_idx == i
             f = self.accessor.async_index_add_(0, index[mask], source[mask], self.rrefs[i])
             futs.append(f)

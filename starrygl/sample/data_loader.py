@@ -67,8 +67,8 @@ class DistributedDataLoader:
             self._get_expected_idx(self.dataset.len)
         else:
             if torch.distributed.get_rank() == 0:
-                #self._get_expected_idx(self.dataset.len,op = dist.ReduceOp.MAX)
-                self.expected_idx = int(math.ceil(self.dataset.len/self.batch_size))
+                self._get_expected_idx(self.dataset.len,op = dist.ReduceOp.MAX)
+                #self.expected_idx = int(math.ceil(self.dataset.len/self.batch_size))
             else:
                 self.expected_idx = 0
                   
@@ -152,8 +152,9 @@ class DistributedDataLoader:
                 self.recv_idxs += 1
                 assert batch_data is not None
                 end_event.record()
+                torch.cuda.synchronize()
                 sample_time = start_event.elapsed_time(end_event)
-                return batch_data,sample_time
+                return *batch_data,sample_time
             else :
                 raise StopIteration
         if self.queue_size > 0 :

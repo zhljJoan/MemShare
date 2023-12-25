@@ -79,7 +79,7 @@ def main():
     val_ts = torch.masked_select(graph.edge_ts,pdata.val_mask.to(graph.edge_index.device))
     test_data = torch.masked_select(graph.edge_index,pdata.test_mask.to(graph.edge_index.device)).reshape(2,-1)
     test_ts = torch.masked_select(graph.edge_ts,pdata.test_mask.to(graph.edge_index.device)) 
-    print(train_data.shape[1],val_data.shape[1],test_data.shape[1])
+    #print(train_data.shape[1],val_data.shape[1],test_data.shape[1])
     train_data = DataSet(edges = train_data,ts =train_ts,eids = torch.nonzero(pdata.train_mask).view(-1))
     test_data = DataSet(edges = test_data,ts =test_ts,eids = torch.nonzero(pdata.test_mask).view(-1))
     val_data = DataSet(edges = val_data,ts = val_ts,eids = torch.nonzero(pdata.val_mask).view(-1))
@@ -259,6 +259,7 @@ def main():
                     start_event.record()
                     mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
                     end_event.record()
+                    torch.cuda.synchronize()
                     write_back_time += start_event.elapsed_time(end_event)/1000
                 
         torch.cuda.synchronize()
@@ -270,7 +271,7 @@ def main():
         ap, auc = eval('val')
         print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f}'.format(total_loss,train_ap, ap, auc))
         print('\ttotal time:{:.2f}s  prep time:{:.2f}s'.format(time.time()-epoch_start_time, time_prep))    
-        print('\t fetch time:{:.2f}s write back time:{:.2f}s',format(fetch_time,write_back_time))
+        print('\t fetch time:{:.2f}s write back time:{:.2f}s'.format(fetch_time,write_back_time))
           
     model.eval()
     if mailbox is not None:

@@ -45,7 +45,7 @@ class SharedMailBox():
         if self._ctx._use_rpc is True:
             self.rref = rpc.RRef(self)
             self.rrefs = self._ctx.all_gather_remote_objects(self.rref)
-            self.partptr = torch.tensor([ ((i & 0xFFFF)<<48) for i in range(self.num_parts+1) ],device = device)
+        self.partptr = torch.tensor([ ((i & 0xFFFF)<<48) for i in range(self.num_parts+1) ],device = device)
 
 
     def reset(self):
