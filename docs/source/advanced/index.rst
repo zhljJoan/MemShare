@@ -2,7 +2,6 @@ Advanced Concepts
 =================
 
 .. toctree::
-    ts_sampling
-    pp_training
-    tp_training
-    data_proc
+    sampling_parallel/index
+    partition_parallel/index
+    timeline_parallel/index
