@@ -99,7 +99,7 @@ def test():
                             is_distinct=0)
     end = time.time()
     print("init time:", end-pre)
-    # print(sampler.tnb.deg[0:10])
+    print(sampler.tnb.deg[0:100])
     
     n_list = []
     for i in range (g_data.num_nodes.item() // args.batch_size):

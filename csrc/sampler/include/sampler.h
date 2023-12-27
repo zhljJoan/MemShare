@@ -122,7 +122,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_static_layer(th::Tensor nodes
                     if(rst.second){ //≤ª÷ÿ∏¥
                         eid_threads[tid].emplace_back(*chosen_e_iter);
                         node_s_threads[tid].insert(*chosen_n_iter);
-                        if(temp_s.size()<fanout && !tnb.neighbors_set.empty() && temp_s.size()<tnb.neighbors_set[node].size()) fanout++;
+                        if(!tnb.neighbors_set.empty() && temp_s.size()<fanout && temp_s.size()<tnb.neighbors_set[node].size()) fanout++;
                     }
                 }
                 else{
