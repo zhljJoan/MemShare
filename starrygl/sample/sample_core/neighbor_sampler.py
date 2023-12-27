@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 
 from .base import BaseSampler, NegativeSampling, SampleOutput, SampleType
 # from sample_cores import ParallelSampler, get_neighbors, heads_unique
-from starrygl.lib.libstarrygl_ops_sampler import ParallelSampler, get_neighbors
+from starrygl.lib.libstarrygl_sampler import ParallelSampler, get_neighbors
 from torch.distributed.rpc import rpc_async
 
 # def outer_sample(graph_name, nodes, ts, fanout_index, with_outer_sample = SampleType.Outer):# 默认此时继续向外采样

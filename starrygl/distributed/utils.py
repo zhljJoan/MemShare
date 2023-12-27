@@ -159,7 +159,7 @@ class DistributedTensor:
         return self._num_nodes
     
     @property
-    def num_part_nodes(self) -> tuple[int,...]:
+    def num_part_nodes(self):# -> tuple[int,...]:
         return self._num_part_nodes
     
     @property

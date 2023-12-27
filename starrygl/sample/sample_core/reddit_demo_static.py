@@ -70,7 +70,7 @@ def test():
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
 
-    g_data = load_reddit_dataset()
+    g_data = load_ogb_dataset()
     print(g_data)
 
     from .neighbor_sampler import NeighborSampler, get_neighbors
@@ -96,7 +96,7 @@ def test():
                             workers=32, 
                             policy="uniform", 
                             graph_name='a',
-                            is_distinct=1)
+                            is_distinct=0)
     end = time.time()
     print("init time:", end-pre)
     # print(sampler.tnb.deg[0:10])
