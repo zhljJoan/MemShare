@@ -7,6 +7,7 @@ import os
 from torch import Tensor
 from typing import *
 
+import socket
 from contextlib import contextmanager
 
 import logging
@@ -24,6 +25,7 @@ class DistributedContext:
     @staticmethod
     def init(
         backend: str,
+        use_rpc: bool = False,
         use_gpu: Optional[bool] = None,
         rpc_gpu: Optional[bool] = None,
     ) -> 'DistributedContext':
@@ -63,7 +65,9 @@ class DistributedContext:
             rpc_init_method=rpc_init_url,
             rank=rank, world_size=world_size,
             local_rank=local_rank,
-            use_gpu=use_gpu, rpc_gpu=rpc_gpu,
+            use_rpc=use_rpc,
+            use_gpu=use_gpu,
+            rpc_gpu=rpc_gpu,
         )
         _set_default_dist_context(ctx)
         
@@ -86,7 +90,9 @@ class DistributedContext:
         rpc_init_method: str,
         rank: int, world_size: int,
         local_rank: int,
-        use_gpu: bool, rpc_gpu: bool,
+        use_rpc: bool,
+        use_gpu: bool,
+        rpc_gpu: bool,
     ) -> None:
         if use_gpu:
             device = torch.device(f"cuda:{local_rank}")
@@ -111,20 +117,35 @@ class DistributedContext:
                     to=f"worker{i}",
                     device_map={local_rank: dev},
                 )
-
-        rpc.init_rpc(
-            name=f"worker{rank}",
-            rank=rank, world_size=world_size,
-            rpc_backend_options=rpc_backend_options,
-        )
+        
+        if use_rpc:
+            rpc.init_rpc(
+                name=f"worker{rank}",
+                rank=rank, world_size=world_size,
+                rpc_backend_options=rpc_backend_options,
+            )
+        self._use_rpc = use_rpc
 
         self._local_rank = local_rank
         self._compute_device = device
+        self._hostname = socket.gethostname()
+
+        if self.device.type == "cuda":
+            torch.cuda.set_device(self.device)
+
+        rank_to_host = [None] * self.world_size
+        dist.all_gather_object(rank_to_host, (self.hostname, self.local_rank))
+        self._rank_to_host: Tuple[Tuple[str, int], ...] = tuple(rank_to_host)
+
+        host_index = [h for h, _ in self.rank_to_host]
+        host_index.sort()
+        self._host_index: Dict[str, int] = {h:i for i, h in enumerate(host_index)}
 
         self.__temp_ag_remote_object: Optional[rpc.RRef] = None
     
     def shutdown(self):
-        rpc.shutdown()
+        if self._use_rpc:
+            rpc.shutdown()
     
     @property
     def rank(self) -> int:
@@ -137,16 +158,87 @@ class DistributedContext:
     @property
     def local_rank(self) -> int:
         return self._local_rank
+    
+    @property
+    def hostname(self) -> str:
+        return self._hostname
+    
+    @property
+    def rank_to_host(self):
+        return self._rank_to_host
+    
+    @property
+    def host_index(self):
+        return self._host_index
 
     @property
     def device(self) -> torch.device:
         return self._compute_device
     
     def get_default_group(self):
-        return dist.distributed_c10d._get_default_group()
+        # return dist.distributed_c10d._get_default_group()
+        return dist.GroupMember.WORLD
     
     def get_default_store(self):
         return dist.distributed_c10d._get_default_store()
+
+    def get_ranks_by_host(self, hostname: Optional[str] = None) -> Tuple[int,...]:
+        if hostname is None:
+            hostname = self.hostname
+    
+        ranks: List[int] = []
+        for i, (h, r) in enumerate(self.rank_to_host):
+            if h == hostname:
+                ranks.append(i)
+        ranks.sort()
+        return tuple(ranks)
+    
+    def get_ranks_by_local(self, local_rank: Optional[int] = None) -> Tuple[int,...]:
+        if local_rank is None:
+            local_rank = self.local_rank
+        
+        ranks: List[Tuple[int, str]] = []
+        for i, (h, r) in enumerate(self.rank_to_host):
+            if r == local_rank:
+                ranks.append((i, h))
+        ranks.sort(key=lambda x: self.host_index[x[1]])
+        return tuple(i for i, h in ranks)
+    
+    def get_hybrid_matrix(self) -> Tensor:
+        hosts = sorted(self.host_index.items(), key=lambda x: x[1])
+        matrix = []
+        for h, _ in hosts:
+            rs = self.get_ranks_by_host(h)
+            matrix.append(rs)
+        return torch.tensor(matrix, dtype=torch.long, device="cpu")
+    
+    def new_hybrid_subgroups(self,
+        matrix: Optional[Tensor] = None,
+        backend: Any = None,
+    ) -> Tuple[Any, Any]:
+        if matrix is None:
+            matrix = self.get_hybrid_matrix()
+
+        assert matrix.dim() == 2
+        row_group = None
+        col_group = None
+        for row in matrix.tolist():
+            if self.rank in row:
+                row_group = dist.new_group(
+                    row, backend=backend,
+                    use_local_synchronization=True,
+                )
+                break
+        for col in matrix.t().tolist():
+            if self.rank in col:
+                col_group = dist.new_group(
+                    col, backend=backend,
+                    use_local_synchronization=True,
+                )
+                break
+        assert row_group is not None
+        assert col_group is not None
+        return row_group, col_group
     
     def get_worker_info(self, rank: Optional[int] = None) -> rpc.WorkerInfo:
         rank = dist.get_rank() if rank is None else rank

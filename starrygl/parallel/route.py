@@ -24,6 +24,9 @@ class Route:
         bipartite: bool = True,
         group: Any = None,
     ) -> 'Route':
+        if group is None:
+            group = dist.GroupMember.WORLD
+            
         fw_tables, bw_tables = Route._build_route_tables(
             src_ids=src_ids, dst_ids=dst_ids,
             bipartite=bipartite, group=group,
@@ -256,8 +259,11 @@ class Route:
                 all_dst_ids[i] = dst_ids
             else:
                 all_dst_ids[i] = torch.empty(all_dst_lens[i], **ikw)
+            
+            src_rank = dist.get_global_rank(group, i)
             all_dst_get[i] = dist.broadcast(
-                all_dst_ids[i], src=i, async_op=True, group=group
+                all_dst_ids[i], src=src_rank,
+                async_op=True, group=group,
             )
         
         fw_tables: List[Tensor] = []

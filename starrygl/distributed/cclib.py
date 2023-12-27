@@ -152,8 +152,11 @@ def batch_send(
     if len(tensors) == 0:
         return BatchWork(None, None)
     
+    if group is None:
+        group = dist.GroupMember.WORLD
     # tensors = tuple(t.data for t in tensors)
     backend = dist.get_backend(group)
+    dst = dist.get_global_rank(group, dst)
 
     if async_op:
         works = []
@@ -177,8 +180,11 @@ def batch_recv(
     if len(tensors) == 0:
         return BatchWork(None, None)
     
+    if group is None:
+        group = dist.GroupMember.WORLD
     # tensors = tuple(t.data for t in tensors)
     backend = dist.get_backend(group)
+    src = dist.get_global_rank(group, src)
 
     if async_op:
         works = []

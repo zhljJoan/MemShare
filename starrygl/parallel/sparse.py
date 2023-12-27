@@ -58,6 +58,9 @@ class SparseBlocks:
     def __fetch_ids_sizes(local_ids: Tensor, group: Any):
         assert local_ids.dim() == 1
 
+        if group is None:
+            group = dist.GroupMember.WORLD
+
         rank = dist.get_rank(group)
         world_size = dist.get_world_size(group)
         ikw = dict(dtype=torch.long, device=local_ids.device)
@@ -80,8 +83,9 @@ class SparseBlocks:
                 all_ids[i] = local_ids
             else:
                 all_ids[i] = torch.empty(all_lens[i], **ikw)
+            src = dist.get_global_rank(group, i)
             all_get[i] = dist.broadcast(
-                all_ids[i], src=i, async_op=True, group=group
+                all_ids[i], src=src, async_op=True, group=group
             )
         
         imp: Tensor = torch.full((num_nodes,), (2**62-1)*2+1, **ikw)
@@ -151,13 +155,18 @@ class SparseBlockMM(autograd.Function):
         part_id = sp.part_id
         num_parts = sp.num_parts
 
+        group = sp.group
+        if group is None:
+            group = dist.GroupMember.WORLD
+
         def async_fetch(i: int):
             n = sp.adj_t(i).sparse_size(1)
             if i == part_id:
                 h = x.clone()
             else:
                 h = torch.empty(n, *x.shape[1:], dtype=x.dtype, device=x.device)
-            return dist.broadcast(h, src=i, group=sp.group, async_op=True)
+            src = dist.get_global_rank(group, i)
+            return dist.broadcast(h, src=src, group=sp.group, async_op=True)
 
         last_work = None
         out = None
@@ -192,9 +201,14 @@ class SparseBlockMM(autograd.Function):
         part_id = sp.part_id
         num_parts = sp.num_parts
 
+        group = sp.group
+        if group is None:
+            group = dist.GroupMember.WORLD
+
         def async_reduce(i: int, g: Tensor):
+            dst = dist.get_global_rank(group, i)
             return dist.reduce(
-                g, dst=i, op=dist.ReduceOp.SUM,
+                g, dst=dst, op=dist.ReduceOp.SUM,
                 group=sp.group, async_op=True,
             )
         

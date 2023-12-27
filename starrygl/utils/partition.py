@@ -33,6 +33,7 @@ def metis_partition(
     rowptr, col, value = adj_t.coalesce().to_symmetric().csr()
     node_parts = starrygl.ops.metis_partition(
         rowptr, col, value, node_weight, node_sizes, num_parts, recursive, min_edge_cut)
+    # node_parts = torch.ops.torch_sparse.partition(rowptr, col, None, num_parts, num_parts < 8)
     return node_parts
 
 def mt_metis_partition(

@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(starrygl_ops VERSION 0.1)
+project(starrygl VERSION 0.1)
 
 option(WITH_PYTHON "Link to Python when building" ON)
 option(WITH_CUDA "Link to CUDA when building" ON)
 option(WITH_METIS "Link to METIS when building" ON)
 option(WITH_MTMETIS "Link to multi-threaded METIS when building" ON)
+option(WITH_LDG "Link to (multi-threaded optionally) LDG when building" ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -37,8 +38,8 @@ if(WITH_CUDA)
 
     file(GLOB_RECURSE UVM_SRCS "csrc/uvm/*.cpp")
 
-    add_library(uvm SHARED ${UVM_SRCS})
-    target_link_libraries(uvm PRIVATE ${TORCH_LIBRARIES})
+    add_library(uvm_ops SHARED ${UVM_SRCS})
+    target_link_libraries(uvm_ops PRIVATE ${TORCH_LIBRARIES})
 endif()
 
 if(WITH_METIS)
@@ -54,10 +55,10 @@ if(WITH_METIS)
 
     include_directories(${METIS_INCLUDE_DIRS})
 
-    add_library(metis SHARED "csrc/partition/metis.cpp")
-    target_link_libraries(metis PRIVATE ${TORCH_LIBRARIES})
-    target_link_libraries(metis PRIVATE ${GKLIB_LIBRARIES})
-    target_link_libraries(metis PRIVATE ${METIS_LIBRARIES})
+    add_library(metis_partition SHARED "csrc/partition/metis.cpp")
+    target_link_libraries(metis_partition PRIVATE ${TORCH_LIBRARIES})
+    target_link_libraries(metis_partition PRIVATE ${GKLIB_LIBRARIES})
+    target_link_libraries(metis_partition PRIVATE ${METIS_LIBRARIES})
 endif()
 
 if(WITH_MTMETIS)
@@ -68,15 +69,28 @@ if(WITH_MTMETIS)
     file(GLOB_RECURSE MTMETIS_LIBRARIES "${MTMETIS_DIR}/lib/lib*.a")
 
     include_directories(${MTMETIS_INCLUDE_DIRS})
-    add_library(mtmetis SHARED "csrc/partition/mtmetis.cpp")
-    target_link_libraries(mtmetis PRIVATE ${TORCH_LIBRARIES})
-    target_link_libraries(mtmetis PRIVATE ${MTMETIS_LIBRARIES})
+    add_library(mtmetis_partition SHARED "csrc/partition/mtmetis.cpp")
+    target_link_libraries(mtmetis_partition PRIVATE ${TORCH_LIBRARIES})
+    target_link_libraries(mtmetis_partition PRIVATE ${MTMETIS_LIBRARIES})
 
-    target_compile_definitions(mtmetis PRIVATE -DMTMETIS_64BIT_VERTICES)
-    target_compile_definitions(mtmetis PRIVATE -DMTMETIS_64BIT_EDGES)
-    target_compile_definitions(mtmetis PRIVATE -DMTMETIS_64BIT_WEIGHTS)
-    target_compile_definitions(mtmetis PRIVATE -DMTMETIS_64BIT_PARTITIONS)
+    target_compile_definitions(mtmetis_partition PRIVATE -DMTMETIS_64BIT_VERTICES)
+    target_compile_definitions(mtmetis_partition PRIVATE -DMTMETIS_64BIT_EDGES)
+    target_compile_definitions(mtmetis_partition PRIVATE -DMTMETIS_64BIT_WEIGHTS)
+    target_compile_definitions(mtmetis_partition PRIVATE -DMTMETIS_64BIT_PARTITIONS)
 endif()
+
+if (WITH_LDG)
+    # Imports neighbor-clustering based (e.g. LDG algorithm) graph partitioning implementation
+    add_definitions(-DWITH_LDG)
+    set(LDG_DIR "third_party/ldg_partition")
+    
+    add_library(ldg_partition SHARED "csrc/partition/ldg.cpp")
+    target_link_libraries(ldg_partition PRIVATE ${TORCH_LIBRARIES})
+
+    add_subdirectory(${LDG_DIR})
+    target_include_directories(ldg_partition PRIVATE ${LDG_DIR})
+    target_link_libraries(ldg_partition PRIVATE ldg-vertex-partition)
+endif ()
 
 include_directories("csrc/include")
 add_library(${PROJECT_NAME} SHARED csrc/export.cpp)
@@ -90,17 +104,23 @@ if(WITH_PYTHON)
 endif()
 
 if (WITH_CUDA)
-    target_link_libraries(${PROJECT_NAME} PRIVATE uvm)
+    target_link_libraries(${PROJECT_NAME} PRIVATE uvm_ops)
 endif()
 
 if (WITH_METIS)
-    target_link_libraries(${PROJECT_NAME} PRIVATE metis)
+    message(STATUS "Current project '${PROJECT_NAME}' uses METIS graph partitioning algorithm.")
+    target_link_libraries(${PROJECT_NAME} PRIVATE metis_partition)
 endif()
 
 if (WITH_MTMETIS)
-    target_link_libraries(${PROJECT_NAME} PRIVATE mtmetis)
+    message(STATUS "Current project '${PROJECT_NAME}' uses multi-threaded METIS graph partitioning algorithm.")
+    target_link_libraries(${PROJECT_NAME} PRIVATE mtmetis_partition)
 endif()
 
+if (WITH_LDG)
+    message(STATUS "Current project '${PROJECT_NAME}' uses LDG graph partitioning algorithm.")
+    target_link_libraries(${PROJECT_NAME} PRIVATE ldg_partition)
+endif()
 
 # add libsampler.so
 set(SAMLPER_NAME "${PROJECT_NAME}_sampler")

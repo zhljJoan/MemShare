@@ -1,0 +1,8 @@
+-r requirements.txt
+
+# used by docs
+sphinx-autobuild
+sphinx_rtd_theme
+
+matplotlib
+ipykernel
