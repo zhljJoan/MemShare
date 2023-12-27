@@ -157,11 +157,12 @@ class NeighborSampler(BaseSampler):
             sampled_edge_index_list: the edge sampled
         """
         if(ts is None):
-            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), None)
+            self.part_unique = True
+            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), None, self.part_unique)
             ret = self.p_sampler.get_ret()
             return ret
         else:
-            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), ts.float().contiguous())
+            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), ts.float().contiguous(), None)
             ret = self.p_sampler.get_ret()
             return ret
         

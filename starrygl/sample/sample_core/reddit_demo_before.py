@@ -3,8 +3,6 @@ import random
 import pandas as pd
 import numpy as np
 import torch
-from ogb.nodeproppred import PygNodePropPredDataset
-from torch_geometric.datasets import Reddit
 import time
 
 from tqdm import tqdm
@@ -25,8 +23,18 @@ class NegLinkInductiveSampler:
     def sample(self, n):
         return np.random.choice(self.nodes, size=n)
 
-def load_reddit_dataset(data_path):
+def load_reddit_dataset():
     df = pd.read_csv('/mnt/data/hzq/DATA/{}/edges.csv'.format("REDDIT"))
+    num_nodes = max(int(df['src'].max()), int(df['dst'].max())) + 1
+    src = torch.tensor(df['src'].to_numpy(dtype=int))
+    dst = torch.tensor(df['dst'].to_numpy(dtype=int))
+    edge_index = torch.stack([src, dst])
+    timestamp = torch.tensor(df['time']).float()
+    g = GraphData(0, edge_index, timestamp=timestamp, data=None, partptr=torch.tensor([0, num_nodes]))
+    return g, df
+
+def load_gdelt_dataset():
+    df = pd.read_csv('/mnt/data/hzq/DATA/{}/edges.csv'.format("GDELT"))
     num_nodes = max(int(df['src'].max()), int(df['dst'].max())) + 1
     src = torch.tensor(df['src'].to_numpy(dtype=int))
     dst = torch.tensor(df['dst'].to_numpy(dtype=int))
@@ -43,6 +51,7 @@ def test():
     parser.add_argument('--batch_size', type=int, default=600, help='path to config file')
     parser.add_argument('--num_thread', type=int, default=64, help='number of thread')
     args=parser.parse_args()
+    dataset = "gdelt"#"reddit"#"gdelt"
 
     seed=10
     torch.manual_seed(seed) # 为CPU设置随机种子
@@ -53,7 +62,7 @@ def test():
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
 
-    g_data, df = load_reddit_dataset("/mnt/data/hzq/DATA/REDDIT")
+    g_data, df = load_gdelt_dataset()
     print(g_data)
     # for worker in [1,2,3,4,5,6,7,8,9,10,20,30]:
     # import random
@@ -84,11 +93,13 @@ def test():
     row = row[ind]
     col = col[ind]
     print(row, col)
+    g2 = GraphData(0, torch.stack([row, col]), timestamp=timestamp, data=None, partptr=torch.tensor([0, max(int(df['src'].max()), int(df['dst'].max())) + 1]))
+    print(g2)
     pre = time.time()
-    tnb = get_neighbors("reddit", row.contiguous(), col.contiguous(), g_data.num_nodes, 0, eid, edge_weight, timestamp)
+    tnb = get_neighbors(dataset, row.contiguous(), col.contiguous(), g_data.num_nodes, 0, eid, edge_weight, timestamp)
     end = time.time()
     print("init tnb time:", end-pre)
-    torch.save(tnb, "tnb_reddit_before.my")
+    # torch.save(tnb, "tnb_{}_before.my".format(dataset), pickle_protocol=4)
 
 
     pre = time.time()
@@ -138,17 +149,17 @@ def test():
             sam_time += outi[0].sample_time
             # print(outi[0].sample_edge_num)
             sam_edge += outi[0].sample_edge_num
-            out.append(outi)
+            # out.append(outi)
 
     end = time.time()
-    print("row", out[23][0].row())
+    # print("row", out[23][0].row())
     print("sample time", end-pre)
     print("tot_time", tot_time)
     print("sam_time", sam_time)
     print("sam_edge", sam_edge)
-    print('eid_list:', out[23][0].eid())
+    # print('eid_list:', out[23][0].eid())
     # print('delta_ts_list:', out[10][0].delta_ts)
-    print('node:', out[23][0].sample_nodes())
+    # print('node:', out[23][0].sample_nodes())
     # print('node_ts:', out[23][0].sample_nodes_ts)
     # print('eid_list:', out[23][1].eid)
     # print('node:', out[23][1].sample_nodes)
@@ -158,6 +169,7 @@ def test():
     # print("min_than_ten_sum", min_than_ten_sum)
     # print("seed_node_sum", seed_node_sum)
     # print("predict edge_num", (seed_node_sum-min_than_ten)*9+min_than_ten_sum)
+    print('吞吐量  : {:.4f}'.format(sam_edge/(end-pre)))
     
 if __name__ == "__main__":
     test()

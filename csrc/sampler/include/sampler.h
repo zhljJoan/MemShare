@@ -33,16 +33,16 @@ class ParallelSampler
             ret.resize(num_layers);
         }
 
-        void neighbor_sample_from_nodes(th::Tensor nodes, optional<th::Tensor> root_ts);
-        void neighbor_sample_from_nodes_static(th::Tensor nodes);
-        void neighbor_sample_from_nodes_static_layer(th::Tensor nodes, int cur_layer);
+        void neighbor_sample_from_nodes(th::Tensor nodes, optional<th::Tensor> root_ts, optional<bool> part_unique);
+        void neighbor_sample_from_nodes_static(th::Tensor nodes, bool part_unique);
+        void neighbor_sample_from_nodes_static_layer(th::Tensor nodes, int cur_layer, bool part_unique);
         void neighbor_sample_from_nodes_with_before(th::Tensor nodes, th::Tensor root_ts);
         void neighbor_sample_from_nodes_with_before_layer(th::Tensor nodes, th::Tensor root_ts, int cur_layer);
 };
 
 
 
-void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th::Tensor> root_ts)
+void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th::Tensor> root_ts, optional<bool> part_unique)
 {
     omp_set_num_threads(threads);
     if(policy == "weighted")
@@ -60,37 +60,39 @@ void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th
         neighbor_sample_from_nodes_with_before(nodes, root_ts.value());
     }
     else{
-        neighbor_sample_from_nodes_static(nodes);
+        bool flag = part_unique.has_value() ? part_unique.value() : true;
+        neighbor_sample_from_nodes_static(nodes, flag);
     }
 }
 
-void ParallelSampler :: neighbor_sample_from_nodes_static_layer(th::Tensor nodes, int cur_layer){
+void ParallelSampler :: neighbor_sample_from_nodes_static_layer(th::Tensor nodes, int cur_layer, bool part_unique){
     py::gil_scoped_release release;
     double tot_start_time = omp_get_wtime();
 
     TemporalGraphBlock tgb = TemporalGraphBlock();
     int fanout = fanouts[cur_layer];
     ret[cur_layer] = TemporalGraphBlock();
-    auto nodes_data = get_data_ptr<NodeIDType>(nodes);    
+    auto nodes_data = get_data_ptr<NodeIDType>(nodes); 
     vector<phmap::parallel_flat_hash_set<NodeIDType>> node_s_threads(threads);
-    // vector<vector<NodeIDType>> node_threads(threads);
+    vector<vector<NodeIDType>> node_threads(threads);
     phmap::parallel_flat_hash_set<NodeIDType> node_s;
-    vector<vector<NodeIDType>> eid_threads(threads);//row_threads(threads),col_threads(threads);
+    vector<vector<NodeIDType>> eid_threads(threads);
     vector<vector<NodeIDType>> src_index_threads(threads);
     AT_ASSERTM(tnb.with_eid, "Tnb has no eid infomation! We need eid!");
     
     // double start_time = omp_get_wtime();
     int reserve_capacity = int(ceil(nodes.size(0) / threads)) * fanout;
+    
 #pragma omp parallel
 {
     int tid = omp_get_thread_num();
     unsigned int loc_seed = tid;
     eid_threads[tid].reserve(reserve_capacity);
     src_index_threads[tid].reserve(reserve_capacity);
-    // node_threads[tid].reserve(reserve_capacity);
+    if(!part_unique)
+        node_threads[tid].reserve(reserve_capacity);
 #pragma omp for schedule(static, int(ceil(static_cast<float>((nodes.size(0)) / threads))))
     for(int64_t i=0; i<nodes.size(0); i++){
-        // int tid = omp_get_thread_num();
         NodeIDType node = nodes_data[i];
         vector<NodeIDType>& nei = tnb.neighbors[node];
         vector<EdgeIDType> edge;
@@ -98,12 +100,11 @@ void ParallelSampler :: neighbor_sample_from_nodes_static_layer(th::Tensor nodes
 
         double s_start_time = omp_get_wtime();
         if(tnb.deg[node]>fanout){
-            src_index_threads[tid].insert(src_index_threads[tid].end(), fanout, i);
             phmap::flat_hash_set<NodeIDType> temp_s;
             default_random_engine e(8);//(time(0));
-            uniform_int_distribution<> u(0, tnb.deg[node]-1);
-            while(temp_s.size()!=fanout){
-            // for(int i=0;i<fanout;i++){
+            // uniform_int_distribution<> u(0, tnb.deg[node]-1);            
+            // while(temp_s.size()!=fanout && temp_s.size()<tnb.neighbors_set[node].size()){
+            for(int i=0;i<fanout;i++){
                 //循环选择fanout个邻居
                 NodeIDType indice;
                 if(policy == "weighted"){//考虑边权重信息
@@ -112,24 +113,34 @@ void ParallelSampler :: neighbor_sample_from_nodes_static_layer(th::Tensor nodes
                 }
                 else if(policy == "uniform"){//均匀采样
                     // indice = u(e);
-                    indice = rand_r(&loc_seed) % (tnb.deg[node]);
+                    indice = rand_r(&loc_seed) % (nei.size());
                 }
                 auto chosen_n_iter = nei.begin() + indice;
-                // auto chosen_e_iter = edge.begin() + indice;
-                // eid_threads[tid].emplace_back(*chosen_e_iter);
-                // node_threads[tid].emplace_back(*chosen_n_iter);
-                auto rst = temp_s.insert(*chosen_n_iter);
-                if(rst.second){ //不重复
-                    auto chosen_e_iter = edge.begin() + indice;
+                auto chosen_e_iter = edge.begin() + indice;
+                if(part_unique){
+                    auto rst = temp_s.insert(*chosen_n_iter);
+                    if(rst.second){ //不重复
+                        eid_threads[tid].emplace_back(*chosen_e_iter);
+                        node_s_threads[tid].insert(*chosen_n_iter);
+                        if(temp_s.size()<fanout && !tnb.neighbors_set.empty() && temp_s.size()<tnb.neighbors_set[node].size()) fanout++;
+                    }
+                }
+                else{
                     eid_threads[tid].emplace_back(*chosen_e_iter);
-                    node_s_threads[tid].insert(*chosen_n_iter);
+                    node_threads[tid].emplace_back(*chosen_n_iter);
                 }
             }
+            if(part_unique)
+                src_index_threads[tid].insert(src_index_threads[tid].end(), temp_s.size(), i);
+            else
+                src_index_threads[tid].insert(src_index_threads[tid].end(), fanout, i);
         }
         else{
             src_index_threads[tid].insert(src_index_threads[tid].end(), tnb.deg[node], i);
-            // node_threads[tid].insert(node_threads[tid].end(), nei.begin(), nei.end());
-            node_s_threads[tid].insert(nei.begin(), nei.end());
+            if(part_unique)
+                node_s_threads[tid].insert(nei.begin(), nei.end());
+            else
+                node_threads[tid].insert(node_threads[tid].end(), nei.begin(), nei.end());
             eid_threads[tid].insert(eid_threads[tid].end(),edge.begin(), edge.end());
         }
         if(tid==0)
@@ -153,22 +164,25 @@ void ParallelSampler :: neighbor_sample_from_nodes_static_layer(th::Tensor nodes
 #pragma omp parallel for schedule(static, 1)
     for(int i = 0; i<threads; i++){
         copy(eid_threads[i].begin(), eid_threads[i].end(), ret[cur_layer].eid.begin()+each_begin[i]);
-        // copy(node_threads[i].begin(), node_threads[i].end(), ret[cur_layer].sample_nodes.begin()+each_begin[i]);
+        if(!part_unique)
+            copy(node_threads[i].begin(), node_threads[i].end(), ret[cur_layer].sample_nodes.begin()+each_begin[i]);
         copy(src_index_threads[i].begin(), src_index_threads[i].end(), ret[cur_layer].src_index.begin()+each_begin[i]);
     }
-    for(int i = 0; i<threads; i++)
-        node_s.insert(node_s_threads[i].begin(), node_s_threads[i].end());
-    ret[cur_layer].sample_nodes.assign(node_s.begin(), node_s.end());
+    if(part_unique){
+        for(int i = 0; i<threads; i++)
+            node_s.insert(node_s_threads[i].begin(), node_s_threads[i].end());
+        ret[cur_layer].sample_nodes.assign(node_s.begin(), node_s.end());
+    }
 
     ret[0].tot_time += omp_get_wtime() - tot_start_time;
     ret[0].sample_edge_num += ret[cur_layer].eid.size();
     py::gil_scoped_acquire acquire;
 }
 
-void ParallelSampler :: neighbor_sample_from_nodes_static(th::Tensor nodes){
+void ParallelSampler :: neighbor_sample_from_nodes_static(th::Tensor nodes, bool part_unique){
     for(int i=0;i<num_layers;i++){
-        if(i==0) neighbor_sample_from_nodes_static_layer(nodes, i);
-        else neighbor_sample_from_nodes_static_layer(vecToTensor<NodeIDType>(ret[i-1].sample_nodes), i);
+        if(i==0) neighbor_sample_from_nodes_static_layer(nodes, i, part_unique);
+        else neighbor_sample_from_nodes_static_layer(vecToTensor<NodeIDType>(ret[i-1].sample_nodes), i, part_unique);
     }
 }
 

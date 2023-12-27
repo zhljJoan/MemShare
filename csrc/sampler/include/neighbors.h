@@ -258,18 +258,15 @@ TemporalNeighborBlock& get_neighbors(
         
     if(is_distinct){
         for(int64_t i=0; i<num_nodes; i++){
-            //收集单边去重节点度
+            //收集去重邻居
             phmap::parallel_flat_hash_set<NodeIDType> temp_s;
             temp_s.insert(tnb.neighbors[i].begin(), tnb.neighbors[i].end());
             tnb.neighbors_set.emplace_back(temp_s);
-            tnb.deg[i] = tnb.neighbors_set[i].size();
         }
     }
-    else{
-        for(int64_t i=0; i<num_nodes; i++){
-            //收集单边节点度
-            tnb.deg[i] = tnb.neighbors[i].size();
-        }
+    for(int64_t i=0; i<num_nodes; i++){
+        //收集单边节点度
+        tnb.deg[i] = tnb.neighbors[i].size();
     }
     double end_time = omp_get_wtime();
     cout<<"get_neighbors consume: "<<end_time-start_time<<"s"<<endl;
