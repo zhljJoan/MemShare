@@ -168,6 +168,8 @@ cython_debug/
 *.pt
 /nohup.out
 
+/.vscode
+/run_route.py
 /dataset
 /test_*
 /*.ipynb
