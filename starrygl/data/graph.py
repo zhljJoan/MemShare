@@ -202,15 +202,18 @@ class GraphData:
         logging.info(f"running partition aglorithm: {algorithm}")
         partition_kwargs = partition_kwargs or {}
         
+        not_self_loop = (edge_index[0] != edge_index[1])
+
         if node_weight is not None:
             node_weight = self.node()[node_weight]
-        
+
         if edge_weight is not None:
             edge_weight = self.edge()[edge_weight]
+            edge_weight = edge_weight[not_self_loop]
         
         if algorithm == "metis":
             node_parts = metis_partition(
-                edge_index,
+                edge_index[:,not_self_loop],
                 num_nodes, num_parts,
                 node_weight=node_weight,
                 edge_weight=edge_weight,
@@ -218,7 +221,7 @@ class GraphData:
             )
         elif algorithm == "mt-metis":
             node_parts = mt_metis_partition(
-                edge_index,
+                edge_index[:,not_self_loop],
                 num_nodes, num_parts,
                 node_weight=node_weight,
                 edge_weight=edge_weight,
@@ -226,7 +229,7 @@ class GraphData:
             )
         elif algorithm == "random":
             node_parts = random_partition(
-                edge_index,
+                edge_index[:,not_self_loop],
                 num_nodes, num_parts,
                 **partition_kwargs,
             )

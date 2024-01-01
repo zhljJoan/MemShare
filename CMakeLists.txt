@@ -5,7 +5,7 @@ project(starrygl VERSION 0.1)
 option(WITH_PYTHON "Link to Python when building" ON)
 option(WITH_CUDA "Link to CUDA when building" ON)
 option(WITH_METIS "Link to METIS when building" ON)
-option(WITH_MTMETIS "Link to multi-threaded METIS when building" ON)
+option(WITH_MTMETIS "Link to multi-threaded METIS when building" OFF)
 option(WITH_LDG "Link to (multi-threaded optionally) LDG when building" ON)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -43,22 +43,53 @@ if(WITH_CUDA)
 endif()
 
 if(WITH_METIS)
+    # add_definitions(-DWITH_METIS)
+    # set(GKLIB_DIR "${CMAKE_SOURCE_DIR}/third_party/GKlib")
+    # set(METIS_DIR "${CMAKE_SOURCE_DIR}/third_party/METIS")
+
+    # set(GKLIB_INCLUDE_DIRS "${GKLIB_DIR}/include")
+    # file(GLOB_RECURSE GKLIB_LIBRARIES "${GKLIB_DIR}/lib/lib*.a")
+
+    # set(METIS_INCLUDE_DIRS "${METIS_DIR}/include")
+    # file(GLOB_RECURSE METIS_LIBRARIES "${METIS_DIR}/lib/lib*.a")
+
+    # include_directories(${METIS_INCLUDE_DIRS})
+
+    # add_library(metis_partition SHARED "csrc/partition/metis.cpp")
+    # target_link_libraries(metis_partition PRIVATE ${TORCH_LIBRARIES})
+    # target_link_libraries(metis_partition PRIVATE ${GKLIB_LIBRARIES})
+    # target_link_libraries(metis_partition PRIVATE ${METIS_LIBRARIES})
+
     add_definitions(-DWITH_METIS)
-    set(GKLIB_DIR "${CMAKE_SOURCE_DIR}/third_party/GKlib")
-    set(METIS_DIR "${CMAKE_SOURCE_DIR}/third_party/METIS")
+    set(METIS_DIR "${CMAKE_SOURCE_DIR}/third_party/mts/METIS")
+    set(METIS_GKLIB_DIR "${METIS_DIR}/GKlib")
 
-    set(GKLIB_INCLUDE_DIRS "${GKLIB_DIR}/include")
-    file(GLOB_RECURSE GKLIB_LIBRARIES "${GKLIB_DIR}/lib/lib*.a")
+    file(GLOB METIS_SRCS "${METIS_DIR}/libmetis/*.c")
+    file(GLOB METIS_GKLIB_SRCS "${METIS_GKLIB_DIR}/*.c")
+    
+    if (MSVC)
+        file(GLOB METIS_GKLIB_WIN32_SRCS "${METIS_GKLIB_DIR}/win32/*.c")
+        set(METIS_GKLIB_SRCS ${METIS_GKLIB_SRCS} ${METIS_GKLIB_WIN32_SRCS})
+    endif()
 
-    set(METIS_INCLUDE_DIRS "${METIS_DIR}/include")
-    file(GLOB_RECURSE METIS_LIBRARIES "${METIS_DIR}/lib/lib*.a")
+    add_library(metis_partition SHARED
+        "csrc/partition/metis.cpp"
+        ${METIS_SRCS} ${METIS_GKLIB_SRCS}
+    )
+    target_include_directories(metis_partition PRIVATE "${METIS_DIR}/include")
+    target_include_directories(metis_partition PRIVATE "${METIS_GKLIB_DIR}")
+    if (MSVC)
+        target_include_directories(metis_partition PRIVATE "${METIS_GKLIB_DIR}/win32")
+    endif()
 
-    include_directories(${METIS_INCLUDE_DIRS})
+    target_compile_definitions(metis_partition PRIVATE -DIDXTYPEWIDTH=64)
+    target_compile_definitions(metis_partition PRIVATE -DREALTYPEWIDTH=32)
+    target_compile_options(metis_partition PRIVATE -O3)
 
-    add_library(metis_partition SHARED "csrc/partition/metis.cpp")
     target_link_libraries(metis_partition PRIVATE ${TORCH_LIBRARIES})
-    target_link_libraries(metis_partition PRIVATE ${GKLIB_LIBRARIES})
-    target_link_libraries(metis_partition PRIVATE ${METIS_LIBRARIES})
+    if (UNIX)
+        target_link_libraries(metis_partition PRIVATE m)
+    endif()
 endif()
 
 if(WITH_MTMETIS)

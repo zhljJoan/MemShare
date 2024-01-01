@@ -1,6 +1,5 @@
 #include <torch/all.h>
 #include <metis.h>
-#include <mtmetis.h>
 #include "utils.h"
 
 

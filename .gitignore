@@ -171,5 +171,3 @@ cython_debug/
 /dataset
 /test_*
 /*.ipynb
-/third_party
-!/third_party/ldg_partition
