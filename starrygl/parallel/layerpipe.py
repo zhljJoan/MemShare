@@ -128,7 +128,7 @@ class LayerPipeRuntime:
             if op == "sync":
                 xs = self.ready_bw[(layer_i - 1, snap_i, 1)].values() if layer_i > 0 else None
                 with self.program._switch_layer(layer_i, snap_i):
-                    xs = self.program.layer_inputs(None)
+                    xs = self.program.layer_inputs(xs)
                     route = self.program.get_route()
                 self.ready_bw[(layer_i, snap_i, 0)] = LayerRoute(route, *xs)
             elif op == "comp":
