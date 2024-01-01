@@ -1,6 +1,9 @@
 #include <torch/all.h>
-#include <mtmetis.h>
 #include "utils.h"
+
+#ifdef WITH_MTMETIS
+
+#include <mtmetis.h>
 
 at::Tensor mt_metis_partition(
     at::Tensor rowptr,
@@ -76,3 +79,5 @@ at::Tensor mt_metis_partition(
     AT_ASSERT(ret == MTMETIS_SUCCESS);
     return part;
 }
+
+#endif
