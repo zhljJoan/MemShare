@@ -11,6 +11,7 @@ from contextlib import contextmanager
 
 from .sync import VirtualMotions, VirtualForward, BatchSync
 from .utils import vector_backward
+from starrygl.parallel.utils import *
 
 class SequencePipe(ABC):
     def __init__(self) -> None:
@@ -54,6 +55,24 @@ class SequencePipe(ABC):
                 models.append((key, val))
         return tuple(models)
     
+    def to(self, device: Any):
+        for _, net in self.get_model():
+            net.to(device)
+        return self
+    
+    def all_reduce(self, async_op: bool = False):
+        works = []
+        for name, net in self.get_model():
+            ws = all_reduce_gradients(net, async_op=async_op)
+            if async_op:
+                works.extend(ws)
+            
+            ws = all_reduce_buffers(net, async_op=async_op)
+            if async_op:
+                works.extend(ws)
+        if async_op:
+            return ws
+    
     def apply(self, bs: int, *inputs: Tensor) -> Sequence[Tensor]:
         runtime = SequencePipeRuntime(bs, self)
         return SequencePipeFunction.apply(runtime, *inputs)
@@ -87,10 +106,11 @@ class SequencePipe(ABC):
 
         self._pos_begin = begin
         self._pos_end   = end
-        yield
-        
-        self._pos_begin = saved_begin
-        self._pos_end   = saved_end
+        try:
+            yield
+        finally:
+            self._pos_begin = saved_begin
+            self._pos_end   = saved_end
 
 
 class SequencePipeRuntime:

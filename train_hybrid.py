@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Sequence, Tuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,7 +9,7 @@ from typing import *
 
 from starrygl.distributed import DistributedContext
 from starrygl.data import GraphData
-from starrygl.parallel import Route, SequencePipe
+from starrygl.parallel import Route, SequencePipe, LayerPipe
 from starrygl.parallel.utils import *
 
 import torch_geometric.nn as pyg_nn
@@ -75,6 +75,35 @@ class SimpleGNN(nn.Module):
         for layer in self.layers:
             x = layer(x, edge_index, route)
         return x
+
+class SimpleGNNPipe(LayerPipe):
+    def __init__(self,
+        num_features: int,
+        hidden_dims: int,
+        num_layers: int,
+        features: Tensor,
+        edge_index: Tensor,
+        route: Route,
+    ) -> None:
+        super().__init__()
+        self.features = features
+        self.edge_index = edge_index
+        self.route = route
+
+        self.net = SimpleGNN(num_features, hidden_dims, num_layers)
+    
+    def layer_inputs(self, inputs: Sequence[Tensor] | None = None) -> Sequence[Tensor]:
+        if self.layer_id == 0:
+            x = self.features
+        else:
+            x, = inputs
+        x = self.route.apply(x)
+        return (x,)
+    
+    def layer_forward(self, inputs: Sequence[Tensor]) -> Sequence[Tensor]:
+        x, = inputs
+        x = self.net.layers[self.layer_id](x, self.edge_index, self.route)
+        return (x,)
 
 class SimpleRNN(SequencePipe, nn.Module):
     def __init__(self,
