@@ -61,7 +61,7 @@ if(WITH_METIS)
     # target_link_libraries(metis_partition PRIVATE ${METIS_LIBRARIES})
 
     add_definitions(-DWITH_METIS)
-    set(METIS_DIR "${CMAKE_SOURCE_DIR}/third_party/mts/METIS")
+    set(METIS_DIR "${CMAKE_SOURCE_DIR}/third_party/METIS")
     set(METIS_GKLIB_DIR "${METIS_DIR}/GKlib")
 
     file(GLOB METIS_SRCS "${METIS_DIR}/libmetis/*.c")

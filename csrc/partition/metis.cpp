@@ -14,6 +14,7 @@ at::Tensor metis_partition(
     bool min_edge_cut
 ) {
     static_assert(sizeof(idx_t) == sizeof(int64_t));
+    static_assert(sizeof(real_t) == sizeof(float));
 
     CHECK_CPU(rowptr);
     AT_ASSERT(rowptr.dim() == 1);
