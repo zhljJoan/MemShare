@@ -13,6 +13,12 @@ at::Tensor metis_partition(
     bool min_edge_cut
 );
 
+at::Tensor metis_cache_friendly_reordering(
+    at::Tensor rowptr,
+    at::Tensor col,
+    at::Tensor part
+);
+
 at::Tensor mt_metis_partition(
     at::Tensor rowptr,
     at::Tensor col,

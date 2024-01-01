@@ -92,3 +92,38 @@ at::Tensor metis_partition(
     return part;
 }
 
+
+at::Tensor metis_cache_friendly_reordering(
+    at::Tensor rowptr,
+    at::Tensor col,
+    at::Tensor part
+) {
+    static_assert(sizeof(idx_t) == sizeof(int64_t));
+    static_assert(sizeof(real_t) == sizeof(float));
+
+    CHECK_CPU(rowptr);
+    AT_ASSERT(rowptr.dim() == 1);
+    AT_ASSERT(rowptr.is_contiguous());
+
+    CHECK_CPU(col);
+    AT_ASSERT(col.dim() == 1);
+    AT_ASSERT(col.is_contiguous());
+
+    CHECK_CPU(part);
+    AT_ASSERT(part.dim() == 1);
+    AT_ASSERT(part.is_contiguous());
+
+    idx_t nvtxs = rowptr.numel() - 1;
+
+    idx_t *xadj = rowptr.data_ptr<idx_t>();
+    idx_t *adjncy = col.data_ptr<idx_t>();
+
+    idx_t *part_data = part.data_ptr<idx_t>();
+
+    auto old2new = at::empty({nvtxs}, rowptr.options());
+    idx_t *old2new_data = old2new.data_ptr<idx_t>();
+
+    int ret = METIS_CacheFriendlyReordering(nvtxs, xadj, adjncy, part_data, old2new_data);
+    AT_ASSERT(ret == METIS_OK);
+    return old2new;
+}

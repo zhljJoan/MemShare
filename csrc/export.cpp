@@ -22,6 +22,7 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
 
     #ifdef WITH_METIS
     m.def("metis_partition", &metis_partition, "metis graph partition");
+    m.def("metis_cache_friendly_reordering", &metis_cache_friendly_reordering, "metis cache-friendly reordering");
     #endif
 
     #ifdef WITH_MTMETIS
