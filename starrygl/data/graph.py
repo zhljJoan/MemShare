@@ -233,6 +233,11 @@ class GraphData:
                 num_nodes, num_parts,
                 **partition_kwargs,
             )
+        elif algorithm == "pyg-metis":
+            node_parts = pyg_metis_partition(
+                edge_index[:,not_self_loop],
+                num_nodes, num_parts,
+            )
         else:
             raise ValueError(f"unknown partition algorithm: {algorithm}")
         

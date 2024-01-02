@@ -11,6 +11,7 @@ __all__ = [
     "metis_partition",
     "mt_metis_partition",
     "random_partition",
+    "pyg_metis_partition"
 ]
 
 def _nopart(edge_index: Tensor, num_nodes: int):
@@ -33,7 +34,19 @@ def metis_partition(
     rowptr, col, value = adj_t.coalesce().to_symmetric().csr()
     node_parts = starrygl.ops.metis_partition(
         rowptr, col, value, node_weight, node_sizes, num_parts, recursive, min_edge_cut)
-    # node_parts = torch.ops.torch_sparse.partition(rowptr, col, None, num_parts, num_parts < 8)
+    return node_parts
+
+def pyg_metis_partition(
+    edge_index: Tensor,
+    num_nodes: int,
+    num_parts: int,
+) -> Tensor:
+    if num_parts <= 1:
+        return _nopart(edge_index, num_nodes)
+    
+    adj_t = SparseTensor.from_edge_index(edge_index, sparse_sizes=(num_nodes, num_nodes))
+    rowptr, col, _ = adj_t.coalesce().to_symmetric().csr()
+    node_parts = torch.ops.torch_sparse.partition(rowptr, col, None, num_parts, num_parts < 8)
     return node_parts
 
 def mt_metis_partition(
