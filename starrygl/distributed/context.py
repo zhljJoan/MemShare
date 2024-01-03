@@ -22,6 +22,8 @@ __all__ = [
 
 
 class DistributedContext:
+    """Global context manager for distributed training
+    """
     @staticmethod
     def init(
         backend: str,
