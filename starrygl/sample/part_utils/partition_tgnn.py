@@ -1,4 +1,3 @@
-import parser
 from torch_sparse import SparseTensor
 from torch_geometric.data import Data
 from torch_geometric.utils import degree

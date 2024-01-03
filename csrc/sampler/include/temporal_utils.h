@@ -5,9 +5,9 @@
 #include <vector>
 #include <iostream>
 #include <map>
-#include <boost/thread/mutex.hpp>
+// #include <boost/thread/mutex.hpp>
 using namespace std;
-#define MTX boost::mutex
+#define MTX std::mutex
 
 namespace py = pybind11;
 namespace th = torch;

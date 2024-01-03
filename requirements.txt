@@ -13,3 +13,4 @@ torch_spline_conv==1.2.2+pt21cu118
 
 ogb
 tqdm
+networkx
