@@ -58,7 +58,6 @@ class DistributedContext:
         master_port = int(os.environ["MASTER_PORT"])
         ccl_init_url = f"tcp://{master_addr}:{master_port}"
         rpc_init_url = f"tcp://{master_addr}:{master_port + 1}"
-
         ctx = DistributedContext(
             backend=backend,
             ccl_init_method=ccl_init_url,
@@ -69,6 +68,7 @@ class DistributedContext:
             use_gpu=use_gpu,
             rpc_gpu=rpc_gpu,
         )
+
         _set_default_dist_context(ctx)
         
         return ctx

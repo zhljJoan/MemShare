@@ -3,8 +3,9 @@ import torch
 import torch.distributed as dist
 from starrygl.distributed.utils import DistributedTensor
 from starrygl.module.memorys import MailBox
+from starrygl.sample.cache.fetch_cache import FetchFeatureCache
 from starrygl.sample.graph_core import DataSet
-from starrygl.sample.graph_core import GraphData
+from starrygl.sample.graph_core import DistributedGraphStore
 from starrygl.sample.sample_core.base import BaseSampler, NegativeSampling
 import dgl
 
@@ -44,8 +45,7 @@ def prepare_input(node_feat, edge_feat, mem_embedding,mfgs,dist_nid,dist_eid):
                     #print(idx.shape[0],b.srcdata['mem_ts'].shape)
         return mfgs
 
-def to_block(graph: GraphData, data, sample_out, mailbox:MailBox = None,device = torch.device('cuda'),group = None):
-
+def to_block(graph: DistributedGraphStore, data, sample_out, mailbox:MailBox = None,device = torch.device('cuda'),group = None):
     if len(sample_out) > 1:
         sample_out,metadata = sample_out
     else:
@@ -77,26 +77,39 @@ def to_block(graph: GraphData, data, sample_out, mailbox:MailBox = None,device =
     nid_tensor = torch.cat([root_node,src_node],dim = 0)
     dist_nid = nid_mapper[nid_tensor].to(device)
     dist_nid,nid_inv = dist_nid.unique(return_inverse = True)
-    if isinstance(graph.edge_attr,DistributedTensor):
-        ind_dict = graph.edge_attr.all_to_all_ind2ptr(dist_eid,group = group)
-        edge_feat = graph.edge_attr.all_to_all_get(group = group,**ind_dict)
-    else:
-        edge_feat = graph._get_edge_attr(dist_eid)
-    ind_dict = None
-    if isinstance(graph.x,DistributedTensor):
-        ind_dict = graph.x.all_to_all_ind2ptr(dist_nid,group = group)
-        node_feat = graph.x.all_to_all_get(group = group,**ind_dict)
-    else:
-        node_feat = graph._get_node_attr(dist_nid)
-    if mailbox is not None:
-        if torch.distributed.get_world_size() > 1:
-            if node_feat is None:
-                ind_dict = mailbox.node_memory.all_to_all_ind2ptr(dist_nid,group = group)
-            mem = mailbox.gather_memory(**ind_dict)
+    
+    fetchCache = FetchFeatureCache.getFetchCache()
+    if fetchCache is None:
+        if isinstance(graph.edge_attr,DistributedTensor):
+            ind_dict = graph.edge_attr.all_to_all_ind2ptr(dist_eid,group = group)
+            edge_feat = graph.edge_attr.all_to_all_get(group = group,**ind_dict)
         else:
-            mem = mailbox.get_memory(dist_nid)
+            edge_feat = graph._get_edge_attr(dist_eid)
+        ind_dict = None
+        if isinstance(graph.x,DistributedTensor):
+            ind_dict = graph.x.all_to_all_ind2ptr(dist_nid,group = group)
+            node_feat = graph.x.all_to_all_get(group = group,**ind_dict)
+        else:
+            node_feat = graph._get_node_attr(dist_nid)
+        if mailbox is not None:
+            if torch.distributed.get_world_size() > 1:
+                if node_feat is None:
+                    ind_dict = mailbox.node_memory.all_to_all_ind2ptr(dist_nid,group = group)
+                mem = mailbox.gather_memory(**ind_dict)
+            else:
+                mem = mailbox.get_memory(dist_nid)
+        else:
+            mem = None
     else:
-        mem = None
+        raw_nid = torch.empty_like(dist_nid)
+        raw_eid = torch.empty_like(dist_eid)
+        nid_tensor = nid_tensor.to(device)
+        eid_tensor = eid_tensor.to(device)
+        raw_nid[nid_inv] = nid_tensor
+        raw_eid[eid_inv] = eid_tensor
+        node_feat,edge_feat,mem = fetchCache.fetch_feature(raw_nid,
+                                 dist_nid,raw_eid,
+                                 dist_eid)
     def build_block():
         mfgs = list()
         col = torch.arange(0,root_len,device = device)
@@ -127,7 +140,7 @@ def to_block(graph: GraphData, data, sample_out, mailbox:MailBox = None,device =
     data,mfgs,metadata = build_block()
     mfgs = prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
         #return build_block(node_feat,edge_feat,mem)#data,mfgs,metadata
-    return data,mfgs,metadata
+    return (data,mfgs,metadata)
 
 
 def graph_sample(graph, sampler:BaseSampler,
@@ -141,7 +154,10 @@ def graph_sample(graph, sampler:BaseSampler,
         return to_block(graph,data,out,mailbox,device)
     else:
         manger =  getPipelineManger()
-        future = manger.submit('lookup',to_block,graph,data,out,mailbox,device)
+        future = manger.submit('lookup',to_block,{'graph':graph,'data':data,\
+                                                  'sample_out':out,\
+                                                  'mailbox':mailbox,\
+                                                  'device':device})
         return future
 
 def sample_from_nodes(sampler:BaseSampler,  data:DataSet, **kwargs):

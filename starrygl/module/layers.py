@@ -32,8 +32,8 @@ class EdgePredictor(torch.nn.Module):
 
     def forward(self, h, neg_samples=1):
         num_edge = h.shape[0] // (neg_samples + 2)
-        h_src =  self.src_fc(h[num_edge:2 * num_edge])#self.src_fc(h[:num_edge]) 
-        h_pos_dst = self.dst_fc(h[:num_edge]) #
+        h_src =  self.src_fc(h[:num_edge]) 
+        h_pos_dst = self.dst_fc(h[num_edge:num_edge*2]) #
         h_neg_src = self.src_fc(h[2 * num_edge:])
         h_pos_edge = torch.nn.functional.relu(h_src + h_pos_dst)
         h_neg_edge = torch.nn.functional.relu(h_neg_src + h_pos_dst.tile(neg_samples, 1))

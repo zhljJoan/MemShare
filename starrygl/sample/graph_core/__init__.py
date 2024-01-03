@@ -1,13 +1,19 @@
+from starrygl.distributed.context import DistributedContext
 from starrygl.distributed.utils import DistIndex, DistributedTensor
 from starrygl.sample.graph_core.utils import build_mapper
 import os.path as osp
 import torch
 import torch.distributed as dist
 from torch_geometric.data import Data
-class GraphStore():
-    def __init__(self, pdata, device = torch.device('cuda'), all_on_gpu = False):
+
+from starrygl.utils.uvm import cudaMemoryAdvise, uvm_advise, uvm_empty, uvm_prefetch, uvm_share
+class DistributedGraphStore:
+    def __init__(self, pdata, device = torch.device('cuda'),
+                 uvm_node = False, 
+                 uvm_edge = False):
         self.device = device
         self.ids = pdata.ids.to(device)
+        self.eids = pdata.eids
         self.edge_index = pdata.edge_index.to(device)
         if hasattr(pdata,'edge_ts'):
             self.edge_ts = pdata.edge_ts.to(device).to(torch.float)
@@ -16,41 +22,78 @@ class GraphStore():
         self.sample_graph = pdata.sample_graph
         self.nids_mapper = build_mapper(nids=pdata.ids.to(device)).dist.to('cpu')
         self.eids_mapper = build_mapper(nids=pdata.eids.to(device)).dist.to('cpu')
-        if all_on_gpu:
-            self.nids_mapper = self.nids_mapper.to(device)
-            self.eids_mapper = self.eids_mapper.to(device)
+        torch.cuda.empty_cache()
+
         self.num_nodes = self.nids_mapper.data.shape[0]
+        self.num_edges = self.eids_mapper.data.shape[0]
         world_size = dist.get_world_size()
+        self.uvm_node = uvm_node
+        self.uvm_edge = uvm_edge
+        
         if hasattr(pdata,'x') and pdata.x is not None:
+            pdata.x = pdata.x.to(torch.float)
+            if uvm_node == False :
+                x = pdata.x.to(self.device)
+            else:
+                if self.device.type == 'cuda':
+                    x = uvm_empty(*pdata.x.size(),
+                                    dtype=pdata.x.dtype,
+                                    device=ctx.device)
+                    uvm_share(x,device = ctx.device)
+                    uvm_advise(x,cudaMemoryAdvise.cudaMemAdviseSetAccessedBy)
+                    uvm_prefetch(x)
             if world_size > 1:
                 self.x = DistributedTensor(pdata.x.to(self.device).to(torch.float))
             else:
-                self.x = pdata.x.to(device).to(torch.float)
+                self.x = x
         else:
             self.x = None
+            
         if hasattr(pdata,'edge_attr') and pdata.edge_attr is not None:
-            if world_size > 1:
-                self.edge_attr = DistributedTensor(pdata.edge_attr.to('cuda').to(torch.float))
+            ctx = DistributedContext.get_default_context()
+            pdata.edge_attr = pdata.edge_attr.to(torch.float)
+            if uvm_edge == False :
+                edge_attr = pdata.edge_attr.to(self.device)
             else:
-                self.edge_attr = pdata.edge_attr.to('cuda').to(torch.float)
+                if self.device.type == 'cuda':
+                    edge_attr = uvm_empty(*pdata.edge_attr.size(),
+                                    dtype=pdata.edge_attr.dtype,
+                                    device=ctx.device)
+                    uvm_share(edge_attr,device = ctx.device)
+                    uvm_advise(edge_attr,cudaMemoryAdvise.cudaMemAdviseSetAccessedBy)
+                    uvm_prefetch(edge_attr)
+            if world_size > 1:
+                self.edge_attr = DistributedTensor(edge_attr)
+            else:
+                self.edge_attr = edge_attr
         else:
             self.edge_attr = None
 
-    def _get_node_attr(self,ids):
+    def _get_node_attr(self,ids,asyncOp = False):
         if self.x is None:
             return None
         elif dist.get_world_size() == 1:
             return self.x[ids]
         else:
+            if self.x.rrefs is None or asyncOp is False:
+                ids = self.x.all_to_all_ind2ptr(ids)
+                return self.x.all_to_all_get(**ids)
             return self.x.index_select(ids)
-    def _get_edge_attr(self,ids,):
+    
+    def _get_edge_attr(self,ids,asyncOp = False):
         if self.edge_attr is None:
             return None
         elif dist.get_world_size() == 1:
             return self.edge_attr[ids]
         else:
+            
+            if self.edge_attr.rrefs is None or asyncOp is False:
+                ids = self.edge_attr.all_to_all_ind2ptr(ids)
+                return self.edge_attr.all_to_all_get(**ids)
             return self.edge_attr.index_select(ids)
-
+    
+    def _get_dist_index(self,ind,mapper):
+        return mapper[ind.to(mapper.device)]
 
 class DataSet:
     def __init__(self,nodes = None,
@@ -106,7 +149,7 @@ class DataSet:
                 setattr(d,k,v[indx])
         return d
     
-class TemporalGraphData(GraphStore):
+class TemporalGraphData(DistributedGraphStore):
     def __init__(self,pdata,device):
         super(TemporalGraphData,self).__init__(pdata,device)
     def _set_temporal_batch_cache(self,size,pin_size):
@@ -117,7 +160,7 @@ class TemporalGraphData(GraphStore):
 
 
 
-class TemporalNeighborSampleGraph(GraphStore):
+class TemporalNeighborSampleGraph(DistributedGraphStore):
     def __init__(self, sample_graph=None, mode='full', eids_mapper=None):
         self.edge_index = sample_graph['edge_index']
         self.num_edges = self.edge_index.shape[1]

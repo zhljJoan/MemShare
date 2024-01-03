@@ -9,7 +9,7 @@ from typing import Optional, Tuple
 
 from .base import BaseSampler, NegativeSampling, SampleOutput, SampleType
 # from sample_cores import ParallelSampler, get_neighbors, heads_unique
-from starrygl.lib.libstarrygl_ops_sampler import ParallelSampler, get_neighbors
+from starrygl.lib.libstarrygl_sampler import ParallelSampler, get_neighbors
 from torch.distributed.rpc import rpc_async
 
 # def outer_sample(graph_name, nodes, ts, fanout_index, with_outer_sample = SampleType.Outer):# 默认此时继续向外采样
@@ -157,11 +157,12 @@ class NeighborSampler(BaseSampler):
             sampled_edge_index_list: the edge sampled
         """
         if(ts is None):
-            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), None)
+            self.part_unique = True
+            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), None, self.part_unique)
             ret = self.p_sampler.get_ret()
             return ret
         else:
-            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), ts.float().contiguous())
+            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), ts.float().contiguous(), None)
             ret = self.p_sampler.get_ret()
             return ret
         

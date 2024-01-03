@@ -18,13 +18,13 @@ class PipelineManager:
             self.dist_set[k] = dist.new_group()
             self.args_queue[k] = Deque()
     
-    def submit(self,state,func,*args):
-        future = self.thread_pool.submit(target=self.run, args=(state,func,args))
+    def submit(self,state,func,kwargs):
+        future = self.thread_pool.submit(self.run, state,func,kwargs)
         return future
 
-    def run(self,state,func,*args):
-        while torch.cuda.stream(self.stream_set[state]):
-            func(args, group = self.dist_set[state])
+    def run(self,state,func,kwargs):
+        with torch.cuda.stream(self.stream_set[state]):
+            return func(**kwargs,group = self.dist_set[state])
 
 manger = None
 def getPipelineManger():

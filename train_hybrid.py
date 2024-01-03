@@ -10,7 +10,6 @@ from typing import *
 from starrygl.distributed import DistributedContext
 from starrygl.data import GraphData
 from starrygl.parallel import Route, SequencePipe
-from starrygl.parallel.sequence import STensor
 from starrygl.parallel.utils import *
 
 import torch_geometric.nn as pyg_nn
@@ -39,7 +38,7 @@ def prepare_data(root: str, num_parts, part_algo: str = "metis"):
     logging.info(f"GraphData.node().keys(): {g.node().keys()}")
     logging.info(f"GraphData.edge().keys(): {g.edge().keys()}")
 
-    g.save_partition(root, num_parts, part_algo)
+    g.save_partition(root, num_parts, algorithm=part_algo)
     return g
 
 class SimpleConv(pyg_nn.MessagePassing):
@@ -129,7 +128,6 @@ if __name__ == "__main__":
     hybrid_matrix = ctx.get_hybrid_matrix()
     if hybrid_matrix.size(0) == 1:
         hybrid_matrix = hybrid_matrix.view(2, -1)
-    ctx.sync_print(hybrid_matrix)
     # sp is sequence parallel
     # pp is partition parallel
     sp_group, pp_group = ctx.new_hybrid_subgroups(hybrid_matrix)
