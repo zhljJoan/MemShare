@@ -22,4 +22,6 @@ def build_mapper(nids):
         ind_mp[iid] = torch.arange(all_ids[i].shape[0],**ikw)
     return DistIndex(ind_mp,part_mp)
 
-    
+
+def get_validate_graph(self,graph):
+    pass

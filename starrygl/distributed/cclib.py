@@ -133,7 +133,6 @@ def all_to_all_s(
 
     output_sizes = [t-s for s, t in zip(output_rowptr, output_rowptr[1:])]
     input_sizes = [t-s for s, t in zip(input_rowptr, input_rowptr[1:])]
-
     return dist.all_to_all_single(
         output=output_tensor,
         input=input_tensor,

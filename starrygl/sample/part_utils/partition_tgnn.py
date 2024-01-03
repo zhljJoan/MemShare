@@ -2,15 +2,16 @@ import parser
 from torch_sparse import SparseTensor
 from torch_geometric.data import Data
 from torch_geometric.utils import degree
-from .torch_utils import get_norm_temporal
+
 import os.path as osp
 import os
 import shutil
 import torch
 import torch.utils.data
-import metis
-import networkx as nx
+
 import torch.distributed as dist
+from starrygl.lib.libstarrygl_sampler import get_norm_temporal
+from starrygl.utils.partition import mt_metis_partition
 
 
 def partition_load(root: str, algo: str = "metis") -> Data:
@@ -22,6 +23,7 @@ def partition_load(root: str, algo: str = "metis") -> Data:
 
 def partition_save(root: str, data: Data, num_parts: int,
                    algo: str = "metis",
+                   node_weight = None,
                    edge_weight_dict=None):
     root = osp.abspath(root)
     if osp.exists(root) and not osp.isdir(root):
@@ -46,6 +48,7 @@ def partition_save(root: str, data: Data, num_parts: int,
     if algo == 'metis_for_tgnn':
         for i, pdata in enumerate(partition_data_for_tgnn(
                 data, num_parts, algo, verbose=True,
+                node_weight = node_weight,
                 edge_weight_dict=edge_weight_dict)):
             print(f"saving partition data: {i+1}/{num_parts}")
             fn = osp.join(path, f"{i:03d}")
@@ -153,30 +156,41 @@ def _nopart(edge_index: torch.LongTensor, num_nodes: int):
 def metis_for_tgnn(edge_index_dict: dict,
                    num_nodes: int,
                    num_parts: int,
+                   node_weight = None,
                    edge_weight_dict=None):
     if num_parts <= 1:
         return _nopart(edge_index_dict, num_nodes)
-    G = nx.Graph()
-    G.add_nodes_from(torch.arange(0, num_nodes).tolist())
-    value, counts = torch.unique(edge_index_dict['edata'][1, :].view(-1),
-                                 return_counts=True)
-    nodes = torch.tensor(list(G.adj.keys()))
-    for i in range(value.shape[0]):
-        if (value[i].item() in G.nodes):
-            G.nodes[int(value[i].item())]['weight'] = counts[i]
-            G.nodes[int(value[i].item())]['ones'] = 1
-    G.graph['node_weight_attr'] = ['weight', 'ones']
-    for i, key in enumerate(edge_index_dict):
+    edge_list = []
+    weight_list = []
+    for i,key in enumerate(edge_index_dict):
         v = edge_index_dict[key]
-        edges = torch.cat((v, (torch.ones(v.shape[1], dtype=torch.long) *
-                               edge_weight_dict[key]).unsqueeze(0)), dim=0)
-        # w = edges.T
-        G.add_weighted_edges_from((edges.T).tolist())
-    G.graph['edge_weight_attr'] = 'weight'
-    cuts, part = metis.part_graph(G, num_parts)
-    node_parts = torch.zeros(num_nodes, dtype=torch.long)
-    node_parts[nodes] = torch.tensor(part)
+        edge_list.append(v)
+        weight_list.append(torch.ones(v.shape[1])*edge_weight_dict[key])
+    edge_index = torch.cat(edge_list,dim = 1)
+    edge_weight = torch.cat(weight_list,dim = 0)
+    node_parts = mt_metis_partition(edge_index,num_nodes,num_parts,node_weight,edge_weight)
     return node_parts
+    #G = nx.Graph()
+    #G.add_nodes_from(torch.arange(0, num_nodes).tolist())
+    #value, counts = torch.unique(edge_index_dict['edata'][1, :].view(-1),
+    #                             return_counts=True)
+    #nodes = torch.tensor(list(G.adj.keys()))
+    #for i in range(value.shape[0]):
+    #    if (value[i].item() in G.nodes):
+    #        G.nodes[int(value[i].item())]['weight'] = counts[i]
+    #        G.nodes[int(value[i].item())]['ones'] = 1
+    #G.graph['node_weight_attr'] = ['weight', 'ones']
+    #for i, key in enumerate(edge_index_dict):
+    #    v = edge_index_dict[key]
+    #    edges = torch.cat((v, (torch.ones(v.shape[1], dtype=torch.long) *
+    #                           edge_weight_dict[key]).unsqueeze(0)), dim=0)
+    #    # w = edges.T
+    #    G.add_weighted_edges_from((edges.T).tolist())
+    #G.graph['edge_weight_attr'] = 'weight'
+    #cuts, part = metis.part_graph(G, num_parts)
+    #node_parts = torch.zeros(num_nodes, dtype=torch.long)
+    #node_parts[nodes] = torch.tensor(part)
+    #return node_parts
 
 
 """
@@ -187,6 +201,7 @@ weight: 各种工作负载边划分权重
 
 def partition_data_for_tgnn(data: Data, num_parts: int, algo: str,
                             verbose: bool = False,
+                            node_weight: torch.Tensor = None,
                             edge_weight_dict: dict = None):
     if algo == "metis_for_tgnn":
         part_fn = metis_for_tgnn
@@ -200,6 +215,7 @@ def partition_data_for_tgnn(data: Data, num_parts: int, algo: str,
     if verbose:
         print(f"running partition algorithm: {algo}")
     node_parts = part_fn(edge_index_dict, num_nodes, num_parts,
+                         node_weight,
                          edge_weight_dict)
     edge_parts = node_parts[data.edge_index[1, :]]
     eids = torch.arange(num_edges, dtype=torch.long)

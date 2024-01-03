@@ -1,5 +1,9 @@
 install.sh
 
+a.out
+third_party
+install.sh
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -21,7 +21,7 @@ class GeneralModel(torch.nn.Module):
         self.train_param = train_param
         if memory_param['type'] == 'node':
             if memory_param['memory_update'] == 'gru':
-                self.memory_updater = RNNMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node)
+                self.memory_updater = GRUMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node)
             elif memory_param['memory_update'] == 'rnn':
                 self.memory_updater = RNNMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node)
             elif memory_param['memory_update'] == 'transformer':

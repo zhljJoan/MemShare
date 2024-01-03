@@ -42,6 +42,7 @@ class DistributedDataLoader:
             train = False,
             queue_size = 10,
             mailbox = None,
+            is_pipeline = False,
             **kwargs
     ):
         assert sampler is not None
@@ -63,11 +64,13 @@ class DistributedDataLoader:
         self.dataset = dataset
         self.mailbox = mailbox
         self.device =  device
+        self.is_pipeline = is_pipeline
         if train is True:
             self._get_expected_idx(self.dataset.len)
         else:
             self._get_expected_idx(self.dataset.len,op = dist.ReduceOp.MAX)
             #self.expected_idx = int(math.ceil(self.dataset.len/self.batch_size))
+        torch.distributed.barrier()
               
     def __iter__(self):
         if self.chunk_size is None:
@@ -134,7 +137,7 @@ class DistributedDataLoader:
         return next_data
     
     def __next__(self):
-        if(dist.get_world_size() > 0):
+        if self.is_pipeline is False:
             if self.recv_idxs < self.expected_idx:
                 data = self._next_data()
                 batch_data = graph_sample(self.graph,
@@ -148,47 +151,36 @@ class DistributedDataLoader:
                 return batch_data
             else :
                 raise StopIteration
-        else :
-            num_reqs = min(self.queue_size - self.num_pending,self.expected_idx - self.submitted)
-            for _ in range(num_reqs):
-                if len(self.result_queue)>0:
-                    result = self.result_queue[0]
-                    if result[1].done() == True:
-                        self.recv_idxs += 1
-                        self.num_pending -= 1
-                        self.result_queue.popleft()
-                        return result[0],result[1].value(),result[2]
-                else:
-                    next_data = self._next_data()
-                    assert next_data is not None
-                    batch_data = graph_sample(self.graph,
+        else:
+            if self.recv_idxs == 0:
+                data = self._next_data()
+                batch_data = graph_sample(self.graph,
                                           self.sampler,
                                           self.sampler_fn,
-                                          next_data,self.neg_sampler,
+                                          data,self.neg_sampler,
                                           self.mailbox,
                                           self.device)
-                    batch_data[1].wait()
-                    self.submitted = self.submitted + 1
-                    self.num_pending = self.num_pending + 1
-                    self.recv_idxs += 1
-                    self.num_pending -= 1
-                    return batch_data[0],batch_data[1].value(),batch_data[2]
-                    self.result_queue.append(batch_data)
-                    self.submitted = self.submitted + 1
-                    self.num_pending = self.num_pending + 1
-                    
-            while(self.recv_idxs < self.expected_idx):
-                assert len(self.result_queue) > 0
-                result= self.result_queue[0]
-                if result[1].done() == True:
-                    self.recv_idxs += 1
-                    self.num_pending -= 1
+                self.recv_idxs += 1
+            else:
+                if(self.recv_idxs < self.expected_idx):
+                    assert len(self.result_queue) > 0
+                    result= self.result_queue[0]
                     self.result_queue.popleft()
-                    return result[0],result[1].value(),result[2]
-                
-                
-            assert self.num_pending == 0
-            raise StopIteration
+                    batch_data = result.result()
+                    self.recv_idxs += 1
+                else:
+                    raise StopIteration
+            if(self.recv_idxs+1<=self.expected_idx):
+                data = self._next_data()
+                next_batch =  graph_sample(self.graph,
+                                          self.sampler,
+                                          self.sampler_fn,
+                                          data,self.neg_sampler,
+                                          self.mailbox,
+                                          self.device,
+                                          async_op=True)
+                self.result_queue.append(next_batch)     
+        return batch_data
                     
 
         

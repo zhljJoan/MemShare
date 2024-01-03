@@ -155,6 +155,8 @@ endif()
 
 # add libsampler.so
 set(SAMLPER_NAME "${PROJECT_NAME}_sampler")
+set(BOOST_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/third_party/boost_1_83_0")
+include_directories(${BOOST_INCLUDE_DIRS})
 
 file(GLOB_RECURSE SAMPLER_SRCS "csrc/sampler/*.cpp")
 add_library(${SAMLPER_NAME} SHARED ${SAMPLER_SRCS})

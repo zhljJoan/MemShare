@@ -2,6 +2,7 @@
 #include <sampler.h>
 #include <output.h>
 #include <neighbors.h>
+#include <temporal_utils.h>
 
 
 /*------------Python Bind--------------------------------------------------------------*/
@@ -16,7 +17,14 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
         py::return_value_policy::reference)
     .def("divide_nodes_to_part", 
         &divide_nodes_to_part, 
-        py::return_value_policy::reference);
+        py::return_value_policy::reference)
+    .def("sparse_get_index", 
+        &sparse_get_index, 
+        py::return_value_policy::reference)
+    .def("get_norm_temporal",
+        &get_norm_temporal, 
+        py::return_value_policy::reference
+    );
 
     py::class_<TemporalGraphBlock>(m, "TemporalGraphBlock")
         .def(py::init<vector<NodeIDType> &, vector<NodeIDType> &,
@@ -79,4 +87,5 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
         .def("neighbor_sample_from_nodes", &ParallelSampler::neighbor_sample_from_nodes)
         .def("reset", &ParallelSampler::reset)
         .def("get_ret", [](const ParallelSampler &ps) { return ps.ret; });
+
 }

@@ -7,7 +7,8 @@ from starrygl.distributed.utils import DistIndex
 from starrygl.module.modules import GeneralModel
 
 from starrygl.module.utils import parse_config
-from starrygl.sample.graph_core import DataSet, GraphData, TemporalNeighborSampleGraph
+from starrygl.sample.cache.fetch_cache import FetchFeatureCache
+from starrygl.sample.graph_core import DataSet, DistributedGraphStore, TemporalNeighborSampleGraph
 from starrygl.sample.memory.shared_mailbox import SharedMailBox
 from starrygl.sample.sample_core.base import NegativeSampling
 from starrygl.sample.sample_core.neighbor_sampler import NeighborSampler
@@ -25,31 +26,17 @@ import os
 
 from starrygl.sample.data_loader import DistributedDataLoader
 from starrygl.sample.batch_data import SAMPLE_TYPE
-"""
-test command 
-python test.py --world_size 2 --rank 0 
---world_size', default=4, type=int, metavar='W',
-                    help='number of workers')
-parser.add_argument('--rank', default=0, type=int, metavar='W',
-                    help='rank of the worker')
-parser.add_argument('--log_interval', type=int, default=10, metavar='N',
-                    help='interval between training status logs')
-parser.add_argument('--gamma', type=float, default=0.99, metavar='G',
-                    help='how much to value future rewards')
-parser.add_argument('--seed', type=int, default=1, metavar='S',
-                    help='random seed  for reproducibility')
-parser.add_argument('--num_sampler', type=int, default=10, metavar='S',
-                    help='number of samplers')
-parser.add_argument('--queue_size', type=int, default=10, metavar='S',
-                    help='sampler queue size')
-"""
+from starrygl.sample.stream_manager import getPipelineManger
+
 parser = argparse.ArgumentParser(
     description="RPC Reinforcement Learning Example",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
-parser.add_argument('--rank', default=0, type=str, metavar='W',
+parser.add_argument('--rank', default=0, type=int, metavar='W',
                     help='name of dataset')
 parser.add_argument('--world_size', default=1, type=int, metavar='W',
+                    help='number of negative samples')
+parser.add_argument('--dataname', default=1, type=str, metavar='W',
                     help='number of negative samples')
 args = parser.parse_args()
 from sklearn.metrics import average_precision_score, roc_auc_score
@@ -60,11 +47,12 @@ import dgl
 import numpy as np
 from sklearn.metrics import average_precision_score, roc_auc_score
 from torch.nn.parallel import DistributedDataParallel as DDP
-os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
-os.environ["RANK"] = str(args.rank)
-os.environ["WORLD_SIZE"] = str(args.world_size)
-os.environ["LOCAL_RANK"] = str(0)
-os.environ["MASTER_ADDR"] = '127.0.0.1'
+#os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
+#os.environ["RANK"] = str(args.rank)
+#os.environ["WORLD_SIZE"] = str(args.world_size)
+#os.environ["LOCAL_RANK"] = str(0)
+torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
+os.environ["MASTER_ADDR"] = '10.214.211.187'
 os.environ["MASTER_PORT"] = '9337'
 def seed_everything(seed=42):
     random.seed(seed)
@@ -76,18 +64,19 @@ def seed_everything(seed=42):
 
 seed_everything(1234)
 def main():   
+    print('main')
     use_cuda = True
     sample_param, memory_param, gnn_param, train_param = parse_config('./config/TGN.yml')
     torch.set_num_threads(12)
     ctx = DistributedContext.init(backend="nccl", use_gpu=True)
     device_id = torch.cuda.current_device()
     print('use cuda on',device_id)
-    pdata = partition_load("./dataset/here/GDELT", algo="metis_for_tgnn")    
-    graph = GraphData(pdata = pdata)
+    pdata = partition_load("/mnt/data/part_data/dataset/here/{}".format(args.dataname), algo="metis_for_tgnn")    
+    graph = DistributedGraphStore(pdata = pdata,uvm_edge = False,uvm_node = False)
 
     sample_graph = TemporalNeighborSampleGraph(sample_graph = pdata.sample_graph,mode = 'full')
     mailbox = SharedMailBox(pdata.ids.shape[0], memory_param, dim_edge_feat = pdata.edge_attr.shape[1] if pdata.edge_attr is not None else 0)
-    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=1, fanout=[10],graph_data=sample_graph, workers=10,policy = 'recent',graph_name = "wiki_train")
+    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=1, fanout=[10],graph_data=sample_graph, workers=15,policy = 'recent',graph_name = "wiki_train")
     train_data = torch.masked_select(graph.edge_index,pdata.train_mask.to(graph.edge_index.device)).reshape(2,-1)
     train_ts = torch.masked_select(graph.edge_ts,pdata.train_mask.to(graph.edge_index.device))
     val_data = torch.masked_select(graph.edge_index,pdata.val_mask.to(graph.edge_index.device)).reshape(2,-1)
@@ -96,8 +85,16 @@ def main():
     test_ts = torch.masked_select(graph.edge_ts,pdata.test_mask.to(graph.edge_index.device)) 
     print(train_data.shape[1],val_data.shape[1],test_data.shape[1])
     train_data = DataSet(edges = train_data,ts =train_ts,eids = torch.nonzero(pdata.train_mask).view(-1))
+    #if dist.get_rank() == 0:
     test_data = DataSet(edges = test_data,ts =test_ts,eids = torch.nonzero(pdata.test_mask).view(-1))
     val_data = DataSet(edges = val_data,ts = val_ts,eids = torch.nonzero(pdata.val_mask).view(-1))
+    #else:
+        #test_data = torch.tensor([[],[]],device = graph.edge_index.device,detype = graph.edge_index.#dtype)
+        #val_data = torch.tensor([[],[]],device = graph.edge_index.device,detype = graph.edge_index.dtype)
+        #test_ts = torch.tensor([[],[]],device = graph.ts.device,detype = graph.ts.dtype)
+        #val_ts = torch.tensor([[],[]],device = graph.ts.device,detype = graph.ts.dtype)
+        #test_data = DataSet(edges = test_data,ts =test_ts,eids = torch.tensor([],dtype = torch.long,#device = torch.cuda))
+        #val_data = DataSet(edges = val_data,ts = val_ts,eids = torch.tensor([],dtype = torch.long,device #= torch.cuda))
     #train_neg_sampler = PreNegativeSampling('triplet',torch.masked_select(pdata.edge_index['pos_edge'],graph.data.train_mask).reshape(2,-1))
     neg_sampler = NegativeSampling('triplet')
     trainloader = DistributedDataLoader(graph,train_data,sampler = sampler,
@@ -109,7 +106,8 @@ def main():
                                         chunk_size = None,
                                         train=True,
                                         queue_size = 1000,
-                                        mailbox = mailbox)
+                                        mailbox = mailbox,
+                                        )
     testloader = DistributedDataLoader(graph,test_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
@@ -130,8 +128,12 @@ def main():
                                         train=False,
                                         queue_size = 100,
                                         mailbox = mailbox)
+    #FetchFeatureCache.create_fetch_cache(graph.num_nodes,graph.eids_mapper.shape[0],0.1,0.1,graph,mailbox,policy = 'static')
+    #cache = FetchFeatureCache.getFetchCache()
+    #cache.init_cache_with_presample(trainloader,3)
     gnn_dim_node = 0 if graph.x is None else pdata.x.shape[1]
     gnn_dim_edge = 0 if graph.edge_attr is None else pdata.edge_attr.shape[1]
+    print(gnn_dim_node,gnn_dim_edge)
     avg_time  = 0
     if use_cuda:
         model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param).cuda()
@@ -159,40 +161,42 @@ def main():
         with torch.no_grad():
             total_loss = 0
             signal = torch.tensor([0],dtype = int,device = device)
-            
-            for roots,mfgs,metadata in loader:
-                
-                pred_pos, pred_neg = model(mfgs,metadata)
-                total_loss += creterion(pred_pos, torch.ones_like(pred_pos))
-                total_loss += creterion(pred_neg, torch.zeros_like(pred_neg))
-                y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
-                y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
-                aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
-                aucs_mrrs.append(roc_auc_score(y_true, y_pred))
-                if mailbox is not None:
-                    src = metadata['src_pos_index']
-                    dst = metadata['dst_pos_index']
-                    
-                    ts = roots.ts
-                    if(graph.edge_attr.device == torch.device('cpu')):
-                        edge_feats = graph.edge_attr[roots.eids.to('cpu')].to('cuda') if graph.edge_attr is not None else None
-                    else:
-                        edge_feats = graph.edge_attr[roots.eids] if graph.edge_attr is not None else None
-                    dist_index_mapper = mfgs[0][0].srcdata['ID']
-                    root_index = torch.cat((src,dst))
-                    last_updated_nid = model.module.memory_updater.last_updated_nid[root_index]
-                    last_updated_memory = model.module.memory_updater.last_updated_memory[root_index]
-                    last_updated_ts=model.module.memory_updater.last_updated_ts[root_index]
-                    index, memory, memory_ts = mailbox.get_update_memory(last_updated_nid,
-                                                                       last_updated_memory,
-                                                                       last_updated_ts)
-                    
-                    index, mail, mail_ts = mailbox.get_update_mail(dist_index_mapper,
-                                                 src,dst,ts,edge_feats,
-                                                 model.module.memory_updater.last_updated_memory,
-                                                 )
-                    mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
-                
+            with torch.cuda.stream(train_stream):
+                for roots,mfgs,metadata in loader:
+
+                    pred_pos, pred_neg = model(mfgs,metadata)
+                    total_loss += creterion(pred_pos, torch.ones_like(pred_pos))
+                    total_loss += creterion(pred_neg, torch.zeros_like(pred_neg))
+                    y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
+                    y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
+                    aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
+                    aucs_mrrs.append(roc_auc_score(y_true, y_pred))
+                    if mailbox is not None:
+                        src = metadata['src_pos_index']
+                        dst = metadata['dst_pos_index']
+
+                        ts = roots.ts
+                        if graph.edge_attr is None:
+                            edge_feats = None
+                        elif(graph.edge_attr.device == torch.device('cpu')):
+                            edge_feats = graph.edge_attr[roots.eids.to('cpu')].to('cuda')
+                        else:
+                            edge_feats = graph.edge_attr[roots.eids] 
+                        dist_index_mapper = mfgs[0][0].srcdata['ID']
+                        root_index = torch.cat((src,dst))
+                        last_updated_nid = model.module.memory_updater.last_updated_nid[root_index]
+                        last_updated_memory = model.module.memory_updater.last_updated_memory[root_index]
+                        last_updated_ts=model.module.memory_updater.last_updated_ts[root_index]
+                        index, memory, memory_ts = mailbox.get_update_memory(last_updated_nid,
+                                                                           last_updated_memory,
+                                                                           last_updated_ts)
+#
+                        index, mail, mail_ts = mailbox.get_update_mail(dist_index_mapper,
+                                                     src,dst,ts,edge_feats,
+                                                     model.module.memory_updater.last_updated_memory,
+                                                     )
+                        mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
+
 
         #ap = float(torch.tensor(aps).mean())
         #if neg_samples > 1:
@@ -207,7 +211,6 @@ def main():
         ap = float(torch.tensor(apc).mean())
         auc_mrr = float(torch.tensor(auc_mrr).mean())
         return ap, auc_mrr
-    
     creterion = torch.nn.BCEWithLogitsLoss()
 
     optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'])
@@ -242,15 +245,20 @@ def main():
                 y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
                 y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
                 train_aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
+                #start_event = torch.cuda.Event(enable_timing=True)
+                #end_event = torch.cuda.Event(enable_timing=True)
+                #start_event.record()
                 if mailbox is not None:
                     src = metadata['src_pos_index']
                     dst = metadata['dst_pos_index']
                     
                     ts = roots.ts
-                    if(graph.edge_attr.device == torch.device('cpu')):
-                        edge_feats = graph.edge_attr[roots.eids.to('cpu')].to('cuda') if graph.edge_attr is not None else None
+                    if graph.edge_attr is None:
+                        edge_feats = None
+                    elif(graph.edge_attr.device == torch.device('cpu')):
+                        edge_feats = graph.edge_attr[roots.eids.to('cpu')].to('cuda')
                     else:
-                        edge_feats = graph.edge_attr[roots.eids] if graph.edge_attr is not None else None
+                        edge_feats = graph.edge_attr[roots.eids] 
                     dist_index_mapper = mfgs[0][0].srcdata['ID']
                     root_index = torch.cat((src,dst))
                     last_updated_nid = model.module.memory_updater.last_updated_nid[root_index]
@@ -263,8 +271,11 @@ def main():
                                                  src,dst,ts,edge_feats,
                                                  model.module.memory_updater.last_updated_memory,
                                                  )
-                    
                     mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
+                    
+                    #end_event.record()
+                    #torch.cuda.synchronize()
+                    #write_back_time += start_event.elapsed_time(end_event)/1000
                 
         torch.cuda.synchronize()
         time_prep = time.time() - epoch_start_time
@@ -272,10 +283,14 @@ def main():
         train_ap = float(torch.tensor(train_aps).mean())    
         ap = 0
         auc = 0
+        #if cache.edge_cache is not None:
+        #    print('hit {}'.format(cache.edge_cache.hit_/ cache.edge_cache.hit_sum))
+        #if cache.node_cache is not None:
+        #    print('hit {}'.format(cache.node_cache.hit_/ cache.node_cache.hit_sum))
         ap, auc = eval('val')
         print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f}'.format(total_loss,train_ap, ap, auc))
         print('\ttotal time:{:.2f}s  prep time:{:.2f}s'.format(time.time()-epoch_start_time, time_prep))    
-          
+        #print('\t fetch time:{:.2f}s write back time:{:.2f}s'.format(fetch_time,write_back_time))
     model.eval()
     if mailbox is not None:
         mailbox.reset()

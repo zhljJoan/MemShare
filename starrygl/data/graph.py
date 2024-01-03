@@ -1,3 +1,11 @@
+
+
+
+
+
+
+
+
 import torch
 
 from torch import Tensor
@@ -19,6 +27,9 @@ __all__ = [
     "GraphData",
 ]
 
+
+Strings = Sequence[str]
+OptStrings = Optional[Strings]
 
 Strings = Sequence[str]
 OptStrings = Optional[Strings]
@@ -178,6 +189,13 @@ class GraphData:
         algorithm: str = "metis",
     ) -> 'GraphData':
         p = Path(root).expanduser().resolve() / f"{algorithm}_{num_parts}" / f"{part_id:03d}"
+    def load_partition(
+        root: str,
+        part_id: int,
+        num_parts: int,
+        algorithm: str = "metis",
+    ) -> 'GraphData':
+        p = Path(root).expanduser().resolve() / f"{algorithm}_{num_parts}" / f"{part_id:03d}"
         return torch.load(p.__str__())
     
     def save_partition(self,
@@ -307,7 +325,6 @@ class GraphData:
 
             logging.info(f"saving partition data: {i+1}/{num_parts}")
             torch.save(g, (base_path / f"{i:03d}").__str__())
-            
 
 class MetaData:
     def __init__(self) -> None:
