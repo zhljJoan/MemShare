@@ -7,6 +7,8 @@ from starrygl.distributed.utils import DistIndex
 from starrygl.module.modules import GeneralModel
 from pathlib import Path
 
+from pathlib import Path
+
 
 from starrygl.module.utils import parse_config
 from starrygl.sample.cache.fetch_cache import FetchFeatureCache
@@ -79,8 +81,15 @@ def main():
     device_id = torch.cuda.current_device()
     print('use cuda on',device_id)
     pdata = partition_load("/mnt/data/part_data/dataset/here/{}".format(args.dataname), algo="metis_for_tgnn")    
-    graph = DistributedGraphStore(pdata = pdata,uvm_edge = False,uvm_node = False)
+    graph = DistributedGraphStore(pdata = pdata)
 
+    Path("./saved_models/").mkdir(parents=True, exist_ok=True)
+    Path("./saved_checkpoints/").mkdir(parents=True, exist_ok=True)
+    get_checkpoint_path = lambda \
+    epoch: f'./saved_checkpoints/{args.model}-{args.dataname}-{epoch}.pth'
+    gnn_param['dyrep'] = True if args.model == 'DyRep' else False
+    use_src_emb = gnn_param['use_src_emb'] if 'use_src_emb' in gnn_param else False
+    use_dst_emb = gnn_param['use_dst_emb'] if 'use_dst_emb' in gnn_param else False
     sample_graph = TemporalNeighborSampleGraph(sample_graph = pdata.sample_graph,mode = 'full')
     mailbox = SharedMailBox(pdata.ids.shape[0], memory_param, dim_edge_feat = pdata.edge_attr.shape[1] if pdata.edge_attr is not None else 0)
     sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=1, fanout=[10],graph_data=sample_graph, workers=15,policy = 'recent',graph_name = "wiki_train")
@@ -90,7 +99,7 @@ def main():
     val_ts = torch.masked_select(graph.edge_ts,pdata.val_mask.to(graph.edge_index.device))
     test_data = torch.masked_select(graph.edge_index,pdata.test_mask.to(graph.edge_index.device)).reshape(2,-1)
     test_ts = torch.masked_select(graph.edge_ts,pdata.test_mask.to(graph.edge_index.device)) 
-    #print(train_data.shape[1],val_data.shape[1],test_data.shape[1])
+    ##print(train_data.shape[1],val_data.shape[1],test_data.shape[1])
     train_data = DataSet(edges = train_data,ts =train_ts,eids = torch.nonzero(pdata.train_mask).view(-1))
     #if dist.get_rank() == 0:
     test_data = DataSet(edges = test_data,ts =test_ts,eids = torch.nonzero(pdata.test_mask).view(-1))
@@ -169,7 +178,7 @@ def main():
             total_loss = 0
             signal = torch.tensor([0],dtype = int,device = device)
             with torch.cuda.stream(train_stream):
-                for roots,mfgs,metadata in loader:
+                for roots,mfgs,metadata,sample_time in loader:
 
                     pred_pos, pred_neg = model(mfgs,metadata)
                     total_loss += creterion(pred_pos, torch.ones_like(pred_pos))
@@ -199,11 +208,11 @@ def main():
                                                                            last_updated_ts)
 #
                         index, mail, mail_ts = mailbox.get_update_mail(dist_index_mapper,
-                                                     src,dst,ts,edge_feats,
-                                                     model.module.memory_updater.last_updated_memory,
+                                                    src,dst,ts,edge_feats,
+                                                    model.module.memory_updater.last_updated_memory,
                                                      model.module.embedding,use_src_emb,
                                                      use_dst_emb,
-                                                     )
+                                                )
                         mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
 
 
@@ -289,6 +298,9 @@ def main():
                     end_event = torch.cuda.Event(enable_timing=True)
                     start_event.record()
                     mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
+                    end_event.record()
+                    torch.cuda.synchronize()
+                    write_back_time += start_event.elapsed_time(end_event)/1000
                 
         torch.cuda.synchronize()
         time_prep = time.time() - epoch_start_time
