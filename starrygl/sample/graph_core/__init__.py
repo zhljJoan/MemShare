@@ -223,7 +223,7 @@ class DataSet:
     
 class TemporalGraphData(DistributedGraphStore):
     def __init__(self,pdata,device):
-        super(DistributedTempoGraphData,self).__init__(pdata,device)
+        super(DistributedGraphStore,self).__init__(pdata,device)
     def _set_temporal_batch_cache(self,size,pin_size):
         pass
     def _load_feature_to_cuda(self,ids):

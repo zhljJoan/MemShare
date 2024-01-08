@@ -1,0 +1,14 @@
+Advanced Concepts
+=================
+
+.. toctree::
+<<<<<<< HEAD
+    sampling_parallel/index
+    partition_parallel/index
+    timeline_parallel/index
+=======
+    ts_sampling
+    pp_training
+    tp_training
+    data_proc
+>>>>>>> cmy_dev
