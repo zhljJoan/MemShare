@@ -1,0 +1,22 @@
+starrygl.sample.graph_core
+==========================
+
+.. note::
+    Distributed Data Structure used in sampling training
+
+.. currentmodule:: starrygl.sample.graph_core
+
+.. autoclass::
+    DistributedGraphStore
+
+.. autofunction::
+     DistributedGraphStore._get_node_attr
+.. autofunction::
+     DistributedGraphStore._get_edge_attr
+.. autofunction::
+     DistributedGraphStore._get_dist_index
+
+.. autoclass::
+    DataSet
+.. autoclass::
+    TemporalNeighborSampleGraph

@@ -1,0 +1,28 @@
+Distributed Memory Updater
+==========================
+We will first define our mailbox, including our definitions of mialbox and memory:
+    .. code-block:: python
+        
+        from starrygl.sample.memory.shared_mailbox import SharedMailBox
+        mailbox = SharedMailBox(num_nodes=num_nodes, memory_param=memory_param, dim_edge_feat=dim_edge_feat)
+
+Args:
+    num_nodes: number of nodes
+    memory_param: the memory parameters in the yaml file,refer to TGL
+    dim_edge_feat: the dim of edge feature
+    
+Examples:
+
+    .. code-block:: python
+
+            from starrygl.sample.part_utils.partition_tgnn import partition_load
+            from starrygl.sample.memory.shared_mailbox import SharedMailBox
+
+            pdata = partition_load("PATH/{}".format(dataname), algo="metis_for_tgnn")
+            mailbox = SharedMailBox(pdata.ids.shape[0], memory_param, dim_edge_feat=pdata.edge_attr.shape[1] if pdata.edge_attr is not None else 0)
+
+We then need to hand over the mailbox to the data loader as in the above example,
+so that the relevant memory/mailbox can be directly loaded during training.
+
+During the training, we will call `get_update_memory`/`get_update_mail` function constantly updates 
+the relevant storage,which is the idea related to TGN.

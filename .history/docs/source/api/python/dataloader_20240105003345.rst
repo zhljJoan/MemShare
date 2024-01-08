@@ -1,0 +1,10 @@
+starrygl.sample.dataloader
+==========================
+
+.. note::
+    Distributed Sampling Graph Dataloader
+
+.. currentmodule:: starrygl.sample.dataloader
+
+.. autoclass::
+    Dataloader

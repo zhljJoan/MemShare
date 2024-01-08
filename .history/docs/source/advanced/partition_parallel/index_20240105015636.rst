@@ -1,0 +1,60 @@
+Distributed Partition Parallel
+==============================
+
+Introduction
+------------
+Distributed partition parallel refers to the process of partitioning a large graph into multiple partitions and distributing them to different workers for parallel training. Each worker is responsible for training a specific partition, and data is exchanged across different partitions. In Starygl, the Route class provides a simple and effective way to implement partition parallelism. It manages the data exchange between different partitions during training and facilitates communication and synchronization between workers. The Route class enables seamless parallel training across distributed systems by efficiently routing and exchanging data.
+
+Partitioning the Graph
+----------------------
+Before implementing partition parallelism, it is necessary to decide how to partition the graph data. Starygl provides several partitioning algorithms, including:
+
+- lgd
+- metis
+- multi-constraint metis
+
+In the following code example, we first partition the graph using a specific algorithm and save the node and edge features together with the corresponding graph partition.
+
+.. code-block:: python
+
+    def partition_graph(self,
+        root: str,
+        num_parts: int,
+        node_weight: Optional[str] = None,
+        edge_weight: Optional[str] = None,
+        algorithm: str = "metis",
+        partition_kwargs = None,):
+        # Code for partitioning the graph
+        ...
+
+Training with Partition Parallelism
+-----------------------------------
+To train a model using partition parallelism, you need to modify the model code to include the Route class. The Route class manages the exchange of features between partitions.
+
+.. code-block:: python
+
+    class SimpleConv(pyg_nn.MessagePassing):
+        def __init__(self, in_feats: int, out_feats: int):
+            super().__init__(aggr="mean")
+            self.linear = nn.Linear(in_feats, out_feats)
+
+        def forward(self, x: Tensor, edge_index: Tensor, route: Route):
+            dst_len = x.size(0)
+            x = route.apply(x)  # Exchange features
+            return self.propagate(edge_index, x=x)[:dst_len]
+
+        def message(self, x_j: Tensor):
+            return x_j
+
+        def update(self, x: Tensor):
+            return F.relu(self.linear(x))
+
+Conclusion
+----------
+In this tutorial, we discussed the concept of distributed partition parallelism and how to implement it using the Route class in Starygl. We covered the process of partitioning the graph using different algorithms and saving the partitioned data. We also modified the model code to include the Route class for feature exchange between partitions during training.
+
+By leveraging distributed partition parallelism, you can efficiently train large-scale graph models in a parallel and distributed manner. This approach enables better utilization of computing resources and accelerates the training process.
+
+We hope this tutorial provides a clear understanding of distributed partition parallelism and its implementation using the Route class. If you have any further questions or need additional assistance, please don't hesitate to ask.
+
+Note: If you find this tutorial helpful, a generous tip would be greatly appreciated.
