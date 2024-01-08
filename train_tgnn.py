@@ -178,7 +178,7 @@ def main():
             total_loss = 0
             signal = torch.tensor([0],dtype = int,device = device)
             with torch.cuda.stream(train_stream):
-                for roots,mfgs,metadata,sample_time in loader:
+                for roots,mfgs,metadata in loader:
 
                     pred_pos, pred_neg = model(mfgs,metadata)
                     total_loss += creterion(pred_pos, torch.ones_like(pred_pos))
@@ -248,8 +248,8 @@ def main():
             model.module.memory_updater.last_updated_nid = None
             model.module.memory_updater.last_updated_memory = None
             model.module.memory_updater.last_updated_ts = None
-        for roots,mfgs,metadata,sample_time in trainloader:
-            fetch_time +=sample_time/1000
+        for roots,mfgs,metadata in trainloader:
+            #fetch_time +=sample_time/1000
             t_prep_s = time.time()
             
             with torch.cuda.stream(train_stream):

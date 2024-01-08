@@ -1,8 +1,0 @@
-Package References
-==================
-
-.. toctree::
-    distributed
-    dataloader
-    neighbor_sampler
-    memory
