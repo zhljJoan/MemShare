@@ -5,9 +5,13 @@ from os.path import abspath, join, dirname
 from starrygl.distributed.context import DistributedContext
 from starrygl.distributed.utils import DistIndex
 from starrygl.module.modules import GeneralModel
+from pathlib import Path
+
 
 from starrygl.module.utils import parse_config
 from starrygl.sample.cache.fetch_cache import FetchFeatureCache
+from starrygl.sample.graph_core import DataSet, DistributedGraphStore, TemporalNeighborSampleGraph
+from starrygl.module.utils import parse_config, EarlyStopMonitor
 from starrygl.sample.graph_core import DataSet, DistributedGraphStore, TemporalNeighborSampleGraph
 from starrygl.sample.memory.shared_mailbox import SharedMailBox
 from starrygl.sample.sample_core.base import NegativeSampling
@@ -34,10 +38,13 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument('--rank', default=0, type=int, metavar='W',
                     help='name of dataset')
+parser.add_argument('--patience', type=int, default=5, help='Patience for early stopping')
 parser.add_argument('--world_size', default=1, type=int, metavar='W',
                     help='number of negative samples')
 parser.add_argument('--dataname', default=1, type=str, metavar='W',
-                    help='number of negative samples')
+                    help='name of dataset')
+parser.add_argument('--model', default='TGN', type=str, metavar='W',
+                    help='name of model')
 args = parser.parse_args()
 from sklearn.metrics import average_precision_score, roc_auc_score
 import torch
@@ -66,7 +73,7 @@ seed_everything(1234)
 def main():   
     print('main')
     use_cuda = True
-    sample_param, memory_param, gnn_param, train_param = parse_config('./config/TGN.yml')
+    sample_param, memory_param, gnn_param, train_param = parse_config('./config/{}.yml'.format(args.model))
     torch.set_num_threads(12)
     ctx = DistributedContext.init(backend="nccl", use_gpu=True)
     device_id = torch.cuda.current_device()
@@ -83,7 +90,7 @@ def main():
     val_ts = torch.masked_select(graph.edge_ts,pdata.val_mask.to(graph.edge_index.device))
     test_data = torch.masked_select(graph.edge_index,pdata.test_mask.to(graph.edge_index.device)).reshape(2,-1)
     test_ts = torch.masked_select(graph.edge_ts,pdata.test_mask.to(graph.edge_index.device)) 
-    print(train_data.shape[1],val_data.shape[1],test_data.shape[1])
+    #print(train_data.shape[1],val_data.shape[1],test_data.shape[1])
     train_data = DataSet(edges = train_data,ts =train_ts,eids = torch.nonzero(pdata.train_mask).view(-1))
     #if dist.get_rank() == 0:
     test_data = DataSet(edges = test_data,ts =test_ts,eids = torch.nonzero(pdata.test_mask).view(-1))
@@ -100,7 +107,7 @@ def main():
     trainloader = DistributedDataLoader(graph,train_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
-                                        batch_size = 1000,
+                                        batch_size = train_param['batch_size'],
                                         shuffle=False,
                                         drop_last=True,
                                         chunk_size = None,
@@ -111,7 +118,7 @@ def main():
     testloader = DistributedDataLoader(graph,test_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
-                                        batch_size = 1000,
+                                        batch_size = train_param['batch_size'],
                                         shuffle=False,
                                         drop_last=False,
                                         chunk_size = None,
@@ -121,7 +128,7 @@ def main():
     valloader = DistributedDataLoader(graph,val_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
-                                        batch_size = 1000,
+                                        batch_size = train_param['batch_size'],
                                         shuffle=False,
                                         drop_last=False,
                                         chunk_size = None,
@@ -194,6 +201,8 @@ def main():
                         index, mail, mail_ts = mailbox.get_update_mail(dist_index_mapper,
                                                      src,dst,ts,edge_feats,
                                                      model.module.memory_updater.last_updated_memory,
+                                                     model.module.embedding,use_src_emb,
+                                                     use_dst_emb,
                                                      )
                         mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
 
@@ -212,10 +221,13 @@ def main():
         auc_mrr = float(torch.tensor(auc_mrr).mean())
         return ap, auc_mrr
     creterion = torch.nn.BCEWithLogitsLoss()
-
     optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'])
+    early_stopper = EarlyStopMonitor(max_round=args.patience)
+    MODEL_SAVE_PATH = f'./saved_models/{args.model}-{args.dataname}.pth'
     for e in range(train_param['epoch']):
         torch.cuda.synchronize()
+        write_back_time = 0
+        fetch_time = 0
         epoch_start_time = time.time()
         train_aps = list()
         print('Epoch {:d}:'.format(e))
@@ -227,7 +239,8 @@ def main():
             model.module.memory_updater.last_updated_nid = None
             model.module.memory_updater.last_updated_memory = None
             model.module.memory_updater.last_updated_ts = None
-        for roots,mfgs,metadata in trainloader:
+        for roots,mfgs,metadata,sample_time in trainloader:
+            fetch_time +=sample_time/1000
             t_prep_s = time.time()
             
             with torch.cuda.stream(train_stream):
@@ -268,14 +281,14 @@ def main():
                                                                        last_updated_memory,
                                                                        last_updated_ts)
                     index, mail, mail_ts = mailbox.get_update_mail(dist_index_mapper,
-                                                 src,dst,ts,edge_feats,
-                                                 model.module.memory_updater.last_updated_memory,
-                                                 )
+                                                src,dst,ts,edge_feats,
+                                                model.module.memory_updater.last_updated_memory, 
+                                                model.module.embedding,use_src_emb,use_dst_emb,
+                                                )
+                    start_event = torch.cuda.Event(enable_timing=True)
+                    end_event = torch.cuda.Event(enable_timing=True)
+                    start_event.record()
                     mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
-                    
-                    #end_event.record()
-                    #torch.cuda.synchronize()
-                    #write_back_time += start_event.elapsed_time(end_event)/1000
                 
         torch.cuda.synchronize()
         time_prep = time.time() - epoch_start_time
@@ -288,9 +301,19 @@ def main():
         #if cache.node_cache is not None:
         #    print('hit {}'.format(cache.node_cache.hit_/ cache.node_cache.hit_sum))
         ap, auc = eval('val')
-        print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f}'.format(total_loss,train_ap, ap, auc))
-        print('\ttotal time:{:.2f}s  prep time:{:.2f}s'.format(time.time()-epoch_start_time, time_prep))    
-        #print('\t fetch time:{:.2f}s write back time:{:.2f}s'.format(fetch_time,write_back_time))
+        early_stop = early_stopper.early_stop_check(ap)
+        if early_stop:
+            print("Early stopping at epoch {:d}".format(e))
+            print(f"Loading the best model at epoch {early_stopper.best_epoch}")
+            best_model_path = get_checkpoint_path(early_stopper.best_epoch)
+            model.load_state_dict(torch.load(best_model_path))
+            break
+        else:
+            print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f}'.format(total_loss,train_ap, ap, auc))
+            print('\ttotal time:{:.2f}s  prep time:{:.2f}s'.format(time.time()-epoch_start_time, time_prep))    
+            print('\t fetch time:{:.2f}s write back time:{:.2f}s'.format(fetch_time,write_back_time))
+            torch.save(model.state_dict(), get_checkpoint_path(e))
+          
     model.eval()
     if mailbox is not None:
         mailbox.reset()
@@ -304,6 +327,7 @@ def main():
     else:
         print('\ttest AP:{:4f}  test AUC:{:4f}'.format(ap, auc))    
     print('test_dataset',test_data.edges.shape[1],'avg_time',avg_time/train_param['epoch'])
+    torch.save(model.state_dict(), MODEL_SAVE_PATH)
     ctx.shutdown()
 if __name__ == "__main__":
     main()

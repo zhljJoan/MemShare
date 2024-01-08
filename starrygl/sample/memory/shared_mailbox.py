@@ -299,7 +299,7 @@ class SharedMailBox():
 
     def get_update_mail(self,dist_indx_mapper,
                  src,dst,ts,edge_feats,
-                 memory):
+                 memory,embedding=None,use_src_emb=False,use_dst_emb=False):
         if edge_feats is not None:
             edge_feats = edge_feats.to(self.device).to(self.mailbox.dtype)
         src = src.to(self.device)
@@ -309,12 +309,14 @@ class SharedMailBox():
 
         mem_src = memory[src]
         mem_dst = memory[dst]
+        if embedding is not None:
+            emb_src = embedding[src]
+            emb_dst = embedding[dst]
+        src_mail = torch.cat([emb_src if use_src_emb else mem_src, emb_dst if use_dst_emb else mem_dst], dim=1)
+        dst_mail = torch.cat([emb_dst if use_src_emb else mem_dst, emb_src if use_dst_emb else mem_src], dim=1)
         if edge_feats is not None:
-            src_mail = torch.cat([mem_src, mem_dst, edge_feats], dim=1)
-            dst_mail = torch.cat([mem_dst, mem_src, edge_feats], dim=1)
-        else:
-            src_mail = torch.cat([mem_src, mem_dst], dim=1)
-            dst_mail = torch.cat([mem_dst, mem_src], dim=1)
+            src_mail = torch.cat([src_mail, edge_feats], dim=1)
+            dst_mail = torch.cat([dst_mail, edge_feats], dim=1)
         mail = torch.cat([src_mail, dst_mail], dim=1).reshape(-1, src_mail.shape[1])
         mail_ts = torch.cat((ts,ts),-1).to(self.device).to(self.mailbox_ts.dtype)
         unq_index,inv = torch.unique(index,return_inverse = True)
@@ -324,7 +326,6 @@ class SharedMailBox():
         index = unq_index
         return index,mail,mail_ts
     
-
     def get_update_memory(self,index,memory,memory_ts):
         unq_index,inv = torch.unique(index,return_inverse = True)
         max_ts,idx = torch_scatter.scatter_max(memory_ts,inv,0)

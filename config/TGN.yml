@@ -18,13 +18,15 @@ memory:
     dim_out: 100
 gnn:
   - arch: 'transformer_attention'
+    use_src_emb: False
+    use_dst_emb: False
     layer: 1
     att_head: 2
     dim_time: 100
     dim_out: 100
 train:
-  - epoch: 5
-    #batch_size: 100
+  - epoch: 20
+    batch_size: 200
     # reorder: 16
     lr: 0.0001
     dropout: 0.2
