@@ -114,11 +114,15 @@ edge_weight_dict = {}
 edge_weight_dict['edata'] = 2*neg_nums
 edge_weight_dict['sample_data'] = 1*neg_nums
 edge_weight_dict['neg_data'] = 1
-partition_save('./dataset/here/'+data_name, data, 1, 'metis_for_tgnn',
-               edge_weight_dict=edge_weight_dict)
-partition_save('./dataset/here/'+data_name, data, 2, 'metis_for_tgnn',
-               edge_weight_dict=edge_weight_dict)
-partition_save('./dataset/here/'+data_name, data, 4, 'metis_for_tgnn',
+#partition_save('./dataset/here/'+data_name, data, 1, 'metis_for_tgnn',
+#               edge_weight_dict=edge_weight_dict)
+#partition_save('./dataset/here/'+data_name, data, 2, 'metis_for_tgnn',
+#               edge_weight_dict=edge_weight_dict)
+#partition_save('./dataset/here/'+data_name, data, 4, 'metis_for_tgnn',
+#               edge_weight_dict=edge_weight_dict)
+#partition_save('./dataset/here/'+data_name, data, 8, 'metis_for_tgnn',
+#               edge_weight_dict=edge_weight_dict)
+partition_save('./dataset/here/'+data_name, data, 16, 'metis_for_tgnn',
                edge_weight_dict=edge_weight_dict)
 #
 # partition_save('./dataset/here/'+data_name, data, 4, 'metis_for_tgnn',

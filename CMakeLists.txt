@@ -110,19 +110,6 @@ if(WITH_MTMETIS)
     target_compile_definitions(mtmetis_partition PRIVATE -DMTMETIS_64BIT_PARTITIONS)
 endif()
 
-if (WITH_LDG)
-    # Imports neighbor-clustering based (e.g. LDG algorithm) graph partitioning implementation
-    add_definitions(-DWITH_LDG)
-    set(LDG_DIR "third_party/ldg_partition")
-    
-    add_library(ldg_partition SHARED "csrc/partition/ldg.cpp")
-    target_link_libraries(ldg_partition PRIVATE ${TORCH_LIBRARIES})
-
-    add_subdirectory(${LDG_DIR})
-    target_include_directories(ldg_partition PRIVATE ${LDG_DIR})
-    target_link_libraries(ldg_partition PRIVATE ldg-vertex-partition)
-endif ()
-
 include_directories("csrc/include")
 add_library(${PROJECT_NAME} SHARED csrc/export.cpp)
 

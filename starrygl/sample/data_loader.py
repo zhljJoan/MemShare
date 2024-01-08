@@ -192,7 +192,10 @@ class DistributedDataLoader:
                                           self.device)
                 self.recv_idxs += 1
                 assert batch_data is not None
-                return batch_data
+                end_event.record()
+                torch.cuda.synchronize()
+                sample_time = start_event.elapsed_time(end_event)
+                return *batch_data,sample_time
             else :
                 raise StopIteration
         else:

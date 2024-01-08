@@ -5,6 +5,7 @@
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
     #ifdef WITH_CUDA
+    #ifdef WITH_CUDA
     m.def("uvm_storage_new", &uvm_storage_new, "return storage of unified virtual memory");
     m.def("uvm_storage_to_cuda", &uvm_storage_to_cuda, "share uvm storage with another cuda device");
     m.def("uvm_storage_to_cpu", &uvm_storage_to_cpu, "share uvm storage with cpu");
