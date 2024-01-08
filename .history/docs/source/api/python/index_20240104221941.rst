@@ -1,5 +1,0 @@
-Package References
-==================
-
-.. toctree::
-    distributed
