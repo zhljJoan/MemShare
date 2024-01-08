@@ -169,6 +169,8 @@ cython_debug/
 
 /third_party
 /.vscode
+/.history
+/.cache
 
 /run_route.py
 /dataset
