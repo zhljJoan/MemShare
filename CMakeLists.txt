@@ -1,4 +1,3 @@
-set(CMAKE_SOURCE_DIR "/mnt/data/")
 cmake_minimum_required(VERSION 3.15)
 
 project(starrygl VERSION 0.1)

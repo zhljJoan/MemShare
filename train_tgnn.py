@@ -5,8 +5,10 @@ from os.path import abspath, join, dirname
 from starrygl.distributed.context import DistributedContext
 from starrygl.distributed.utils import DistIndex
 from starrygl.module.modules import GeneralModel
+from pathlib import Path
 
-from starrygl.module.utils import parse_config
+
+from starrygl.module.utils import parse_config, EarlyStopMonitor
 from starrygl.sample.graph_core import DataSet, DistributedGraphStore, TemporalNeighborSampleGraph
 from starrygl.sample.memory.shared_mailbox import SharedMailBox
 from starrygl.sample.sample_core.base import NegativeSampling
@@ -32,10 +34,13 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument('--rank', default=0, type=str, metavar='W',
                     help='name of dataset')
+parser.add_argument('--patience', type=int, default=5, help='Patience for early stopping')
 parser.add_argument('--world_size', default=1, type=int, metavar='W',
                     help='number of negative samples')
 parser.add_argument('--dataname', default=1, type=str, metavar='W',
-                    help='number of negative samples')
+                    help='name of dataset')
+parser.add_argument('--model', default='TGN', type=str, metavar='W',
+                    help='name of model')
 args = parser.parse_args()
 from sklearn.metrics import average_precision_score, roc_auc_score
 import torch
@@ -62,7 +67,7 @@ def seed_everything(seed=42):
 seed_everything(1234)
 def main():   
     use_cuda = True
-    sample_param, memory_param, gnn_param, train_param = parse_config('./config/TGN.yml')
+    sample_param, memory_param, gnn_param, train_param = parse_config('./config/{}.yml'.format(args.model))
     torch.set_num_threads(12)
     ctx = DistributedContext.init(backend="nccl", use_gpu=True)
     device_id = torch.cuda.current_device()
@@ -70,6 +75,13 @@ def main():
     pdata = partition_load("/mnt/data/part_data/dataset/here/{}".format(args.dataname), algo="metis_for_tgnn")    
     graph = DistributedGraphStore(pdata = pdata)
 
+    Path("./saved_models/").mkdir(parents=True, exist_ok=True)
+    Path("./saved_checkpoints/").mkdir(parents=True, exist_ok=True)
+    get_checkpoint_path = lambda \
+    epoch: f'./saved_checkpoints/{args.model}-{args.dataname}-{epoch}.pth'
+    gnn_param['dyrep'] = True if args.model == 'DyRep' else False
+    use_src_emb = gnn_param['use_src_emb'] if 'use_src_emb' in gnn_param else False
+    use_dst_emb = gnn_param['use_dst_emb'] if 'use_dst_emb' in gnn_param else False
     sample_graph = TemporalNeighborSampleGraph(sample_graph = pdata.sample_graph,mode = 'full')
     mailbox = SharedMailBox(pdata.ids.shape[0], memory_param, dim_edge_feat = pdata.edge_attr.shape[1] if pdata.edge_attr is not None else 0)
     sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=1, fanout=[10],graph_data=sample_graph, workers=10,policy = 'recent',graph_name = "wiki_train")
@@ -88,7 +100,7 @@ def main():
     trainloader = DistributedDataLoader(graph,train_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
-                                        batch_size = 1000,
+                                        batch_size = train_param['batch_size'],
                                         shuffle=False,
                                         drop_last=True,
                                         chunk_size = None,
@@ -98,7 +110,7 @@ def main():
     testloader = DistributedDataLoader(graph,test_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
-                                        batch_size = 1000,
+                                        batch_size = train_param['batch_size'],
                                         shuffle=False,
                                         drop_last=False,
                                         chunk_size = None,
@@ -108,7 +120,7 @@ def main():
     valloader = DistributedDataLoader(graph,val_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
-                                        batch_size = 1000,
+                                        batch_size = train_param['batch_size'],
                                         shuffle=False,
                                         drop_last=False,
                                         chunk_size = None,
@@ -175,9 +187,10 @@ def main():
                                                                        last_updated_ts)
                     
                     index, mail, mail_ts = mailbox.get_update_mail(dist_index_mapper,
-                                                 src,dst,ts,edge_feats,
-                                                 model.module.memory_updater.last_updated_memory,
-                                                 )
+                                                src,dst,ts,edge_feats,
+                                                model.module.memory_updater.last_updated_memory,
+                                                model.module.embedding,use_src_emb,use_dst_emb,
+                                                )
                     mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
                 
 
@@ -197,6 +210,8 @@ def main():
     
     creterion = torch.nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'])
+    early_stopper = EarlyStopMonitor(max_round=args.patience)
+    MODEL_SAVE_PATH = f'./saved_models/{args.model}-{args.dataname}.pth'
     for e in range(train_param['epoch']):
         torch.cuda.synchronize()
         write_back_time = 0
@@ -251,9 +266,10 @@ def main():
                                                                        last_updated_memory,
                                                                        last_updated_ts)
                     index, mail, mail_ts = mailbox.get_update_mail(dist_index_mapper,
-                                                 src,dst,ts,edge_feats,
-                                                 model.module.memory_updater.last_updated_memory,
-                                                 )
+                                                src,dst,ts,edge_feats,
+                                                model.module.memory_updater.last_updated_memory, 
+                                                model.module.embedding,use_src_emb,use_dst_emb,
+                                                )
                     start_event = torch.cuda.Event(enable_timing=True)
                     end_event = torch.cuda.Event(enable_timing=True)
                     start_event.record()
@@ -269,9 +285,18 @@ def main():
         ap = 0
         auc = 0
         ap, auc = eval('val')
-        print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f}'.format(total_loss,train_ap, ap, auc))
-        print('\ttotal time:{:.2f}s  prep time:{:.2f}s'.format(time.time()-epoch_start_time, time_prep))    
-        print('\t fetch time:{:.2f}s write back time:{:.2f}s'.format(fetch_time,write_back_time))
+        early_stop = early_stopper.early_stop_check(ap)
+        if early_stop:
+            print("Early stopping at epoch {:d}".format(e))
+            print(f"Loading the best model at epoch {early_stopper.best_epoch}")
+            best_model_path = get_checkpoint_path(early_stopper.best_epoch)
+            model.load_state_dict(torch.load(best_model_path))
+            break
+        else:
+            print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f}'.format(total_loss,train_ap, ap, auc))
+            print('\ttotal time:{:.2f}s  prep time:{:.2f}s'.format(time.time()-epoch_start_time, time_prep))    
+            print('\t fetch time:{:.2f}s write back time:{:.2f}s'.format(fetch_time,write_back_time))
+            torch.save(model.state_dict(), get_checkpoint_path(e))
           
     model.eval()
     if mailbox is not None:
@@ -286,6 +311,7 @@ def main():
     else:
         print('\ttest AP:{:4f}  test AUC:{:4f}'.format(ap, auc))    
     print('test_dataset',test_data.edges.shape[1],'avg_time',avg_time/train_param['epoch'])
+    torch.save(model.state_dict(), MODEL_SAVE_PATH)
     ctx.shutdown()
 if __name__ == "__main__":
     main()

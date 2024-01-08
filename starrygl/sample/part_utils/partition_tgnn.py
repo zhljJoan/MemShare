@@ -2,8 +2,7 @@ import parser
 from torch_sparse import SparseTensor
 from torch_geometric.data import Data
 from torch_geometric.utils import degree
-from starrygl.lib.libstarrygl_ops import metis_partition
-from starrygl.lib.libstarrygl_ops_sampler import get_norm_temporal
+from starrygl.lib.libstarrygl_sampler import get_norm_temporal
 import os.path as osp
 import os
 import shutil

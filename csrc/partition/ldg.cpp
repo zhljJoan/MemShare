@@ -1,6 +1,6 @@
 #include <torch/all.h>
-#include "neighbor_clustering/vertex_partition/vertex_partition.h"
-#include "neighbor_clustering/vertex_partition/params.h"
+#include "vertex_partition/vertex_partition.h"
+#include "vertex_partition/params.h"
 
 at::Tensor ldg_partition(at::Tensor edges,
                          at::optional<at::Tensor> vertex_weights,

@@ -68,7 +68,7 @@ class DataSet:
         if labels is not None:
             self.labels = labels
         self.len = self.nodes.shape[0] if nodes is not None else self.edges.shape[1] 
-        print(self.edges.shape,self.len)
+        
         for k, v in kwargs.items():
             assert isinstance(v,torch.Tensor) and v.shape[0]==self.len
             setattr(self, k, v.to(device))
