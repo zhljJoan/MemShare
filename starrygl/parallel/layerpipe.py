@@ -75,6 +75,12 @@ class LayerPipe(ABC):
                 models.append((key, val))
         return tuple(models)
     
+    def parameters(self):
+        params: List[nn.Parameter] = []
+        for name, m in self.get_model():
+            params.extend(m.parameters())
+        return params
+    
     def register_route(self, *xs: Tensor):
         for t in xs:
             t.requires_route = True
