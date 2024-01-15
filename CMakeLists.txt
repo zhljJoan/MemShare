@@ -113,7 +113,7 @@ endif()
 if (WITH_LDG)
     # Imports neighbor-clustering based (e.g. LDG algorithm) graph partitioning implementation
     add_definitions(-DWITH_LDG)
-    set(LDG_DIR "csrc/partition/neighbor_clustering")
+    set(LDG_DIR "third_party/ldg_partition")
     
     add_library(ldg_partition SHARED "csrc/partition/ldg.cpp")
     target_link_libraries(ldg_partition PRIVATE ${TORCH_LIBRARIES})
