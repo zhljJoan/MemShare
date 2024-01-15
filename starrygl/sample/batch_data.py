@@ -25,8 +25,8 @@ delta_ts: list[tensor,tensor, tensor...]
 metadata
 """
 def prepare_input(node_feat, edge_feat, mem_embedding,mfgs,dist_nid,dist_eid):
-    for mfg in mfgs:
-        for i,b in enumerate(mfg):
+    for i,mfg in enumerate(mfgs):
+        for b in mfg:
             e_idx = b.edata['ID']
             idx = b.srcdata['ID']
             b.edata['ID'] = dist_eid[e_idx]
@@ -43,7 +43,7 @@ def prepare_input(node_feat, edge_feat, mem_embedding,mfgs,dist_nid,dist_eid):
                     b.srcdata['mem_input'] = mailbox[idx].reshape(b.srcdata['ID'].shape[0], -1)
                     b.srcdata['mail_ts'] = mailbox_ts[idx]
                     #print(idx.shape[0],b.srcdata['mem_ts'].shape)
-        return mfgs
+    return mfgs
 
 def to_block(graph: DistributedGraphStore, data, sample_out, mailbox:MailBox = None,device = torch.device('cuda'),group = None):
     if len(sample_out) > 1:
@@ -52,6 +52,7 @@ def to_block(graph: DistributedGraphStore, data, sample_out, mailbox:MailBox = N
         metadata = None
     eid = [ret.eid() for ret in sample_out]
     eid_len = [e.shape[0] for e in eid ]
+    #print(len(sample_out),eid,eid_len)
     eid_mapper: torch.Tensor = graph.eids_mapper
     nid_mapper: torch.Tensor = graph.nids_mapper
     eid_tensor = torch.cat(eid,dim = 0).to(eid_mapper.device)

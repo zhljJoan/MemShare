@@ -62,7 +62,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 #os.environ["LOCAL_RANK"] = str(0)
 torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
 os.environ["MASTER_ADDR"] = '10.214.211.187'
-os.environ["MASTER_PORT"] = '9337'
+os.environ["MASTER_PORT"] = '9437'
 def seed_everything(seed=42):
     random.seed(seed)
     np.random.seed(seed)
@@ -81,7 +81,7 @@ def main():
     device_id = torch.cuda.current_device()
     print('use cuda on',device_id)
     pdata = partition_load("/mnt/data/part_data/dataset/here/{}".format(args.dataname), algo="metis_for_tgnn")    
-    graph = DistributedGraphStore(pdata = pdata)
+    graph = DistributedGraphStore(pdata = pdata,uvm_edge = True)
 
     Path("./saved_models/").mkdir(parents=True, exist_ok=True)
     Path("./saved_checkpoints/").mkdir(parents=True, exist_ok=True)
@@ -91,8 +91,9 @@ def main():
     use_src_emb = gnn_param['use_src_emb'] if 'use_src_emb' in gnn_param else False
     use_dst_emb = gnn_param['use_dst_emb'] if 'use_dst_emb' in gnn_param else False
     sample_graph = TemporalNeighborSampleGraph(sample_graph = pdata.sample_graph,mode = 'full')
+    #mailbox = None
     mailbox = SharedMailBox(pdata.ids.shape[0], memory_param, dim_edge_feat = pdata.edge_attr.shape[1] if pdata.edge_attr is not None else 0)
-    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=1, fanout=[10],graph_data=sample_graph, workers=15,policy = 'recent',graph_name = "wiki_train")
+    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=2, fanout=[10,10],graph_data=sample_graph, workers=15,policy = 'uniform',graph_name = "wiki_train")
     train_data = torch.masked_select(graph.edge_index,pdata.train_mask.to(graph.edge_index.device)).reshape(2,-1)
     train_ts = torch.masked_select(graph.edge_ts,pdata.train_mask.to(graph.edge_index.device))
     val_data = torch.masked_select(graph.edge_index,pdata.val_mask.to(graph.edge_index.device)).reshape(2,-1)
@@ -157,7 +158,7 @@ def main():
     else:
         model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param)
         device = torch.device('cpu')
-    model = DDP(model,find_unused_parameters=True)
+    model = DDP(model)
     train_stream = torch.cuda.Stream()
     send_stream = torch.cuda.Stream()
     scatter_stream = torch.cuda.Stream()

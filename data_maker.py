@@ -95,8 +95,8 @@ if e_feat is not None:
     data.edge_attr = e_feat
 
 data.train_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 0)
-data.test_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 1)
-data.val_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 2)
+data.val_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 1)
+data.test_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 2)
 sample_graph['train_mask'] = data.train_mask[sample_eid]
 sample_graph['test_mask'] = data.test_mask[sample_eid]
 sample_graph['val_mask'] = data.val_mask[sample_eid]
@@ -106,24 +106,26 @@ data.y = torch.zeros(edge_index.shape[1])
 edge_index_dict = {}
 edge_index_dict['edata'] = data.edge_index
 edge_index_dict['sample_data'] = data.sample_graph['edge_index']
-edge_index_dict['neg_data'] = torch.cat([neg_src.view(1, -1),
-                                         dst.view(-1, 1).repeat(1, neg_nums).
-                                         reshape(1, -1)], dim=0)
+#edge_index_dict['neg_data'] = torch.cat([neg_src.view(1, -1),
+
+
+#                                         dst.view(-1, 1).repeat(1, neg_nums).
+#                                         reshape(1, -1)], dim=0)
 data.edge_index_dict = edge_index_dict
 edge_weight_dict = {}
-edge_weight_dict['edata'] = 2*neg_nums
+edge_weight_dict['edata'] = 1*neg_nums
 edge_weight_dict['sample_data'] = 1*neg_nums
-edge_weight_dict['neg_data'] = 1
-#partition_save('./dataset/here/'+data_name, data, 1, 'metis_for_tgnn',
-#               edge_weight_dict=edge_weight_dict)
-#partition_save('./dataset/here/'+data_name, data, 2, 'metis_for_tgnn',
-#               edge_weight_dict=edge_weight_dict)
-#partition_save('./dataset/here/'+data_name, data, 4, 'metis_for_tgnn',
-#               edge_weight_dict=edge_weight_dict)
-#partition_save('./dataset/here/'+data_name, data, 8, 'metis_for_tgnn',
-#               edge_weight_dict=edge_weight_dict)
-partition_save('./dataset/here/'+data_name, data, 16, 'metis_for_tgnn',
+#edge_weight_dict['neg_data'] = 1
+partition_save('/mnt/data/part_data/v2/here/'+data_name, data, 1, 'metis_for_tgnn',
                edge_weight_dict=edge_weight_dict)
+partition_save('/mnt/data/part_data/v2/here/'+data_name, data, 2, 'metis_for_tgnn',
+               edge_weight_dict=edge_weight_dict)
+partition_save('/mnt/data/part_data/v2/here/'+data_name, data, 4, 'metis_for_tgnn',
+               edge_weight_dict=edge_weight_dict)
+partition_save('/mnt/data/part_data/v2/here/'+data_name, data, 8, 'metis_for_tgnn',
+               edge_weight_dict=edge_weight_dict)
+#partition_save('./dataset/here/'+data_name, data, 16, 'metis_for_tgnn',
+#               edge_weight_dict=edge_weight_dict)
 #
 # partition_save('./dataset/here/'+data_name, data, 4, 'metis_for_tgnn',
 # edge_weight_dict=edge_weight_dict )
