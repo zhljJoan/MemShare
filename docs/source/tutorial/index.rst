@@ -5,5 +5,4 @@ Tutorials
     intro
     module
     dataset
-    application
     distributed
