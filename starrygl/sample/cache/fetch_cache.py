@@ -17,12 +17,31 @@ class FetchFeatureCache:
                  graph: DistributedGraphStore,
                  mailbox:SharedMailBox = None,
                  policy = 'lru'):
+        """
+        method to create a fetch cache instance.
+
+        Args:
+            num_nodes: Total number of nodes in the graph.
+            num_edges: Total number of edges in the graph.
+            edge_cache_ratio: The hit rate of cache edges.
+            node_cache_ratio: The hit rate of cache nodes.
+            graph: Distributed graph store.
+            mailbox: used for storing information.
+            policy: Caching policy, either 'lru' or 'static'.
+
+        """
         global _FetchCache
         _FetchCache = FetchFeatureCache(num_nodes, num_edges,
                  edge_cache_ratio, node_cache_ratio,
                  graph,mailbox,policy)
     @staticmethod
     def getFetchCache():
+        """
+        method to get the existing fetch cache instance.
+
+        Returns:
+            FetchFeatureCache: The existing fetch cache instance.
+        """
         global _FetchCache
         return _FetchCache
     def __init__(self, num_nodes: int, num_edges: int,
@@ -31,6 +50,19 @@ class FetchFeatureCache:
                  mailbox:SharedMailBox = None,
                  policy = 'lru'
                 ):
+        """
+        Initializes the FetchFeatureCache instance.
+
+        Args:
+            num_nodes: Total number of nodes in the graph.
+            num_edges: Total number of edges in the graph.
+            edge_cache_ratio: The hit rate of cache edges.
+            node_cache_ratio: The hit rate of cache nodes.
+            graph: Distributed graph store.
+            mailbox: used for storing information.
+            policy: Caching policy, either 'lru' or 'static'.
+
+        """
         if policy == 'lru':
             init_fn = LRU_cache.LRUCache
         elif policy == 'static':
@@ -62,7 +94,17 @@ class FetchFeatureCache:
 
     def fetch_feature(self, nid: Optional[torch.Tensor] = None, dist_nid = None,
                       eid: Optional[torch.Tensor] = None,  dist_eid = None
-                      ):  
+                      ):
+        """
+        Fetches node and edge features along with mailbox memory.
+
+        Args:
+            nid: Node indices to fetch features for.
+            dist_nid: The remote communication corresponding to nid.
+            eid: Edge indices to fetch features for.
+            dist_eid: The remote communication corresponding to eid.
+
+        """
         nfeat = None
         mem = None
         efeat = None
@@ -147,6 +189,14 @@ class FetchFeatureCache:
         return nfeat,efeat,mem
 
     def init_cache_with_presample(self,dataloader, num_epoch:int = 10):
+        """
+        Initializes the cache with pre-sampled data from the provided dataloader.
+
+        Args:
+            dataloader: The data loader we implement, containing the graph data.
+            num_epoch: Number of epochs to pre-sample the data.
+
+        """
         node_size = self.node_cache.capacity if self.node_cache is not None else 0
         edge_size = self.edge_cache.capacity if self.edge_cache is not None else 0
         node_counts,edge_counts = pre_sample(dataloader=dataloader,

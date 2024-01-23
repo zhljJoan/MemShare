@@ -294,7 +294,7 @@ class DistributedTensor:
         index = dist_index.loc
 
         futs: List[torch.futures.Future] = []
-        for i in range(self.num_parts()):
+        for i in range(self.num_parts):
             mask = part_idx == i
             f = self.accessor.async_index_copy_(0, index[mask], source[mask], self.rrefs[i])
             futs.append(f)
@@ -308,7 +308,7 @@ class DistributedTensor:
         index = dist_index.loc
 
         futs: List[torch.futures.Future] = []
-        for i in range(self.num_parts()):
+        for i in range(self.num_parts):
             mask = part_idx == i
             f = self.accessor.async_index_add_(0, index[mask], source[mask], self.rrefs[i])
             futs.append(f)

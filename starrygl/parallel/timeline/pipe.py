@@ -55,6 +55,12 @@ class SequencePipe(ABC):
                 models.append((key, val))
         return tuple(models)
     
+    def parameters(self):
+        params: List[nn.Parameter] = []
+        for name, m in self.get_model():
+            params.extend(m.parameters())
+        return params
+    
     def to(self, device: Any):
         for _, net in self.get_model():
             net.to(device)

@@ -1,3 +1,4 @@
+import starrygl
 from typing import Union
 from typing import List
 from typing import Optional
@@ -8,9 +9,41 @@ from starrygl.distributed.context import DistributedContext
 from starrygl.distributed.utils import DistIndex, DistributedTensor
 import torch.distributed as dist
 
-from starrygl.utils.uvm import cudaMemoryAdvise, uvm_advise, uvm_empty, uvm_prefetch, uvm_share
+#from starrygl.utils.uvm import cudaMemoryAdvise
 
 class SharedMailBox():
+    '''
+    We will first define our mailbox, including our definitions of mialbox and memory:
+    .. code-block:: python
+        from starrygl.sample.memory.shared_mailbox import SharedMailBox
+        mailbox = SharedMailBox(num_nodes=num_nodes, memory_param=memory_param, dim_edge_feat=dim_edge_feat)
+
+    Args:
+        num_nodes (int): number of nodes
+
+        memory_param (dict): the memory parameters in the yaml file,refer to TGL
+
+        dim_edge_feat (int): the dim of edge feature
+
+        device (torch.device): the device used to store MailBox
+
+        uvm (bool): 1-use uvm, 0-don't use uvm
+    
+    Examples:
+
+        .. code-block:: python
+        
+            from starrygl.sample.part_utils.partition_tgnn import partition_load
+            from starrygl.sample.memory.shared_mailbox import SharedMailBox
+
+            pdata = partition_load("PATH/{}".format(dataname), algo="metis_for_tgnn")
+            mailbox = SharedMailBox(pdata.ids.shape[0], memory_param, dim_edge_feat=pdata.edge_attr.shape[1] if pdata.edge_attr is not None else 0)
+
+    We then need to hand over the mailbox to the data loader as in the above example, so that the relevant memory/mailbox can be directly loaded during training.
+
+    During the training, we will call `get_update_memory`/`get_update_mail` function constantly updates 
+    the relevant storage,which is the idea related to TGN.
+    '''
     def __init__(self,
                  num_nodes,
                  memory_param,
@@ -47,18 +80,18 @@ class SharedMailBox():
         if uvm is True:
             
             ctx = DistributedContext.get_default_context()
-            node_memory = uvm_empty(*node_memory.shape,
+            node_memory = starrygl.utils.uvm.uvm_empty(*node_memory.shape,
                                     dtype=node_memory.dtype,
                                     device=ctx.device)
-            uvm_share(node_memory,device = ctx.device)
-            uvm_advise(node_memory,cudaMemoryAdvise.cudaMemAdviseSetAccessedBy)
-            uvm_prefetch(node_memory)
-            mailbox = uvm_empty(*mailbox.shape,
+            starrygl.utils.uvm.uvm_share(node_memory,device = ctx.device)
+            starrygl.utils.uvm.uvm_advise(node_memory,starrygl.utils.uvm.cudaMemoryAdvise.cudaMemAdviseSetAccessedBy)
+            starrygl.utils.uvm.uvm_prefetch(node_memory)
+            mailbox = starrygl.utils.uvm.uvm_empty(*mailbox.shape,
                                     dtype=mailbox.dtype,
                                     device=ctx.device)
-            uvm_share(mailbox,device = ctx.device)
-            uvm_advise(mailbox,cudaMemoryAdvise.cudaMemAdviseSetAccessedBy)
-            uvm_prefetch(mailbox)
+            starrygl.utils.uvm.uvm_share(mailbox,device = ctx.device)
+            starrygl.utils.uvm.vm_advise(mailbox,starrygl.utils.uvm.cudaMemoryAdvise.cudaMemAdviseSetAccessedBy)
+            starrygl.utils.uvm.uvm_prefetch(mailbox)
         self.node_memory = DistributedTensor(node_memory)
         self.node_memory_ts = DistributedTensor(node_memory_ts)
         self.mailbox = DistributedTensor(mailbox)
@@ -266,7 +299,7 @@ class SharedMailBox():
 
     def get_update_mail(self,dist_indx_mapper,
                  src,dst,ts,edge_feats,
-                 memory):
+                 memory,embedding=None,use_src_emb=False,use_dst_emb=False):
         if edge_feats is not None:
             edge_feats = edge_feats.to(self.device).to(self.mailbox.dtype)
         src = src.to(self.device)
@@ -276,12 +309,14 @@ class SharedMailBox():
 
         mem_src = memory[src]
         mem_dst = memory[dst]
+        if embedding is not None:
+            emb_src = embedding[src]
+            emb_dst = embedding[dst]
+        src_mail = torch.cat([emb_src if use_src_emb else mem_src, emb_dst if use_dst_emb else mem_dst], dim=1)
+        dst_mail = torch.cat([emb_dst if use_src_emb else mem_dst, emb_src if use_dst_emb else mem_src], dim=1)
         if edge_feats is not None:
-            src_mail = torch.cat([mem_src, mem_dst, edge_feats], dim=1)
-            dst_mail = torch.cat([mem_dst, mem_src, edge_feats], dim=1)
-        else:
-            src_mail = torch.cat([mem_src, mem_dst], dim=1)
-            dst_mail = torch.cat([mem_dst, mem_src], dim=1)
+            src_mail = torch.cat([src_mail, edge_feats], dim=1)
+            dst_mail = torch.cat([dst_mail, edge_feats], dim=1)
         mail = torch.cat([src_mail, dst_mail], dim=1).reshape(-1, src_mail.shape[1])
         mail_ts = torch.cat((ts,ts),-1).to(self.device).to(self.mailbox_ts.dtype)
         unq_index,inv = torch.unique(index,return_inverse = True)
@@ -291,7 +326,6 @@ class SharedMailBox():
         index = unq_index
         return index,mail,mail_ts
     
-
     def get_update_memory(self,index,memory,memory_ts):
         unq_index,inv = torch.unique(index,return_inverse = True)
         max_ts,idx = torch_scatter.scatter_max(memory_ts,inv,0)

@@ -1,6 +1,6 @@
+import starrygl
 import sys
 from os.path import abspath, join, dirname
-
 sys.path.insert(0, join(abspath(dirname(__file__))))
 import math
 import torch
@@ -9,16 +9,72 @@ from typing import Optional, Tuple
 
 from .base import BaseSampler, NegativeSampling, SampleOutput, SampleType
 # from sample_cores import ParallelSampler, get_neighbors, heads_unique
-from starrygl.lib.libstarrygl_sampler import ParallelSampler, get_neighbors
+
 from torch.distributed.rpc import rpc_async
 
-# def outer_sample(graph_name, nodes, ts, fanout_index, with_outer_sample = SampleType.Outer):# 默认此时继续向外采样
-#     local_sampler = get_local_sampler(graph_name)
-#     assert local_sampler is not None, 'Local_sampler is None!!!'
-#     out = local_sampler.sample_from_nodes(nodes, with_outer_sample, ts, fanout_index)
-#     return out
-
 class NeighborSampler(BaseSampler):
+    r'''  
+    Parallel sampling is crucial for expanding model training to a large amount of data.Due to the large scale and complexity of graph data, traditional serial sampling may lead to significant waste of computing and storage resources. The significance of parallel sampling lies in improving the efficiency and overall computational speed of sampling by simultaneously sampling from multiple nodes or neighbors.
+    
+    This helps to accelerate the training and inference process of the model, making it more scalable and practical when dealing with large-scale graph data.
+    
+    Our parallel sampling adopts a hybrid approach of CPU and GPU, where the entire graph structure is stored on the CPU and then uploaded to the GPU after sampling the graph structure on the CPU. Each trainer has a separate sampler for parallel training.
+    
+    We have encapsulated the functions for parallel sampling, and you can easily use them in the following ways:
+    
+        .. code-block:: python
+            # First,you need to import Python packages
+            from starrygl.sample.sample_core.neighbor_sampler import NeighborSampler
+            # Then,you can use ours parallel sampler
+            sampler = NeighborSampler(num_nodes=num_nodes, num_layers=num_layers, fanout=fanout, graph_data=graph_data,
+            workers=workers, is_distinct = is_distinct, policy = policy, edge_weight= edge_weight, graph_name =     graph_name)
+    
+    Args:
+        num_nodes (int): the num of all nodes in the graph
+    
+        num_layers (int): the num of layers to be sampled
+    
+        fanout (list): the list of max neighbors' number chosen for each layer
+    
+        graph_data (:class: starrygl.sample.sample_core.neighbor_sampler): the graph data you want to sample
+    
+        workers (int): the number of threads, default value is 1
+    
+        is_distinct (bool): 1-need distinct muti-edge, 0-don't need distinct muti-edge
+    
+        policy (str): "uniform" or "recent" or "weighted"
+    
+        edge_weight (torch.Tensor,Optional): the initial weights of edges
+    
+        graph_name (str): the name of graph should provide edge_index or (neighbors, deg)
+    
+    Examples:
+    
+        .. code-block:: python
+    
+            from starrygl.sample.part_utils.partition_tgnn import partition_load
+            from starrygl.sample.graph_core import DataSet, DistributedGraphStore, TemporalNeighborSampleGraph
+            from starrygl.sample.sample_core.neighbor_sampler import NeighborSampler
+            pdata = partition_load("PATH/{}".format(dataname), algo="metis_for_tgnn")
+            graph = DistributedGraphStore(pdata = pdata,uvm_edge = False,uvm_node = False)
+            sample_graph = TemporalNeighborSampleGraph(sample_graph = pdata.sample_graph,mode = 'full')
+            sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=1, fanout=[10],
+            graph_data=sample_graph, workers=15, policy = 'recent', graph_name = "wiki_train")
+    
+    
+    If you want to directly call parallel sampling functions, use the following methods:
+    
+        .. code-block:: python
+            
+            # the parameter meaning is the same as the `Args` above
+            from starrygl.lib.libstarrygl_sampler import ParallelSampler, get_neighbors
+            # get neighbor infomation table,row and col come from graph_data.edge_index=(row, col)
+            tnb = get_neighbors(graph_name, row.contiguous(), col.contiguous(), num_nodes, is_distinct, graph_data. eid, edge_weight, timestamp)
+            # call parallel sampler
+            p_sampler = ParallelSampler(self.tnb, num_nodes, graph_data.num_edges, workers, fanout, num_layers, policy)
+    
+    For complete usage and more details, please refer to `~starrygl.sample.sample_core.neighbor_sampler`
+    '''
     def __init__(
         self,
         num_nodes: int,
@@ -68,11 +124,11 @@ class NeighborSampler(BaseSampler):
                 row, col = graph_data.edge_index
             if(edge_weight is not None):
                 edge_weight = edge_weight.float().contiguous()
-            self.tnb = get_neighbors(graph_name, row.contiguous(), col.contiguous(), num_nodes, is_distinct, eid, edge_weight, timestamp)
+            self.tnb = starrygl.sampler_ops.get_neighbors(graph_name, row.contiguous(), col.contiguous(), num_nodes, is_distinct, eid, edge_weight, timestamp)
         else:
             assert tnb is not None
             self.tnb = tnb
-        self.p_sampler = ParallelSampler(self.tnb, num_nodes, graph_data.num_edges, workers, 
+        self.p_sampler = starrygl.sampler_ops.ParallelSampler(self.tnb, num_nodes, graph_data.num_edges, workers, 
                                          fanout, num_layers, policy)
     
     def _get_sample_info(self):

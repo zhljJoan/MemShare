@@ -1,7 +1,6 @@
 from torch_sparse import SparseTensor
 from torch_geometric.data import Data
 from torch_geometric.utils import degree
-
 import os.path as osp
 import os
 import shutil

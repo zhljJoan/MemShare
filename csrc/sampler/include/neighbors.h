@@ -287,10 +287,15 @@ void TemporalNeighborBlock::update_edge_weight(
 
     for(int64_t i=0; i<edge_num; i++){
         //修改节点与邻居边的权重
-        AT_ASSERTM(this->inverted_index[dst[i]].count(src[i])==1, "Unexist Edge Index: "+to_string(src[i])+", "+to_string(dst[i]));
 		int index;
-        if(this->with_eid) index = this->inverted_index[dst[i]][eid_ptr[i]];
-        else index = this->inverted_index[dst[i]][src[i]];
+        if(this->with_eid){
+            AT_ASSERTM(this->inverted_index[dst[i]].count(eid_ptr[i])==1, "Unexist Eid --> Col: "+to_string(eid_ptr[i])+"-->"+to_string(dst[i]));
+            index = this->inverted_index[dst[i]][eid_ptr[i]];
+        }
+        else{
+            AT_ASSERTM(this->inverted_index[dst[i]].count(src[i])==1, "Unexist Edge Index: "+to_string(src[i])+", "+to_string(dst[i]));
+            index = this->inverted_index[dst[i]][src[i]];
+        }
         this->edge_weight[dst[i]][index] = ew[i];
     }
 }

@@ -1,5 +1,4 @@
 import torch
-import dgl
 from os.path import abspath, join, dirname
 import sys
 sys.path.insert(0, join(abspath(dirname(__file__))))
@@ -47,7 +46,7 @@ class GeneralModel(torch.nn.Module):
         self.edge_predictor = EdgePredictor(gnn_param['dim_out'])
         if 'combine' in gnn_param and gnn_param['combine'] == 'rnn':
             self.combiner = torch.nn.RNN(gnn_param['dim_out'], gnn_param['dim_out'])
-    
+            
                 
     def forward(self, mfgs, metadata = None,neg_samples=1):
         if self.memory_param['type'] == 'node':
@@ -68,8 +67,14 @@ class GeneralModel(torch.nn.Module):
             out = torch.stack(out, dim=0)
             out = self.combiner(out)[0][-1, :, :]
         #metadata需要在前面去重的时候记一下id
+        if self.gnn_param['use_src_emb'] or self.gnn_param['use_dst_emb']:
+            self.embedding = out.detach().clone()
+        else:
+            self.embedding = None
         if metadata is not None:
             #out = torch.cat((out[metadata['dst_pos_pos']],out[metadata['src_id_pos']],out[metadata['dst_neg_pos']]),0)
+            if self.gnn_param['dyrep']:
+                out = self.memory_updater.last_updated_memory
             out = torch.cat((out[metadata['src_pos_index']],out[metadata['dst_pos_index']],out[metadata['src_neg_index']]),0)
         return self.edge_predictor(out, neg_samples=neg_samples)
 
