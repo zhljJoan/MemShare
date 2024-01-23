@@ -33,27 +33,28 @@ parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 parser.add_argument('--rank', default=0, type=int, metavar='W',
-                    help='name of dataset')
+                    help='rank')
 parser.add_argument('--world_size', default=1, type=int, metavar='W',
-                    help='number of negative samples')
-parser.add_argument('--dataname', default=1, type=str, metavar='W',
-                    help='number of negative samples')
+                    help='the world size')
+parser.add_argument('--dataname', default="MOOC", type=str, metavar='W',
+                    help='name of dataset')
 args = parser.parse_args()
 from sklearn.metrics import average_precision_score, roc_auc_score
 import torch
 import time
 import random
-import dgl
 import numpy as np
 from sklearn.metrics import average_precision_score, roc_auc_score
 from torch.nn.parallel import DistributedDataParallel as DDP
-#os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
-#os.environ["RANK"] = str(args.rank)
-#os.environ["WORLD_SIZE"] = str(args.world_size)
-#os.environ["LOCAL_RANK"] = str(0)
+
+os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
+os.environ["RANK"] = str(args.rank)
+os.environ["WORLD_SIZE"] = str(args.world_size)
+os.environ["LOCAL_RANK"] = str(0)
+
 torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
-os.environ["MASTER_ADDR"] = '10.214.211.187'
-os.environ["MASTER_PORT"] = '9337'
+os.environ["MASTER_ADDR"] = '10.214.211.186'
+os.environ["MASTER_PORT"] = '9667'
 def seed_everything(seed=42):
     random.seed(seed)
     np.random.seed(seed)
@@ -71,8 +72,8 @@ def main():
     ctx = DistributedContext.init(backend="nccl", use_gpu=True)
     device_id = torch.cuda.current_device()
     print('use cuda on',device_id)
-    pdata = partition_load("/mnt/data/part_data/dataset/here/{}".format(args.dataname), algo="metis_for_tgnn")    
-    graph = DistributedGraphStore(pdata = pdata,uvm_edge = False,uvm_node = False)
+    pdata = partition_load("/mnt/data/part_data/here/{}".format(args.dataname), algo="metis_for_tgnn")    
+    graph = DistributedGraphStore(pdata = pdata,uvm_edge = True,uvm_node = False)
 
     sample_graph = TemporalNeighborSampleGraph(sample_graph = pdata.sample_graph,mode = 'full')
     mailbox = SharedMailBox(pdata.ids.shape[0], memory_param, dim_edge_feat = pdata.edge_attr.shape[1] if pdata.edge_attr is not None else 0)
@@ -83,7 +84,7 @@ def main():
     val_ts = torch.masked_select(graph.edge_ts,pdata.val_mask.to(graph.edge_index.device))
     test_data = torch.masked_select(graph.edge_index,pdata.test_mask.to(graph.edge_index.device)).reshape(2,-1)
     test_ts = torch.masked_select(graph.edge_ts,pdata.test_mask.to(graph.edge_index.device)) 
-    print(train_data.shape[1],val_data.shape[1],test_data.shape[1])
+    print("train data:", train_data.shape[1],"val data:", val_data.shape[1],"test data:", test_data.shape[1])
     train_data = DataSet(edges = train_data,ts =train_ts,eids = torch.nonzero(pdata.train_mask).view(-1))
     #if dist.get_rank() == 0:
     test_data = DataSet(edges = test_data,ts =test_ts,eids = torch.nonzero(pdata.test_mask).view(-1))
@@ -133,7 +134,7 @@ def main():
     #cache.init_cache_with_presample(trainloader,3)
     gnn_dim_node = 0 if graph.x is None else pdata.x.shape[1]
     gnn_dim_edge = 0 if graph.edge_attr is None else pdata.edge_attr.shape[1]
-    print(gnn_dim_node,gnn_dim_edge)
+    print("gnn_dim_node:", gnn_dim_node, "gnn_dim_edge:", gnn_dim_edge)
     avg_time  = 0
     if use_cuda:
         model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param).cuda()
@@ -141,7 +142,7 @@ def main():
     else:
         model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param)
         device = torch.device('cpu')
-    model = DDP(model,find_unused_parameters=True)
+    model = DDP(model,find_unused_parameters=False)
     train_stream = torch.cuda.Stream()
     send_stream = torch.cuda.Stream()
     scatter_stream = torch.cuda.Stream()
@@ -208,8 +209,11 @@ def main():
         auc_mrr = torch.empty([loader.expected_idx*world_size],dtype = torch.float,device = 'cuda')
         dist.all_gather_into_tensor(apc,torch.tensor(aps,device ='cuda',dtype=torch.float))
         dist.all_gather_into_tensor(auc_mrr,torch.tensor(aucs_mrrs,device ='cuda',dtype=torch.float))
-        ap = float(torch.tensor(apc).mean())
-        auc_mrr = float(torch.tensor(auc_mrr).mean())
+        # ap = float(torch.tensor(apc).mean())
+        # auc_mrr = float(torch.tensor(auc_mrr).mean())
+        ap = float(apc.clone().mean())
+        auc_mrr = float(auc_mrr.clone().mean())
+
         return ap, auc_mrr
     creterion = torch.nn.BCEWithLogitsLoss()
 
@@ -242,9 +246,9 @@ def main():
                 optimizer.step()
                 #torch.cuda.synchronize()
                 t_prep_s = time.time()
-                y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
-                y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
-                train_aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
+                # y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
+                # y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
+                # train_aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
                 #start_event = torch.cuda.Event(enable_timing=True)
                 #end_event = torch.cuda.Event(enable_timing=True)
                 #start_event.record()

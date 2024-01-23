@@ -111,10 +111,10 @@ class DistributedDataLoader:
         self.expected_idx = data_size // self.batch_size if self.drop_last is True else int(math.ceil(data_size/self.batch_size))
 
         if dist.get_world_size() > 1:
-            num_epochs = torch.tensor([self.expected_idx],dtype = torch.long,device=self.device) 
-            print(num_epochs)
-            dist.all_reduce(num_epochs, op=op)
-            self.expected_idx = int(num_epochs.item())
+            num_batchs = torch.tensor([self.expected_idx],dtype = torch.long,device=self.device) 
+            print("num_batchs:", num_batchs)
+            dist.all_reduce(num_batchs, op=op)
+            self.expected_idx = int(num_batchs.item())
 
     def _next_data(self):   
         if self.current_pos >= self.dataset.len:

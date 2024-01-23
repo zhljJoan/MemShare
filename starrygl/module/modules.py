@@ -1,5 +1,4 @@
 import torch
-import dgl
 from os.path import abspath, join, dirname
 import sys
 sys.path.insert(0, join(abspath(dirname(__file__))))
