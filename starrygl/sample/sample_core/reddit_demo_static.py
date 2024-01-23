@@ -70,7 +70,7 @@ def test():
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
 
-    g_data = load_ogb_dataset()
+    g_data = load_reddit_dataset()
     print(g_data)
 
     from .neighbor_sampler import NeighborSampler, get_neighbors
