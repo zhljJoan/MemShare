@@ -1,4 +1,3 @@
-import parser
 from torch_sparse import SparseTensor
 from torch_geometric.data import Data
 from torch_geometric.utils import degree
@@ -8,7 +7,7 @@ import os
 import shutil
 import torch
 import torch.utils.data
-import metis
+#import metis
 import networkx as nx
 import torch.distributed as dist
 

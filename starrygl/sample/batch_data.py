@@ -135,7 +135,7 @@ def to_block(graph: DistributedGraphStore, data, sample_out, mailbox:MailBox = N
             if sample_out[r].delta_ts().shape[0] > 0:
                 b.edata['dt'] = sample_out[r].delta_ts().to(device)
             if src_ts is not None:
-                b.srcdata['ts'] = src_ts[0:row_len + eid_len[r]]
+                b.srcdata['ts'] = src_ts[0:row_len + elen]
             b.edata['ID'] = e_idx
             #print(b.all_edges)
             #print(dist_nid[b.srcdata['ID']],dist_nid[b.srcdata['ID'][col[sample_out[r].src_index().to(device)]]])

@@ -56,11 +56,11 @@ import dgl
 import numpy as np
 from sklearn.metrics import average_precision_score, roc_auc_score
 from torch.nn.parallel import DistributedDataParallel as DDP
-#os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
-#os.environ["RANK"] = str(args.rank)
-#os.environ["WORLD_SIZE"] = str(args.world_size)
-#os.environ["LOCAL_RANK"] = str(0)
-torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
+os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
+os.environ["RANK"] = str(args.rank)
+os.environ["WORLD_SIZE"] = str(args.world_size)
+os.environ["LOCAL_RANK"] = str(0)
+#torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
 os.environ["MASTER_ADDR"] = '127.0.0.1'
 os.environ["MASTER_PORT"] = '9437'
 def seed_everything(seed=42):
@@ -80,7 +80,7 @@ def main():
     torch.set_num_threads(int(40/torch.distributed.get_world_size()))
     device_id = torch.cuda.current_device()
     print('use cuda on',device_id)
-    pdata = partition_load("/mnt/data/part_data/v2/here/{}".format(args.dataname), algo="metis_for_tgnn")    
+    pdata = partition_load("/mnt/data/part_data/here/{}".format(args.dataname), algo="metis_for_tgnn")    
     graph = DistributedGraphStore(pdata = pdata)
 
     Path("./saved_models/").mkdir(parents=True, exist_ok=True)
@@ -103,15 +103,15 @@ def main():
     print(sample_graph.eid.shape,sample_graph.edge_index.shape,sample_graph.edge_ts.shape,graph.edge_attr)
     train_data = torch.masked_select(graph.edge_index,pdata.train_mask.to(graph.edge_index.device)).reshape(2,-1)
     train_ts = torch.masked_select(graph.edge_ts,pdata.train_mask.to(graph.edge_index.device))
-    val_data = torch.masked_select(graph.edge_index,pdata.val_mask.to(graph.edge_index.device)).reshape(2,-1)
-    val_ts = torch.masked_select(graph.edge_ts,pdata.val_mask.to(graph.edge_index.device))
-    test_data = torch.masked_select(graph.edge_index,pdata.test_mask.to(graph.edge_index.device)).reshape(2,-1)
-    test_ts = torch.masked_select(graph.edge_ts,pdata.test_mask.to(graph.edge_index.device)) 
+    test_data = torch.masked_select(graph.edge_index,pdata.val_mask.to(graph.edge_index.device)).reshape(2,-1)
+    test_ts = torch.masked_select(graph.edge_ts,pdata.val_mask.to(graph.edge_index.device))
+    val_data = torch.masked_select(graph.edge_index,pdata.test_mask.to(graph.edge_index.device)).reshape(2,-1)
+    val_ts = torch.masked_select(graph.edge_ts,pdata.test_mask.to(graph.edge_index.device)) 
     print(train_ts.max(),val_ts.max(),test_ts.max())
     #print(train_data.shape[1],val_data.shape[1],test_data.shape[1])
     train_data = DataSet(edges = train_data,ts =train_ts,eids = torch.nonzero(pdata.train_mask).view(-1))
-    test_data = DataSet(edges = test_data,ts =test_ts,eids = torch.nonzero(pdata.test_mask).view(-1))
-    val_data = DataSet(edges = val_data,ts = val_ts,eids = torch.nonzero(pdata.val_mask).view(-1))
+    test_data = DataSet(edges = test_data,ts =test_ts,eids = torch.nonzero(pdata.val_mask).view(-1))
+    val_data = DataSet(edges = val_data,ts = val_ts,eids = torch.nonzero(pdata.test_mask).view(-1))
     neg_sampler = NegativeSampling('triplet')
     trainloader = DistributedDataLoader(graph,train_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
@@ -185,6 +185,7 @@ def main():
                     y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
                     y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
                     aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
+
                     aucs_mrrs.append(roc_auc_score(y_true, y_pred))
                     if mailbox is not None:
                         src = metadata['src_pos_index']
@@ -256,7 +257,6 @@ def main():
 
                 optimizer.zero_grad()
                 pred_pos, pred_neg = model(mfgs,metadata)
-                
                 loss = creterion(pred_pos, torch.ones_like(pred_pos))
                 loss += creterion(pred_neg, torch.zeros_like(pred_neg))
                 total_loss += float(loss)
