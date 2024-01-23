@@ -255,7 +255,8 @@ class TemporalNeighborSampleGraph(DistributedGraphStore):
             self.edge_ts = sample_graph['ts']
         else:
             self.edge_ts = None
-        self.eid = sample_graph['eids']
+        self.eid = torch.arange(self.num_edges,dtype = torch.long, device = sample_graph['eids'].device)
+        #sample_graph['eids']
         if mode == 'train':
             mask = sample_graph['train_mask']
         if mode == 'val':

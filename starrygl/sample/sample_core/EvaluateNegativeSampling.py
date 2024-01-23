@@ -1,6 +1,3 @@
-'''
-参考自DyLib
-'''
 import sys
 from os.path import abspath, join, dirname
 
@@ -12,7 +9,7 @@ from base import NegativeSamplingMode
 from typing import Any, List, Optional, Tuple, Union
 
 
-class EvaluateNegSampling(NegativeSampling):
+class EvaluateNegativeSampling(NegativeSampling):
     def __init__(
         self,
         mode: Union[NegativeSamplingMode, str],
@@ -23,7 +20,7 @@ class EvaluateNegSampling(NegativeSampling):
         negative_sample_strategy: str = 'random',
         seed: int = None
     ):
-        super(EvaluateNegSampling,self).__init__(mode)
+        super(EvaluateNegativeSampling,self).__init__(mode)
         self.seed = seed
         self.negative_sample_strategy = negative_sample_strategy
         self.src_node_ids = src_node_ids

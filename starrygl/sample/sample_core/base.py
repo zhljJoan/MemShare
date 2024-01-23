@@ -4,7 +4,7 @@ from enum import Enum
 import math
 from abc import ABC
 from typing import Any, List, Optional, Tuple, Union
-
+import numpy as np
 class SampleType(Enum):
     Whole = 0
     Inner = 1
@@ -82,7 +82,8 @@ class NegativeSampling:
                     f"Cannot sample negatives in '{self.__class__.__name__}' "
                     f"without passing the 'num_nodes' argument")
             return torch.randint(num_nodes, (num_samples, ))
-
+            #return torch.from_numpy(np.random.randint(num_nodes, size=num_samples))
+        
         if num_nodes is not None and self.weight.numel() != num_nodes:
             raise ValueError(
                 f"The 'weight' attribute in '{self.__class__.__name__}' "

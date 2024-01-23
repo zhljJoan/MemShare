@@ -105,13 +105,13 @@ void ParallelSampler :: neighbor_sample_from_nodes_static_layer(th::Tensor nodes
             // uniform_int_distribution<> u(0, tnb.deg[node]-1);            
             // while(temp_s.size()!=fanout && temp_s.size()<tnb.neighbors_set[node].size()){
             for(int i=0;i<fanout;i++){
-                //Ñ­ï¿½ï¿½Ñ¡ï¿½ï¿½fanoutï¿½ï¿½ï¿½Ú¾ï¿½
+                //Ñ­»·Ñ¡Ôñfanout¸öÁÚ¾Ó
                 NodeIDType indice;
-                if(policy == "weighted"){//ï¿½ï¿½ï¿½Ç±ï¿½È¨ï¿½ï¿½ï¿½ï¿½Ï¢
+                if(policy == "weighted"){//¿¼ÂÇ±ßÈ¨ÖØÐÅÏ¢
                     const vector<WeightType>& ew = tnb.edge_weight[node];
                     indice = sample_multinomial(ew, e);
                 }
-                else if(policy == "uniform"){//ï¿½ï¿½ï¿½È²ï¿½ï¿½ï¿½
+                else if(policy == "uniform"){//¾ùÔÈ²ÉÑù
                     // indice = u(e);
                     indice = rand_r(&loc_seed) % (nei.size());
                 }
@@ -119,7 +119,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_static_layer(th::Tensor nodes
                 auto chosen_e_iter = edge.begin() + indice;
                 if(part_unique){
                     auto rst = temp_s.insert(*chosen_n_iter);
-                    if(rst.second){ //ï¿½ï¿½ï¿½Ø¸ï¿½
+                    if(rst.second){ //²»ÖØ¸´
                         eid_threads[tid].emplace_back(*chosen_e_iter);
                         node_s_threads[tid].insert(*chosen_n_iter);
                         if(!tnb.neighbors_set.empty() && temp_s.size()<fanout && temp_s.size()<tnb.neighbors_set[node].size()) fanout++;
@@ -229,7 +229,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
             }
         }
         else{
-            //ï¿½ï¿½Ñ¡ï¿½Ú¾Ó±ß´ï¿½ï¿½ï¿½ï¿½È³ï¿½ï¿½Ä»ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½fanoutï¿½ï¿½ï¿½Ú¾ï¿½
+            //¿ÉÑ¡ÁÚ¾Ó±ß´óÓÚÉÈ³öµÄ»°ÐèÒªËæ»úÑ¡Ôñfanout¸öÁÚ¾Ó
             tgb_i[tid].src_index.insert(tgb_i[tid].src_index.end(), fanout, i);
             uniform_int_distribution<> u(0, end_index-1);
             //cout<<end_index<<endl;

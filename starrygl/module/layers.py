@@ -32,11 +32,16 @@ class EdgePredictor(torch.nn.Module):
 
     def forward(self, h, neg_samples=1):
         num_edge = h.shape[0] // (neg_samples + 2)
-        h_src =  self.src_fc(h[:num_edge]) 
-        h_pos_dst = self.dst_fc(h[num_edge:num_edge*2]) #
-        h_neg_src = self.src_fc(h[2 * num_edge:])
+        h_src = self.src_fc(h[:num_edge])
+        h_pos_dst = self.dst_fc(h[num_edge:num_edge*2])
+        h_neg_dst = self.dst_fc(h[2 * num_edge:])
         h_pos_edge = torch.nn.functional.relu(h_src + h_pos_dst)
-        h_neg_edge = torch.nn.functional.relu(h_neg_src + h_pos_dst.tile(neg_samples, 1))
+        h_neg_edge = torch.nn.functional.relu(h_src + h_neg_dst.tile(neg_samples, 1))
+        #h_src =  self.src_fc(h[num_edge:2 * num_edge])#self.src_fc(h[:num_edge]) 
+        #h_pos_dst = self.dst_fc(h[:num_edge]) #
+        #h_neg_src = self.src_fc(h[2 * num_edge:])
+        #h_pos_edge = torch.nn.functional.relu(h_src + #h_pos_dst)
+        #h_neg_edge = torch.nn.functional.relu(h_neg_src #+ h_pos_dst.tile(neg_samples, 1))
         #h_neg_edge = torch.nn.functional.relu(h_neg_dst.tile(neg_samples, 1) + h_pos_dst)
         #print(h_src,h_pos_dst,h_neg_dst)
         return self.out_fc(h_pos_edge), self.out_fc(h_neg_edge)
@@ -123,6 +128,10 @@ class TransfomerAttentionLayer(torch.nn.Module):
                 V = self.w_v(torch.cat([b.srcdata['h'][b.edges()[0]], b.edata['f']], dim=1))
                 #K = self.w_k(torch.cat([b.srcdata['h'][b.num_dst_nodes():], b.edata['f']], dim=1))
                 #V = self.w_v(torch.cat([b.srcdata['h'][b.num_dst_nodes():], b.edata['f']], dim=1))
+            elif self.dim_node_feat == 0 and self.dim_edge_feat == 0:
+                Q = self.w_q(zero_time_feat)[b.edges()[1]]
+                K = self.w_k(time_feat)
+                V = self.w_v(time_feat)
             elif self.dim_node_feat == 0:
                 Q = self.w_q(zero_time_feat)[b.edges()[1]]
                 K = self.w_k(torch.cat([b.edata['f'], time_feat], dim=1))

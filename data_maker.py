@@ -97,6 +97,7 @@ if e_feat is not None:
 data.train_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 0)
 data.val_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 1)
 data.test_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 2)
+print(ts[data.train_mask].min(),ts[data.train_mask].max(),ts[data.val_mask].min(),ts[data.val_mask].max(),ts[data.test_mask].min(),ts[data.test_mask].max())
 sample_graph['train_mask'] = data.train_mask[sample_eid]
 sample_graph['test_mask'] = data.test_mask[sample_eid]
 sample_graph['val_mask'] = data.val_mask[sample_eid]

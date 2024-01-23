@@ -115,7 +115,7 @@ class SharedMailBox():
     
 
     def set_memory_local(self,index,source,source_ts,Reduce_Op = None):
-        if Reduce_Op == 'max':
+        if Reduce_Op == 'max' and self.num_parts > 1:
             unq_id,inv = index.unique(return_inverse = True)
             max_ts,id =  torch_scatter.scatter_max(source_ts,inv,dim=0)
             source_ts = max_ts
@@ -243,7 +243,6 @@ class SharedMailBox():
         #futs: List[torch.futures.Future] = []
         if self.num_parts == 1:
             dist_index = DistIndex(index)
-            part_idx = dist_index.part
             index = dist_index.loc
             self.set_mailbox_local(index,mail,mail_ts)
             self.set_memory_local(index,memory,memory_ts)
@@ -317,7 +316,7 @@ class SharedMailBox():
         if edge_feats is not None:
             src_mail = torch.cat([src_mail, edge_feats], dim=1)
             dst_mail = torch.cat([dst_mail, edge_feats], dim=1)
-        mail = torch.cat([src_mail, dst_mail], dim=1).reshape(-1, src_mail.shape[1])
+        mail = torch.cat([src_mail, dst_mail], dim=0)#.reshape(-1, src_mail.shape[1])
         mail_ts = torch.cat((ts,ts),-1).to(self.device).to(self.mailbox_ts.dtype)
         unq_index,inv = torch.unique(index,return_inverse = True)
         max_ts,idx = torch_scatter.scatter_max(mail_ts,inv,0)
