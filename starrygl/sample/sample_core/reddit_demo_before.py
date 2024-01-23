@@ -62,7 +62,7 @@ def test():
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
 
-    g_data, df = load_gdelt_dataset()
+    g_data, df = load_reddit_dataset()
     print(g_data)
     # for worker in [1,2,3,4,5,6,7,8,9,10,20,30]:
     # import random

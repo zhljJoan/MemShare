@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <algorithm>
 #include <torch/extension.h>
 #include <omp.h>
 #include <time.h>
@@ -17,6 +18,12 @@ typedef int64_t NodeIDType;
 typedef int64_t EdgeIDType;
 typedef float WeightType;
 typedef float TimeStampType;
+typedef tuple<NodeIDType, EdgeIDType, TimeStampType> PPRKeyType;
+typedef double PPRValueType;
+typedef phmap::parallel_flat_hash_map<PPRKeyType, PPRValueType> PPRDictType;
+typedef vector<PPRDictType> PPRListDictType;
+typedef vector<vector<PPRDictType>> PPRListListDictType;
+typedef vector<vector<double>> NormListType;
 
 class TemporalNeighborBlock;
 class TemporalGraphBlock;
@@ -28,6 +35,7 @@ int nodeIdToInOut(NodeIDType nid, int pid, const vector<NodeIDType>& part_ptr);
 int nodeIdToPartId(NodeIDType nid, const vector<NodeIDType>& part_ptr);
 vector<th::Tensor> divide_nodes_to_part(th::Tensor nodes, const vector<NodeIDType>& part_ptr, int threads);
 NodeIDType sample_multinomial(const vector<WeightType>& weights, default_random_engine& e);
+vector<int64_t> sample_max(const vector<WeightType>& weights, int k);
 
 
 
@@ -172,4 +180,18 @@ NodeIDType sample_multinomial(const vector<WeightType>& weights, default_random_
     auto it = lower_bound(cumulative_weights.begin(), cumulative_weights.end(), random_value);
     sample_indice = distance(cumulative_weights.begin(), it);
     return sample_indice;
+}
+
+vector<int64_t> sample_max(const vector<WeightType>& weights, int k) {
+    vector<int64_t> indices(weights.size());
+    for (int i = 0; i < weights.size(); ++i) {
+        indices[i] = i;
+    }
+
+    // 使用部分排序算法（选择算法）找到前k个最大值的索引
+    partial_sort(indices.begin(), indices.begin() + k, indices.end(), 
+                 [&weights](int64_t a, int64_t b) { return weights[a] > weights[b]; });
+
+    // 返回前k个最大值的索引
+    return vector<int64_t>(indices.begin(), indices.begin() + k);
 }
