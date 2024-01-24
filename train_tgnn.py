@@ -43,7 +43,7 @@ parser.add_argument('--rank', default=0, type=int, metavar='W',
 parser.add_argument('--patience', type=int, default=5, help='Patience for early stopping')
 parser.add_argument('--world_size', default=1, type=int, metavar='W',
                     help='number of negative samples')
-parser.add_argument('--dataname', default=1, type=str, metavar='W',
+parser.add_argument('--dataname', default="WIKI", type=str, metavar='W',
                     help='name of dataset')
 parser.add_argument('--model', default='TGN', type=str, metavar='W',
                     help='name of model')
@@ -52,14 +52,15 @@ from sklearn.metrics import average_precision_score, roc_auc_score
 import torch
 import time
 import random
-import dgl
 import numpy as np
 from sklearn.metrics import average_precision_score, roc_auc_score
 from torch.nn.parallel import DistributedDataParallel as DDP
-#os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
-#os.environ["RANK"] = str(args.rank)
-#os.environ["WORLD_SIZE"] = str(args.world_size)
-#os.environ["LOCAL_RANK"] = str(0)
+
+os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
+os.environ["RANK"] = str(args.rank)
+os.environ["WORLD_SIZE"] = str(args.world_size)
+os.environ["LOCAL_RANK"] = str(0)
+
 torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
 os.environ["MASTER_ADDR"] = '127.0.0.1'
 os.environ["MASTER_PORT"] = '9437'
@@ -152,7 +153,7 @@ def main():
     else:
         model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param)
         device = torch.device('cpu')
-    model = DDP(model,find_unused_parameters=True)
+    model = DDP(model,find_unused_parameters=False)
     train_stream = torch.cuda.Stream()
     send_stream = torch.cuda.Stream()
     scatter_stream = torch.cuda.Stream()
@@ -223,8 +224,11 @@ def main():
         auc_mrr = torch.empty([loader.expected_idx*world_size],dtype = torch.float,device = 'cuda')
         dist.all_gather_into_tensor(apc,torch.tensor(aps,device ='cuda',dtype=torch.float))
         dist.all_gather_into_tensor(auc_mrr,torch.tensor(aucs_mrrs,device ='cuda',dtype=torch.float))
-        ap = float(torch.tensor(apc).mean())
-        auc_mrr = float(torch.tensor(auc_mrr).mean())
+        # ap = float(torch.tensor(apc).mean())
+        # auc_mrr = float(torch.tensor(auc_mrr).mean())
+        ap = float(apc.clone().mean())
+        auc_mrr = float(auc_mrr.clone().mean())
+
         return ap, auc_mrr
     creterion = torch.nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'])

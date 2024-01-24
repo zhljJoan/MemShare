@@ -8,7 +8,7 @@ import torch.multiprocessing as mp
 from typing import Optional, Tuple
 
 from .base import BaseSampler, NegativeSampling, SampleOutput, SampleType
-# from sample_cores import ParallelSampler, get_neighbors, heads_unique
+from starrygl.lib.libstarrygl_sampler import ParallelSampler, get_neighbors, heads_unique
 
 from torch.distributed.rpc import rpc_async
 
