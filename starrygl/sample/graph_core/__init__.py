@@ -37,6 +37,7 @@ class DistributedGraphStore:
         self.sample_graph = pdata.sample_graph
         self.nids_mapper = build_mapper(nids=pdata.ids.to(device)).dist.to('cpu')
         self.eids_mapper = build_mapper(nids=pdata.eids.to(device)).dist.to('cpu')
+        self.sample_graph['dist_eid'] = self.eids_mapper[pdata.sample_graph['eids']]
         torch.cuda.empty_cache()
 
         self.num_nodes = self.nids_mapper.data.shape[0]
@@ -255,7 +256,7 @@ class TemporalNeighborSampleGraph(DistributedGraphStore):
             self.edge_ts = sample_graph['ts']
         else:
             self.edge_ts = None
-        self.eid = torch.arange(self.num_edges,dtype = torch.long, device = sample_graph['eids'].device)
+        self.eid = sample_graph['eids']#torch.arange(self.num_edges,dtype = torch.long, device = sample_graph['eids'].device)
         #sample_graph['eids']
         if mode == 'train':
             mask = sample_graph['train_mask']

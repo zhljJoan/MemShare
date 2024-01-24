@@ -31,7 +31,6 @@ def prepare_input(node_feat, edge_feat, mem_embedding,mfgs,dist_nid,dist_eid):
             idx = b.srcdata['ID']
             b.edata['ID'] = dist_eid[e_idx]
             b.srcdata['ID'] = dist_nid[idx]
-            #print(b.edata['ID'],b.edata['dt'],b.srcdata['ID'])
             if edge_feat is not None:
                 b.edata['f'] = edge_feat[e_idx]
             if i == 0:
@@ -51,21 +50,19 @@ def to_block(graph: DistributedGraphStore, data, sample_out, mailbox:MailBox = N
         sample_out,metadata = sample_out
     else:
         metadata = None
+    # print(sample_out)
     eid = [ret.eid() for ret in sample_out]
     eid_len = [e.shape[0] for e in eid ]
-    #print(len(sample_out),eid,eid_len)
     eid_mapper: torch.Tensor = graph.eids_mapper
     nid_mapper: torch.Tensor = graph.nids_mapper
     eid_tensor = torch.cat(eid,dim = 0).to(eid_mapper.device)
-    #print(eid_tensor)
-    dist_eid = eid_mapper[eid_tensor>>1].to(device)
+    dist_eid = graph.sample_graph['dist_eid'][eid_tensor].to(device)#eid_mapper[eid_tensor].to(device)
     dist_eid,eid_inv = dist_eid.unique(return_inverse=True)
     src_node = graph.sample_graph['edge_index'][0,eid_tensor].to(graph.nids_mapper.device)
-    #print(src_node,graph.sample_graph['edge_index'][1,eid_tensor])
     src_ts = None  
     if metadata is None:
-        root_node = data.nodes.to(graph.nids_mapper.device)
-        root_len = root_node.shape[0]
+        root_node = data.nodes.to(graph.nidst_eid_mapper.device)
+        root_len = [root_node.shape[0]]
         if hasattr(data,'ts'):
             src_ts = torch.cat([data.ts,
                                 graph.sample_graph['ts'][eid_tensor].to(device)])
@@ -77,44 +74,30 @@ def to_block(graph: DistributedGraphStore, data, sample_out, mailbox:MailBox = N
                                 graph.sample_graph['ts'][eid_tensor].to(device)])
         for k in metadata:
             metadata[k] = metadata[k].to(device)
-    #print(src_ts,root_node)
+
     nid_tensor = torch.cat([root_node,src_node],dim = 0)
-    #sprint(nid_tensor)
     dist_nid = nid_mapper[nid_tensor].to(device)
     dist_nid,nid_inv = dist_nid.unique(return_inverse = True)
-    
-    fetchCache = FetchFeatureCache.getFetchCache()
-    if fetchCache is None:
-        if isinstance(graph.edge_attr,DistributedTensor):
-            ind_dict = graph.edge_attr.all_to_all_ind2ptr(dist_eid,group = group)
-            edge_feat = graph.edge_attr.all_to_all_get(group = group,**ind_dict)
-        else:
-            edge_feat = graph._get_edge_attr(dist_eid)
-        ind_dict = None
-        if isinstance(graph.x,DistributedTensor):
-            ind_dict = graph.x.all_to_all_ind2ptr(dist_nid,group = group)
-            node_feat = graph.x.all_to_all_get(group = group,**ind_dict)
-        else:
-            node_feat = graph._get_node_attr(dist_nid)
-        if mailbox is not None:
-            if torch.distributed.get_world_size() > 1:
-                if node_feat is None:
-                    ind_dict = mailbox.node_memory.all_to_all_ind2ptr(dist_nid,group = group)
-                mem = mailbox.gather_memory(**ind_dict)
-            else:
-                mem = mailbox.get_memory(dist_nid)
-        else:
-            mem = None
+    if isinstance(graph.edge_attr,DistributedTensor):
+        ind_dict = graph.edge_attr.all_to_all_ind2ptr(dist_eid,group = group)
+        edge_feat = graph.edge_attr.all_to_all_get(group = group,**ind_dict)
     else:
-        raw_nid = torch.empty_like(dist_nid)
-        raw_eid = torch.empty_like(dist_eid)
-        nid_tensor = nid_tensor.to(device)
-        eid_tensor = eid_tensor.to(device)
-        raw_nid[nid_inv] = nid_tensor
-        raw_eid[eid_inv] = (eid_tensor>>1)
-        node_feat,edge_feat,mem = fetchCache.fetch_feature(raw_nid,
-                                 dist_nid,raw_eid,
-                                 dist_eid)
+        edge_feat = graph._get_edge_attr(dist_eid)
+    ind_dict = None
+    if isinstance(graph.x,DistributedTensor):
+        ind_dict = graph.x.all_to_all_ind2ptr(dist_nid,group = group)
+        node_feat = graph.x.all_to_all_get(group = group,**ind_dict)
+    else:
+        node_feat = graph._get_node_attr(dist_nid)
+    if mailbox is not None:
+        if torch.distributed.get_world_size() > 1:
+            if node_feat is None:
+                ind_dict = mailbox.node_memory.all_to_all_ind2ptr(dist_nid,group = group)
+            mem = mailbox.gather_memory(**ind_dict)
+        else:
+            mem = mailbox.get_memory(dist_nid)
+    else:
+        mem = None
     def build_block():
         mfgs = list()
         col = torch.arange(0,root_len,device = device)
@@ -123,23 +106,18 @@ def to_block(graph: DistributedGraphStore, data, sample_out, mailbox:MailBox = N
         for r in range(len(eid_len)):
             elen = eid_len[r]
             row = torch.arange(row_len,row_len+elen,device = device)
-            #print(row,col[sample_out[r].src_index()])
             b = dgl.create_block((row,col[sample_out[r].src_index().to(device)]),
                                  num_src_nodes = row_len + elen,
                                  num_dst_nodes = row_len,
                                  device = device)
             idx = nid_inv[0:row_len + elen]
             e_idx = eid_inv[col_len:col_len+elen]
-            #print(idx,e_idx)
             b.srcdata['ID'] = idx
             if sample_out[r].delta_ts().shape[0] > 0:
                 b.edata['dt'] = sample_out[r].delta_ts().to(device)
             if src_ts is not None:
-                b.srcdata['ts'] = src_ts[0:row_len + elen]
+                b.srcdata['ts'] = src_ts[0:row_len + eid_len[r]]
             b.edata['ID'] = e_idx
-            #print(b.all_edges)
-            #print(dist_nid[b.srcdata['ID']],dist_nid[b.srcdata['ID'][col[sample_out[r].src_index().to(device)]]])
-            #print(b.edata['dt'],b.srcdata['ts'])
             col = row
             col_len += eid_len[r]
             row_len += eid_len[r]
@@ -151,7 +129,6 @@ def to_block(graph: DistributedGraphStore, data, sample_out, mailbox:MailBox = N
     mfgs = prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
         #return build_block(node_feat,edge_feat,mem)#data,mfgs,metadata
     return (data,mfgs,metadata)
-
 
 def graph_sample(graph, sampler:BaseSampler,
                       sample_fn, data, 

@@ -149,6 +149,7 @@ class TransfomerAttentionLayer(torch.nn.Module):
                 #Q = self.w_q(torch.cat([b.srcdata['h'][:b.num_dst_nodes()], zero_time_feat], dim=1))[b.edges()[1]]
                 #K = self.w_k(torch.cat([b.srcdata['h'][b.num_dst_nodes():], b.edata['f'], time_feat], dim=1))
                 #V = self.w_v(torch.cat([b.srcdata['h'][b.num_dst_nodes():], b.edata['f'], time_feat], dim=1))
+                
             Q = torch.reshape(Q, (Q.shape[0], self.num_head, -1))
             K = torch.reshape(K, (K.shape[0], self.num_head, -1))
             V = torch.reshape(V, (V.shape[0], self.num_head, -1))
