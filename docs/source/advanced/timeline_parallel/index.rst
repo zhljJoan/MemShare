@@ -1,9 +1,6 @@
 Distributed Timeline Parallel
 =============================
 
-.. note::
-    分布式时序并行
-
 The timeline parallel means each node in the graph performs independent computation
 since each node has its own independent timeline. This parallel approach emphasizes that the timelines of each node are
 independent and may span multiple machines or processes, and nodes may not immediately synchronize or communicate with each other.

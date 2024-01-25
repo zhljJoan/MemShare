@@ -9,8 +9,6 @@ StarryGL Documentation
    tutorial/index
    advanced/index
    api/python/index
-   cheatsheets/index
-   external/index
 
 .. Indices and tables
 .. ==================

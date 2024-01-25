@@ -1,11 +1,6 @@
 Distributed Partition Parallel
 ==============================
 
-.. note::
-    分布式分区并行训练部分
-
-
-
 The **distributed partition parallel** refers to the process of partitioning a large graph into
 multiple partitions and distributing them to different workers. Each worker is responsible for training
 a specific partition in parallel. The data is exchanged across different partitions.
