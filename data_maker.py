@@ -19,29 +19,6 @@ parser.add_argument('--num_neg_sample', default=1, type=int, metavar='W',
 args = parser.parse_args()
 
 
-def load_feat(d, rand_de=0, rand_dn=0):
-    node_feats = None
-    if os.path.exists('DATA/{}/node_features.pt'.format(d)):
-        node_feats = torch.load('DATA/{}/node_features.pt'.format(d))
-        if node_feats.dtype == torch.bool:
-            node_feats = node_feats.type(torch.float32)
-    edge_feats = None
-    if os.path.exists('DATA/{}/edge_features.pt'.format(d)):
-        edge_feats = torch.load('DATA/{}/edge_features.pt'.format(d))
-        if edge_feats.dtype == torch.bool:
-            edge_feats = edge_feats.type(torch.float32)
-    if rand_de > 0:
-        if d == 'LASTFM':
-            edge_feats = torch.randn(1293103, rand_de)
-        elif d == 'MOOC':
-            edge_feats = torch.randn(411749, rand_de)
-    if rand_dn > 0:
-        if d == 'LASTFM':
-            node_feats = torch.randn(1980, rand_dn)
-        elif d == 'MOOC':
-            edge_feats = torch.randn(7144, rand_dn)
-    return node_feats, edge_feats
-
 
 data_name = args.data_name
 g = np.load('/mnt/nfs/fzz/TGL-DATA/'+data_name+'/ext_full.npz')
@@ -95,8 +72,9 @@ if e_feat is not None:
     data.edge_attr = e_feat
 
 data.train_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 0)
-data.test_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 1)
-data.val_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 2)
+data.val_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 1)
+data.test_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 2)
+print(ts[data.train_mask].min(),ts[data.train_mask].max(),ts[data.val_mask].min(),ts[data.val_mask].max(),ts[data.test_mask].min(),ts[data.test_mask].max())
 sample_graph['train_mask'] = data.train_mask[sample_eid]
 sample_graph['test_mask'] = data.test_mask[sample_eid]
 sample_graph['val_mask'] = data.val_mask[sample_eid]
@@ -106,28 +84,19 @@ data.y = torch.zeros(edge_index.shape[1])
 edge_index_dict = {}
 edge_index_dict['edata'] = data.edge_index
 edge_index_dict['sample_data'] = data.sample_graph['edge_index']
-edge_index_dict['neg_data'] = torch.cat([neg_src.view(1, -1),
-                                         dst.view(-1, 1).repeat(1, neg_nums).
-                                         reshape(1, -1)], dim=0)
+
 data.edge_index_dict = edge_index_dict
 edge_weight_dict = {}
-edge_weight_dict['edata'] = 2*neg_nums
+edge_weight_dict['edata'] = 1*neg_nums
 edge_weight_dict['sample_data'] = 1*neg_nums
-edge_weight_dict['neg_data'] = 1
-#partition_save('./dataset/here/'+data_name, data, 1, 'metis_for_tgnn',
-#               edge_weight_dict=edge_weight_dict)
-#partition_save('./dataset/here/'+data_name, data, 2, 'metis_for_tgnn',
-#               edge_weight_dict=edge_weight_dict)
-#partition_save('./dataset/here/'+data_name, data, 4, 'metis_for_tgnn',
-#               edge_weight_dict=edge_weight_dict)
-#partition_save('./dataset/here/'+data_name, data, 8, 'metis_for_tgnn',
-#               edge_weight_dict=edge_weight_dict)
+partition_save('/mnt/data/part_data/v2/here/'+data_name, data, 1, 'metis_for_tgnn',
+               edge_weight_dict=edge_weight_dict)
+partition_save('/mnt/data/part_data/v2/here/'+data_name, data, 2, 'metis_for_tgnn',
+               edge_weight_dict=edge_weight_dict)
+partition_save('/mnt/data/part_data/v2/here/'+data_name, data, 4, 'metis_for_tgnn',
+               edge_weight_dict=edge_weight_dict)
+partition_save('/mnt/data/part_data/v2/here/'+data_name, data, 8, 'metis_for_tgnn',
+               edge_weight_dict=edge_weight_dict)
 partition_save('./dataset/here/'+data_name, data, 16, 'metis_for_tgnn',
                edge_weight_dict=edge_weight_dict)
-#
-# partition_save('./dataset/here/'+data_name, data, 4, 'metis_for_tgnn',
-# edge_weight_dict=edge_weight_dict )
-# partition_save('./dataset/here'+data_name, data, 8, 'metis')
-# partition_save('./dataset/'+data_name, data, 12, 'metis')
-# partition_save('./dataset/'+data_name, data, 16, 'metis')
 

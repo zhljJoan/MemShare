@@ -203,9 +203,6 @@ class GRUMemeoryUpdater(torch.nn.Module):
             self.last_updated_ts = b.srcdata['ts'].detach().clone()
             self.last_updated_memory = updated_memory.detach().clone()
             self.last_updated_nid = b.srcdata['ID'].detach().clone()
-            x1 = torch.sum(b.srcdata['mem']**2,dim = 1)
-            self.delta_memory = torch.sum((updated_memory - b.srcdata['mem'])**2,dim = 1)/torch.sum(b.srcdata['mem']**2,dim = 1)
-            #print(torch.dist(b.srcdata['mem'],updated_memory))
             if self.memory_param['combine_node_feature']:
                 if self.dim_node_feat > 0:
                     if self.dim_node_feat == self.dim_hid:

@@ -16,8 +16,8 @@ gnn:
     use_dst_emb: False
     time_transform: 'JODIE'
 train:
-  - epoch: 20
-    batch_size: 200
+  - epoch: 100
+    batch_size: 1000
     lr: 0.0001
     dropout: 0.1
     all_on_gpu: True

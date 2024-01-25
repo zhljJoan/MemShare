@@ -262,6 +262,8 @@ class NeighborSampler(BaseSampler):
                 seed = torch.cat([src, dst, src_neg], dim=0)
                 if with_timestap: # ts操作
                     seed_ts = torch.cat([ets, ets, ets], dim=0)
+            #if neg_sampling.is_evaluate():
+                #src,dst = neg_sampling.sample(num_samples=)
         else:
             seed = torch.cat([src, dst], dim=0)            
             if with_timestap: # ts操作

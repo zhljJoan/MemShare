@@ -40,6 +40,8 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument('--rank', default=0, type=int, metavar='W',
                     help='name of dataset')
+parser.add_argument('--local_rank', default=0, type=int, metavar='W',
+                    help='name of dataset')
 parser.add_argument('--patience', type=int, default=5, help='Patience for early stopping')
 parser.add_argument('--world_size', default=1, type=int, metavar='W',
                     help='number of negative samples')
@@ -56,14 +58,16 @@ import numpy as np
 from sklearn.metrics import average_precision_score, roc_auc_score
 from torch.nn.parallel import DistributedDataParallel as DDP
 
-os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
-os.environ["RANK"] = str(args.rank)
-os.environ["WORLD_SIZE"] = str(args.world_size)
-os.environ["LOCAL_RANK"] = str(0)
-
+#os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
+if not 'WORLD_SIZE'  in os.environ:
+    os.environ["RANK"] = str(args.rank)
+    os.environ["WORLD_SIZE"] = str(args.world_size)
+    os.environ["LOCAL_RANK"] = str(args.local_rank)
+if not 'MASTER_ADDR' in os.environ:
+    os.environ["MASTER_ADDR"] = '192.168.2.107'
+if not 'MASTER_PORT' in os.environ:
+    os.environ["MASTER_PORT"] = '9337'
 torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
-os.environ["MASTER_ADDR"] = '10.214.211.186'
-os.environ["MASTER_PORT"] = '9667'
 def seed_everything(seed=42):
     random.seed(seed)
     np.random.seed(seed)
@@ -72,18 +76,18 @@ def seed_everything(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-seed_everything(1234)
+seed_everything(34)
 def main():   
-    print('main')
+    print('LOCAL RANK {}, RANK{}'.format(os.environ["LOCAL_RANK"],os.environ["RANK"]))
     use_cuda = True
     sample_param, memory_param, gnn_param, train_param = parse_config('./config/{}.yml'.format(args.model))
-    torch.set_num_threads(12)
     ctx = DistributedContext.init(backend="nccl", use_gpu=True)
+    torch.set_num_threads(int(80/torch.distributed.get_world_size()))
     device_id = torch.cuda.current_device()
     print('use cuda on',device_id)
-    pdata = partition_load("/mnt/data/part_data/here/{}".format(args.dataname), algo="metis_for_tgnn")    
+    pdata = partition_load("/mnt/data/part_data/v2/here/{}".format(args.dataname), algo="metis_for_tgnn")    
     graph = DistributedGraphStore(pdata = pdata)
-
+    print(graph.num_nodes)
     Path("./saved_models/").mkdir(parents=True, exist_ok=True)
     Path("./saved_checkpoints/").mkdir(parents=True, exist_ok=True)
     get_checkpoint_path = lambda \
@@ -92,27 +96,24 @@ def main():
     use_src_emb = gnn_param['use_src_emb'] if 'use_src_emb' in gnn_param else False
     use_dst_emb = gnn_param['use_dst_emb'] if 'use_dst_emb' in gnn_param else False
     sample_graph = TemporalNeighborSampleGraph(sample_graph = pdata.sample_graph,mode = 'full')
-    mailbox = SharedMailBox(pdata.ids.shape[0], memory_param, dim_edge_feat = pdata.edge_attr.shape[1] if pdata.edge_attr is not None else 0)
-    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=1, fanout=[10],graph_data=sample_graph, workers=15,policy = 'recent',graph_name = "wiki_train")
+    if memory_param['type'] != 'none':
+        mailbox = SharedMailBox(pdata.ids.shape[0], memory_param, dim_edge_feat = pdata.edge_attr.shape[1] if pdata.edge_attr is not None else 0)
+    else:
+        mailbox = None
+    fanout = []
+    num_layers = sample_param['layer'] if 'layer' in sample_param else 1
+    fanout = sample_param['neighbor'] if 'neighbor' in sample_param else [10]
+    policy = sample_param['strategy'] if 'strategy' in sample_param else 'recent'
+    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=int(80/torch.distributed.get_world_size()),policy = policy, graph_name = "wiki_train")
     train_data = torch.masked_select(graph.edge_index,pdata.train_mask.to(graph.edge_index.device)).reshape(2,-1)
     train_ts = torch.masked_select(graph.edge_ts,pdata.train_mask.to(graph.edge_index.device))
-    val_data = torch.masked_select(graph.edge_index,pdata.val_mask.to(graph.edge_index.device)).reshape(2,-1)
-    val_ts = torch.masked_select(graph.edge_ts,pdata.val_mask.to(graph.edge_index.device))
     test_data = torch.masked_select(graph.edge_index,pdata.test_mask.to(graph.edge_index.device)).reshape(2,-1)
-    test_ts = torch.masked_select(graph.edge_ts,pdata.test_mask.to(graph.edge_index.device)) 
-    ##print(train_data.shape[1],val_data.shape[1],test_data.shape[1])
+    test_ts = torch.masked_select(graph.edge_ts,pdata.test_mask.to(graph.edge_index.device))
+    val_data = torch.masked_select(graph.edge_index,pdata.val_mask.to(graph.edge_index.device)).reshape(2,-1)
+    val_ts = torch.masked_select(graph.edge_ts,pdata.val_mask.to(graph.edge_index.device)) 
     train_data = DataSet(edges = train_data,ts =train_ts,eids = torch.nonzero(pdata.train_mask).view(-1))
-    #if dist.get_rank() == 0:
     test_data = DataSet(edges = test_data,ts =test_ts,eids = torch.nonzero(pdata.test_mask).view(-1))
     val_data = DataSet(edges = val_data,ts = val_ts,eids = torch.nonzero(pdata.val_mask).view(-1))
-    #else:
-        #test_data = torch.tensor([[],[]],device = graph.edge_index.device,detype = graph.edge_index.#dtype)
-        #val_data = torch.tensor([[],[]],device = graph.edge_index.device,detype = graph.edge_index.dtype)
-        #test_ts = torch.tensor([[],[]],device = graph.ts.device,detype = graph.ts.dtype)
-        #val_ts = torch.tensor([[],[]],device = graph.ts.device,detype = graph.ts.dtype)
-        #test_data = DataSet(edges = test_data,ts =test_ts,eids = torch.tensor([],dtype = torch.long,#device = torch.cuda))
-        #val_data = DataSet(edges = val_data,ts = val_ts,eids = torch.tensor([],dtype = torch.long,device #= torch.cuda))
-    #train_neg_sampler = PreNegativeSampling('triplet',torch.masked_select(pdata.edge_index['pos_edge'],graph.data.train_mask).reshape(2,-1))
     neg_sampler = NegativeSampling('triplet')
     trainloader = DistributedDataLoader(graph,train_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
@@ -122,7 +123,7 @@ def main():
                                         drop_last=True,
                                         chunk_size = None,
                                         train=True,
-                                        queue_size = 1000,
+                                        queue_size = 200,
                                         mailbox = mailbox,
                                         )
     testloader = DistributedDataLoader(graph,test_data,sampler = sampler,
@@ -145,12 +146,10 @@ def main():
                                         train=False,
                                         queue_size = 100,
                                         mailbox = mailbox)
-    #FetchFeatureCache.create_fetch_cache(graph.num_nodes,graph.eids_mapper.shape[0],0.1,0.1,graph,mailbox,policy = 'static')
-    #cache = FetchFeatureCache.getFetchCache()
-    #cache.init_cache_with_presample(trainloader,3)
+    
+
     gnn_dim_node = 0 if graph.x is None else pdata.x.shape[1]
     gnn_dim_edge = 0 if graph.edge_attr is None else pdata.edge_attr.shape[1]
-    print("gnn_dim_node:", gnn_dim_node, "gnn_dim_edge:", gnn_dim_edge)
     avg_time  = 0
     if use_cuda:
         model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param).cuda()
@@ -158,7 +157,7 @@ def main():
     else:
         model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param)
         device = torch.device('cpu')
-    model = DDP(model,find_unused_parameters=False)
+    model = DDP(model,find_unused_parameters=True)
     train_stream = torch.cuda.Stream()
     send_stream = torch.cuda.Stream()
     scatter_stream = torch.cuda.Stream()
@@ -187,11 +186,11 @@ def main():
                     y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
                     y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
                     aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
+
                     aucs_mrrs.append(roc_auc_score(y_true, y_pred))
                     if mailbox is not None:
                         src = metadata['src_pos_index']
                         dst = metadata['dst_pos_index']
-
                         ts = roots.ts
                         if graph.edge_attr is None:
                             edge_feats = None
@@ -199,6 +198,7 @@ def main():
                             edge_feats = graph.edge_attr[roots.eids.to('cpu')].to('cuda')
                         else:
                             edge_feats = graph.edge_attr[roots.eids] 
+                            
                         dist_index_mapper = mfgs[0][0].srcdata['ID']
                         root_index = torch.cat((src,dst))
                         last_updated_nid = model.module.memory_updater.last_updated_nid[root_index]
@@ -214,6 +214,7 @@ def main():
                                                      model.module.embedding,use_src_emb,
                                                      use_dst_emb,
                                                 )
+
                         mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
 
 
@@ -253,27 +254,22 @@ def main():
             model.module.memory_updater.last_updated_memory = None
             model.module.memory_updater.last_updated_ts = None
         for roots,mfgs,metadata in trainloader:
-            # fetch_time +=sample_time/1000
+            #fetch_time +=sample_time/1000
             t_prep_s = time.time()
             
             with torch.cuda.stream(train_stream):
 
                 optimizer.zero_grad()
                 pred_pos, pred_neg = model(mfgs,metadata)
-                
                 loss = creterion(pred_pos, torch.ones_like(pred_pos))
                 loss += creterion(pred_neg, torch.zeros_like(pred_neg))
                 total_loss += float(loss)
                 loss.backward()
                 optimizer.step()
-                #torch.cuda.synchronize()
                 t_prep_s = time.time()
-                # y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
-                # y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
-                # train_aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
-                #start_event = torch.cuda.Event(enable_timing=True)
-                #end_event = torch.cuda.Event(enable_timing=True)
-                #start_event.record()
+                y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
+                y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
+                train_aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
                 if mailbox is not None:
                     src = metadata['src_pos_index']
                     dst = metadata['dst_pos_index']
@@ -298,13 +294,8 @@ def main():
                                                 model.module.memory_updater.last_updated_memory, 
                                                 model.module.embedding,use_src_emb,use_dst_emb,
                                                 )
-                    start_event = torch.cuda.Event(enable_timing=True)
-                    end_event = torch.cuda.Event(enable_timing=True)
-                    start_event.record()
+                    
                     mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
-                    end_event.record()
-                    torch.cuda.synchronize()
-                    write_back_time += start_event.elapsed_time(end_event)/1000
                 
         torch.cuda.synchronize()
         time_prep = time.time() - epoch_start_time
@@ -312,24 +303,24 @@ def main():
         train_ap = float(torch.tensor(train_aps).mean())    
         ap = 0
         auc = 0
-        #if cache.edge_cache is not None:
-        #    print('hit {}'.format(cache.edge_cache.hit_/ cache.edge_cache.hit_sum))
-        #if cache.node_cache is not None:
-        #    print('hit {}'.format(cache.node_cache.hit_/ cache.node_cache.hit_sum))
         ap, auc = eval('val')
         early_stop = early_stopper.early_stop_check(ap)
         if early_stop:
-            print("Early stopping at epoch {:d}".format(e))
-            print(f"Loading the best model at epoch {early_stopper.best_epoch}")
+            print("Early stopping at epoch {:d}\n".format(e))
+            print(f"Loading the best model at epoch {early_stopper.best_epoch}\n")
             best_model_path = get_checkpoint_path(early_stopper.best_epoch)
             model.load_state_dict(torch.load(best_model_path))
             break
         else:
-            print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f}'.format(total_loss,train_ap, ap, auc))
-            print('\ttotal time:{:.2f}s  prep time:{:.2f}s'.format(time.time()-epoch_start_time, time_prep))    
-            # print('\t fetch time:{:.2f}s write back time:{:.2f}s'.format(fetch_time,write_back_time))
+            print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f}\n'.format(total_loss,train_ap, ap, auc))
+            print('\ttotal time:{:.2f}s  prep time:{:.2f}s\n'.format(time.time()-epoch_start_time, time_prep))    
+            print('\t fetch time:{:.2f}s write back time:{:.2f}s\n'.format(fetch_time,write_back_time))
             torch.save(model.state_dict(), get_checkpoint_path(e))
           
+    if not early_stop:        
+        print(f"Loading the best model at epoch {early_stopper.best_epoch}")
+        best_model_path = get_checkpoint_path(early_stopper.best_epoch)
+        model.load_state_dict(torch.load(best_model_path))      
     model.eval()
     if mailbox is not None:
         mailbox.reset()
@@ -339,10 +330,10 @@ def main():
     ap, auc = eval('test')
     eval_neg_samples = 1
     if eval_neg_samples > 1:
-        print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, auc))
+        print('\ttest AP:{:4f}  test MRR:{:4f}\n'.format(ap, auc))
     else:
-        print('\ttest AP:{:4f}  test AUC:{:4f}'.format(ap, auc))    
-    print('test_dataset',test_data.edges.shape[1],'avg_time',avg_time/train_param['epoch'])
+        print('\ttest AP:{:4f}  test AUC:{:4f}\n'.format(ap, auc))    
+    print('test_dataset {} avg_time {} \n'.format(test_data.edges.shape[1],avg_time/train_param['epoch']))
     torch.save(model.state_dict(), MODEL_SAVE_PATH)
     ctx.shutdown()
 if __name__ == "__main__":

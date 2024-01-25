@@ -7,7 +7,7 @@ import torch
 import torch.distributed as dist
 from torch_geometric.data import Data
 
-
+from starrygl.utils.uvm import *
 class DistributedGraphStore:
     '''
 
@@ -37,6 +37,7 @@ class DistributedGraphStore:
         self.sample_graph = pdata.sample_graph
         self.nids_mapper = build_mapper(nids=pdata.ids.to(device)).dist.to('cpu')
         self.eids_mapper = build_mapper(nids=pdata.eids.to(device)).dist.to('cpu')
+        self.sample_graph['dist_eid'] = self.eids_mapper[pdata.sample_graph['eids']]
         torch.cuda.empty_cache()
 
         self.num_nodes = self.nids_mapper.data.shape[0]
@@ -46,17 +47,18 @@ class DistributedGraphStore:
         self.uvm_edge = uvm_edge
         
         if hasattr(pdata,'x') and pdata.x is not None:
+            ctx = DistributedContext.get_default_context()
             pdata.x = pdata.x.to(torch.float)
             if uvm_node == False :
                 x = pdata.x.to(self.device)
             else:
                 if self.device.type == 'cuda':
-                    x = starrygl.utils.uvm.uvm_empty(*pdata.x.size(),
+                    x = uvm_empty(*pdata.x.size(),
                                     dtype=pdata.x.dtype,
                                     device=ctx.device)
-                    starrygl.utils.uvm.uvm_share(x,device = ctx.device)
-                    starrygl.utils.uvm.uvm_advise(x,starrygl.utils.uvm.cudaMemoryAdvise.cudaMemAdviseSetAccessedBy)
-                    starrygl.utils.uvm.uvm_prefetch(x)
+                    uvm_share(x,device = ctx.device)
+                    uvm_advise(x,cudaMemoryAdvise.cudaMemAdviseSetAccessedBy)
+                    uvm_prefetch(x)
             if world_size > 1:
                 self.x = DistributedTensor(pdata.x.to(self.device).to(torch.float))
             else:
@@ -71,12 +73,15 @@ class DistributedGraphStore:
                 edge_attr = pdata.edge_attr.to(self.device)
             else:
                 if self.device.type == 'cuda':
-                    edge_attr = starrygl.utils.uvm.uvm_empty(*pdata.edge_attr.size(),
+                    edge_attr = uvm_empty(*pdata.edge_attr.size(),
                                     dtype=pdata.edge_attr.dtype,
                                     device=ctx.device)
-                    starrygl.utils.uvm.uvm_share(edge_attr,device = ctx.device)
-                    starrygl.utils.uvm.uvm_advise(edge_attr,starrygl.utils.uvm.cudaMemoryAdvise.cudaMemAdviseSetAccessedBy)
-                    starrygl.utils.uvm.uvm_prefetch(edge_attr)
+                    edge_attr = uvm_share(edge_attr,device = torch.device('cpu'))
+                    edge_attr.copy_(pdata.edge_attr)
+
+                    edge_attr = uvm_share(edge_attr,device = ctx.device)
+                    uvm_advise(edge_attr,cudaMemoryAdvise.cudaMemAdviseSetAccessedBy)
+                    uvm_prefetch(edge_attr)
             if world_size > 1:
                 self.edge_attr = DistributedTensor(edge_attr)
             else:
@@ -251,7 +256,8 @@ class TemporalNeighborSampleGraph(DistributedGraphStore):
             self.edge_ts = sample_graph['ts']
         else:
             self.edge_ts = None
-        self.eid = sample_graph['eids']
+        self.eid = sample_graph['eids']#torch.arange(self.num_edges,dtype = torch.long, device = sample_graph['eids'].device)
+        #sample_graph['eids']
         if mode == 'train':
             mask = sample_graph['train_mask']
         if mode == 'val':

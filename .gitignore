@@ -180,3 +180,8 @@ cython_debug/
 /*.ipynb
 saved_models/
 saved_checkpoints/
+.history/
+.preprocess_data/
+.processed_data/
+.DG_data/
+.examples/
