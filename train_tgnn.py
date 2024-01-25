@@ -40,6 +40,8 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument('--rank', default=0, type=int, metavar='W',
                     help='name of dataset')
+parser.add_argument('--local_rank', default=0, type=int, metavar='W',
+                    help='name of dataset')
 parser.add_argument('--patience', type=int, default=5, help='Patience for early stopping')
 parser.add_argument('--world_size', default=1, type=int, metavar='W',
                     help='number of negative samples')
@@ -56,14 +58,16 @@ import numpy as np
 from sklearn.metrics import average_precision_score, roc_auc_score
 from torch.nn.parallel import DistributedDataParallel as DDP
 
-os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
-os.environ["RANK"] = str(args.rank)
-os.environ["WORLD_SIZE"] = str(args.world_size)
-os.environ["LOCAL_RANK"] = str(0)
-
+#os.environ['CUDA_VISIBLE_DEVICES'] = str(args.rank)
+if not 'WORLD_SIZE'  in os.environ:
+    os.environ["RANK"] = str(args.rank)
+    os.environ["WORLD_SIZE"] = str(args.world_size)
+    os.environ["LOCAL_RANK"] = str(args.local_rank)
+if not 'MASTER_ADDR' in os.environ:
+    os.environ["MASTER_ADDR"] = '192.168.2.107'
+if not 'MASTER_PORT' in os.environ:
+    os.environ["MASTER_PORT"] = '9337'
 torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
-os.environ["MASTER_ADDR"] = '127.0.0.1'
-os.environ["MASTER_PORT"] = '9437'
 def seed_everything(seed=42):
     random.seed(seed)
     np.random.seed(seed)
@@ -74,11 +78,11 @@ def seed_everything(seed=42):
 
 seed_everything(34)
 def main():   
-    print('main')
+    print('LOCAL RANK {}, RANK{}'.format(os.environ["LOCAL_RANK"],os.environ["RANK"]))
     use_cuda = True
     sample_param, memory_param, gnn_param, train_param = parse_config('./config/{}.yml'.format(args.model))
     ctx = DistributedContext.init(backend="nccl", use_gpu=True)
-    torch.set_num_threads(int(40/torch.distributed.get_world_size()))
+    torch.set_num_threads(int(80/torch.distributed.get_world_size()))
     device_id = torch.cuda.current_device()
     print('use cuda on',device_id)
     pdata = partition_load("/mnt/data/part_data/v2/here/{}".format(args.dataname), algo="metis_for_tgnn")    
@@ -100,7 +104,7 @@ def main():
     num_layers = sample_param['layer'] if 'layer' in sample_param else 1
     fanout = sample_param['neighbor'] if 'neighbor' in sample_param else [10]
     policy = sample_param['strategy'] if 'strategy' in sample_param else 'recent'
-    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=int(40/torch.distributed.get_world_size()),policy = policy, graph_name = "wiki_train")
+    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=int(80/torch.distributed.get_world_size()),policy = policy, graph_name = "wiki_train")
     train_data = torch.masked_select(graph.edge_index,pdata.train_mask.to(graph.edge_index.device)).reshape(2,-1)
     train_ts = torch.masked_select(graph.edge_ts,pdata.train_mask.to(graph.edge_index.device))
     test_data = torch.masked_select(graph.edge_index,pdata.test_mask.to(graph.edge_index.device)).reshape(2,-1)
@@ -153,7 +157,7 @@ def main():
     else:
         model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param)
         device = torch.device('cpu')
-    model = DDP(model,find_unused_parameters=False)
+    model = DDP(model,find_unused_parameters=True)
     train_stream = torch.cuda.Stream()
     send_stream = torch.cuda.Stream()
     scatter_stream = torch.cuda.Stream()
