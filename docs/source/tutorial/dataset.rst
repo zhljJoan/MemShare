@@ -4,12 +4,12 @@ Preparing the Temporal Graph Dataset
 In this tutorial, we will show the preparation process of the temporal graph datase that can be used by StarryGL.
 
 1 Preparing the Temporal Graph Dataset for CTDG
--------------
+-----------------------------------------------
 
 This section writes the steps to prepare the dataset for CTDG.
 
 1.1 Read Raw Data
--------------
+-----------------
 
 Take Wikipedia dataset as an example, the raw data files are as follows:
 
@@ -43,7 +43,7 @@ Here is an example to read the raw data files:
         the number of edges in graph is {}'.format(num_nodes, num_edges))
 
 1.2 Preprocess Data
----------------
+-------------------
 
 After reading the raw data, we need to preprocess the data to get the data format that can be used by StarryGL. The following code shows the preprocessing process:
 
@@ -121,12 +121,12 @@ Finally, we can partition the graph and save the data:
                edge_weight_dict=edge_weight_dict)
 
 2 Preparing the Temporal Graph Dataset for DTDG
--------------
+-----------------------------------------------
 
 This section writes the steps to prepare the dataset for DTDG.
 
 2.1 Processing the raw data
--------------
+---------------------------
 Take elliptic dataset as an example, the raw data files are as follows:
 
 - `elliptic_txs_features.csv`: the node features of the graph
@@ -173,7 +173,7 @@ This dataset is then called elliptic_temporal.The process of getting the most im
     edgelist_timed.to_csv('elliptic_txs_edgelist_timed.csv', index=False)
 
 2.2 Read raw data and preprocess Data
----------------
+-------------------------------------
 After the previous step, we will read in our dataset and use a separate wrapped class to process the corresponding data:
 
 .. code-block:: python
@@ -231,7 +231,7 @@ We construct a wrapped Elliptic_Temporal_Dataset object to store the data. The d
 - `max_degree`: a tensor that stores the maximum out-degree over all time steps in the dataset.
 
 2.3 Generate a graph from graph data
----------------
+------------------------------------
 In order to facilitate further processing later, the corresponding graph is generated from the graph dataset using the encapsulated function:
 
 .. code-block:: python
