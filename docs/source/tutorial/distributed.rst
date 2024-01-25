@@ -2,7 +2,7 @@ Distributed Training
 ====================
 
 1. Preparation distributed environment for CTDG
----------------------------------------
+-----------------------------------------------
 
 Before start training, we need to prepare the environment for distributed training, inluding the following steps:
 
@@ -202,7 +202,7 @@ Before start training, we need to prepare the environment for distributed traini
         print('\ttest AP:{:4f}  test MRR:{:4f}'.format(ap, auc))
 
 2. Preparation distributed environment for DTDG
----------------------------------------
+-----------------------------------------------
 
 Before start training, we need to prepare the environment for distributed training, including the following steps:
 
