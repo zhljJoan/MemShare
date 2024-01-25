@@ -2,7 +2,7 @@ Creating Temporal GNN Models
 ============================
 
 1. Continuous-time Temporal GNN Models
------------------------------------
+--------------------------------------
 
 To create a continuous-time temporal GNN model, we first need to define a configuration file with the suffix yml to specify the model structures and parameters. Here we use the configuration file :code:`TGN.yml` for TGN model as an example:
 
@@ -75,7 +75,7 @@ Then a :code:`GeneralModel` object is created. If needed, we can adjust the mode
 - :code:`TGAT`: The TGAT model proposed in `Temporal Graph Attention for Deep Temporal Modeling <https://arxiv.org/abs/2002.07962>`__.
 
 2. Discrete-time Temporal GNN Models
------------------------------------
+------------------------------------
 
 To create a discrete-time temporal GNN model, we first need to define a configuration file with the suffix yml to specify the model structures and parameters. Here we use the configuration file :code:`parameters_elliptic_egcn_o.yaml` for egcn_o model as an example:
 
