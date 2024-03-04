@@ -1,0 +1,5 @@
+LOCAL RANK 0, RANK0
+use cuda on 0
+638486
+get_neighbors consume: 4.12395s
+Epoch 0:

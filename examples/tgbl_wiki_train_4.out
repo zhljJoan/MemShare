@@ -1,0 +1,1368 @@
+LOCAL RANK 0, RANK0
+LOCAL RANK 2, RANK2
+LOCAL RANK 1, RANK1LOCAL RANK 3, RANK3
+
+use cuda on 2
+use cuda on 3
+use cuda on 1
+use cuda on 0
+92279227
+
+9227
+9227
+get_neighbors consume: 0.0114267s
+get_neighbors consume: 0.0112016s
+get_neighbors consume: 0.0112517s
+get_neighbors consume: 0.0118708s
+num_batchs: tensor([136], device='cuda:0')
+num_batchs: tensor([145], device='cuda:1')
+num_batchs: tensor([127], device='cuda:3')
+num_batchs: tensor([141], device='cuda:2')
+num_batchs: num_batchs: tensor([37], device='cuda:0')
+num_batchs: tensor([27], device='cuda:3')num_batchs:
+ tensor([30], device='cuda:2')
+tensor([27], device='cuda:1')
+num_batchs:num_batchs:  num_batchs:num_batchs:  tensor([32], device='cuda:2')
+tensor([29], device='cuda:0')
+tensor([28], device='cuda:3')tensor([31], device='cuda:1')
+
+Epoch 0:
+Epoch 0:
+Epoch 0:
+Epoch 0:
+	train loss:123.3378  train ap:0.853755  val ap:0.914218  val auc:0.912577
+	train loss:119.7958  train ap:0.864334  val ap:0.914218  val auc:0.912577
+	train loss:128.1577  train ap:0.833298  val ap:0.914218  val auc:0.912577
+
+
+	train loss:121.0308  train ap:0.855477  val ap:0.914218  val auc:0.912577
+
+	total time:4.32s  prep time:4.01s
+	total time:4.32s  prep time:4.01s
+
+
+	total time:4.32s  prep time:4.01s
+	 fetch time:0.00s write back time:0.00s
+
+
+	total time:4.32s  prep time:4.01s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 1:
+Epoch 1:Epoch 1:
+
+Epoch 1:
+	train loss:102.7750  train ap:0.896443  val ap:0.917845  val auc:0.917570
+	train loss:86.6295  train ap:0.923560  val ap:0.917845  val auc:0.917570
+	train loss:92.8748  train ap:0.912647  val ap:0.917845  val auc:0.917570
+
+
+	train loss:90.5898  train ap:0.914378  val ap:0.917845  val auc:0.917570
+
+	total time:2.07s  prep time:1.76s
+	total time:2.07s  prep time:1.76s
+
+
+	total time:2.07s  prep time:1.76s
+
+	total time:2.07s  prep time:1.76s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 2:
+Epoch 2:Epoch 2:
+
+Epoch 2:
+	train loss:81.4270  train ap:0.933189  val ap:0.917884  val auc:0.919979
+	train loss:98.9949  train ap:0.902533  val ap:0.917884  val auc:0.919979
+	train loss:88.5987  train ap:0.918559  val ap:0.917884  val auc:0.919979
+	train loss:85.2710  train ap:0.923680  val ap:0.917884  val auc:0.919979
+
+
+
+
+	total time:2.07s  prep time:1.76s
+	total time:2.07s  prep time:1.76s
+	total time:2.07s  prep time:1.76s
+
+	total time:2.07s  prep time:1.76s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 3:Epoch 3:
+Epoch 3:
+
+Epoch 3:
+	train loss:85.9204  train ap:0.923351  val ap:0.919950  val auc:0.919488
+	train loss:83.3718  train ap:0.928029  val ap:0.919950  val auc:0.919488
+	train loss:80.2313  train ap:0.931704  val ap:0.919950  val auc:0.919488
+	train loss:96.2580  train ap:0.909615  val ap:0.919950  val auc:0.919488
+
+
+
+
+	total time:2.07s  prep time:1.76s
+	total time:2.07s  prep time:1.76s
+	total time:2.07s  prep time:1.76s
+
+	total time:2.07s  prep time:1.76s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 4:Epoch 4:Epoch 4:
+
+Epoch 4:
+
+	train loss:85.0409  train ap:0.926282  val ap:0.919517  val auc:0.919116
+	train loss:77.9838  train ap:0.935790  val ap:0.919517  val auc:0.919116
+	train loss:94.9697  train ap:0.913220  val ap:0.919517  val auc:0.919116
+	train loss:81.9256  train ap:0.929987  val ap:0.919517  val auc:0.919116
+
+
+
+
+	total time:2.06s  prep time:1.76s
+	total time:2.06s  prep time:1.76s
+	total time:2.06s  prep time:1.76s
+
+	total time:2.06s  prep time:1.76s
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 5:
+Epoch 5:Epoch 5:
+
+Epoch 5:
+	train loss:75.5574  train ap:0.938574  val ap:0.923025  val auc:0.923346
+	train loss:92.2706  train ap:0.916673  val ap:0.923025  val auc:0.923346
+	train loss:83.1462  train ap:0.928510  val ap:0.923025  val auc:0.923346
+	train loss:80.5073  train ap:0.932611  val ap:0.923025  val auc:0.923346
+
+
+
+
+	total time:2.06s  prep time:1.75s
+	total time:2.06s  prep time:1.75s
+	total time:2.06s  prep time:1.75s
+
+	total time:2.06s  prep time:1.75s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 6:Epoch 6:
+
+Epoch 6:
+Epoch 6:
+	train loss:81.8060  train ap:0.930951  val ap:0.930009  val auc:0.931360
+	train loss:90.8795  train ap:0.919864  val ap:0.930009  val auc:0.931360
+	train loss:79.1179  train ap:0.936566  val ap:0.930009  val auc:0.931360
+
+	train loss:74.1278  train ap:0.943166  val ap:0.930009  val auc:0.931360
+
+
+	total time:2.19s  prep time:1.85s
+
+	total time:2.19s  prep time:1.85s
+
+	total time:2.19s  prep time:1.85s
+	 fetch time:0.00s write back time:0.00s
+
+	total time:2.19s  prep time:1.85s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 7:Epoch 7:
+Epoch 7:
+
+Epoch 7:
+	train loss:74.2026  train ap:0.943481  val ap:0.934922  val auc:0.933923
+	train loss:89.4164  train ap:0.923606  val ap:0.934922  val auc:0.933923
+	train loss:79.4655  train ap:0.936280  val ap:0.934922  val auc:0.933923
+
+	train loss:77.4014  train ap:0.940044  val ap:0.934922  val auc:0.933923
+
+
+	total time:2.43s  prep time:2.07s
+
+	total time:2.43s  prep time:2.07s
+
+	total time:2.43s  prep time:2.07s
+
+	total time:2.43s  prep time:2.07s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 8:Epoch 8:
+Epoch 8:
+
+Epoch 8:
+	train loss:78.0228  train ap:0.938883  val ap:0.938825  val auc:0.938385
+	train loss:71.4538  train ap:0.947977  val ap:0.938825  val auc:0.938385
+	train loss:86.4893  train ap:0.928232  val ap:0.938825  val auc:0.938385
+	train loss:75.1229  train ap:0.943555  val ap:0.938825  val auc:0.938385
+
+
+
+
+	total time:2.35s  prep time:2.00s
+	total time:2.35s  prep time:2.00s
+	total time:2.35s  prep time:2.00s
+
+	total time:2.35s  prep time:2.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 9:
+Epoch 9:Epoch 9:
+
+Epoch 9:
+	train loss:69.4881  train ap:0.952006  val ap:0.947348  val auc:0.946217
+	train loss:75.6891  train ap:0.942633  val ap:0.947348  val auc:0.946217
+	train loss:84.4704  train ap:0.931431  val ap:0.947348  val auc:0.946217
+
+	train loss:72.4057  train ap:0.948850  val ap:0.947348  val auc:0.946217
+
+
+	total time:2.36s  prep time:2.01s
+
+	total time:2.36s  prep time:2.01s
+
+	total time:2.36s  prep time:2.01s
+
+	total time:2.36s  prep time:2.01s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 10:
+Epoch 10:Epoch 10:Epoch 10:
+
+
+	train loss:73.9361  train ap:0.945705  val ap:0.950347  val auc:0.950115
+	train loss:66.5602  train ap:0.956275  val ap:0.950347  val auc:0.950115
+	train loss:82.0624  train ap:0.936810  val ap:0.950347  val auc:0.950115
+
+	train loss:70.8339  train ap:0.950265  val ap:0.950347  val auc:0.950115
+
+
+	total time:2.36s  prep time:2.00s
+
+	total time:2.36s  prep time:2.00s
+
+	total time:2.36s  prep time:2.00s
+
+	total time:2.36s  prep time:2.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 11:
+Epoch 11:Epoch 11:
+Epoch 11:
+
+	train loss:80.2513  train ap:0.939381  val ap:0.951866  val auc:0.951528
+	train loss:67.3593  train ap:0.953846  val ap:0.951866  val auc:0.951528
+	train loss:72.1514  train ap:0.949227  val ap:0.951866  val auc:0.951528
+
+
+	train loss:68.3804  train ap:0.954180  val ap:0.951866  val auc:0.951528
+
+	total time:2.36s  prep time:2.00s
+	total time:2.36s  prep time:2.00s
+
+
+	total time:2.36s  prep time:2.00s
+
+	total time:2.36s  prep time:2.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 12:
+Epoch 12:Epoch 12:
+
+Epoch 12:
+	train loss:77.6837  train ap:0.943483  val ap:0.955151  val auc:0.954360
+	train loss:64.1101  train ap:0.959728  val ap:0.955151  val auc:0.954360
+	train loss:71.5212  train ap:0.949585  val ap:0.955151  val auc:0.954360
+	train loss:68.1205  train ap:0.954258  val ap:0.955151  val auc:0.954360
+
+
+
+
+	total time:2.37s  prep time:2.02s
+	total time:2.37s  prep time:2.02s
+	total time:2.37s  prep time:2.02s
+
+	total time:2.37s  prep time:2.02s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 13:Epoch 13:Epoch 13:
+
+
+Epoch 13:
+	train loss:76.7123  train ap:0.944382  val ap:0.958182  val auc:0.957536
+	train loss:69.6559  train ap:0.952299  val ap:0.958182  val auc:0.957536
+	train loss:62.7070  train ap:0.960355  val ap:0.958182  val auc:0.957536
+
+
+
+	total time:2.36s  prep time:2.00s
+	total time:2.36s  prep time:2.00s
+
+	total time:2.36s  prep time:2.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	train loss:65.7178  train ap:0.958041  val ap:0.958182  val auc:0.957536
+
+	total time:2.36s  prep time:2.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 14:
+Epoch 14:Epoch 14:
+
+Epoch 14:
+	train loss:61.2000  train ap:0.963588  val ap:0.956409  val auc:0.955584
+	train loss:76.0099  train ap:0.944896  val ap:0.956409  val auc:0.955584
+	train loss:68.6356  train ap:0.953758  val ap:0.956409  val auc:0.955584
+
+	train loss:63.9058  train ap:0.961098  val ap:0.956409  val auc:0.955584
+
+
+	total time:2.47s  prep time:2.07s
+
+	total time:2.47s  prep time:2.07s
+	total time:2.47s  prep time:2.07s
+
+
+	total time:2.47s  prep time:2.07s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 15:
+Epoch 15:Epoch 15:
+
+Epoch 15:
+	train loss:76.1507  train ap:0.944705  val ap:0.960281  val auc:0.959706
+	train loss:63.2278  train ap:0.959601  val ap:0.960281  val auc:0.959706
+	train loss:69.3052  train ap:0.953616  val ap:0.960281  val auc:0.959706
+
+	train loss:65.8970  train ap:0.957695  val ap:0.960281  val auc:0.959706
+
+
+	total time:2.51s  prep time:2.13s
+
+	total time:2.51s  prep time:2.13s
+	total time:2.51s  prep time:2.13s
+
+
+	total time:2.51s  prep time:2.13s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 16:Epoch 16:
+Epoch 16:
+Epoch 16:
+
+	train loss:61.6107  train ap:0.963324  val ap:0.961179  val auc:0.960351
+	train loss:69.1189  train ap:0.953501  val ap:0.961179  val auc:0.960351
+	train loss:74.8315  train ap:0.947684  val ap:0.961179  val auc:0.960351
+
+	train loss:64.2459  train ap:0.960182  val ap:0.961179  val auc:0.960351
+
+
+	total time:2.42s  prep time:2.07s
+
+	total time:2.42s  prep time:2.07s
+
+	total time:2.42s  prep time:2.07s
+
+	total time:2.42s  prep time:2.07s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 17:
+Epoch 17:
+Epoch 17:Epoch 17:
+
+	train loss:66.9914  train ap:0.957178  val ap:0.963475  val auc:0.962502
+	train loss:74.3185  train ap:0.947961  val ap:0.963475  val auc:0.962502
+	train loss:60.8575  train ap:0.962965  val ap:0.963475  val auc:0.962502
+
+	train loss:62.1433  train ap:0.962527  val ap:0.963475  val auc:0.962502
+
+
+	total time:2.40s  prep time:2.04s
+
+	total time:2.40s  prep time:2.04s
+
+	total time:2.40s  prep time:2.04s
+	total time:2.40s  prep time:2.04s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 18:Epoch 18:
+Epoch 18:
+
+Epoch 18:
+	train loss:66.4025  train ap:0.956987  val ap:0.964559  val auc:0.963546
+	train loss:60.3496  train ap:0.963946  val ap:0.964559  val auc:0.963546
+	train loss:72.3370  train ap:0.951568  val ap:0.964559  val auc:0.963546
+
+
+	train loss:61.7511  train ap:0.963632  val ap:0.964559  val auc:0.963546
+
+	total time:2.41s  prep time:2.05s
+	total time:2.41s  prep time:2.05s
+
+
+	total time:2.41s  prep time:2.05s
+
+	 fetch time:0.00s write back time:0.00s
+	total time:2.41s  prep time:2.05s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 19:Epoch 19:Epoch 19:
+
+Epoch 19:
+
+	train loss:66.6593  train ap:0.957518  val ap:0.963903  val auc:0.963591
+	train loss:59.7753  train ap:0.964455  val ap:0.963903  val auc:0.963591
+	train loss:71.7726  train ap:0.952638  val ap:0.963903  val auc:0.963591
+	train loss:60.8455  train ap:0.963829  val ap:0.963903  val auc:0.963591
+
+
+
+
+	total time:2.43s  prep time:2.07s
+	total time:2.43s  prep time:2.07s
+	total time:2.43s  prep time:2.07s
+
+	total time:2.43s  prep time:2.07s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 20:Epoch 20:
+
+Epoch 20:
+Epoch 20:
+	train loss:57.4701  train ap:0.968381  val ap:0.966703  val auc:0.965856
+	train loss:65.9609  train ap:0.958111  val ap:0.966703  val auc:0.965856
+	train loss:71.3897  train ap:0.953114  val ap:0.966703  val auc:0.965856
+
+	train loss:59.8048  train ap:0.964998  val ap:0.966703  val auc:0.965856
+
+
+	total time:2.40s  prep time:2.03s
+
+	total time:2.40s  prep time:2.03s
+
+	total time:2.40s  prep time:2.03s
+
+	total time:2.40s  prep time:2.03s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 21:Epoch 21:
+Epoch 21:
+
+Epoch 21:
+	train loss:71.6177  train ap:0.952593  val ap:0.966044  val auc:0.965142
+	train loss:57.6982  train ap:0.968289  val ap:0.966044  val auc:0.965142
+	train loss:59.9029  train ap:0.965802  val ap:0.966044  val auc:0.965142
+	train loss:63.2272  train ap:0.962170  val ap:0.966044  val auc:0.965142
+
+
+
+
+	total time:2.36s  prep time:2.01s
+	total time:2.36s  prep time:2.01s
+	total time:2.36s  prep time:2.01s
+
+	total time:2.36s  prep time:2.01s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 22:Epoch 22:
+Epoch 22:
+Epoch 22:
+
+	train loss:63.2778  train ap:0.961871  val ap:0.968463  val auc:0.967461
+	train loss:69.6851  train ap:0.954952  val ap:0.968463  val auc:0.967461
+	train loss:57.2220  train ap:0.968283  val ap:0.968463  val auc:0.967461
+
+	train loss:58.6709  train ap:0.967088  val ap:0.968463  val auc:0.967461
+
+
+	total time:2.37s  prep time:2.02s
+
+	total time:2.37s  prep time:2.02s
+	total time:2.37s  prep time:2.02s
+
+
+	total time:2.37s  prep time:2.02s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 23:
+Epoch 23:
+Epoch 23:
+Epoch 23:
+	train loss:62.9887  train ap:0.962018  val ap:0.968122  val auc:0.967319
+	train loss:69.3614  train ap:0.955205  val ap:0.968122  val auc:0.967319
+	train loss:56.8950  train ap:0.968472  val ap:0.968122  val auc:0.967319
+	train loss:57.1121  train ap:0.969189  val ap:0.968122  val auc:0.967319
+
+
+
+
+	total time:2.38s  prep time:2.03s
+	total time:2.38s  prep time:2.03s
+	total time:2.38s  prep time:2.03s
+	total time:2.38s  prep time:2.03s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+Epoch 24:
+Epoch 24:
+Epoch 24:
+Epoch 24:
+	train loss:56.3057  train ap:0.970087  val ap:0.967538  val auc:0.966955
+	train loss:62.6017  train ap:0.962912  val ap:0.967538  val auc:0.966955
+	train loss:68.6662  train ap:0.956110  val ap:0.967538  val auc:0.966955
+
+
+
+	total time:2.36s  prep time:2.02s
+
+	total time:2.36s  prep time:2.02s
+	total time:2.36s  prep time:2.02s
+	 fetch time:0.00s write back time:0.00s
+
+
+	train loss:57.1639  train ap:0.968935  val ap:0.967538  val auc:0.966955
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+	total time:2.36s  prep time:2.02s
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 25:
+Epoch 25:
+Epoch 25:
+Epoch 25:
+	train loss:62.5181  train ap:0.962567  val ap:0.966588  val auc:0.966440
+	train loss:69.3504  train ap:0.956049  val ap:0.966588  val auc:0.966440
+	train loss:58.6922  train ap:0.966765  val ap:0.966588  val auc:0.966440
+	train loss:57.1053  train ap:0.968492  val ap:0.966588  val auc:0.966440
+
+
+
+
+	total time:2.38s  prep time:2.01s
+	total time:2.38s  prep time:2.01s
+	total time:2.38s  prep time:2.01s
+	total time:2.38s  prep time:2.01s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+Epoch 26:
+Epoch 26:
+Epoch 26:
+Epoch 26:
+	train loss:61.4962  train ap:0.963934  val ap:0.969727  val auc:0.969460
+
+	train loss:55.8220  train ap:0.969446  val ap:0.969727  val auc:0.969460
+	train loss:56.4361  train ap:0.969552  val ap:0.969727  val auc:0.969460
+	total time:2.34s  prep time:1.99s
+	train loss:67.9671  train ap:0.957416  val ap:0.969727  val auc:0.969460
+
+
+
+
+	total time:2.34s  prep time:1.99s
+	total time:2.34s  prep time:1.99s
+	 fetch time:0.00s write back time:0.00s
+
+	total time:2.34s  prep time:1.99s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 27:
+Epoch 27:Epoch 27:
+
+Epoch 27:
+	train loss:60.9567  train ap:0.964485  val ap:0.969411  val auc:0.969159
+	train loss:54.8527  train ap:0.970446  val ap:0.969411  val auc:0.969159
+	train loss:66.7655  train ap:0.958428  val ap:0.969411  val auc:0.969159
+
+	train loss:55.8786  train ap:0.968926  val ap:0.969411  val auc:0.969159
+
+
+	total time:2.34s  prep time:2.00s
+
+	total time:2.34s  prep time:2.00s
+	total time:2.34s  prep time:2.00s
+
+
+	total time:2.34s  prep time:2.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 28:
+Epoch 28:
+Epoch 28:
+Epoch 28:
+	train loss:66.5786  train ap:0.959190  val ap:0.970688  val auc:0.970374
+	train loss:54.0897  train ap:0.972020  val ap:0.970688  val auc:0.970374
+	train loss:60.7561  train ap:0.964240  val ap:0.970688  val auc:0.970374
+	train loss:55.3817  train ap:0.970250  val ap:0.970688  val auc:0.970374
+
+
+
+
+	total time:2.35s  prep time:2.00s
+	total time:2.35s  prep time:2.00s
+	total time:2.35s  prep time:2.00s
+
+	total time:2.35s  prep time:2.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 29:
+Epoch 29:
+Epoch 29:
+Epoch 29:
+	train loss:59.1135  train ap:0.966342  val ap:0.971187  val auc:0.970594
+	train loss:54.0108  train ap:0.972241  val ap:0.971187  val auc:0.970594
+	train loss:55.3218  train ap:0.969804  val ap:0.971187  val auc:0.970594
+
+	train loss:65.7909  train ap:0.960222  val ap:0.971187  val auc:0.970594
+
+
+	total time:2.34s  prep time:1.99s
+
+	total time:2.34s  prep time:1.99s
+	total time:2.34s  prep time:1.99s
+
+
+	total time:2.34s  prep time:1.99s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 30:
+Epoch 30:
+Epoch 30:
+Epoch 30:
+	train loss:53.6740  train ap:0.971874  val ap:0.971368  val auc:0.970488
+	train loss:59.0456  train ap:0.966357  val ap:0.971368  val auc:0.970488
+	train loss:54.3334  train ap:0.970578  val ap:0.971368  val auc:0.970488
+	train loss:65.3920  train ap:0.960561  val ap:0.971368  val auc:0.970488
+
+
+
+
+	total time:2.35s  prep time:2.00s
+	total time:2.35s  prep time:2.00s
+	total time:2.35s  prep time:2.00s
+
+	total time:2.35s  prep time:2.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 31:Epoch 31:
+
+Epoch 31:
+Epoch 31:
+	train loss:58.4527  train ap:0.967171  val ap:0.970350  val auc:0.970659
+	train loss:64.1537  train ap:0.961999  val ap:0.970350  val auc:0.970659
+
+	train loss:54.5837  train ap:0.970700  val ap:0.970350  val auc:0.970659
+
+	train loss:53.4245  train ap:0.972263  val ap:0.970350  val auc:0.970659
+	total time:2.37s  prep time:2.00s
+
+	total time:2.38s  prep time:2.00s
+
+
+
+	total time:2.38s  prep time:2.00s
+	total time:2.38s  prep time:2.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 32:
+Epoch 32:
+Epoch 32:
+Epoch 32:
+	train loss:59.5737  train ap:0.965499  val ap:0.971045  val auc:0.971084
+	train loss:52.6024  train ap:0.973221  val ap:0.971045  val auc:0.971084
+	train loss:64.2868  train ap:0.961182  val ap:0.971045  val auc:0.971084
+	train loss:53.9027  train ap:0.971177  val ap:0.971045  val auc:0.971084
+
+
+
+
+	total time:2.34s  prep time:2.00s
+	total time:2.34s  prep time:2.00s
+	total time:2.34s  prep time:2.00s
+	total time:2.34s  prep time:2.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 33:
+Epoch 33:
+Epoch 33:
+Epoch 33:
+	train loss:64.4721  train ap:0.961330  val ap:0.971705  val auc:0.971615
+	train loss:58.2022  train ap:0.966919  val ap:0.971705  val auc:0.971615
+	train loss:53.6572  train ap:0.972123  val ap:0.971705  val auc:0.971615
+	train loss:52.8161  train ap:0.972717  val ap:0.971705  val auc:0.971615
+
+
+
+
+	total time:2.34s  prep time:2.00s
+	total time:2.34s  prep time:2.00s
+	total time:2.34s  prep time:2.00s
+
+	total time:2.34s  prep time:2.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 34:
+Epoch 34:
+Epoch 34:
+Epoch 34:
+	train loss:63.2622  train ap:0.963819  val ap:0.972779  val auc:0.972498
+	train loss:53.0382  train ap:0.972783  val ap:0.972779  val auc:0.972498
+	train loss:57.8172  train ap:0.966480  val ap:0.972779  val auc:0.972498
+
+	train loss:53.5220  train ap:0.971246  val ap:0.972779  val auc:0.972498
+
+
+	total time:2.38s  prep time:2.02s
+
+	total time:2.38s  prep time:2.02s
+
+	total time:2.38s  prep time:2.02s
+
+	total time:2.38s  prep time:2.02s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 35:
+Epoch 35:
+Epoch 35:
+Epoch 35:
+	train loss:56.2001  train ap:0.969756  val ap:0.973664  val auc:0.973200
+	train loss:62.8994  train ap:0.963332  val ap:0.973664  val auc:0.973200
+	train loss:51.7398  train ap:0.973320  val ap:0.973664  val auc:0.973200
+
+	train loss:53.2094  train ap:0.972655  val ap:0.973664  val auc:0.973200
+
+
+	total time:2.35s  prep time:2.00s
+
+	total time:2.35s  prep time:2.00s
+	total time:2.35s  prep time:2.00s
+
+
+	total time:2.35s  prep time:2.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 36:Epoch 36:
+
+Epoch 36:
+Epoch 36:
+	train loss:52.4631  train ap:0.972994  val ap:0.972105  val auc:0.972144
+	train loss:62.6992  train ap:0.963157  val ap:0.972105  val auc:0.972144
+	train loss:58.7143  train ap:0.966666  val ap:0.972105  val auc:0.972144
+
+	train loss:52.6953  train ap:0.972413  val ap:0.972105  val auc:0.972144
+
+
+	total time:2.35s  prep time:2.00s
+
+	total time:2.35s  prep time:2.00s
+	total time:2.35s  prep time:2.00s
+
+
+	total time:2.35s  prep time:2.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 37:Epoch 37:
+
+Epoch 37:
+Epoch 37:
+	train loss:51.6406  train ap:0.973430  val ap:0.974538  val auc:0.974165
+	train loss:56.9392  train ap:0.968403  val ap:0.974538  val auc:0.974165
+	train loss:63.4455  train ap:0.962197  val ap:0.974538  val auc:0.974165
+
+	train loss:52.7715  train ap:0.971992  val ap:0.974538  val auc:0.974165
+
+
+	total time:2.36s  prep time:2.00s
+
+	total time:2.36s  prep time:2.00s
+
+	total time:2.36s  prep time:2.00s
+	 fetch time:0.00s write back time:0.00s
+	total time:2.36s  prep time:2.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 38:
+Epoch 38:
+Epoch 38:
+Epoch 38:
+	train loss:50.0356  train ap:0.975320  val ap:0.973131  val auc:0.972900
+	train loss:56.2640  train ap:0.969440  val ap:0.973131  val auc:0.972900
+	train loss:61.9657  train ap:0.964427  val ap:0.973131  val auc:0.972900
+
+	train loss:53.3090  train ap:0.971174  val ap:0.973131  val auc:0.972900
+
+
+	total time:2.34s  prep time:2.00s
+
+	total time:2.34s  prep time:2.00s
+
+	total time:2.34s  prep time:2.00s
+
+	total time:2.34s  prep time:2.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 39:
+Epoch 39:
+Epoch 39:
+Epoch 39:
+	train loss:51.7537  train ap:0.972938  val ap:0.974730  val auc:0.974496
+	train loss:62.0245  train ap:0.963711  val ap:0.974730  val auc:0.974496
+	train loss:57.4291  train ap:0.968386  val ap:0.974730  val auc:0.974496
+
+	train loss:53.3602  train ap:0.971910  val ap:0.974730  val auc:0.974496
+
+
+	total time:2.37s  prep time:2.02s
+
+	total time:2.37s  prep time:2.02s
+
+	total time:2.37s  prep time:2.02s
+
+	total time:2.37s  prep time:2.02s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 40:
+Epoch 40:
+Epoch 40:
+Epoch 40:
+	train loss:56.9792  train ap:0.968267  val ap:0.974983  val auc:0.974454
+	train loss:50.4307  train ap:0.975214  val ap:0.974983  val auc:0.974454
+	train loss:62.0409  train ap:0.963881  val ap:0.974983  val auc:0.974454
+
+	train loss:52.8885  train ap:0.971870  val ap:0.974983  val auc:0.974454
+
+
+	total time:2.33s  prep time:1.98s
+
+	total time:2.33s  prep time:1.98s
+	total time:2.33s  prep time:1.98s
+
+
+	total time:2.33s  prep time:1.98s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 41:Epoch 41:
+
+Epoch 41:
+Epoch 41:
+	train loss:54.5205  train ap:0.971014  val ap:0.975489  val auc:0.974803
+	train loss:51.5671  train ap:0.973705  val ap:0.975489  val auc:0.974803
+	train loss:49.1804  train ap:0.975497  val ap:0.975489  val auc:0.974803
+	train loss:61.3572  train ap:0.964603  val ap:0.975489  val auc:0.974803
+
+
+
+
+	total time:2.33s  prep time:1.98s
+	total time:2.33s  prep time:1.98s
+	total time:2.33s  prep time:1.98s
+	total time:2.33s  prep time:1.98s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+Epoch 42:
+Epoch 42:
+Epoch 42:
+Epoch 42:
+	train loss:55.4220  train ap:0.970446  val ap:0.973951  val auc:0.973813
+	train loss:62.3554  train ap:0.963702  val ap:0.973951  val auc:0.973813
+	train loss:52.0832  train ap:0.972311  val ap:0.973951  val auc:0.973813
+
+	train loss:49.2889  train ap:0.976735  val ap:0.973951  val auc:0.973813
+
+
+	total time:2.33s  prep time:1.97s
+
+	total time:2.33s  prep time:1.97s
+	total time:2.33s  prep time:1.97s
+
+
+	total time:2.33s  prep time:1.97s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 43:
+Epoch 43:
+Epoch 43:
+Epoch 43:
+	train loss:48.9256  train ap:0.976293  val ap:0.974996  val auc:0.974853
+	train loss:60.1842  train ap:0.966549  val ap:0.974996  val auc:0.974853
+	train loss:53.9976  train ap:0.971387  val ap:0.974996  val auc:0.974853
+	train loss:50.6925  train ap:0.974185  val ap:0.974996  val auc:0.974853
+
+
+
+
+	total time:2.33s  prep time:1.98s
+	total time:2.33s  prep time:1.98s
+	total time:2.33s  prep time:1.98s
+
+	total time:2.33s  prep time:1.98s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 44:Epoch 44:
+
+Epoch 44:
+Epoch 44:
+	train loss:55.5751  train ap:0.969093  val ap:0.974097  val auc:0.974263
+	train loss:51.0575  train ap:0.973668  val ap:0.974097  val auc:0.974263
+	train loss:60.7870  train ap:0.965938  val ap:0.974097  val auc:0.974263
+
+	train loss:48.7321  train ap:0.976971  val ap:0.974097  val auc:0.974263
+
+
+	total time:2.35s  prep time:2.00s
+
+	total time:2.35s  prep time:2.00s
+	total time:2.35s  prep time:2.00s
+
+	total time:2.35s  prep time:2.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 45:Epoch 45:
+
+Epoch 45:
+Epoch 45:
+	train loss:54.1609  train ap:0.970995  val ap:0.973614  val auc:0.973329
+	train loss:60.3872  train ap:0.965370  val ap:0.973614  val auc:0.973329
+
+	train loss:48.1635  train ap:0.977290  val ap:0.973614  val auc:0.973329
+
+	total time:2.36s  prep time:2.01s
+
+	total time:2.36s  prep time:2.01s
+
+
+	total time:2.36s  prep time:2.01s
+	train loss:50.3630  train ap:0.973891  val ap:0.973614  val auc:0.973329
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	total time:2.36s  prep time:2.01s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 46:Epoch 46:
+
+Epoch 46:
+Epoch 46:
+Early stopping at epoch 46
+Early stopping at epoch 46
+Early stopping at epoch 46
+Early stopping at epoch 46
+
+
+
+
+Loading the best model at epoch 41
+Loading the best model at epoch 41
+Loading the best model at epoch 41
+Loading the best model at epoch 41
+
+
+
+
+0.9695311188697815 0.9686346650123596 
+0.9695311188697815 0.9686346650123596 
+0.9695311188697815 0.9686346650123596 
+
+0.9695311188697815 0.9686346650123596 
+
+
+
+0.9625623822212219 0.9607158899307251 
+0.9625623822212219 0.9607158899307251 
+0.9625623822212219 0.9607158899307251 
+0.9625623822212219 0.9607158899307251 
+
+
+
+
+	test AP:0.959871  test AUC:0.957466
+	test AP:0.959871  test AUC:0.957466
+
+	test AP:0.959871  test AUC:0.957466
+	test AP:0.959871  test AUC:0.957466
+
+test_dataset 7215 avg_time 1.9041776847839356 
+
+
+
+test_dataset 5214 avg_time 1.904272723197937 
+test_dataset 5980 avg_time 1.904249210357666 
+
+test_dataset 5212 avg_time 1.9042695140838624 
+
+

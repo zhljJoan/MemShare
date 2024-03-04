@@ -1,0 +1,59 @@
+LOCAL RANK 0, RANK0
+use cuda on 0
+994790
+get_neighbors consume: 6.18508s
+Epoch 0:
+	train loss:12236.7578  train ap:0.986976  val ap:0.934674  val auc:0.946284
+
+	total time:630.37s  prep time:545.79s
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 1:
+	train loss:11833.1818  train ap:0.987815  val ap:0.960581  val auc:0.965728
+
+	total time:628.44s  prep time:542.56s
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 2:
+	train loss:11622.9559  train ap:0.988244  val ap:0.956752  val auc:0.963083
+
+	total time:622.89s  prep time:538.77s
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 3:
+	train loss:11679.1400  train ap:0.988072  val ap:0.929351  val auc:0.943797
+
+	total time:681.88s  prep time:569.50s
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 4:
+	train loss:11676.1710  train ap:0.988098  val ap:0.936353  val auc:0.948531
+
+	total time:849.98s  prep time:741.47s
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 5:
+	train loss:11745.6001  train ap:0.987897  val ap:0.950828  val auc:0.958958
+
+	total time:862.77s  prep time:750.90s
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 6:
+Early stopping at epoch 6
+
+Loading the best model at epoch 1
+
+0.9248434901237488 0.929413378238678 
+
+0.8653780221939087 0.861071765422821 
+
+	test AP:0.847958  test AUC:0.837159
+
+test_dataset 6647176 avg_time 87.00003329753876 
+
