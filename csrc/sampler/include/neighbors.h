@@ -10,15 +10,18 @@ class TemporalNeighborBlock
         vector<vector<NodeIDType>> neighbors;
         vector<vector<TimeStampType>> timestamp;
         vector<vector<EdgeIDType>> eid;
+        vector<vector<EdgeIDType>> dist_eid;
         vector<vector<WeightType>> edge_weight;
         vector<phmap::parallel_flat_hash_map<NodeIDType, int64_t>> inverted_index;
         vector<int64_t> deg;
         vector<phmap::parallel_flat_hash_set<NodeIDType>> neighbors_set;
-
+        vector<int16_t> part; 
         bool with_eid = false;
+        bool with_dist_eid = false;
         bool weighted = false;
         bool with_timestamp = false;
-
+        bool with_historical = false;
+        
         TemporalNeighborBlock(){}
         // TemporalNeighborBlock(const TemporalNeighborBlock &tnb);
         TemporalNeighborBlock(vector<vector<NodeIDType>>& neighbors, 
@@ -27,19 +30,22 @@ class TemporalNeighborBlock
         TemporalNeighborBlock(vector<vector<NodeIDType>>& neighbors, 
                               vector<vector<WeightType>>& edge_weight, 
                               vector<vector<EdgeIDType>>& eid,
+                              vector<vector<EdgeIDType>>& dist_eid,
                               vector<int64_t> &deg):
-                              neighbors(neighbors), edge_weight(edge_weight),eid(eid), deg(deg)
+                              neighbors(neighbors), edge_weight(edge_weight),eid(eid),dist_eid(dist_eid),deg(deg)
                               { this->with_eid=true;
                                 this->weighted=true; }
         TemporalNeighborBlock(vector<vector<NodeIDType>>& neighbors, 
                               vector<vector<WeightType>>& edge_weight,
                               vector<vector<TimeStampType>>& timestamp,
                               vector<vector<EdgeIDType>>& eid, 
+                              vector<vector<EdgeIDType>>& dist_eid, 
                               vector<int64_t> &deg):
-                              neighbors(neighbors), edge_weight(edge_weight), timestamp(timestamp),eid(eid), deg(deg)
+                              neighbors(neighbors), edge_weight(edge_weight), timestamp(timestamp),eid(eid),dist_eid(dist_eid),deg(deg)
                               { this->with_eid=true;
                                 this->weighted=true; 
                                 this->with_timestamp=true;}
+        
         py::array get_node_neighbor(NodeIDType node_id){
             return vec2npy(neighbors[node_id]);
         }
@@ -61,7 +67,7 @@ class TemporalNeighborBlock
         std::string serialize() const {
             std::ostringstream oss;
             // 序列化基本类型成员
-            oss << with_eid << " " << weighted << " " << with_timestamp << " ";
+            oss << with_eid << " " << with_dist_eid<<" "<<weighted << " " << with_timestamp << " ";
 
             // 序列化 vector<vector<T>> 类型成员
             auto serializeVecVec = [&oss](const auto& vecVec) {
@@ -77,6 +83,7 @@ class TemporalNeighborBlock
             serializeVecVec(neighbors);
             serializeVecVec(timestamp);
             serializeVecVec(eid);
+            serializeVecVec(dist_eid);
             serializeVecVec(edge_weight);
 
             // 序列化 vector<int64_t> 类型成员
@@ -112,7 +119,7 @@ class TemporalNeighborBlock
             TemporalNeighborBlock tnb;
 
             // 反序列化基本类型成员
-            iss >> tnb.with_eid >> tnb.weighted >> tnb.with_timestamp;
+            iss >> tnb.with_eid >>tnb.with_dist_eid>> tnb.weighted >> tnb.with_timestamp;
 
             // 反序列化 vector<vector<T>> 类型成员
             auto deserializeVecLong = [&iss](vector<vector<int64_t>>& vecVec) {
@@ -149,8 +156,10 @@ class TemporalNeighborBlock
             };
 
             deserializeVecLong(tnb.neighbors);
-            deserializeVecFloat(tnb.timestamp);
+            deserializeVecLong(tnb.timestamp);
+            //deserializeVecLong(tnb.timestamp);
             deserializeVecLong(tnb.eid);
+            deserializeVecLong(tnb.dist_eid);
             deserializeVecFloat(tnb.edge_weight);
 
             std::string segment;
@@ -204,11 +213,12 @@ class TemporalNeighborBlock
 };
 
 TemporalNeighborBlock& get_neighbors(
-        string graph_name, th::Tensor row, th::Tensor col, int64_t num_nodes, int is_distinct, optional<th::Tensor> eid, optional<th::Tensor> edge_weight, optional<th::Tensor> time)
+        string graph_name, th::Tensor row, th::Tensor col, int64_t num_nodes, int is_distinct, optional<th::Tensor> eid, optional<th::Tensor> dist_eid, optional<th::Tensor> edge_weight, optional<th::Tensor> time)
 {   //row、col、time按time升序排列，由时间早的到时间晚的
     auto src = get_data_ptr<NodeIDType>(row);
     auto dst = get_data_ptr<NodeIDType>(col);
     EdgeIDType* eid_ptr = eid ? get_data_ptr<EdgeIDType>(eid.value()) : nullptr;
+    EdgeIDType* dist_eid_ptr = dist_eid ? get_data_ptr<EdgeIDType>(dist_eid.value()) : nullptr;
     WeightType* ew = edge_weight ? get_data_ptr<WeightType>(edge_weight.value()) : nullptr;
     TimeStampType* t = time ? get_data_ptr<TimeStampType>(time.value()) : nullptr;
     int64_t edge_num = row.size(0);
@@ -224,9 +234,11 @@ TemporalNeighborBlock& get_neighbors(
     tnb.deg.resize(num_nodes, 0);
         //初始化optional相关
     tnb.with_eid = eid.has_value();
+    tnb.with_dist_eid = dist_eid.has_value();
     tnb.weighted = edge_weight.has_value();
     tnb.with_timestamp = time.has_value();
     if (tnb.with_eid) tnb.eid.resize(num_nodes);
+    if (tnb.with_dist_eid) tnb.dist_eid.resize(num_nodes);
     if (tnb.weighted) {
         tnb.edge_weight.resize(num_nodes);
         tnb.inverted_index.resize(num_nodes);
@@ -242,6 +254,10 @@ TemporalNeighborBlock& get_neighbors(
     if(tnb.with_eid)
         for(int64_t i=0; i<edge_num; i++){
             tnb.eid[dst[i]].emplace_back(eid_ptr[i]);
+        }
+    if(tnb.with_dist_eid)
+        for(int64_t i=0; i<edge_num;i++){
+            tnb.dist_eid[dst[i]].emplace_back(dist_eid_ptr[i]);
         }
     //如果有权重信息，插入节点与邻居边的权重和反向索引
     if(tnb.weighted)

@@ -9,6 +9,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
+#include <atomic>
 
 using namespace std;
 namespace py = pybind11;
@@ -17,7 +18,7 @@ namespace th = torch;
 typedef int64_t NodeIDType;
 typedef int64_t EdgeIDType;
 typedef float WeightType;
-typedef float TimeStampType;
+typedef int64_t TimeStampType;
 typedef tuple<NodeIDType, EdgeIDType, TimeStampType> PPRKeyType;
 typedef double PPRValueType;
 typedef phmap::parallel_flat_hash_map<PPRKeyType, PPRValueType> PPRDictType;
@@ -29,7 +30,7 @@ class TemporalNeighborBlock;
 class TemporalGraphBlock;
 class ParallelSampler;
 
-TemporalNeighborBlock& get_neighbors(string graph_name, th::Tensor row, th::Tensor col, int64_t num_nodes, int is_distinct, optional<th::Tensor> eid, optional<th::Tensor> edge_weight, optional<th::Tensor> time);
+TemporalNeighborBlock& get_neighbors(string graph_name, th::Tensor row, th::Tensor col, int64_t num_nodes, int is_distinct, optional<th::Tensor> eid, optional<th::Tensor> dist_eid,optional<th::Tensor> edge_weight, optional<th::Tensor> time);
 th::Tensor heads_unique(th::Tensor array, th::Tensor heads, int threads);
 int nodeIdToInOut(NodeIDType nid, int pid, const vector<NodeIDType>& part_ptr);
 int nodeIdToPartId(NodeIDType nid, const vector<NodeIDType>& part_ptr);
@@ -37,6 +38,16 @@ vector<th::Tensor> divide_nodes_to_part(th::Tensor nodes, const vector<NodeIDTyp
 NodeIDType sample_multinomial(const vector<WeightType>& weights, default_random_engine& e);
 vector<int64_t> sample_max(const vector<WeightType>& weights, int k);
 
+#define MTX std::mutex
+
+#define EXTRAARGS , phmap::priv::hash_default_hash<K>, \
+                            phmap::priv::hash_default_eq<K>, \
+                            std::allocator<K>, 10, MTX
+template <class K>
+using HashT  = phmap::parallel_flat_hash_set<K EXTRAARGS>;
+
+template <class K, class V>
+using HashM  = phmap::parallel_flat_hash_map<K, V EXTRAARGS>;
 
 
 // ¸¨Öúº¯Êý

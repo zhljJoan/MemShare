@@ -5,23 +5,10 @@
 #include <vector>
 #include <iostream>
 #include <map>
+#include "head.h"
 // #include <boost/thread/mutex.hpp>
 using namespace std;
-#define MTX std::mutex
 
-namespace py = pybind11;
-namespace th = torch;
-typedef int64_t NodeIDType;
-typedef float TimeStampType;
-
-#define EXTRAARGS , phmap::priv::hash_default_hash<K>, \
-                            phmap::priv::hash_default_eq<K>, \
-                            std::allocator<K>, 4, MTX
-template <class K>
-using HashT  = phmap::parallel_flat_hash_set<K EXTRAARGS>;
-
-template <class K, class V>
-using HashM  = phmap::parallel_flat_hash_map<K, V EXTRAARGS>;
 #define work_thread 10
 th::Tensor sparse_get_index(th::Tensor in,th::Tensor map_key){
     auto key_ptr = map_key.data_ptr<NodeIDType>();

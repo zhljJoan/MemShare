@@ -10,4 +10,5 @@ cmake .. \
 && rm -rf ../starrygl/lib \
 && mkdir ../starrygl/lib \
 && cp lib*.so ../starrygl/lib/ \
+&& cp third_party/ldg_partition/lib*.so ../starrygl/lib/ \
 && patchelf --set-rpath '$ORIGIN:$ORIGIN/lib' --force-rpath ../starrygl/lib/*.so

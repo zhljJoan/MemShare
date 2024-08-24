@@ -4,9 +4,9 @@ project(starrygl VERSION 0.1)
 
 option(WITH_PYTHON "Link to Python when building" ON)
 option(WITH_CUDA "Link to CUDA when building" ON)
-option(WITH_METIS "Link to METIS when building" ON)
+option(WITH_METIS "Link to METIS when building" OFF)
 option(WITH_MTMETIS "Link to multi-threaded METIS when building" OFF)
-option(WITH_LDG "Link to (multi-threaded optionally) LDG when building" ON)
+option(WITH_LDG "Link to (multi-threaded optionally) LDG when building" OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -41,6 +41,7 @@ if(WITH_CUDA)
     add_library(uvm_ops SHARED ${UVM_SRCS})
     target_link_libraries(uvm_ops PRIVATE ${TORCH_LIBRARIES})
 endif()
+
 
 if(WITH_METIS)
     # add_definitions(-DWITH_METIS)
@@ -164,6 +165,7 @@ add_library(${SAMLPER_NAME} SHARED ${SAMPLER_SRCS})
 target_include_directories(${SAMLPER_NAME} PRIVATE "csrc/sampler/include")
 
 target_compile_options(${SAMLPER_NAME} PRIVATE -O3)
+message(STATUS "Torch include directories: ${TORCH_LIBRARIES}")
 target_link_libraries(${SAMLPER_NAME} PRIVATE ${TORCH_LIBRARIES})
 target_compile_definitions(${SAMLPER_NAME} PRIVATE -DTORCH_EXTENSION_NAME=lib${SAMLPER_NAME})
 

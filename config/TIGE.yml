@@ -16,6 +16,7 @@ memory:
     mailbox_size: 1
     combine_node_feature: True
     dim_out: 100
+    historical: True
 gnn:
   - arch: 'transformer_attention'
     use_src_emb: True
@@ -24,6 +25,7 @@ gnn:
     att_head: 2
     dim_time: 100
     dim_out: 100
+    historcial: True
 train:
   - epoch: 50
     batch_size: 1000

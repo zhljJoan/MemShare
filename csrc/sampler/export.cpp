@@ -41,20 +41,6 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
         .def_readonly("tot_time", &TemporalGraphBlock::tot_time, py::return_value_policy::reference)
         .def_readonly("sample_edge_num", &TemporalGraphBlock::sample_edge_num, py::return_value_policy::reference);
 
-    py::class_<T_TemporalGraphBlock>(m, "T_TemporalGraphBlock")
-        .def(py::init<th::Tensor &, th::Tensor &,
-                      th::Tensor &>())
-        .def_readonly("row", &T_TemporalGraphBlock::row, py::return_value_policy::reference)
-        .def_readonly("col", &T_TemporalGraphBlock::col, py::return_value_policy::reference)
-        .def_readonly("eid", &T_TemporalGraphBlock::eid, py::return_value_policy::reference)
-        .def_readonly("delta_ts", &T_TemporalGraphBlock::delta_ts, py::return_value_policy::reference)
-        .def_readonly("src_index", &T_TemporalGraphBlock::src_index, py::return_value_policy::reference)
-        .def_readonly("sample_nodes", &T_TemporalGraphBlock::sample_nodes, py::return_value_policy::reference)
-        .def_readonly("sample_nodes_ts", &T_TemporalGraphBlock::sample_nodes_ts, py::return_value_policy::reference)
-        .def_readonly("sample_time", &T_TemporalGraphBlock::sample_time, py::return_value_policy::reference)
-        .def_readonly("tot_time", &T_TemporalGraphBlock::tot_time, py::return_value_policy::reference)
-        .def_readonly("sample_edge_num", &T_TemporalGraphBlock::sample_edge_num, py::return_value_policy::reference);
-
     py::class_<TemporalNeighborBlock>(m, "TemporalNeighborBlock")
         .def(py::init<vector<vector<NodeIDType>>&, 
                       vector<int64_t> &>())
@@ -83,11 +69,18 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
 
     py::class_<ParallelSampler>(m, "ParallelSampler")
         .def(py::init<TemporalNeighborBlock &, NodeIDType, EdgeIDType, int,
-                      vector<int>&, int, string>())
+                      vector<int>&, int, string, int, th::Tensor &,th::Tensor &,double>())
         .def_readonly("ret", &ParallelSampler::ret, py::return_value_policy::reference)
         .def("neighbor_sample_from_nodes", &ParallelSampler::neighbor_sample_from_nodes)
         .def("reset", &ParallelSampler::reset)
-        .def("get_ret", [](const ParallelSampler &ps) { return ps.ret; });
+        .def("get_ret", [](const ParallelSampler &ps) { return ps.ret; })
+        .def("sample_unique", &ParallelSampler::sample_unique)
+        .def_readonly("dist_nid",&ParallelSampler::dist_nid,py::return_value_policy::reference)
+        .def_readonly("dist_eid",&ParallelSampler::dist_eid,py::return_value_policy::reference)
+        .def_readonly("block_node_list",&ParallelSampler::block_node_list,py::return_value_policy::reference)
+        .def_readonly("eid_inv",&ParallelSampler::eid_inv,py::return_value_policy::reference)
+        .def_readonly("unq_id",&ParallelSampler::unq_id,py::return_value_policy::reference)
+        .def_readonly("first_block_id",&ParallelSampler::first_block_id,py::return_value_policy::reference);
 
     py::class_<ParallelTppRComputer>(m, "ParallelTppRComputer")
         .def(py::init<TemporalNeighborBlock &, NodeIDType, EdgeIDType, int,
