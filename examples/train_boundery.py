@@ -72,7 +72,7 @@ parser.add_argument('--shared_memory_ssim', default=2, type=float, metavar='W',
                     help='name of model')
 parser.add_argument('--neg_samples', default=1, type=int, metavar='W',
                     help='name of model')
-parser.add_argument('--memory_type', default=False, type=str, metavar='W',
+parser.add_argument('--memory_type', default='all_update', type=str, metavar='W',
                     help='name of model')
 #boundery_recent_uniform boundery_recent_decay
 args = parser.parse_args()

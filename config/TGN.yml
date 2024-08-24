@@ -14,7 +14,6 @@ memory:
     mail_combine: 'last'
     memory_update: 'gru'
     historical_fix: False
-    mode: 
     async: True
     mailbox_size: 1
     combine_node_feature: True

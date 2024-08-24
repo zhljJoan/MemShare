@@ -260,7 +260,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
                 cal_cnt++;
                 if(cal_cnt > 2*fanout)break;
                 int eid = tnb.eid[node][cid];
-                if(part[eid] != local_part){
+                 if(part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part){
                     double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);
                     if(p0 > boundery_probility)continue;
                 }
@@ -279,14 +279,16 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
             int cnt = 0;
             int cal_cnt = 0;
             double sum_p = 0;
+            int sum_1 = 0;
             vector<double>pr(2*fanout);
             TimeStampType delta = end_index-1>=0?(rtts - tnb.timestamp[node][end_index-1])*fanout:0; 
             for(int cid = end_index-1;cid>=0;cid--){
                 cal_cnt++;
                 if(cal_cnt>2*fanout)break;
-                if(part[tnb.eid[node][cid-1]] != local_part|| node_part[tnb.neighbors[node][cid-1]]!= local_part){
+                if(part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part){
                     double ep = exp((double)(tnb.timestamp[node][cid]-rtts)/(delta));
                     sum_p+=ep;pr[cal_cnt-1]=ep;
+                    sum_1++;
                 }
             }
             cal_cnt = 0;
@@ -295,9 +297,9 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
                 if(cal_cnt > 2*fanout)break;
                 int eid = tnb.eid[node][cid];
                 
-                if(part[tnb.eid[node][cid-1]] != local_part|| node_part[tnb.neighbors[node][cid-1]]!= local_part){
+                if(part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part){
                     double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);
-                    double ep = boundery_probility*pr[cal_cnt-1]/sum_p;
+                    double ep = boundery_probility*pr[cal_cnt-1]/sum_p*sum_1;
                     if(p0 > ep)continue;
                 }
                 tgb_i[tid].src_index.emplace_back(i);
