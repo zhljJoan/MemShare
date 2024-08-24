@@ -1,7 +1,9 @@
+
+import torch
+import starrygl
 from torch_sparse import SparseTensor
 from torch_geometric.data import Data
 from torch_geometric.utils import degree
-import starrygl
 import os.path as osp
 import os
 import shutil
@@ -11,10 +13,13 @@ import metis
 import networkx as nx
 import torch.distributed as dist
 
+from starrygl import distributed
 
 def partition_load(root: str, algo: str = "metis") -> Data:
-    rank = dist.get_rank()
-    world_size = dist.get_world_size()
+    ctx = distributed.context._get_default_dist_context()
+    rank = ctx.memory_group_rank
+    world_size = ctx.memory_group_size#dist.get_rank()
+    #world_size = dist.get_world_size()
     fn = osp.join(root, f"{algo}_{world_size}", f"{rank:03d}")
     return torch.load(fn)
 
@@ -42,7 +47,7 @@ def partition_save(root: str, data: Data, num_parts: int,
     if not osp.exists(path):
         print(f"creating directory '{path}'")
         os.makedirs(path)
-    if algo == 'metis_for_tgnn':
+    if algo[-4:] == 'tgnn':
         for i, pdata in enumerate(partition_data_for_tgnn(
                 data, num_parts, algo, verbose=True,
                 edge_weight_dict=edge_weight_dict)):
@@ -187,23 +192,36 @@ weight: 各种工作负载边划分权重
 """
 
 
+def LDG_for_tgnn(edge_index_dict:dict,num_nodes:int,num_parts:int,edge_weight_dict=None):
+    edge = edge_index_dict['edata']
+    value, counts = torch.unique(edge.reshape(-1),
+                                 return_counts=True)
+    id = torch.arange(value.max().item()+1).reshape(1,-1)
+    vertex_weight = torch.ones_like(id)
+    vertex_weight[:,value] = counts
+    vertex_weight = torch.cat((id,torch.ones_like(id),vertex_weight),dim = 0)
+    node_part = starrygl.ops.ldg_partition(edge.T,vertex_weight,None,num_parts,10)
+    print(node_part)
+    return node_part[1,:]
+    
 def partition_data_for_tgnn(data: Data, num_parts: int, algo: str,
                             verbose: bool = False,
                             edge_weight_dict: dict = None):
     if algo == "metis_for_tgnn":
         part_fn = metis_for_tgnn
-
+    elif algo == "LDG_for_tgnn":
+        part_fn = LDG_for_tgnn
     else:
         raise ValueError(f"invalid algorithm: {algo}")
     num_nodes = data.num_nodes
     num_edges = data.num_edges
     edge_index_dict = data.edge_index_dict
-    tgnn_norm = compute_temporal_norm(data.edge_index, data.edge_ts, num_nodes)
+    tgnn_norm = None#compute_temporal_norm(data.edge_index, data.edge_ts, num_nodes)
     if verbose:
         print(f"running partition algorithm: {algo}")
     node_parts = part_fn(edge_index_dict, num_nodes, num_parts,
                          edge_weight_dict)
-    edge_parts = node_parts[data.edge_index[1, :]]
+    edge_parts = node_parts[data.edge_index[0, :]]
     eids = torch.arange(num_edges, dtype=torch.long)
     data.eids = eids
     data.sample_graph['eids'] = eids[data.sample_graph['eids']]

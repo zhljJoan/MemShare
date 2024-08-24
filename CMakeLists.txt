@@ -42,6 +42,7 @@ if(WITH_CUDA)
     target_link_libraries(uvm_ops PRIVATE ${TORCH_LIBRARIES})
 endif()
 
+
 if(WITH_METIS)
     # add_definitions(-DWITH_METIS)
     # set(GKLIB_DIR "${CMAKE_SOURCE_DIR}/third_party/GKlib")
@@ -164,6 +165,7 @@ add_library(${SAMLPER_NAME} SHARED ${SAMPLER_SRCS})
 target_include_directories(${SAMLPER_NAME} PRIVATE "csrc/sampler/include")
 
 target_compile_options(${SAMLPER_NAME} PRIVATE -O3)
+message(STATUS "Torch include directories: ${TORCH_LIBRARIES}")
 target_link_libraries(${SAMLPER_NAME} PRIVATE ${TORCH_LIBRARIES})
 target_compile_definitions(${SAMLPER_NAME} PRIVATE -DTORCH_EXTENSION_NAME=lib${SAMLPER_NAME})
 

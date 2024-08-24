@@ -1,183 +1,43 @@
+
+import time
 from os.path import abspath, join, dirname
 import os
+from starrygl.distributed.context import DistributedContext
+from starrygl.module.Filter import Filter
+from starrygl.sample.count_static import time_count
 import sys
 from os.path import abspath, join, dirname
+from starrygl.distributed.utils import DistIndex
+
+from starrygl.module.historical_cache import HistoricalCache
 sys.path.insert(0, join(abspath(dirname(__file__))))
 import torch
 import dgl
 from layers import TimeEncode
 from torch_scatter import scatter
+from starrygl.sample.count_static import time_count as tt
 
-class MailBox():
 
-    def __init__(self, memory_param, num_nodes, dim_edge_feat, _node_memory=None, _node_memory_ts=None,_mailbox=None, _mailbox_ts=None, _next_mail_pos=None, _update_mail_pos=None):
-        self.memory_param = memory_param
-        self.dim_edge_feat = dim_edge_feat
-        if memory_param['type'] != 'node':
-            raise NotImplementedError
-        self.node_memory = torch.zeros((num_nodes, memory_param['dim_out']), dtype=torch.float32) if _node_memory is None else _node_memory
-        self.node_memory_ts = torch.zeros(num_nodes, dtype=torch.float32) if _node_memory_ts is None else _node_memory_ts
-        self.mailbox = torch.zeros((num_nodes, memory_param['mailbox_size'], 2 * memory_param['dim_out'] + dim_edge_feat), dtype=torch.float32) if _mailbox is None else _mailbox
-        self.mailbox_ts = torch.zeros((num_nodes, memory_param['mailbox_size']), dtype=torch.float32) if _mailbox_ts is None else _mailbox_ts
-        self.next_mail_pos = torch.zeros((num_nodes), dtype=torch.long) if _next_mail_pos is None else _next_mail_pos
-        self.update_mail_pos = _update_mail_pos
-        self.device = torch.device('cpu')
-        
-    def reset(self):
-        self.node_memory.fill_(0)
-        self.node_memory_ts.fill_(0)
-        self.mailbox.fill_(0)
-        self.mailbox_ts.fill_(0)
-        self.next_mail_pos.fill_(0)
-
-    def move_to_gpu(self):
-        self.node_memory = self.node_memory.cuda()
-        self.node_memory_ts = self.node_memory_ts.cuda()
-        self.mailbox = self.mailbox.cuda()
-        self.mailbox_ts = self.mailbox_ts.cuda()
-        self.next_mail_pos = self.next_mail_pos.cuda()
-        self.device = torch.device('cuda:0')
-
-    def allocate_pinned_memory_buffers(self, sample_param, batch_size):
-        limit = int(batch_size * 3.3)
-        if 'neighbor' in sample_param:
-            for i in sample_param['neighbor']:
-                limit *= i + 1
-        self.pinned_node_memory_buffs = list()
-        self.pinned_node_memory_ts_buffs = list()
-        self.pinned_mailbox_buffs = list()
-        self.pinned_mailbox_ts_buffs = list()
-        for _ in range(sample_param['history']):
-            self.pinned_node_memory_buffs.append(torch.zeros((limit, self.node_memory.shape[1]), pin_memory=True))
-            self.pinned_node_memory_ts_buffs.append(torch.zeros((limit,), pin_memory=True))
-            self.pinned_mailbox_buffs.append(torch.zeros((limit, self.mailbox.shape[1], self.mailbox.shape[2]), pin_memory=True))
-            self.pinned_mailbox_ts_buffs.append(torch.zeros((limit, self.mailbox_ts.shape[1]), pin_memory=True))
-
-    def prep_input_mails(self, mfg, global_id_list = None,use_pinned_buffers=False):
-        
-        if(global_id_list is not None):
-            idx = global_id_list[b.srcdata['ID']]
-        
-        else:
-            idx = b.srcdata['ID']
-        
-        if use_pinned_buffers:
-            idx = idx.cpu().long()
-            
-        for i, b in enumerate(mfg):
-            if use_pinned_buffers:
-                torch.index_select(self.node_memory, 0, idx, out=self.pinned_node_memory_buffs[i][:idx.shape[0]])
-                b.srcdata['mem'] = self.pinned_node_memory_buffs[i][:idx.shape[0]].cuda(non_blocking=True)
-                torch.index_select(self.node_memory_ts,0, idx, out=self.pinned_node_memory_ts_buffs[i][:idx.shape[0]])
-                b.srcdata['mem_ts'] = self.pinned_node_memory_ts_buffs[i][:idx.shape[0]].cuda(non_blocking=True)
-                torch.index_select(self.mailbox, 0, idx, out=self.pinned_mailbox_buffs[i][:idx.shape[0]])
-                b.srcdata['mem_input'] = self.pinned_mailbox_buffs[i][:idx.shape[0]].reshape(b.srcdata['ID'].shape[0], -1).cuda(non_blocking=True)
-                torch.index_select(self.mailbox_ts, 0, idx, out=self.pinned_mailbox_ts_buffs[i][:idx.shape[0]])
-                b.srcdata['mail_ts'] = self.pinned_mailbox_ts_buffs[i][:idx.shape[0]].cuda(non_blocking=True)
-            else:
-                b.srcdata['mem'] = self.node_memory[idx].cuda()
-                b.srcdata['mem_ts'] = self.node_memory_ts[idx].cuda()
-                b.srcdata['mem_input'] = self.mailbox[idx].cuda().reshape(b.srcdata['ID'].shape[0], -1)
-                b.srcdata['mail_ts'] = self.mailbox_ts[idx].cuda()
-
-    def update_memory(self, nid, memory, root_nodes, ts, global_node_list = None,neg_samples=1):
-        if nid is None:
-            return
-        num_true_src_dst = root_nodes.shape[0] // (neg_samples + 2) * 2
-        with torch.no_grad():
-            nid = nid[:num_true_src_dst].to(self.device)
-            memory = memory[:num_true_src_dst].to(self.device)
-            ts = ts[:num_true_src_dst].to(self.device)
-            self.node_memory[nid.long()] = memory
-            self.node_memory_ts[nid.long()] = ts
-
-    def update_mailbox(self, nid, memory, root_nodes, ts, edge_feats, block, global_node_list = None, neg_samples=1):
-        with torch.no_grad():
-            num_true_edges = root_nodes.shape[0] // (neg_samples + 2)
-            memory = memory.to(self.device)
-            if edge_feats is not None:
-                edge_feats = edge_feats.to(self.device)
-            if block is not None:
-                block = block.to(self.device)
-            # TGN/JODIE
-            if self.memory_param['deliver_to'] == 'self':
-                src = torch.from_numpy(root_nodes[:num_true_edges]).to(self.device)
-                dst = torch.from_numpy(root_nodes[num_true_edges:num_true_edges * 2]).to(self.device)
-                mem_src = memory[:num_true_edges]
-                mem_dst = memory[num_true_edges:num_true_edges * 2]
-                if self.dim_edge_feat > 0:
-                    src_mail = torch.cat([mem_src, mem_dst, edge_feats], dim=1)
-                    dst_mail = torch.cat([mem_dst, mem_src, edge_feats], dim=1)
-                else:
-                    src_mail = torch.cat([mem_src, mem_dst], dim=1)
-                    dst_mail = torch.cat([mem_dst, mem_src], dim=1)
-                mail = torch.cat([src_mail, dst_mail], dim=1).reshape(-1, src_mail.shape[1])
-                nid = torch.cat([src.unsqueeze(1), dst.unsqueeze(1)], dim=1).reshape(-1)
-                mail_ts = torch.from_numpy(ts[:num_true_edges * 2]).to(self.device)
-                if mail_ts.dtype == torch.float64:
-                    import pdb; pdb.set_trace()
-                # find unique nid to update mailbox
-                uni, inv = torch.unique(nid, return_inverse=True)
-                perm = torch.arange(inv.size(0), dtype=inv.dtype, device=inv.device)
-                perm = inv.new_empty(uni.size(0)).scatter_(0, inv, perm)
-                nid = nid[perm]
-                mail = mail[perm]
-                mail_ts = mail_ts[perm]
-                if self.memory_param['mail_combine'] == 'last':
-                    self.mailbox[nid.long(), self.next_mail_pos[nid.long()]] = mail
-                    self.mailbox_ts[nid.long(), self.next_mail_pos[nid.long()]] = mail_ts
-                    if self.memory_param['mailbox_size'] > 1:
-                        self.next_mail_pos[nid.long()] = torch.remainder(self.next_mail_pos[nid.long()] + 1, self.memory_param['mailbox_size'])
-            # APAN
-            elif self.memory_param['deliver_to'] == 'neighbors':
-                mem_src = memory[:num_true_edges]
-                mem_dst = memory[num_true_edges:num_true_edges * 2]
-                if self.dim_edge_feat > 0:
-                    src_mail = torch.cat([mem_src, mem_dst, edge_feats], dim=1)
-                    dst_mail = torch.cat([mem_dst, mem_src, edge_feats], dim=1)
-                else:
-                    src_mail = torch.cat([mem_src, mem_dst], dim=1)
-                    dst_mail = torch.cat([mem_dst, mem_src], dim=1)
-                mail = torch.cat([src_mail, dst_mail], dim=0)
-                mail = torch.cat([mail, mail[block.edges()[0].long()]], dim=0)
-                mail_ts = torch.from_numpy(ts[:num_true_edges * 2]).to(self.device)
-                mail_ts = torch.cat([mail_ts, mail_ts[block.edges()[0].long()]], dim=0)
-                if self.memory_param['mail_combine'] == 'mean':
-                    (nid, idx) = torch.unique(block.dstdata['ID'], return_inverse=True)
-                    mail = scatter(mail, idx, reduce='mean', dim=0)
-                    mail_ts = scatter(mail_ts, idx, reduce='mean')
-                    self.mailbox[nid.long(), self.next_mail_pos[nid.long()]] = mail
-                    self.mailbox_ts[nid.long(), self.next_mail_pos[nid.long()]] = mail_ts
-                elif self.memory_param['mail_combine'] == 'last':
-                    nid = block.dstdata['ID']
-                    # find unique nid to update mailbox
-                    uni, inv = torch.unique(nid, return_inverse=True)
-                    perm = torch.arange(inv.size(0), dtype=inv.dtype, device=inv.device)
-                    perm = inv.new_empty(uni.size(0)).scatter_(0, inv, perm)
-                    nid = nid[perm]
-                    mail = mail[perm]
-                    mail_ts = mail_ts[perm]
-                    self.mailbox[nid.long(), self.next_mail_pos[nid.long()]] = mail
-                    self.mailbox_ts[nid.long(), self.next_mail_pos[nid.long()]] = mail_ts
-                else:
-                    raise NotImplementedError
-                if self.memory_param['mailbox_size'] > 1:
-                    if self.update_mail_pos is None:
-                        self.next_mail_pos[nid.long()] = torch.remainder(self.next_mail_pos[nid.long()] + 1, self.memory_param['mailbox_size'])
-                    else:
-                        self.update_mail_pos[nid.long()] = 1
-            else:
-                raise NotImplementedError
-
-    def update_next_mail_pos(self):
-        if self.update_mail_pos is not None:
-            nid = torch.where(self.update_mail_pos == 1)[0]
-            self.next_mail_pos[nid] = torch.remainder(self.next_mail_pos[nid] + 1, self.memory_param['mailbox_size'])
-            self.update_mail_pos.fill_(0)
-
+cnt_local = 0
+cnt_all_node = 0
+def get_cnt_local():
+    global cnt_local
+    print('local {}'.format(cnt_local))
+    return cnt_local
+def get_cnt_all_node():
+    global cnt_all_node
+    print('all {}'.format(cnt_all_node))
+    return cnt_all_node
+def add_cnt_local(x):
+    global cnt_local
+    cnt_local += x
+def add_all_node(x):
+    global cnt_all_node
+    cnt_all_node += x
+    
 class GRUMemeoryUpdater(torch.nn.Module):
 
-    def __init__(self, memory_param, dim_in, dim_hid, dim_time, dim_node_feat):
+    def __init__(self, memory_param, dim_in, dim_hid, dim_time, dim_node_feat,cache_index = None):
         super(GRUMemeoryUpdater, self).__init__()
         self.dim_hid = dim_hid
         self.dim_node_feat = dim_node_feat
@@ -190,19 +50,39 @@ class GRUMemeoryUpdater(torch.nn.Module):
         self.delta_memory = 0
         if dim_time > 0:
             self.time_enc = TimeEncode(dim_time)
+            
         if memory_param['combine_node_feature']:
             if dim_node_feat > 0 and dim_node_feat != dim_hid:
                 self.node_feat_map = torch.nn.Linear(dim_node_feat, dim_hid)
-
-    def forward(self, mfg):
+        ###for test
+        self.update_node_list = []
+        self.grad_memory_list = []
+        self.update_delta_t = []
+    @staticmethod
+    def get_cnt_local():
+        global cnt_local
+        return cnt_local
+    @staticmethod
+    def get_cnt_all_node():
+        global cnt_all_node
+        return cnt_all_node
+    def empty_cache(self):
+        pass
+    def forward(self, mfg, param = None):
+        t_s = tt.start()
         for b in mfg:
             if self.dim_time > 0:
                 time_feat = self.time_enc(b.srcdata['ts'] - b.srcdata['mem_ts'])
-                b.srcdata['mem_input'] = torch.cat([b.srcdata['mem_input'], time_feat], dim=1)
+
+                
+                b.srcdata['mem_input']= torch.cat([b.srcdata['mem_input'], time_feat], dim=1)
+                #print(b.srcdata['mem_input'])
             updated_memory = self.updater(b.srcdata['mem_input'], b.srcdata['mem'])
+            #print('updated_memory {}'.format(updated_memory))
             self.last_updated_ts = b.srcdata['ts'].detach().clone()
             self.last_updated_memory = updated_memory.detach().clone()
             self.last_updated_nid = b.srcdata['ID'].detach().clone()
+            self.lasted_memory = updated_memory.detach().clone()
             if self.memory_param['combine_node_feature']:
                 if self.dim_node_feat > 0:
                     if self.dim_node_feat == self.dim_hid:
@@ -212,6 +92,7 @@ class GRUMemeoryUpdater(torch.nn.Module):
                 else:
                     b.srcdata['h'] = updated_memory
 
+        tt.mem_update += tt.elapsed(t_s)
 class RNNMemeoryUpdater(torch.nn.Module):
 
     def __init__(self, memory_param, dim_in, dim_hid, dim_time, dim_node_feat):
@@ -231,7 +112,7 @@ class RNNMemeoryUpdater(torch.nn.Module):
             if dim_node_feat > 0 and dim_node_feat != dim_hid:
                 self.node_feat_map = torch.nn.Linear(dim_node_feat, dim_hid)
 
-    def forward(self, mfg):
+    def forward(self, mfg, param = None):
         for b in mfg:
             if self.dim_time > 0:
                 #print(b.srcdata['ts'].shape,b.srcdata['mem_ts'].shape)
@@ -241,6 +122,7 @@ class RNNMemeoryUpdater(torch.nn.Module):
             self.last_updated_ts = b.srcdata['ts'].detach().clone()
             self.last_updated_memory = updated_memory.detach().clone()
             self.last_updated_nid = b.srcdata['ID'].detach().clone()
+
             if self.memory_param['combine_node_feature']:
                 if self.dim_node_feat > 0:
                     if self.dim_node_feat == self.dim_hid:
@@ -249,6 +131,8 @@ class RNNMemeoryUpdater(torch.nn.Module):
                         b.srcdata['h'] = updated_memory + self.node_feat_map(b.srcdata['h'])
                 else:
                     b.srcdata['h'] = updated_memory
+    def empty_cache(self):
+        pass
 
 class TransformerMemoryUpdater(torch.nn.Module):
 
@@ -271,7 +155,7 @@ class TransformerMemoryUpdater(torch.nn.Module):
         self.last_updated_ts = None
         self.last_updated_nid = None
 
-    def forward(self, mfg):
+    def forward(self, mfg, param = None):
         for b in mfg:
             Q = self.w_q(b.srcdata['mem']).reshape((b.num_src_nodes(), self.att_h, -1))
             mails = b.srcdata['mem_input'].reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], -1))
@@ -294,4 +178,199 @@ class TransformerMemoryUpdater(torch.nn.Module):
             self.last_updated_memory = rst.detach().clone()
             self.last_updated_nid = b.srcdata['ID'].detach().clone()
             self.last_updated_ts = b.srcdata['ts'].detach().clone()
+    def empty_cache(self):
+        pass
 
+
+
+
+
+
+
+class HistoricalMemeoryUpdater(torch.nn.Module):
+    def __init__(self, memory_param, dim_in, dim_hid, dim_time, dim_node_feat,updater,learnable = None, num_nodes=None):
+        super(HistoricalMemeoryUpdater, self).__init__()
+        self.dim_hid = dim_hid
+        self.dim_node_feat = dim_node_feat
+        self.memory_param = memory_param
+        self.dim_time = dim_time
+        print(dim_hid,dim_in,dim_time,dim_node_feat)
+        self.updater = updater(dim_in + dim_time, dim_hid)
+        self.last_updated_memory = None
+        self.last_updated_ts = None
+        self.last_updated_nid = None
+        self.delta_memory = 0
+        if dim_time > 0:
+            self.time_enc = TimeEncode(dim_time)
+            
+        if memory_param['combine_node_feature']:
+            if dim_node_feat > 0 and dim_node_feat != dim_hid:
+                self.node_feat_map = torch.nn.Linear(dim_node_feat, dim_hid)
+        #if 'historical' in memory_param and memory_param['historical']:
+        #    self.history_cache = HistoricalCache(cache_index,(cache_index.size,dim_hid),torch.float,torch.device('cuda'))
+        #self.time_for_historical = torch.nn.Linear(dim_hid+dim_time,dim_hid)
+        ###for test
+        #self.update_node_list = []
+        #self.grad_memory_list = []
+        #self.update_delta_t = []
+        self.learnable = learnable
+        if learnable:
+            self.gamma = torch.nn.Parameter(torch.tensor([0.5]),
+                               requires_grad=True)
+            #self.gamma = 0.5
+            self.filter = Filter(n_nodes=num_nodes,
+                           memory_dimension=self.dim_hid,
+                           )
+        else:
+            self.gamma = 0.9
+    @staticmethod
+    def get_cnt_local():
+        global cnt_local
+        return cnt_local
+    @staticmethod
+    def get_cnt_all_node():
+        global cnt_all_node
+        return cnt_all_node
+    def empty_cache(self):
+        self.filter.clear()
+        #if 'historical' in self.memory_param and self.memory_param['historical']:
+        #    self.history_cache.empty()
+    def forward(self, mfg, param = None):
+        t_s = tt.start()
+        for b in mfg:
+            #print(' 0 {}'.format(b.srcdata['h'].shape))
+            #if 'historical' in self.memory_param and self.memory_param['historical']:
+            #    local_mask = DistIndex(b.srcdata['ID']).part == torch.distributed.get_rank()
+            #else:
+            #    local_mask = torch.ones(b.srcdata['ID'].shape[0],dtype = torch.bool,device = 'cuda')
+            #mask = 
+            if self.dim_time > 0:
+                #print(b.srcdata['his_mem'])
+                time_feat = self.time_enc(b.srcdata['ts'] - b.srcdata['mem_ts'])
+                b.srcdata['mem_input']= torch.cat([b.srcdata['mem_input'], time_feat], dim=1)
+            updated_memory = self.updater(b.srcdata['mem_input'], b.srcdata['mem'])
+            #memory = updated_memory
+            if self.learnable:
+                self.prev_memory = b.srcdata['his_mem']
+                #memory = self.gamma * self.prev_memory + (1 - self.gamma)*updated_memory
+#
+                with torch.no_grad():
+                    ctx = DistributedContext.get_default_context()
+                    mask = ~(DistIndex(b.srcdata['ID']).part == ctx.memory_group_rank)
+                    if mask.sum() > 0:
+                        transition_dense = self.filter.get_incretment_remote(b.srcdata['ID'])
+                    else:
+                        transition_dense = self.filter.get_incretment(DistIndex(b.srcdata['ID']).loc)
+                    transition_dense[DistIndex(b.srcdata['ID']).is_shared]*=2
+                    if not (transition_dense.max().item() == 0):      
+                        transition_dense -= transition_dense.min()
+                        transition_dense /=transition_dense.max() 
+                        transition_dense = 2*transition_dense - 1
+                        #print(transition_dense)
+                    pred_memory = self.prev_memory + transition_dense
+                memory = self.gamma * pred_memory + (1- self.gamma) * updated_memory
+                #if not (memory.max().item() == 0):     
+                #        memory =memory- memory.min()
+                #        memory =memory/ memory.max() 
+                #        memory = 2*memory - 1
+                #print(self.gamma)
+                with torch.no_grad():
+                    mask = ((~mask) & ~DistIndex(b.srcdata['ID']).is_shared)
+                    change = memory.data.clone() - self.prev_memory.data.clone()
+                    change.detach()
+                    if not (change.max().item() == 0):     
+                        change -= change.min()
+                        change /=change.max() 
+                        change = 2*change - 1
+                        self.filter.update(DistIndex(b.srcdata['ID'][mask]).loc,change[mask])
+            self.update_memory = memory
+            self.last_updated_ts = b.srcdata['ts'].detach().clone()
+            self.last_updated_memory = memory.detach().clone()
+            self.last_updated_nid = b.srcdata['ID'].detach().clone()
+            ##print('last memory update {}\n'.format(b.srcdata['ID']))
+            ##new_memory = torch.zeros(b.srcdata['ID'].shape[0],updated_memory.shape[1],dtype = updated_memory.dtype, device = #updated_memory.device)
+            ##new_memory[local_mask] = updated_memory
+            ##if 'historical' in self.memory_param and self.memory_param['historical']:
+            ##    self.history_cache.update(b.srcdata['_ID'][local_mask].detach().clone(),updated_memory.detach().clone(), b.srcdata#['ts'][local_mask].detach().clone())
+            ##    if(local_mask.sum().item()!=b.srcdata['ID'].shape[0]):
+            ##        with torch.no_grad():mail_
+            ##            history_mem,history_ts = self.history_cache.get_data(b.srcdata['_ID'][~local_mask])
+            ##        history_mem_ts = self.time_enc(b.srcdata['ts'][~local_mask] - history_ts)
+#
+            ##        new_memory[~local_mask] = self.time_for_historical(torch.cat((history_mem,history_mem_ts),dim = 1))
+            self.lasted_memory = memory.detach().clone()
+            if self.memory_param['combine_node_feature']:
+                if self.dim_node_feat > 0:
+                    if self.dim_node_feat == self.dim_hid:
+                        b.srcdata['h'] += memory
+                    else:
+                        b.srcdata['h'] = memory + self.node_feat_map(b.srcdata['h'])
+                else:
+                    b.srcdata['h'] = memory
+
+        tt.mem_update += tt.elapsed(t_s)
+
+
+class AsyncMemeoryUpdater(torch.nn.Module):
+
+    def __init__(self, memory_param, dim_in, dim_hid, dim_time, dim_node_feat,updater,mailbox = None):
+        super(AsyncMemeoryUpdater, self).__init__()
+        self.dim_hid = dim_hid
+        self.dim_node_feat = dim_node_feat
+        self.memory_param = memory_param
+        self.dim_time = dim_time
+        self.updater = updater(dim_in + dim_time, dim_hid)
+        self.last_updated_memory = None
+        self.last_updated_ts = None
+        self.last_updated_nid = None
+        self.delta_memory = 0
+        if dim_time > 0:
+            self.time_enc = TimeEncode(dim_time)
+        if memory_param['combine_node_feature']:
+            if dim_node_feat > 0 and dim_node_feat != dim_hid:
+                self.node_feat_map = torch.nn.Linear(dim_node_feat, dim_hid)
+        self.mailbox = mailbox
+
+    def forward(self, mfg, param = None):
+        for b in mfg:
+            if self.dim_time > 0:
+                #print(b.srcdata['ts'].shape,b.srcdata['mem_ts'].shape)
+                time_feat = self.time_enc(b.srcdata['ts'] - b.srcdata['mem_ts'])
+                b.srcdata['mem_input'] = torch.cat([b.srcdata['mem_input'], time_feat], dim=1)
+            updated_memory = self.updater(b.srcdata['mem_input'], b.srcdata['mem'])
+            self.last_updated_ts = b.srcdata['ts'].detach().clone()
+            self.last_updated_memory = updated_memory.detach().clone()
+            self.last_updated_nid = b.srcdata['ID'].detach().clone()
+            
+            with torch.no_grad():
+                if param is not None:
+                    _,src,dst,ts,edge_feats,nxt_fetch_func = param
+                    indx = torch.cat((src,dst))
+                    index, memory, memory_ts = self.mailbox.get_update_memory(self.last_updated_nid[indx],
+                                                                    self.last_updated_memory[indx],
+                                                                    self.last_updated_ts[indx],
+                                                                    None)
+                    if param[0]:
+                        index, mail, mail_ts = self.mailbox.get_update_mail(
+                                                    b.srcdata['ID'],src,dst,ts,edge_feats,
+                                                    self.last_updated_memory, 
+                                                    None,False,False,
+                                                )
+                    #self.mailbox.mon.add(index,self.mailbox.node_memory.accessor.data[index],memory)
+                    ##print(index.shape,memory.shape,memory_ts.shape,mail.shape,mail_ts.shape)
+                    local_mask = (DistIndex(index).part==torch.distributed.get_rank())
+                    self.mailbox.set_mailbox_local(DistIndex(index[local_mask]).loc,mail[local_mask],mail_ts[local_mask],Reduce_Op = 'max')
+                    self.mailbox.set_memory_local(DistIndex(index[local_mask]).loc,memory[local_mask],memory_ts[local_mask], Reduce_Op = 'max')
+                    self.mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,mode='all_reduce',set_remote=True)
+                    if nxt_fetch_func is not None:
+                        nxt_fetch_func()
+            if self.memory_param['combine_node_feature']:
+                if self.dim_node_feat > 0:
+                    if self.dim_node_feat == self.dim_hid:
+                        b.srcdata['h'] += updated_memory
+                    else:
+                        b.srcdata['h'] = updated_memory + self.node_feat_map(b.srcdata['h'])
+                else:
+                    b.srcdata['h'] = updated_memory
+    def empty_cache(self):
+        pass

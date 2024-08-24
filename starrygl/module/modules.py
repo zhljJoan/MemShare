@@ -1,13 +1,60 @@
+import time
 import torch
 from os.path import abspath, join, dirname
 import sys
+
+from starrygl.distributed.utils import DistIndex, DistributedTensor
+from starrygl.sample.count_static import time_count
 sys.path.insert(0, join(abspath(dirname(__file__))))
 from layers import *
 from memorys import *
 
+class all_to_all_embedding(torch.autograd.Function):
+
+    @staticmethod
+    def forward(ctx, input,metadata,neg_samples):
+        ctx.save_for_backward(input,metadata['src_pos_index'],
+                              metadata['dst_pos_index'],
+                              metadata['dst_neg_index'], 
+                              metadata['dist_src_index'],
+                              metadata['dist_neg_src_index']
+                            )
+        out = input
+        h_pos_src = out[metadata['src_pos_index']]
+        h_pos_dst_data = out[metadata['dst_pos_index']]
+        h_neg_dst_data = out[metadata['dst_neg_index']]
+        h_pos_dst = DistributedTensor(torch.empty_like(h_pos_src))#DistributedTensor(out[metadata['dst_pos_index']].detach().clone())
+        h_neg_dst = DistributedTensor(torch.empty(h_pos_src.shape[0]*neg_samples,
+                                     h_pos_src.shape[1],dtype = h_pos_src.dtype,device = h_pos_src.device))#DistributedTensor(out[metadata['dst_neg_index']].detach().clone()
+        dist_index,ind = metadata['dist_src_index'].sort()
+        
+        h_pos_dst.all_to_all_set(h_pos_dst_data[ind],dist_index)
+        dist_index,ind = metadata['dist_neg_src_index'].sort()
+        h_neg_dst.all_to_all_set(h_neg_dst_data[ind],dist_index)
+        h_pos_dst = h_pos_dst.accessor.data
+        h_neg_dst = h_neg_dst.accessor.data
+        return h_pos_src,h_pos_dst,h_neg_dst
+    
+    @staticmethod
+    def backward(ctx, grad_pos_src,remote_pos_dst,remote_neg_dst):
+        out,src_pos_index,dst_pos_index,dst_neg_index,dist_src_index,dist_neg_src_index = ctx.saved_tensors
+        remote_pos_dst = DistributedTensor(remote_pos_dst)
+        remote_neg_dst = DistributedTensor(remote_neg_dst)
+        dist_index,ind = dist_src_index.sort()
+        grad_pos_dst = remote_pos_dst.all_to_all_get(dist_index)
+        grad_pos_dst = grad_pos_dst[ind]
+        dist_index,ind = dist_neg_src_index.sort()
+        grad_neg_dst = remote_neg_dst.all_to_all_get(dist_index)
+        grad_neg_dst = grad_neg_dst[ind]
+        grad = torch.empty_like(out)
+        grad[src_pos_index] = grad_pos_src
+        grad[dst_pos_index] = grad_pos_dst
+        grad[dst_neg_index] = grad_neg_dst
+        return grad,None,None
+    
 class GeneralModel(torch.nn.Module):
 
-    def __init__(self, dim_node, dim_edge, sample_param, memory_param, gnn_param, train_param, combined=False):
+    def __init__(self, dim_node, dim_edge, sample_param, memory_param, gnn_param, train_param, num_nodes = None,mailbox = None,combined=False):
         super(GeneralModel, self).__init__()
         self.dim_node = dim_node
         self.dim_node_input = dim_node
@@ -20,9 +67,24 @@ class GeneralModel(torch.nn.Module):
         self.train_param = train_param
         if memory_param['type'] == 'node':
             if memory_param['memory_update'] == 'gru':
-                self.memory_updater = GRUMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node)
+                if memory_param['async'] == False:
+                    self.memory_updater = GRUMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node)
+                else:
+                    updater = torch.nn.GRUCell
+                    if memory_param['historical'] == False:
+                        self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox)
+                    else:
+                        self.memory_updater = HistoricalMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node,updater=updater,learnable=True,num_nodes=num_nodes)
             elif memory_param['memory_update'] == 'rnn':
-                self.memory_updater = RNNMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node)
+                if memory_param['async'] == False:
+                    self.memory_updater = RNNMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node)
+                else:
+                    updater = torch.nn.RNNCell
+                    self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox)
+                    if memory_param['historical'] == False:
+                        self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox)
+                    else:
+                        self.memory_updater = HistoricalMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node,updater=updater,learnable=True,num_nodes=num_nodes)
             elif memory_param['memory_update'] == 'transformer':
                 self.memory_updater = TransformerMemoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], train_param)
             else:
@@ -43,45 +105,22 @@ class GeneralModel(torch.nn.Module):
                     self.layers['l0h' + str(h) + 't'] = JODIETimeEmbedding(gnn_param['dim_out'])
         else:
             raise NotImplementedError
+        
+        self.all_to_all_embedding = all_to_all_embedding.apply
         self.edge_predictor = EdgePredictor(gnn_param['dim_out'])
         if 'combine' in gnn_param and gnn_param['combine'] == 'rnn':
             self.combiner = torch.nn.RNN(gnn_param['dim_out'], gnn_param['dim_out'])
             
                 
-    def forward(self, mfgs, metadata = None,neg_samples=1):
+    def forward(self, mfgs, metadata = None,neg_samples=1, mode = 'triplet',async_param = None):
+        t0 = time.time()
         if self.memory_param['type'] == 'node':
-            self.memory_updater(mfgs[0])
+            self.memory_updater(mfgs[0],async_param)
         out = list()
-        for l in range(self.gnn_param['layer']):
-            for h in range(self.sample_param['history']):
-                rst = self.layers['l' + str(l) + 'h' + str(h)](mfgs[l][h])
-                if 'time_transform' in self.gnn_param and self.gnn_param['time_transform'] == 'JODIE':
-                    rst = self.layers['l0h' + str(h) + 't'](rst, mfgs[l][h].srcdata['mem_ts'], mfgs[l][h].srcdata['ts'])
-                if l != self.gnn_param['layer'] - 1:
-                    mfgs[l + 1][h].srcdata['h'] = rst
-                else:
-                    out.append(rst)
-        if self.sample_param['history'] == 1:
-            out = out[0]
-        else:
-            out = torch.stack(out, dim=0)
-            out = self.combiner(out)[0][-1, :, :]
-        #metadata需要在前面去重的时候记一下id
-        if self.gnn_param['use_src_emb'] or self.gnn_param['use_dst_emb']:
-            self.embedding = out.detach().clone()
-        else:
-            self.embedding = None
-        if metadata is not None:
-            #out = torch.cat((out[metadata['dst_pos_pos']],out[metadata['src_id_pos']],out[metadata['dst_neg_pos']]),0)
-            if self.gnn_param['dyrep']:
-                out = self.memory_updater.last_updated_memory
-            out = torch.cat((out[metadata['src_pos_index']],out[metadata['dst_pos_index']],out[metadata['src_neg_index']]),0)
-        return self.edge_predictor(out, neg_samples=neg_samples)
+        start = torch.cuda.Event(enable_timing=True)
+        end = torch.cuda.Event(enable_timing=True)
 
-    def get_emb(self, mfgs):
-        if self.memory_param['type'] == 'node':
-            self.memory_updater(mfgs[0])
-        out = list()
+        start.record()
         for l in range(self.gnn_param['layer']):
             for h in range(self.sample_param['history']):
                 rst = self.layers['l' + str(l) + 'h' + str(h)](mfgs[l][h])
@@ -91,12 +130,22 @@ class GeneralModel(torch.nn.Module):
                     mfgs[l + 1][h].srcdata['h'] = rst
                 else:
                     out.append(rst)
-        if self.sample_param['history'] == 1:
-            out = out[0]
-        else:
-            out = torch.stack(out, dim=0)
-            out = self.combiner(out)[0][-1, :, :]
-        return out
+        out = out[0]
+        self.embedding = out.detach().clone()
+        if self.gnn_param['dyrep']:
+            out = self.memory_updater.last_updated_memory
+        self.out = out
+        h_pos_src = out[metadata['src_pos_index']]
+        h_pos_dst = out[metadata['dst_pos_index']]
+        h_neg_dst = out[metadata['dst_neg_index']]
+        #end.record()
+        #end.synchronize()
+        #elapsed_time_ms = start.elapsed_time(end)
+        #print('time {}\n'.format(elapsed_time_ms))
+        #print('pos src {} \n pos dst {} \n neg dst{} \n'.format(h_pos_src, h_pos_dst,h_neg_dst))
+        #print('pre predict {}'.format(mfgs[0][0].srcdata['ID']))
+        return self.edge_predictor(h_pos_src, h_pos_dst, None , h_neg_dst, neg_samples=neg_samples, mode = mode)
+    
 
 class NodeClassificationModel(torch.nn.Module):
 

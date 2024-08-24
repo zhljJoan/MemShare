@@ -1,6 +1,12 @@
+from ctypes import Union
 import starrygl
 import sys
 from os.path import abspath, join, dirname
+from starrygl.sample.graph_core import DataSet
+
+
+from starrygl.sample.sample_core.EvaluateNegativeSampling import EvaluateNegativeSampling, TgbNegativeSampling
+from starrygl.sample.sample_core.LocalNegSampling import LocalNegativeSampling
 sys.path.insert(0, join(abspath(dirname(__file__))))
 import math
 import torch
@@ -11,7 +17,7 @@ from .base import BaseSampler, NegativeSampling, SampleOutput, SampleType
 from starrygl.lib.libstarrygl_sampler import ParallelSampler, get_neighbors, heads_unique
 
 from torch.distributed.rpc import rpc_async
-
+import torch.distributed as dist
 class NeighborSampler(BaseSampler):
     r'''  
     Parallel sampling is crucial for expanding model training to a large amount of data.Due to the large scale and complexity of graph data, traditional serial sampling may lead to significant waste of computing and storage resources. The significance of parallel sampling lies in improving the efficiency and overall computational speed of sampling by simultaneously sampling from multiple nodes or neighbors.
@@ -86,7 +92,11 @@ class NeighborSampler(BaseSampler):
         is_distinct = 0,
         policy = "uniform",
         edge_weight: Optional[torch.Tensor] = None,
-        graph_name = None
+        graph_name = None,
+        local_part = -1,
+        node_part = None,
+        edge_part = None,
+        probability = 1,
     ) -> None:
         r"""__init__
         Args:
@@ -112,10 +122,11 @@ class NeighborSampler(BaseSampler):
         self.is_distinct = is_distinct
         assert graph_name is not None
         self.graph_name = graph_name
+
         if(tnb is None):
             if(graph_data.edge_ts is not None):
                 timestamp,ind = graph_data.edge_ts.sort()
-                timestamp = timestamp.float().contiguous()
+                timestamp = timestamp.contiguous()
                 eid = graph_data.eid[ind].contiguous()
                 row, col = graph_data.edge_index[:,ind]
             else:
@@ -124,13 +135,14 @@ class NeighborSampler(BaseSampler):
                 row, col = graph_data.edge_index
             if(edge_weight is not None):
                 edge_weight = edge_weight.float().contiguous()
-            self.tnb = starrygl.sampler_ops.get_neighbors(graph_name, row.contiguous(), col.contiguous(), num_nodes, is_distinct, eid, edge_weight, timestamp)
+            self.tnb = starrygl.sampler_ops.get_neighbors(graph_name, row.contiguous(), col.contiguous(), num_nodes, is_distinct, eid, None,edge_weight, timestamp)
         else:
             assert tnb is not None
             self.tnb = tnb
+        print(local_part,node_part)
         self.p_sampler = starrygl.sampler_ops.ParallelSampler(self.tnb, num_nodes, graph_data.num_edges, workers, 
-                                         fanout, num_layers, policy)
-    
+                                         fanout, num_layers, policy, local_part,edge_part.to(torch.int),node_part.to(torch.int),probability)
+        
     def _get_sample_info(self):
         return self.num_nodes,self.num_layers,self.fanout,self.workers
     
@@ -197,7 +209,10 @@ class NeighborSampler(BaseSampler):
         self,
         nodes: torch.Tensor,
         ts: Optional[torch.Tensor] = None,
-        with_outer_sample: SampleType = SampleType.Whole
+        is_unique = True,
+        nid_mapper = None,
+        eid_mapper = None,
+        out_device = None
     ) -> SampleOutput:
         r"""Performs mutilayer sampling from the nodes specified in: nodes
         The specific number of layers is determined by parameter: num_layers
@@ -218,16 +233,34 @@ class NeighborSampler(BaseSampler):
             ret = self.p_sampler.get_ret()
             return ret
         else:
-            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), ts.float().contiguous(), None)
+            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), ts.contiguous(), None)
             ret = self.p_sampler.get_ret()
-            return ret
+            metadata = {}
+            if is_unique:
+                self.p_sampler.sample_unique(
+                                             nodes,ts.float(),nid_mapper,
+                                         eid_mapper,'cpu' if out_device.type == 'cpu' else str(out_device.index))
+                metadata = {
+                    'eid_inv':self.p_sampler.eid_inv,
+                    'first_block_id':self.p_sampler.first_block_id,
+                    'block_node_list':self.p_sampler.block_node_list,
+                    'unq_id':self.p_sampler.unq_id,
+                    'dist_nid':self.p_sampler.dist_nid,
+                    'dist_eid':self.p_sampler.dist_eid,
+                }
+            #print(nodes.shape[0],ret[0].src_index().max(),ret[0].src_index().min())
+            return ret,metadata
         
     def sample_from_edges(
         self,
         edges: torch.Tensor,
         ets: Optional[torch.Tensor] = None,
         neg_sampling: Optional[NegativeSampling] = None,
-        with_outer_sample: SampleType = SampleType.Whole
+        with_outer_sample: SampleType = SampleType.Whole,
+        is_unique:bool = True,
+        nid_mapper = None,
+        eid_mapper = None,
+        out_device = None
     ) -> SampleOutput:
         r"""Performs sampling from the edges specified in :obj:`index`,
         returning a sampled subgraph in the specified output format.
@@ -252,23 +285,132 @@ class NeighborSampler(BaseSampler):
         if neg_sampling is not None:
             num_neg = math.ceil(num_pos * neg_sampling.amount)
             if neg_sampling.is_binary():
-                src_neg = neg_sampling.sample(num_neg, self.num_nodes)
-                dst_neg = neg_sampling.sample(num_neg, self.num_nodes)
+                src_neg,dst_neg = neg_sampling.sample(num_neg,self.num_nodes)
+                #src_neg = neg_sampling.sample(num_neg, self.num_nodes)
+                #dst_neg = neg_sampling.sample(num_neg, self.num_nodes)
                 seed = torch.cat([src, dst, src_neg, dst_neg], dim=0)
                 if with_timestap: # ts操作
-                    seed_ts = torch.cat([ets, ets, ets, ets], dim=0)
-            if neg_sampling.is_triplet():
-                src_neg = neg_sampling.sample(num_neg, self.num_nodes)
-                seed = torch.cat([src, dst, src_neg], dim=0)
+                    seed_ts = torch.cat([ets, ets, ets.repeat(neg_sampling.amount),
+                                         ets.repeat(neg_sampling.amount)], dim=0)
+                    #seed_ts = torch.cat([ets, ets, ets, ets], dim=0)
+            elif neg_sampling.is_triplet():
+                dst_neg = neg_sampling.sample(num_neg, self.num_nodes)
+                seed = torch.cat([src, dst, dst_neg], dim=0)
                 if with_timestap: # ts操作
-                    seed_ts = torch.cat([ets, ets, ets], dim=0)
-            #if neg_sampling.is_evaluate():
-                #src,dst = neg_sampling.sample(num_samples=)
+                    seed_ts = torch.cat([ets, ets, ets.repeat(neg_sampling.amount)], dim=0)
+
+            elif neg_sampling.is_dygbinary():
+                src_neg,dst_neg = neg_sampling.sample(num_neg,src,dst,
+                                                      current_batch_start_time = ets.min(),
+                                                      current_batch_end_time = ets.max())
+                seed = torch.cat([src, dst, src_neg, dst_neg], dim=0)
+                if with_timestap: # ts操作
+                    seed_ts = torch.cat([ets, ets, ets.repeat(neg_sampling.amount),
+                                         ets.repeat(neg_sampling.amount)], dim=0)
+            
+            elif neg_sampling.is_tgbtriplet():
+                dst_neg = neg_sampling.sample(src,dst,ets)
+                seed = torch.cat([src, dst, dst_neg], dim=0)
+                if with_timestap: # ts操作
+                    seed_ts = torch.cat([ets, ets, ets.repeat(neg_sampling.amount)], dim=0)
+
         else:
             seed = torch.cat([src, dst], dim=0)            
             if with_timestap: # ts操作
                 seed_ts = torch.cat([ets, ets], dim=0)
 
+        # 去重负采样
+        """
+        if neg_sampling is not None and neg_sampling.unique:
+            if with_timestap: # ts操作
+                pair, inverse_seed= torch.unique(torch.stack([seed, seed_ts],0), return_inverse=True, dim=1)
+                seed, seed_ts = pair
+                seed = seed.long()
+            else:
+                seed, inverse_seed = seed.unique(return_inverse=True)
+        """
+        metadata = {}
+        if is_unique:
+            out,metadata = self.sample_from_nodes(seed, seed_ts, is_unique=is_unique,eid_mapper=eid_mapper,nid_mapper=nid_mapper,out_device=out_device)
+            first_block_id = self.p_sampler.first_block_id
+        else:
+            #print('is unique')
+            out,metadata = self.sample_from_nodes(seed, seed_ts, is_unique=False)
+        src_pos_index = torch.arange(0,num_pos,dtype= torch.long,device=out_device)
+        dst_pos_index = torch.arange(num_pos,2*num_pos,dtype= torch.long,device=out_device)
+        if neg_sampling.is_triplet() or neg_sampling.is_tgbtriplet():
+            dst_neg_index=torch.arange(2*num_pos,seed.shape[0],dtype= torch.long,device=out_device)
+            src_neg_index = torch.tensor([],dtype= torch.long,device=out_device)
+        else:
+            src_neg_index = torch.arange(2*num_pos,3*num_pos,dtype= torch.long,device=out_device)
+            dst_neg_index=torch.arange(3*num_pos,seed.shape[0],dtype= torch.long,device=out_device)
+        #if is_unique:
+        #    src_pos_index = first_block_id[src_pos_index].contiguous()
+        #    dst_pos_index = first_block_id[dst_pos_index].contiguous()
+        #    dst_neg_index = first_block_id[dst_neg_index].contiguous()
+        #    src_neg_index = first_block_id[src_neg_index].contiguous()
+        metadata['seed'] = seed
+        metadata['seed_ts'] = seed_ts
+        metadata['src_pos_index']=src_pos_index
+        metadata['dst_pos_index']=dst_pos_index
+        if neg_sampling is not None :
+            metadata['dst_neg_index'] = dst_neg_index
+            if neg_sampling.is_triplet() or neg_sampling.is_tgbtriplet():
+                pass
+            else:
+                metadata['src_neg_index'] = src_neg_index
+        return out, metadata
+    
+    def sample_from_edges_with_distributed_dst(      
+        self,data,id_mapper,
+        neg_sampling: Optional[NegativeSampling] = None,
+        with_outer_sample: SampleType = SampleType.Whole,
+    ) -> SampleOutput:
+        r"""Performs sampling from the edges specified in :obj:`index`,
+        returning a sampled subgraph in the specified output format.
+
+        Args:
+            edges: the list of seed edges index
+            with_outer_sample: 0-sample in whole graph structure; 1-sample onehop outer nodel; 2-cross partition sampling
+            ets: the timestamp of edges, optional
+            neg_sampling: The negative sampling configuration
+        Returns:
+            sampled_edge_index_list: the edges sampled
+            sampled_eid_list: the edges' id sampled
+            sampled_delta_ts_list:the edges' delta time sampled
+            metadata: other infomation
+        """
+
+        num_pos = data.len
+        num_neg = 0
+        with_timestap = hasattr(data,'ts') and data.ts is not None
+        seed_ts = None
+        src,dst = data.edges
+        #print('src is {} dst is {}'.format(src,dst))
+        ets:torch.Tensor = data.ts
+        if neg_sampling is not None:
+            num_neg = math.ceil(num_pos * neg_sampling.amount)
+            if neg_sampling.is_triplet():
+                dst_neg = neg_sampling.sample(num_neg, self.num_nodes).to('cuda')
+            elif neg_sampling.is_tgbtriplet:
+                dst_neg = neg_sampling.sample(src,dst,ets).to('cuda')
+            if with_timestap: # ts操作
+                dst_ts = ets.repeat(neg_sampling.amount)
+            #dst_data,dst_send_dict = DataSet.scatter_train_data(data,id_mapper)
+            #print(dst_data.edges,dst_send_dict)
+            train_dst_data  = DataSet(edges = torch.stack((src.tile(neg_sampling.amount+1),torch.cat((dst,dst_neg)))),
+                                      eids = torch.nn.functional.pad(data.eids,(0,src.shape[0]*neg_sampling.amount)),
+                                      ts = torch.cat((ets,dst_ts)),
+                                      negs = torch.cat((torch.zeros(dst.shape[0],dtype =bool,device = dst.device),torch.ones(dst_neg.shape[0],dtype=bool,device=dst.device))))
+            train_dst_data,dst_send_dict  = DataSet.scatter_train_data(train_dst_data,id_mapper)
+            dst_data = train_dst_data[~train_dst_data.negs]
+            neg_dst_data = train_dst_data[train_dst_data.negs]
+            #neg_data = DataSet(edges = torch.stack((src.tile(neg_sampling.amount),dst_neg)),ts = dst_ts) 
+            #neg_dst_data,_ = DataSet.scatter_train_data(neg_data,id_mapper)
+        else:
+            dst_data,dst_send_dict = DataSet.scatter_train_data(data,id_mapper)
+        seed = torch.cat((src,dst_data.edges[1,:],neg_dst_data.edges[1,:]),dim = 0)
+        seed_ts = torch.cat((ets,dst_data.ts,neg_dst_data.ts),dim = 0)
         # 去重负采样
         if neg_sampling is not None and neg_sampling.unique:
             if with_timestap: # ts操作
@@ -277,47 +419,46 @@ class NeighborSampler(BaseSampler):
                 seed = seed.long()
             else:
                 seed, inverse_seed = seed.unique(return_inverse=True)
-
-        out = self.sample_from_nodes(seed, seed_ts, with_outer_sample)
-        
+        out = self.sample_from_nodes(seed.to('cpu'), seed_ts.to('cpu'), with_outer_sample)
+        num_src = src.shape[0]
+        num_dst = dst_data.len
+        num_neg = neg_dst_data.len
         if neg_sampling is None or (not neg_sampling.unique):
             if with_timestap:
                 return out, {'seed':seed,'seed_ts':seed_ts,
-                             'src_pos_index':torch.arange(0,num_pos), 
-                             'dst_pos_index':torch.arange(num_pos,2*num_pos), 
-                             'src_neg_index':torch.arange(2*num_pos,3*num_pos)}
+                             'src_pos_index':torch.arange(0,num_src), 
+                             'dst_pos_index':torch.arange(num_src,num_src+num_dst), 
+                             'dst_neg_index':torch.arange(num_dst+num_src,seed.shape[0]),
+                             'dist_src_index':dst_data.edges[0,:],
+                             'dist_neg_src_index':neg_dst_data.edges[0,:],
+                             'dst_send_dict': dst_send_dict
+                             },dst_data
             else:
                 return out, {'seed':seed,
-                             'src_pos_index':slice(0,num_pos), 
-                             'dst_pos_index':slice(num_pos,2*num_pos), 
-                             'src_neg_index':slice(2*num_pos,3*num_pos)}
+                             'src_pos_index':torch.arange(0,num_src), 
+                             'dst_pos_index':torch.arange(num_src,num_src+num_dst), 
+                             'dst_neg_index':torch.arange(num_dst+num_src,seed.shape[0]),
+                             'dist_src_index':dst_data.edges[0,:],
+                             'dist_neg_src_index':neg_dst_data.edges[0,:],
+                             'dst_send_dict' : dst_send_dict},dst_data
 
         metadata = {}
-        if neg_sampling.is_binary():
-            src_pos_index = inverse_seed[:num_pos]
-            dst_pos_index = inverse_seed[num_pos:2 * num_pos]
-            src_neg_index = inverse_seed[2 * num_pos:3 * num_pos]
-            src_neg_index = src_neg_index.view(num_pos, -1).squeeze(-1)
-            dst_neg_index = inverse_seed[3 * num_pos:]
-            dst_neg_index = dst_neg_index.view(num_pos, -1).squeeze(-1)
-            metadata = {'seed':seed, 'src_neg_index':src_neg_index, 'dst_pos_index':dst_pos_index, 'dst_neg_index':dst_neg_index}
-            if with_timestap:
-                metadata['seed_ts'] = seed_ts
-        elif neg_sampling.is_triplet():
-            src_pos_index = inverse_seed[:num_pos]
-            dst_pos_index = inverse_seed[num_pos:2 * num_pos]
-            src_neg_index = inverse_seed[2 * num_pos:]
-            src_neg_index = src_neg_index.view(num_pos, -1).squeeze(-1)
+        if neg_sampling.is_triplet() or neg_sampling.is_tgbtriplet():
+            src_pos_index = inverse_seed[:num_src]
+            dst_pos_index = inverse_seed[num_src: num_src + num_dst]
+            dst_neg_index = inverse_seed[num_src+num_dst:]
             # src_index是seed里src点的索引
             # dst_pos_index是seed里dst_pos点的索引
             # dst_neg_index是seed里dst_neg点的索引
-            metadata = {'seed':seed, 'src_pos_index':src_pos_index, 'src_neg_index':src_neg_index, 'dst_pos_index':dst_pos_index}
+            metadata = {'seed':seed, 'src_pos_index':src_pos_index, 'dst_neg_index':dst_neg_index, 
+                        'dst_pos_index':dst_pos_index,
+                        'dist_src_index':dst_data.edges[0,:],
+                        'dist_neg_src_index':neg_dst_data.edges[0,:],
+                        'dst_send_dict' : dst_send_dict},dst_data
             if with_timestap:
                 metadata['seed_ts'] = seed_ts
         # sampled_nodes最前方是原始序列的采样起点也就是去重后的seed
-        return out, metadata
-    
-
+        return out, metadata,dst_data
 
 if __name__=="__main__":
     # edge_index1 = torch.tensor([[0, 1, 1, 1, 2, 2, 2, 4, 4, 4, 5], # , 3, 3

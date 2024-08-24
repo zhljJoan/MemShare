@@ -8,7 +8,35 @@ from base import NegativeSampling
 from base import NegativeSamplingMode
 from typing import Any, List, Optional, Tuple, Union
 
+class TgbNegativeSampling(NegativeSampling):
+    def __init__(
+            self,
+            mode,
+            amount,
+            tgb_sampler ,
+            ns_data
+    ):
+        
+        super(TgbNegativeSampling,self).__init__(mode,amount)
+        self.ns_sampler = tgb_sampler
+        self.ns_data = ns_data
 
+    def load_ns(self,split_mode):
+        self.ns_sampler.load_eval_set(
+            fname=self.ns_data["{}_ns".format(split_mode)], split_mode = split_mode
+        )
+        self.split_mode = split_mode
+
+    def sample(self,pos_src,pos_dst,pos_t):
+        neg_batch_list = self.ns_sampler.query_batch(pos_src, pos_dst, pos_t, split_mode=self.split_mode)
+        self.amount = len(neg_batch_list[0])
+        for i in range(len(neg_batch_list)):
+            if(len(neg_batch_list[i])!=self.amount):
+                print(len(neg_batch_list[i]))
+                for _ in range(self.amount-len(neg_batch_list[i])):
+                    neg_batch_list[i].append(0)
+        neg =  torch.tensor(neg_batch_list).T.reshape(-1)
+        return neg
 class EvaluateNegativeSampling(NegativeSampling):
     def __init__(
         self,
@@ -17,10 +45,11 @@ class EvaluateNegativeSampling(NegativeSampling):
         dst_node_ids: torch.Tensor,
         interact_times: torch.Tensor = None,
         last_observed_time: float = None,
+        amount:int = 1,
         negative_sample_strategy: str = 'random',
         seed: int = None
     ):
-        super(EvaluateNegativeSampling,self).__init__(mode)
+        super(EvaluateNegativeSampling,self).__init__(mode,amount)
         self.seed = seed
         self.negative_sample_strategy = negative_sample_strategy
         self.src_node_ids = src_node_ids
@@ -53,7 +82,7 @@ class EvaluateNegativeSampling(NegativeSampling):
         # return the unique select source and destination nodes in the selected time interval
         return torch.cat((self.src_node_ids[selected_mask],self.dst_node_ids[selected_mask]),dim = 1)
 
-    def sample(self, num_samples: int, num_nodes: Optional[int] = None, batch_src_node_ids: Optional[torch.Tensor] = None,
+    def sample(self, num_samples: int, batch_src_node_ids: Optional[torch.Tensor] = None,
                batch_dst_node_ids: Optional[torch.Tensor] = None, current_batch_start_time: Optional[torch.Tensor] = None,
                current_batch_end_time: Optional[torch.Tensor] = None) -> Tensor:
         if self.negative_sample_strategy == 'random':
