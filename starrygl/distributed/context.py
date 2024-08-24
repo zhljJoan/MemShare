@@ -1,3 +1,4 @@
+from math import floor
 import torch
 import torch.nn as nn
 import torch.distributed as dist
@@ -30,6 +31,8 @@ class DistributedContext:
         use_rpc: bool = False,
         use_gpu: Optional[bool] = None,
         rpc_gpu: Optional[bool] = None,
+        cache_use_rpc: bool =False,
+        memory_group_num = 1,
     ) -> 'DistributedContext':
         if DistributedContext.is_initialized():
             raise RuntimeError("not allowed to call init method twice.")
@@ -69,6 +72,8 @@ class DistributedContext:
             use_rpc=use_rpc,
             use_gpu=use_gpu,
             rpc_gpu=rpc_gpu,
+            cache_use_rpc = cache_use_rpc,
+            memory_group_num=memory_group_num
         )
 
         _set_default_dist_context(ctx)
@@ -95,22 +100,25 @@ class DistributedContext:
         use_rpc: bool,
         use_gpu: bool,
         rpc_gpu: bool,
+        cache_use_rpc: bool,
+        memory_group_num = 1,
+
     ) -> None:
         if use_gpu:
             device = torch.device(f"cuda:{local_rank}")
         else:
             device = torch.device("cpu")
-
+        rpc_backend_options = rpc.TensorPipeRpcBackendOptions()
+        rpc_backend_options.init_method = rpc_init_method
         dist.init_process_group(
             backend=backend,
             init_method=ccl_init_method,
             rank=rank, world_size=world_size,
         )
-
-        rpc_backend_options = rpc.TensorPipeRpcBackendOptions()
-        rpc_backend_options.init_method = rpc_init_method
+        self._gloo_group = dist.torch.distributed.new_group(backend='gloo')
 
         if use_gpu and rpc_gpu:
+            print('in')
             device_maps = torch.zeros(world_size, dtype=torch.long, device=device)
             device_maps[rank] = local_rank
             dist.all_reduce(device_maps, op=dist.ReduceOp.SUM)
@@ -120,25 +128,30 @@ class DistributedContext:
                     device_map={local_rank: dev},
                 )
         
-        if use_rpc:
+        if use_rpc or cache_use_rpc :
             rpc.init_rpc(
                 name=f"worker{rank}",
                 rank=rank, world_size=world_size,
-                rpc_backend_options=rpc_backend_options,
+                #rpc_backend_options=rpc_backend_options,
             )
         self._use_rpc = use_rpc
 
         self._local_rank = local_rank
         self._compute_device = device
         self._hostname = socket.gethostname()
-
         if self.device.type == "cuda":
             torch.cuda.set_device(self.device)
-
         rank_to_host = [None] * self.world_size
         dist.all_gather_object(rank_to_host, (self.hostname, self.local_rank))
         self._rank_to_host: Tuple[Tuple[str, int], ...] = tuple(rank_to_host)
-
+        self.memory_group_size = int(dist.get_world_size()/memory_group_num)
+        self.memory_group= int(floor(dist.get_rank()/self.memory_group_size))
+        self.memory_group_rank = int(dist.get_rank() % self.memory_group_size)
+        print('local rank is {} world_size is {} memory group is {} memory rank is {} memory group size is {}\n'.format(self._local_rank,self.world_size,self.memory_group,self.memory_group_rank,self.memory_group_size))
+        self.memory_group_num = memory_group_num
+        print([i for i in range(self.memory_group*self.memory_group_size,(self.memory_group+1)*self.memory_group_size)])
+        self.memory_gloo_group =  dist.torch.distributed.new_group(ranks=[i for i in range(self.memory_group*self.memory_group_size,(self.memory_group+1)*self.memory_group_size)],backend='gloo')
+        self.memory_nccl_group =  dist.torch.distributed.new_group(ranks=[i for i in range(self.memory_group*self.memory_group_size,(self.memory_group+1)*self.memory_group_size)],backend='nccl')
         host_index = [h for h, _ in self.rank_to_host]
         host_index.sort()
         self._host_index: Dict[str, int] = {h:i for i, h in enumerate(host_index)}
@@ -176,6 +189,9 @@ class DistributedContext:
     @property
     def device(self) -> torch.device:
         return self._compute_device
+    @property
+    def gloo_group(self):
+        return self._gloo_group
     
     def get_default_group(self):
         # return dist.distributed_c10d._get_default_group()

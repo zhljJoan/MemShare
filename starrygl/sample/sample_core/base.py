@@ -17,6 +17,8 @@ class NegativeSamplingMode(Enum):
     # 'triplet': Randomly sample negative destination nodes for each positive
     # source node.
     triplet = 'triplet'
+    dygbinary = 'dygbinary'
+    tgbtriplet = 'tgbtriplet'
     
 
 class NegativeSampling:
@@ -47,7 +49,7 @@ class NegativeSampling:
         mode: Union[NegativeSamplingMode, str],
         amount: Union[int, float] = 1,
         weight: Optional[Tensor] = None,
-        unique: bool = False
+        unique: bool = False,
     ):
         self.mode = NegativeSamplingMode(mode)
         self.amount = amount
@@ -72,6 +74,12 @@ class NegativeSampling:
 
     def is_triplet(self) -> bool:
         return self.mode == NegativeSamplingMode.triplet
+    
+    def is_dygbinary(self) -> bool:
+        return self.mode == NegativeSamplingMode.dygbinary
+    
+    def is_tgbtriplet(self) -> bool:
+        return self.mode == NegativeSamplingMode.tgbtriplet
 
     def sample(self, num_samples: int,
                num_nodes: Optional[int] = None) -> Tensor:
@@ -146,7 +154,12 @@ class BaseSampler(ABC):
             metadata: other infomation
         """
         raise NotImplementedError
-
+    def sample_from_edges_with_distributed_dst(      
+        self,data,
+        neg_sampling: Optional[NegativeSampling] = None,
+        with_outer_sample: SampleType = SampleType.Whole,
+    ) -> SampleOutput:
+        raise NotImplementedError
     # def _sample_one_layer_from_nodes(
     #     self,
     #     nodes:torch.Tensor,

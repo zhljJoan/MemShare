@@ -1,3 +1,4 @@
+from starrygl.distributed.context import DistributedContext
 import torch
 import torch.distributed as dist
 
@@ -126,13 +127,15 @@ def all_to_all_s(
     async_op: bool = False,
 ):
     # rank = dist.get_rank(group)
+    
     world_size = dist.get_world_size(group)
-
     assert len(output_rowptr) == len(input_rowptr)
     assert len(output_rowptr) == world_size + 1
-
     output_sizes = [t-s for s, t in zip(output_rowptr, output_rowptr[1:])]
     input_sizes = [t-s for s, t in zip(input_rowptr, input_rowptr[1:])]
+    """
+    return dist.all_to_all(output_tensor_list=,input_tensor_list=,group=group,async_op=True,)
+    """
     return dist.all_to_all_single(
         output=output_tensor,
         input=input_tensor,
@@ -141,6 +144,7 @@ def all_to_all_s(
         group=group,
         async_op=async_op,
     )
+    
 
 def batch_send(
     *tensors: Tensor,
