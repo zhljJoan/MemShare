@@ -1,0 +1,169 @@
+[2024-04-07 16:57:17,536] torch.distributed.run: [WARNING] master_addr is only used for static rdzv_backend and when rdzv_endpoint is not specified.
+[2024-04-07 16:57:17,536] torch.distributed.run: [WARNING] 
+[2024-04-07 16:57:17,536] torch.distributed.run: [WARNING] *****************************************
+[2024-04-07 16:57:17,536] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-04-07 16:57:17,536] torch.distributed.run: [WARNING] *****************************************
+[2024-04-07 16:57:20,254] torch.distributed.elastic.agent.server.api: [WARNING] Received Signals.SIGINT death signal, shutting down workers
+[2024-04-07 16:57:20,255] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140653 closing signal SIGINT
+[2024-04-07 16:57:20,255] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140654 closing signal SIGINT
+[2024-04-07 16:57:20,255] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140655 closing signal SIGINT
+[2024-04-07 16:57:20,255] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140656 closing signal SIGINT
+Traceback (most recent call last):
+  File "/home/zlj/starrygl-historical/starrygl/examples/train_historical.py", line 40, in <module>
+    from starrygl.sample.data_loader import DistributedDataLoader
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/sample/data_loader.py", line 11, in <module>
+    from starrygl.sample.batch_data import async_to_block, graph_sample
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/sample/batch_data.py", line 85, in <module>
+    stream = torch.cuda.Stream()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/cuda/streams.py", line 34, in __new__
+    return super().__new__(cls, priority=priority, **kwargs)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/zlj/starrygl-historical/starrygl/examples/train_historical.py", line 40, in <module>
+    from starrygl.sample.data_loader import DistributedDataLoader
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/sample/data_loader.py", line 11, in <module>
+    from starrygl.sample.batch_data import async_to_block, graph_sample
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/sample/batch_data.py", line 85, in <module>
+    stream = torch.cuda.Stream()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/cuda/streams.py", line 34, in __new__
+    return super().__new__(cls, priority=priority, **kwargs)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/zlj/starrygl-historical/starrygl/examples/train_historical.py", line 40, in <module>
+Traceback (most recent call last):
+  File "/home/zlj/starrygl-historical/starrygl/examples/train_historical.py", line 40, in <module>
+    from starrygl.sample.data_loader import DistributedDataLoader
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/sample/data_loader.py", line 11, in <module>
+    from starrygl.sample.batch_data import async_to_block, graph_sample
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/sample/batch_data.py", line 85, in <module>
+    from starrygl.sample.data_loader import DistributedDataLoader
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/sample/data_loader.py", line 11, in <module>
+    stream = torch.cuda.Stream()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/cuda/streams.py", line 34, in __new__
+    from starrygl.sample.batch_data import async_to_block, graph_sample
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/sample/batch_data.py", line 85, in <module>
+    return super().__new__(cls, priority=priority, **kwargs)
+KeyboardInterrupt
+    stream = torch.cuda.Stream()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/cuda/streams.py", line 34, in __new__
+    return super().__new__(cls, priority=priority, **kwargs)
+KeyboardInterrupt
+[2024-04-07 16:57:20,521] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140653 closing signal SIGTERM
+[2024-04-07 16:57:20,521] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140654 closing signal SIGTERM
+[2024-04-07 16:57:20,521] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140655 closing signal SIGTERM
+[2024-04-07 16:57:20,521] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140656 closing signal SIGTERM
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 736, in run
+    result = self._invoke_run(role)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 877, in _invoke_run
+    time.sleep(monitor_interval)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 2140577 got signal: 2
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 743, in run
+    self._shutdown(e.sigval)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/local_elastic_agent.py", line 289, in _shutdown
+    self._pcontext.close(death_sig)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 331, in close
+    self._close(death_sig=death_sig, timeout=timeout)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 713, in _close
+    handler.proc.wait(time_to_wait)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/subprocess.py", line 1209, in wait
+    return self._wait(timeout=timeout)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/subprocess.py", line 1953, in _wait
+    time.sleep(delay)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 2140577 got signal: 2
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 8, in <module>
+    sys.exit(main())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 255, in launch_agent
+    result = agent.run()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/metrics/api.py", line 124, in wrapper
+    result = f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 748, in run
+    self._shutdown()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/local_elastic_agent.py", line 289, in _shutdown
+    self._pcontext.close(death_sig)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 331, in close
+    self._close(death_sig=death_sig, timeout=timeout)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 713, in _close
+    handler.proc.wait(time_to_wait)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/subprocess.py", line 1209, in wait
+    return self._wait(timeout=timeout)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/subprocess.py", line 1953, in _wait
+    time.sleep(delay)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 2140577 got signal: 2
+[2024-04-07 16:57:33,879] torch.distributed.run: [WARNING] master_addr is only used for static rdzv_backend and when rdzv_endpoint is not specified.
+[2024-04-07 16:57:33,879] torch.distributed.run: [WARNING] 
+[2024-04-07 16:57:33,879] torch.distributed.run: [WARNING] *****************************************
+[2024-04-07 16:57:33,879] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-04-07 16:57:33,879] torch.distributed.run: [WARNING] *****************************************
+[2024-04-07 16:57:36,079] torch.distributed.elastic.agent.server.api: [WARNING] Received Signals.SIGINT death signal, shutting down workers
+[2024-04-07 16:57:36,080] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140768 closing signal SIGINT
+[2024-04-07 16:57:36,080] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140769 closing signal SIGINT
+[2024-04-07 16:57:36,080] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140770 closing signal SIGINT
+[2024-04-07 16:57:36,080] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140771 closing signal SIGINT
+[2024-04-07 16:57:36,469] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140768 closing signal SIGTERM
+[2024-04-07 16:57:36,469] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140769 closing signal SIGTERM
+[2024-04-07 16:57:36,469] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140770 closing signal SIGTERM
+[2024-04-07 16:57:36,469] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2140771 closing signal SIGTERM
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 736, in run
+    result = self._invoke_run(role)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 877, in _invoke_run
+    time.sleep(monitor_interval)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 2140692 got signal: 2
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 8, in <module>
+    sys.exit(main())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 255, in launch_agent
+    result = agent.run()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/metrics/api.py", line 124, in wrapper
+    result = f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 743, in run
+    self._shutdown(e.sigval)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/local_elastic_agent.py", line 289, in _shutdown
+    self._pcontext.close(death_sig)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 331, in close
+    self._close(death_sig=death_sig, timeout=timeout)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 713, in _close
+    handler.proc.wait(time_to_wait)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/subprocess.py", line 1209, in wait
+    return self._wait(timeout=timeout)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/subprocess.py", line 1953, in _wait
+    time.sleep(delay)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 2140692 got signal: 2

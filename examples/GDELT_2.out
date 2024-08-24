@@ -1,0 +1,155 @@
+[2024-04-03 19:20:55,016] torch.distributed.run: [WARNING] 
+[2024-04-03 19:20:55,016] torch.distributed.run: [WARNING] *****************************************
+[2024-04-03 19:20:55,016] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-04-03 19:20:55,016] torch.distributed.run: [WARNING] *****************************************
+LOCAL RANK 1, RANK1
+LOCAL RANK 3, RANK3
+LOCAL RANK 2, RANK2
+LOCAL RANK 0, RANK0
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+use cuda on 2
+use cuda on 0
+use cuda on 3
+use cuda on 1
+tensor([        0,         0,         1,  ..., 191290880, 191290881,
+        191290881])
+tensor([        0,         0,         1,  ..., 191290880, 191290881,
+        191290881])
+tensor([        0,         0,         1,  ..., 191290880, 191290881,
+        191290881])
+tensor([        0,         0,         1,  ..., 191290880, 191290881,
+        191290881])
+16682
+16682
+16682
+16682
+get_neighbors consume: 13.84s
+get_neighbors consume: 13.9357s
+get_neighbors consume: 13.9526s
+get_neighbors consume: 14.1143s
+num_batchs: tensor([89455], device='cuda:2')
+num_batchs: tensor([82566], device='cuda:0')
+num_batchs: tensor([81208], device='cuda:1')
+num_batchs: tensor([85313], device='cuda:3')
+num_batchs: num_batchs:num_batchs:num_batchs:   tensor([18835], device='cuda:0')
+tensor([21171], device='cuda:2')tensor([18256], device='cuda:3')
+
+tensor([17487], device='cuda:1')
+num_batchs:num_batchs:num_batchs:num_batchs:    tensor([25835], device='cuda:2')
+tensor([21939], device='cuda:1')
+tensor([23750], device='cuda:3')
+tensor([23328], device='cuda:0')
+Epoch 0:
+Epoch 0:
+Epoch 0:
+Epoch 0:
+time on every stage {'total_next_batch': 739.0337371826172, 'total_forward': 238.87406969070435, 'total_count_score': 59.984142780303955, 'total_backward': 884.9794039726257, 'total_prepare_mail': 9.253855228424072, 'total_update_mail': 15.489770412445068, 'total_update_memory': 22.53679132461548, 'total_remote_update': 797.6693353652954} {'total_sample_time': 734.4601891040802, 'total_next_batch_time': 2.6088902950286865, 'total_sample_core_time': 20.951808214187622, 'total_fetch_prepare_time': 41.89657020568848, 'total_comm_time': 605.2807703018188, 'total_build_time': 45.130123138427734, 'total_prepare_input_time': 17.712562322616577, 'total_build_block_time': 712.2731578350067}time on every stage {'total_next_batch': 739.3255813121796, 'total_forward': 242.94932341575623, 'total_count_score': 60.944265604019165, 'total_backward': 880.708080291748, 'total_prepare_mail': 9.502478837966919, 'total_update_mail': 15.634873867034912, 'total_update_memory': 22.856717586517334, 'total_remote_update': 795.8922064304352} {'total_sample_time': 734.7312386035919, 'total_next_batch_time': 2.6350345611572266, 'total_sample_core_time': 21.12726354598999, 'total_fetch_prepare_time': 42.51243758201599, 'total_comm_time': 603.9947056770325, 'total_build_time': 45.59508514404297, 'total_prepare_input_time': 17.962888479232788, 'total_build_block_time': 712.3599157333374}time on every stage {'total_next_batch': 738.5498626232147, 'total_forward': 239.688086271286, 'total_count_score': 59.78140926361084, 'total_backward': 884.6820783615112, 'total_prepare_mail': 9.20731782913208, 'total_update_mail': 15.478270053863525, 'total_update_memory': 22.86419916152954, 'total_remote_update': 797.5794405937195} {'total_sample_time': 734.0397472381592, 'total_next_batch_time': 2.5643937587738037, 'total_sample_core_time': 21.07111930847168, 'total_fetch_prepare_time': 42.40303611755371, 'total_comm_time': 604.5968708992004, 'total_build_time': 44.751171827316284, 'total_prepare_input_time': 17.722063541412354, 'total_build_block_time': 711.7360873222351}
+time on every stage {'total_next_batch': 738.9177443981171, 'total_forward': 245.58676099777222, 'total_count_score': 60.66621994972229, 'total_backward': 878.4219348430634, 'total_prepare_mail': 9.599439144134521, 'total_update_mail': 15.460005283355713, 'total_update_memory': 23.206916093826294, 'total_remote_update': 795.9740815162659} {'total_sample_time': 734.3022773265839, 'total_next_batch_time': 2.6394848823547363, 'total_sample_core_time': 22.156001091003418, 'total_fetch_prepare_time': 42.76404023170471, 'total_comm_time': 602.3244075775146, 'total_build_time': 45.873684883117676, 'total_prepare_input_time': 17.682132720947266, 'total_build_block_time': 710.8918991088867}
+
+
+	train loss:26226.1701  train ap:0.973697  val ap:0.970849  val auc:0.975324
+	train loss:24790.6797  train ap:0.976857  val ap:0.970849  val auc:0.975324
+	train loss:26442.5969  train ap:0.972824  val ap:0.970849  val auc:0.975324
+	train loss:25654.7214  train ap:0.975081  val ap:0.970849  val auc:0.975324
+
+
+
+
+	total time:3639.04s  prep time:2767.99s
+	total time:3639.04s  prep time:2767.99s
+	total time:3639.04s  prep time:2767.98s
+
+	total time:3639.04s  prep time:2767.99s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 1:
+Epoch 1:
+Epoch 1:
+Epoch 1:
+[2024-04-03 20:27:55,011] torch.distributed.elastic.agent.server.api: [WARNING] Received Signals.SIGHUP death signal, shutting down workers
+[2024-04-03 20:27:55,012] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2011799 closing signal SIGHUP
+[2024-04-03 20:27:55,012] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2011800 closing signal SIGHUP
+[2024-04-03 20:27:55,012] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2011801 closing signal SIGHUP
+[2024-04-03 20:27:55,012] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2011802 closing signal SIGHUP
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 8, in <module>
+    sys.exit(main())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 255, in launch_agent
+    result = agent.run()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/metrics/api.py", line 124, in wrapper
+    result = f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 736, in run
+    result = self._invoke_run(role)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 877, in _invoke_run
+    time.sleep(monitor_interval)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 2011708 got signal: 1

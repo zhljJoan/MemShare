@@ -1,0 +1,240 @@
+LOCAL RANK 3, RANK3
+LOCAL RANK 2, RANK2
+LOCAL RANK 1, RANK1
+LOCAL RANK 0, RANK0
+use cuda on 2
+use cuda on 1
+use cuda on 0
+use cuda on 3
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.6 GB
+init Cached:    0.6 GB
+ids mem is 9.573996067047119e-06 eids mem is 0.20334253460168839 edge_inde mem is 0.40668506920337677
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.6 GB
+init Cached:    0.6 GB
+ids mem is 1.640617847442627e-05 eids mem is 0.18971920758485794 edge_inde mem is 0.3794384151697159
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.6 GB
+init Cached:    0.6 GB
+ids mem is 1.6398727893829346e-05 eids mem is 0.18585889041423798 edge_inde mem is 0.37171778082847595
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.5 GB
+init Cached:    0.5 GB
+ids mem is 1.6398727893829346e-05 eids mem is 0.17975840717554092 edge_inde mem is 0.35951681435108185
+
+edge_index memory is 1.4004912972450256
+ts memory is 0.7002456486225128
+eids memory is 0.7002456486225128
+train_mask memory is 0.0875307060778141
+test_mask memory is 0.0875307060778141
+val_mask memory is 0.0875307060778141
+dist_eid memory is 0.7002456486225128
+mapper Memory Usage:
+mapper Allocated: 4.5 GB
+mapper Cached:    5.4 GB
+x Memory Usage:
+x Allocated: 4.5 GB
+x Cached:    5.4 GB
+edge_index memory is 1.327319622039795
+edge_index memory is 1.3409517705440521
+ts memory is 0.6704758852720261
+eids memory is 0.6704758852720261
+train_mask memory is 0.08380948565900326
+ts memory is 0.6636598110198975
+test_mask memory is 0.08380948565900326
+val_mask memory is 0.08380948565900326
+edge_index memory is 1.309744417667389
+eids memory is 0.6636598110198975
+train_mask memory is 0.08295747637748718
+dist_eid memory is 0.6704758852720261
+test_mask memory is 0.08295747637748718
+val_mask memory is 0.08295747637748718
+mapper Memory Usage:
+mapper Allocated: 4.2 GB
+mapper Cached:    5.1 GB
+x Memory Usage:
+x Allocated: 4.2 GB
+x Cached:    5.1 GB
+ts memory is 0.6548722088336945
+dist_eid memory is 0.6636598110198975
+mapper Memory Usage:
+mapper Allocated: 4.2 GB
+mapper Cached:    5.1 GB
+x Memory Usage:
+x Allocated: 4.2 GB
+x Cached:    5.1 GB
+eids memory is 0.6548722088336945
+train_mask memory is 0.08185902610421181
+test_mask memory is 0.08185902610421181
+val_mask memory is 0.08185902610421181
+dist_eid memory is 0.6548722088336945
+mapper Memory Usage:
+mapper Allocated: 4.2 GB
+mapper Cached:    5.1 GB
+x Memory Usage:
+x Allocated: 4.2 GB
+x Cached:    5.1 GB
+edge Memory Usage:
+edge Allocated: 13.7 GB
+edge Cached:    14.7 GB
+edge Memory Usage:
+edge Allocated: 12.4 GB
+edge Cached:    13.3 GB
+edge Memory Usage:
+edge Allocated: 12.7 GB
+edge Cached:    13.6 GB
+edge Memory Usage:
+edge Allocated: 12.8 GB
+edge Cached:    13.8 GB
+torch.Size([9196])
+torch.Size([9416])
+torch.Size([9836])
+torch.Size([8770])
+cache node Memory Usage:
+cache node Memory Usage:
+cache node Memory Usage:
+cache node Allocated: 13.7cache node Memory Usage: 
+GB
+cache node Allocated: 12.7 GB
+cache node Cached:    15.5 GB
+cache node Cached:    14.2 GB
+cache node Allocated: 12.8 GB
+cache node Cached:    14.4 GB
+cache node Allocated: 12.4 GB
+cache node Cached:    13.8 GB
+the cache shape is torch.Size([19700517]) the all shape is torch.Size([27292173])
+
+the cache shape is torch.Size([19591898]) the all shape is torch.Size([24945558])
+
+the cache shape is torch.Size([18484049]) the all shape is torch.Size([25463681])
+
+the cache shape is torch.Size([20868110]) the all shape is torch.Size([24126765])
+
+tensor([-1, -1, -1,  ..., -1, -1, -1], device='cuda:0')
+graph num nodes is
+tensor([2201, 2202, 2203,  ...,   -1,   -1,   -1], device='cuda:1')
+graph num nodes is
+tensor([ 2202,  2203,  2204,  ..., 11617,    -1,    -1], device='cuda:3')
+graph num nodes is
+tensor([1285, 1286, 1287,  ...,   -1,   -1,   -1], device='cuda:2')
+graph num nodes is
+sample graph
+mailbox
+sample graph
+mailbox
+sample graph
+mailbox
+sample graph
+mailbox
+get_neighbors consume: 3.22545s
+neg sampler
+sampling
+num_batchs: tensor([17891], device='cuda:2')
+get_neighbors consume: 3.1316s
+neg sampler
+get_neighbors consume: 3.22918s
+get_neighbors consume: 3.23657s
+sampling
+num_batchs: tensor([16513], device='cuda:0')
+neg sampler
+neg sampler
+sampling
+num_batchs: tensor([17062], device='cuda:3')
+sampling
+num_batchs: tensor([16241], device='cuda:1')
+num_batchs:num_batchs:  num_batchs: num_batchs: tensor([3498], device='cuda:1')tensor([3652], device='cuda:3')
+
+tensor([3767], device='cuda:0')
+tensor([4235], device='cuda:2')
+num_batchs:num_batchs:num_batchs:num_batchs:    tensor([4388], device='cuda:1')
+tensor([4750], device='cuda:3')
+tensor([4666], device='cuda:0')
+tensor([5167], device='cuda:2')
+dataloaderdataloaderdataloaderdataloader
+
+
+
+(10971, 100)(11618, 100)
+
+torch.Size([10971, 100])
+torch.Size([11618, 100])(11397, 100)
+
+torch.Size([11397, 100])
+(11121, 100)
+torch.Size([11121, 100])
+(10971, 100)(11618, 100)(11397, 100)
+
+
+torch.Size([11397, 100])torch.Size([10971, 100])torch.Size([11618, 100])
+
+
+(11121, 100)
+torch.Size([11121, 100])
+model
+model
+model
+model
+Epoch 0:
+Epoch 0:
+Epoch 0:
+Epoch 0:
+time on every stage {'total_next_batch': 88.62879252433777, 'total_forward': 151.27802681922913, 'total_count_score': 15.171905755996704, 'total_backward': 136.84468269348145, 'total_prepare_mail': 5.663840293884277, 'total_update_mail': 3.2460110187530518, 'total_update_memory': 5.15635347366333, 'total_remote_update': 1.013035774230957} {'total_sample_time': 87.46475100517273, 'total_next_batch_time': 0.49900078773498535, 'total_sample_core_time': 39.881004333496094, 'total_fetch_prepare_time': 7.368232727050781, 'total_comm_time': 39.391024112701416, 'total_build_time': 0, 'total_prepare_input_time': 0, 'total_build_block_time': 47.29356360435486, 'forward_embedding': 60.84333300590515, 'forward_all_to_all': 76.98804998397827, 'backward_all_to_all': 24.05680012702942, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 97.76109027862549, 'total_forward': 139.0113925933838, 'total_count_score': 17.06404137611389, 'total_backward': 137.45113563537598, 'total_prepare_mail': 5.923447608947754, 'total_update_mail': 3.4276838302612305, 'total_update_memory': 5.318600654602051, 'total_remote_update': 1.0364093780517578} {'total_sample_time': 96.39953255653381, 'total_next_batch_time': 0.5451028347015381, 'total_sample_core_time': 40.5881884098053, 'total_fetch_prepare_time': 8.40324854850769, 'total_comm_time': 46.48539161682129, 'total_build_time': 0, 'total_prepare_input_time': 0, 'total_build_block_time': 55.475746870040894, 'forward_embedding': 66.24794936180115, 'forward_all_to_all': 57.511762619018555, 'backward_all_to_all': 24.151315450668335, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 97.44419598579407, 'total_forward': 139.57776379585266, 'total_count_score': 17.043208599090576, 'total_backward': 137.22373175621033, 'total_prepare_mail': 5.928680181503296, 'total_update_mail': 3.4306721687316895, 'total_update_memory': 5.30233097076416, 'total_remote_update': 1.0443825721740723} {'total_sample_time': 96.11194443702698, 'total_next_batch_time': 0.5333945751190186, 'total_sample_core_time': 39.83665156364441, 'total_fetch_prepare_time': 8.498884677886963, 'total_comm_time': 46.854007959365845, 'total_build_time': 0, 'total_prepare_input_time': 0, 'total_build_block_time': 55.926682472229004, 'forward_embedding': 64.67228722572327, 'forward_all_to_all': 59.76131558418274, 'backward_all_to_all': 24.445573806762695, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 97.19001007080078, 'total_forward': 139.63847541809082, 'total_count_score': 17.11704993247986, 'total_backward': 137.28023314476013, 'total_prepare_mail': 5.97203254699707, 'total_update_mail': 3.4086415767669678, 'total_update_memory': 5.329617500305176, 'total_remote_update': 1.055471420288086} {'total_sample_time': 95.83668541908264, 'total_next_batch_time': 0.5465989112854004, 'total_sample_core_time': 39.698659896850586, 'total_fetch_prepare_time': 8.152926206588745, 'total_comm_time': 47.12573504447937, 'total_build_time': 0, 'total_prepare_input_time': 0, 'total_build_block_time': 55.792805671691895, 'forward_embedding': 66.02185273170471, 'forward_all_to_all': 58.40201687812805, 'backward_all_to_all': 23.00153112411499, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+	 trainer 2 train loss:1854.5849  train ap:0.995379  val ap:0.975989  val auc:0.979874
+	 trainer 3 train loss:2779.0935  train ap:0.991714  val ap:0.975989  val auc:0.979874
+
+	 trainer 1 train loss:1853.4685  train ap:0.994914  val ap:0.975989  val auc:0.979874
+
+	total time:509.69s  prep time:407.04s
+	 trainer 0 train loss:1813.6976  train ap:0.995147  val ap:0.975989  val auc:0.979874
+
+
+	total time:509.69s  prep time:407.04s
+
+	total time:509.69s  prep time:407.04s
+	 fetch time:0.00s write back time:0.00s
+
+
+	total time:509.69s  prep time:407.04s
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+forward_time backward_time0 0
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+
+
+forward_time backward_time0 0
+
+forward_time backward_time0 0
+per time[0, 0, 0, 0]
+
+per time[0, 0, 0, 0]per time[0, 0, 0, 0]
+
+per time[0, 0, 0, 0]
+Loading the best model at epoch 0Loading the best model at epoch 0Loading the best model at epoch 0
+Loading the best model at epoch 0
+
+
+0.9389623403549194 0.9471434950828552 
+0.9389623403549194 0.9471434950828552 
+0.9389623403549194 0.9471434950828552 
+
+
+
+0.9389623403549194 0.9471434950828552 
+

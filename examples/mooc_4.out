@@ -1,0 +1,620 @@
+LOCAL RANK 0, RANK0
+LOCAL RANK 3, RANK3
+in
+LOCAL RANK 2, RANK2
+LOCAL RANK 1, RANK1
+in
+in
+in
+use cuda on 0
+use cuda on 1
+use cuda on 3
+use cuda on 2
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.0 GB
+init Cached:    0.0 GB
+ids mem is 1.3500452041625977e-05 eids mem is 0.00024472177028656006 edge_inde mem is 0.0004894435405731201
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.0 GB
+init Cached:    0.0 GB
+ids mem is 1.3515353202819824e-05 eids mem is 0.0005929991602897644 edge_inde mem is 0.0011859983205795288
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.0 GB
+init Cached:    0.0 GB
+ids mem is 1.3515353202819824e-05 eids mem is 0.001261979341506958 edge_inde mem is 0.002523958683013916
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.0 GB
+init Cached:    0.0 GB
+ids mem is 1.1973083019256592e-05 eids mem is 0.0009680688381195068 edge_inde mem is 0.0019361376762390137
+
+edge_index memory is 0.012271076440811157
+ts memory is 0.006135538220405579
+eids memory is 0.006135538220405579
+train_mask memory is 0.0007669422775506973
+test_mask memory is 0.0007669422775506973
+val_mask memory is 0.0007669422775506973
+dist_eid memory is 0.006135538220405579
+mapper Memory Usage:
+mapper Allocated: 0.0 GB
+mapper Cached:    0.0 GB
+x Memory Usage:
+x Allocated: 0.0 GB
+x Cached:    0.0 GB
+edge Memory Usage:
+edge Allocated: 0.0 GB
+edge Cached:    0.0 GB
+7047
+edge_index memory is 0.012271076440811157edge_index memory is 0.012271076440811157
+
+edge_index memory is 0.012271076440811157
+ts memory is 0.006135538220405579
+ts memory is 0.006135538220405579
+ts memory is 0.006135538220405579
+eids memory is 0.006135538220405579
+eids memory is 0.006135538220405579
+train_mask memory is 0.0007669422775506973
+eids memory is 0.006135538220405579
+train_mask memory is 0.0007669422775506973
+test_mask memory is 0.0007669422775506973
+train_mask memory is 0.0007669422775506973
+test_mask memory is 0.0007669422775506973
+val_mask memory is 0.0007669422775506973
+test_mask memory is 0.0007669422775506973
+val_mask memory is 0.0007669422775506973
+val_mask memory is 0.0007669422775506973
+dist_eid memory is 0.006135538220405579
+dist_eid memory is 0.006135538220405579
+dist_eid memory is 0.006135538220405579
+mapper Memory Usage:
+mapper Allocated: 0.0 GB
+mapper Cached:    0.0 GB
+x Memory Usage:
+x Allocated: 0.0 GB
+x Cached:    0.0 GB
+edge Memory Usage:
+edge Allocated: 0.0 GB
+edge Cached:    0.0 GB
+7047
+mapper Memory Usage:
+mapper Memory Usage:
+mapper Allocated:mapper Allocated:  0.00.0  GBGB
+
+mapper Cached:    0.0 GBmapper Cached:   
+ 0.0 GB
+x Memory Usage:
+x Memory Usage:
+x Allocated:x Allocated:  0.00.0  GBGB
+
+x Cached:   x Cached:     0.00.0  GBGB
+
+edge Memory Usage:edge Memory Usage:
+
+edge Allocated:edge Allocated:  0.00.0  GBGB
+
+edge Cached:   edge Cached:     0.00.0  GBGB
+
+7047
+7047
+get_neighbors consume: 0.0242529s
+get_neighbors consume: 0.0232048s
+get_neighbors consume: 0.0233245s
+get_neighbors consume: 0.0228497s
+num_batchs: tensor([28], device='cuda:0')
+num_batchs: tensor([116], device='cuda:3')
+num_batchs: tensor([56], device='cuda:1')
+num_batchs: tensor([85], device='cuda:2')
+num_batchs: num_batchs: tensor([27], device='cuda:3')
+tensor([11], device='cuda:1')
+num_batchs: tensor([2], device='cuda:0')
+num_batchs: tensor([23], device='cuda:2')
+num_batchs:num_batchs:num_batchs: num_batchs:   tensor([27], device='cuda:3')
+tensor([12], device='cuda:1')tensor([2], device='cuda:0')
+
+tensor([22], device='cuda:2')
+init dataloaderinit dataloaderinit dataloaderinit dataloader
+
+
+
+The model has 0.9231605529785156 trainable parameters
+The model has 0.9231605529785156 trainable parameters
+The model has 0.9231605529785156 trainable parameters
+Epoch 0:
+Epoch 0:Epoch 0:
+
+The model has 0.9231605529785156 trainable parameters
+Epoch 0:
+time on every stage {'total_next_batch': 0.2338249683380127, 'total_forward': 0.286773681640625, 'total_count_score': 0.031055212020874023, 'total_backward': 0.2706143856048584, 'total_prepare_mail': 0.003556966781616211, 'total_update_mail': 0.011668920516967773, 'total_update_memory': 0.009450674057006836, 'total_remote_update': 0.04863762855529785} {'total_sample_time': 0.2318425178527832, 'total_next_batch_time': 0.00115966796875, 'total_sample_core_time': 0.0142974853515625, 'total_fetch_prepare_time': 0.03600573539733887, 'total_comm_time': 0.11679410934448242, 'total_build_time': 0.046540021896362305, 'total_prepare_input_time': 0.016675710678100586, 'total_build_block_time': 0.21693944931030273, 'forward_embedding': 0.24335098266601562, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.2378368377685547, 'total_forward': 0.2633371353149414, 'total_count_score': 0.030752897262573242, 'total_backward': 0.29626011848449707, 'total_prepare_mail': 0.0035445690155029297, 'total_update_mail': 0.013006448745727539, 'total_update_memory': 0.00938558578491211, 'total_remote_update': 0.041333675384521484} {'total_sample_time': 0.23590421676635742, 'total_next_batch_time': 0.0011439323425292969, 'total_sample_core_time': 0.01410365104675293, 'total_fetch_prepare_time': 0.03367328643798828, 'total_comm_time': 0.11852884292602539, 'total_build_time': 0.05495929718017578, 'total_prepare_input_time': 0.013151168823242188, 'total_build_block_time': 0.22123074531555176, 'forward_embedding': 0.21986699104309082, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.2364964485168457, 'total_forward': 0.2639644145965576, 'total_count_score': 0.03071117401123047, 'total_backward': 0.3013138771057129, 'total_prepare_mail': 0.003495454788208008, 'total_update_mail': 0.011833667755126953, 'total_update_memory': 0.009747028350830078, 'total_remote_update': 0.03792738914489746} {'total_sample_time': 0.2345898151397705, 'total_next_batch_time': 0.0011162757873535156, 'total_sample_core_time': 0.013882875442504883, 'total_fetch_prepare_time': 0.034030914306640625, 'total_comm_time': 0.11766648292541504, 'total_build_time': 0.056481122970581055, 'total_prepare_input_time': 0.011037826538085938, 'total_build_block_time': 0.2201375961303711, 'forward_embedding': 0.21985697746276855, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+time on every stage {'total_next_batch': 0.23383069038391113, 'total_forward': 0.2660071849822998, 'total_count_score': 0.032181739807128906, 'total_backward': 0.30006837844848633, 'total_prepare_mail': 0.003614664077758789, 'total_update_mail': 0.01207733154296875, 'total_update_memory': 0.009909868240356445, 'total_remote_update': 0.037091732025146484} {'total_sample_time': 0.23177242279052734, 'total_next_batch_time': 0.0012021064758300781, 'total_sample_core_time': 0.016221284866333008, 'total_fetch_prepare_time': 0.034206390380859375, 'total_comm_time': 0.11390376091003418, 'total_build_time': 0.05466508865356445, 'total_prepare_input_time': 0.011192083358764648, 'total_build_block_time': 0.2149193286895752, 'forward_embedding': 0.22045326232910156, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+	train loss:35.3014  train ap:0.719237  val ap:0.608411  val auc:0.659423
+	train loss:34.5237  train ap:0.741597  val ap:0.608411  val auc:0.659423
+
+	train loss:35.2562  train ap:0.717786  val ap:0.608411  val auc:0.659423
+
+	total time:1.20s  prep time:0.90s
+
+	train loss:36.5823  train ap:0.654845  val ap:0.608411  val auc:0.659423
+	total time:1.20s  prep time:0.90s
+
+	total time:1.20s  prep time:0.90s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	total time:1.20s  prep time:0.90s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 1:
+Epoch 1:Epoch 1:
+
+Epoch 1:
+time on every stage {'total_next_batch': 0.08733010292053223, 'total_forward': 0.12167119979858398, 'total_count_score': 0.02922797203063965, 'total_backward': 0.15585947036743164, 'total_prepare_mail': 0.0034177303314208984, 'total_update_mail': 0.006421327590942383, 'total_update_memory': 0.008935928344726562, 'total_remote_update': 0.030913829803466797} {'total_sample_time': 0.08542108535766602, 'total_next_batch_time': 0.0011060237884521484, 'total_sample_core_time': 0.014069795608520508, 'total_fetch_prepare_time': 0.022298574447631836, 'total_comm_time': 0.021694660186767578, 'total_build_time': 0.020008563995361328, 'total_prepare_input_time': 0.005919456481933594, 'total_build_block_time': 0.07080435752868652, 'forward_embedding': 0.0951228141784668, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08677244186401367, 'total_forward': 0.12181210517883301, 'total_count_score': 0.029194355010986328, 'total_backward': 0.15566086769104004, 'total_prepare_mail': 0.003399372100830078, 'total_update_mail': 0.006424665451049805, 'total_update_memory': 0.008881807327270508, 'total_remote_update': 0.03161740303039551} {'total_sample_time': 0.0848550796508789, 'total_next_batch_time': 0.0011017322540283203, 'total_sample_core_time': 0.013761520385742188, 'total_fetch_prepare_time': 0.022071123123168945, 'total_comm_time': 0.02168416976928711, 'total_build_time': 0.01990795135498047, 'total_prepare_input_time': 0.006009101867675781, 'total_build_block_time': 0.07055544853210449, 'forward_embedding': 0.09509849548339844, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08576154708862305, 'total_forward': 0.12383413314819336, 'total_count_score': 0.02907848358154297, 'total_backward': 0.1540358066558838, 'total_prepare_mail': 0.003343343734741211, 'total_update_mail': 0.006455183029174805, 'total_update_memory': 0.009280681610107422, 'total_remote_update': 0.032053232192993164} {'total_sample_time': 0.08390498161315918, 'total_next_batch_time': 0.0010728836059570312, 'total_sample_core_time': 0.013330459594726562, 'total_fetch_prepare_time': 0.022709131240844727, 'total_comm_time': 0.020781278610229492, 'total_build_time': 0.01970958709716797, 'total_prepare_input_time': 0.005976438522338867, 'total_build_block_time': 0.07005000114440918, 'forward_embedding': 0.09646844863891602, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08626294136047363, 'total_forward': 0.12408304214477539, 'total_count_score': 0.029244184494018555, 'total_backward': 0.15300965309143066, 'total_prepare_mail': 0.0034215450286865234, 'total_update_mail': 0.006538867950439453, 'total_update_memory': 0.009296655654907227, 'total_remote_update': 0.031964778900146484} {'total_sample_time': 0.08433914184570312, 'total_next_batch_time': 0.0010919570922851562, 'total_sample_core_time': 0.0136871337890625, 'total_fetch_prepare_time': 0.02274155616760254, 'total_comm_time': 0.020442724227905273, 'total_build_time': 0.0199429988861084, 'total_prepare_input_time': 0.006073713302612305, 'total_build_block_time': 0.07008981704711914, 'forward_embedding': 0.09639310836791992, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+	train loss:26.4298  train ap:0.838608  val ap:0.610498  val auc:0.663262
+	train loss:30.1153  train ap:0.759621  val ap:0.610498  val auc:0.663262
+	train loss:27.4181  train ap:0.816024  val ap:0.610498  val auc:0.663262
+
+
+
+	total time:0.77s  prep time:0.44s
+	total time:0.77s  prep time:0.44s
+	total time:0.77s  prep time:0.44s
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	train loss:27.4266  train ap:0.816803  val ap:0.610498  val auc:0.663262
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	total time:0.77s  prep time:0.44s
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 2:
+Epoch 2:
+Epoch 2:
+Epoch 2:
+time on every stage {'total_next_batch': 0.08656668663024902, 'total_forward': 0.12144804000854492, 'total_count_score': 0.02920699119567871, 'total_backward': 0.15563654899597168, 'total_prepare_mail': 0.0033969879150390625, 'total_update_mail': 0.006440401077270508, 'total_update_memory': 0.008887767791748047, 'total_remote_update': 0.030724048614501953} {'total_sample_time': 0.08466887474060059, 'total_next_batch_time': 0.0010983943939208984, 'total_sample_core_time': 0.014101982116699219, 'total_fetch_prepare_time': 0.022058963775634766, 'total_comm_time': 0.02129197120666504, 'total_build_time': 0.01991581916809082, 'total_prepare_input_time': 0.00587153434753418, 'total_build_block_time': 0.0700223445892334, 'forward_embedding': 0.09501409530639648, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08585166931152344, 'total_forward': 0.12205147743225098, 'total_count_score': 0.029126882553100586, 'total_backward': 0.1550137996673584, 'total_prepare_mail': 0.00342559814453125, 'total_update_mail': 0.006437063217163086, 'total_update_memory': 0.008839130401611328, 'total_remote_update': 0.031334638595581055} {'total_sample_time': 0.08387422561645508, 'total_next_batch_time': 0.0011262893676757812, 'total_sample_core_time': 0.01371002197265625, 'total_fetch_prepare_time': 0.021904706954956055, 'total_comm_time': 0.021073579788208008, 'total_build_time': 0.019805908203125, 'total_prepare_input_time': 0.005961894989013672, 'total_build_block_time': 0.06963443756103516, 'forward_embedding': 0.09509110450744629, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08538365364074707, 'total_forward': 0.1237344741821289, 'total_count_score': 0.029310941696166992, 'total_backward': 0.1527385711669922, 'total_prepare_mail': 0.0034394264221191406, 'total_update_mail': 0.006542205810546875, 'total_update_memory': 0.009313344955444336, 'total_remote_update': 0.031928300857543945} {'total_sample_time': 0.08350276947021484, 'total_next_batch_time': 0.0010869503021240234, 'total_sample_core_time': 0.013700485229492188, 'total_fetch_prepare_time': 0.02238178253173828, 'total_comm_time': 0.020123720169067383, 'total_build_time': 0.01985311508178711, 'total_prepare_input_time': 0.006037473678588867, 'total_build_block_time': 0.06925511360168457, 'forward_embedding': 0.0961616039276123, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08458805084228516, 'total_forward': 0.12408947944641113, 'total_count_score': 0.02872753143310547, 'total_backward': 0.15344834327697754, 'total_prepare_mail': 0.0033576488494873047, 'total_update_mail': 0.006447315216064453, 'total_update_memory': 0.009259462356567383, 'total_remote_update': 0.032111167907714844} {'total_sample_time': 0.08268356323242188, 'total_next_batch_time': 0.0010840892791748047, 'total_sample_core_time': 0.013313770294189453, 'total_fetch_prepare_time': 0.022314786911010742, 'total_comm_time': 0.020125865936279297, 'total_build_time': 0.019521474838256836, 'total_prepare_input_time': 0.005987882614135742, 'total_build_block_time': 0.06881856918334961, 'forward_embedding': 0.0962672233581543, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+
+	train loss:23.5806  train ap:0.817073  val ap:0.607550  val auc:0.661273
+	train loss:22.0500  train ap:0.843757  val ap:0.607550  val auc:0.661273
+	train loss:26.9011  train ap:0.769029  val ap:0.607550  val auc:0.661273
+
+	train loss:23.2863  train ap:0.821179  val ap:0.607550  val auc:0.661273
+
+
+	total time:0.74s  prep time:0.44s
+
+	total time:0.74s  prep time:0.44s
+	total time:0.74s  prep time:0.44s
+
+	total time:0.74s  prep time:0.44s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 3:
+Epoch 3:Epoch 3:
+
+Epoch 3:
+time on every stage {'total_next_batch': 0.0939493179321289, 'total_forward': 0.12229108810424805, 'total_count_score': 0.02990889549255371, 'total_backward': 0.15744471549987793, 'total_prepare_mail': 0.0034186840057373047, 'total_update_mail': 0.006485700607299805, 'total_update_memory': 0.00894618034362793, 'total_remote_update': 0.03655409812927246} {'total_sample_time': 0.09201431274414062, 'total_next_batch_time': 0.00110626220703125, 'total_sample_core_time': 0.015611886978149414, 'total_fetch_prepare_time': 0.0223236083984375, 'total_comm_time': 0.026567935943603516, 'total_build_time': 0.02014303207397461, 'total_prepare_input_time': 0.005943775177001953, 'total_build_block_time': 0.07587957382202148, 'forward_embedding': 0.0953071117401123, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.09480977058410645, 'total_forward': 0.12172508239746094, 'total_count_score': 0.02951645851135254, 'total_backward': 0.15834975242614746, 'total_prepare_mail': 0.003414630889892578, 'total_update_mail': 0.00644373893737793, 'total_update_memory': 0.008923530578613281, 'total_remote_update': 0.03588747978210449} {'total_sample_time': 0.09287571907043457, 'total_next_batch_time': 0.001108407974243164, 'total_sample_core_time': 0.016289234161376953, 'total_fetch_prepare_time': 0.022145986557006836, 'total_comm_time': 0.027159452438354492, 'total_build_time': 0.01999211311340332, 'total_prepare_input_time': 0.005856990814208984, 'total_build_block_time': 0.07603788375854492, 'forward_embedding': 0.09508562088012695, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+time on every stage {'total_next_batch': 0.09268331527709961, 'total_forward': 0.12437105178833008, 'total_count_score': 0.029686927795410156, 'total_backward': 0.1560838222503662, 'total_prepare_mail': 0.0033788681030273438, 'total_update_mail': 0.00661015510559082, 'total_update_memory': 0.009395837783813477, 'total_remote_update': 0.036855220794677734} {'total_sample_time': 0.09081172943115234, 'total_next_batch_time': 0.0010781288146972656, 'total_sample_core_time': 0.015466451644897461, 'total_fetch_prepare_time': 0.022707462310791016, 'total_comm_time': 0.02544569969177246, 'total_build_time': 0.0198516845703125, 'total_prepare_input_time': 0.005936622619628906, 'total_build_block_time': 0.07482552528381348, 'forward_embedding': 0.09665989875793457, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.09290122985839844, 'total_forward': 0.12496232986450195, 'total_count_score': 0.032416582107543945, 'total_backward': 0.154679536819458, 'total_prepare_mail': 0.003560781478881836, 'total_update_mail': 0.00675201416015625, 'total_update_memory': 0.009348869323730469, 'total_remote_update': 0.03455018997192383} {'total_sample_time': 0.09102010726928711, 'total_next_batch_time': 0.0010771751403808594, 'total_sample_core_time': 0.013799428939819336, 'total_fetch_prepare_time': 0.02245807647705078, 'total_comm_time': 0.027467012405395508, 'total_build_time': 0.01985931396484375, 'total_prepare_input_time': 0.006010293960571289, 'total_build_block_time': 0.07666373252868652, 'forward_embedding': 0.09709048271179199, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+	train loss:19.2808  train ap:0.845992  val ap:0.623381  val auc:0.668305
+	train loss:20.8643  train ap:0.827478  val ap:0.623381  val auc:0.668305
+
+	train loss:24.8739  train ap:0.776756  val ap:0.623381  val auc:0.668305
+	train loss:20.9765  train ap:0.823183  val ap:0.623381  val auc:0.668305
+
+	total time:0.76s  prep time:0.46s
+
+
+	total time:0.76s  prep time:0.46s
+
+	total time:0.76s  prep time:0.46s
+
+	total time:0.76s  prep time:0.46s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 4:Epoch 4:
+
+Epoch 4:
+Epoch 4:
+time on every stage {'total_next_batch': 0.08748483657836914, 'total_forward': 0.12089371681213379, 'total_count_score': 0.029003143310546875, 'total_backward': 0.15692830085754395, 'total_prepare_mail': 0.0034258365631103516, 'total_update_mail': 0.006401538848876953, 'total_update_memory': 0.008962869644165039, 'total_remote_update': 0.03623151779174805} {'total_sample_time': 0.08556890487670898, 'total_next_batch_time': 0.0011057853698730469, 'total_sample_core_time': 0.013857841491699219, 'total_fetch_prepare_time': 0.021947145462036133, 'total_comm_time': 0.022748470306396484, 'total_build_time': 0.019704341888427734, 'total_prepare_input_time': 0.0059201717376708984, 'total_build_block_time': 0.07120060920715332, 'forward_embedding': 0.09473180770874023, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08936619758605957, 'total_forward': 0.12163710594177246, 'total_count_score': 0.02967524528503418, 'total_backward': 0.15496516227722168, 'total_prepare_mail': 0.003416299819946289, 'total_update_mail': 0.006479978561401367, 'total_update_memory': 0.008998394012451172, 'total_remote_update': 0.03481149673461914} {'total_sample_time': 0.08739709854125977, 'total_next_batch_time': 0.0011105537414550781, 'total_sample_core_time': 0.014958620071411133, 'total_fetch_prepare_time': 0.022976160049438477, 'total_comm_time': 0.02084207534790039, 'total_build_time': 0.021275043487548828, 'total_prepare_input_time': 0.0058858394622802734, 'total_build_block_time': 0.07188534736633301, 'forward_embedding': 0.09522366523742676, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+time on every stage {'total_next_batch': 0.08606362342834473, 'total_forward': 0.1229698657989502, 'total_count_score': 0.028630495071411133, 'total_backward': 0.15548324584960938, 'total_prepare_mail': 0.0033380985260009766, 'total_update_mail': 0.006433248519897461, 'total_update_memory': 0.009241580963134766, 'total_remote_update': 0.03722786903381348} {'total_sample_time': 0.08421063423156738, 'total_next_batch_time': 0.0010671615600585938, 'total_sample_core_time': 0.013636589050292969, 'total_fetch_prepare_time': 0.022309541702270508, 'total_comm_time': 0.021586179733276367, 'total_build_time': 0.019394636154174805, 'total_prepare_input_time': 0.005889177322387695, 'total_build_block_time': 0.07005858421325684, 'forward_embedding': 0.09614920616149902, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08659958839416504, 'total_forward': 0.12362408638000488, 'total_count_score': 0.02934551239013672, 'total_backward': 0.15435457229614258, 'total_prepare_mail': 0.003435850143432617, 'total_update_mail': 0.006552934646606445, 'total_update_memory': 0.009313344955444336, 'total_remote_update': 0.03615713119506836} {'total_sample_time': 0.08471202850341797, 'total_next_batch_time': 0.0010836124420166016, 'total_sample_core_time': 0.014072418212890625, 'total_fetch_prepare_time': 0.022816181182861328, 'total_comm_time': 0.02061319351196289, 'total_build_time': 0.01981830596923828, 'total_prepare_input_time': 0.005994081497192383, 'total_build_block_time': 0.07010602951049805, 'forward_embedding': 0.09627246856689453, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+	train loss:19.7628  train ap:0.832680  val ap:0.629057  val auc:0.673420
+	train loss:17.9965  train ap:0.856238  val ap:0.629057  val auc:0.673420
+	train loss:24.3131  train ap:0.778029  val ap:0.629057  val auc:0.673420
+	train loss:19.5972  train ap:0.832292  val ap:0.629057  val auc:0.673420
+
+
+
+
+	total time:0.74s  prep time:0.45s
+	total time:0.74s  prep time:0.45s
+	total time:0.74s  prep time:0.45s
+	total time:0.74s  prep time:0.45s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+Epoch 5:
+Epoch 5:
+Epoch 5:
+Epoch 5:
+time on every stage {'total_next_batch': 0.0869894027709961, 'total_forward': 0.12125539779663086, 'total_count_score': 0.029275894165039062, 'total_backward': 0.15740561485290527, 'total_prepare_mail': 0.0033769607543945312, 'total_update_mail': 0.0064411163330078125, 'total_update_memory': 0.008944988250732422, 'total_remote_update': 0.033283233642578125} {'total_sample_time': 0.0850677490234375, 'total_next_batch_time': 0.0011029243469238281, 'total_sample_core_time': 0.014522075653076172, 'total_fetch_prepare_time': 0.022211074829101562, 'total_comm_time': 0.02107691764831543, 'total_build_time': 0.0199277400970459, 'total_prepare_input_time': 0.0059092044830322266, 'total_build_block_time': 0.07000112533569336, 'forward_embedding': 0.09482407569885254, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08645844459533691, 'total_forward': 0.12366986274719238, 'total_count_score': 0.028887271881103516, 'total_backward': 0.15490984916687012, 'total_prepare_mail': 0.003401517868041992, 'total_update_mail': 0.006438255310058594, 'total_update_memory': 0.008945703506469727, 'total_remote_update': 0.03423905372619629} {'total_sample_time': 0.08454084396362305, 'total_next_batch_time': 0.0011074542999267578, 'total_sample_core_time': 0.013915061950683594, 'total_fetch_prepare_time': 0.02205681800842285, 'total_comm_time': 0.0214998722076416, 'total_build_time': 0.01972198486328125, 'total_prepare_input_time': 0.005957841873168945, 'total_build_block_time': 0.07011055946350098, 'forward_embedding': 0.09731936454772949, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08562850952148438, 'total_forward': 0.12365150451660156, 'total_count_score': 0.0292513370513916, 'total_backward': 0.1547403335571289, 'total_prepare_mail': 0.003402233123779297, 'total_update_mail': 0.006541252136230469, 'total_update_memory': 0.009377479553222656, 'total_remote_update': 0.03441166877746582} {'total_sample_time': 0.08374691009521484, 'total_next_batch_time': 0.001077890396118164, 'total_sample_core_time': 0.013896465301513672, 'total_fetch_prepare_time': 0.022625207901000977, 'total_comm_time': 0.019985675811767578, 'total_build_time': 0.01981520652770996, 'total_prepare_input_time': 0.006026029586791992, 'total_build_block_time': 0.06931757926940918, 'forward_embedding': 0.09623074531555176, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+time on every stage {'total_next_batch': 0.0853583812713623, 'total_forward': 0.12311768531799316, 'total_count_score': 0.02857184410095215, 'total_backward': 0.15845894813537598, 'total_prepare_mail': 0.003358125686645508, 'total_update_mail': 0.0065004825592041016, 'total_update_memory': 0.009294748306274414, 'total_remote_update': 0.03235173225402832} {'total_sample_time': 0.08349919319152832, 'total_next_batch_time': 0.001070261001586914, 'total_sample_core_time': 0.01358485221862793, 'total_fetch_prepare_time': 0.022397518157958984, 'total_comm_time': 0.02075815200805664, 'total_build_time': 0.019416332244873047, 'total_prepare_input_time': 0.005949258804321289, 'total_build_block_time': 0.06940054893493652, 'forward_embedding': 0.09608769416809082, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+	train loss:19.1722  train ap:0.837150  val ap:0.634377  val auc:0.679648
+	train loss:17.1666  train ap:0.863371  val ap:0.634377  val auc:0.679648
+	train loss:23.7675  train ap:0.785657  val ap:0.634377  val auc:0.679648
+	train loss:19.0468  train ap:0.834184  val ap:0.634377  val auc:0.679648
+
+
+
+
+	total time:0.75s  prep time:0.45s
+	total time:0.75s  prep time:0.45s
+	total time:0.75s  prep time:0.45s
+	total time:0.75s  prep time:0.45s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+Epoch 6:
+Epoch 6:Epoch 6:
+
+Epoch 6:
+time on every stage {'total_next_batch': 0.08647990226745605, 'total_forward': 0.1214437484741211, 'total_count_score': 0.029212236404418945, 'total_backward': 0.15590453147888184, 'total_prepare_mail': 0.003385782241821289, 'total_update_mail': 0.006417751312255859, 'total_update_memory': 0.008887767791748047, 'total_remote_update': 0.030459165573120117} {'total_sample_time': 0.08457303047180176, 'total_next_batch_time': 0.0010943412780761719, 'total_sample_core_time': 0.01431131362915039, 'total_fetch_prepare_time': 0.022028446197509766, 'total_comm_time': 0.021076202392578125, 'total_build_time': 0.01990032196044922, 'total_prepare_input_time': 0.005833864212036133, 'total_build_block_time': 0.0697171688079834, 'forward_embedding': 0.09495401382446289, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08629918098449707, 'total_forward': 0.12214875221252441, 'total_count_score': 0.02910637855529785, 'total_backward': 0.15507221221923828, 'total_prepare_mail': 0.0034093856811523438, 'total_update_mail': 0.0064067840576171875, 'total_update_memory': 0.008831501007080078, 'total_remote_update': 0.030914783477783203} {'total_sample_time': 0.08437347412109375, 'total_next_batch_time': 0.0011010169982910156, 'total_sample_core_time': 0.014081954956054688, 'total_fetch_prepare_time': 0.021992921829223633, 'total_comm_time': 0.0211944580078125, 'total_build_time': 0.019797801971435547, 'total_prepare_input_time': 0.005901813507080078, 'total_build_block_time': 0.0697641372680664, 'forward_embedding': 0.09542202949523926, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+time on every stage {'total_next_batch': 0.08501195907592773, 'total_forward': 0.12410521507263184, 'total_count_score': 0.0288240909576416, 'total_backward': 0.1536259651184082, 'total_prepare_mail': 0.003329753875732422, 'total_update_mail': 0.006432294845581055, 'total_update_memory': 0.009241580963134766, 'total_remote_update': 0.03165102005004883} {'total_sample_time': 0.0831456184387207, 'total_next_batch_time': 0.0010747909545898438, 'total_sample_core_time': 0.013576269149780273, 'total_fetch_prepare_time': 0.022442340850830078, 'total_comm_time': 0.02036118507385254, 'total_build_time': 0.019473552703857422, 'total_prepare_input_time': 0.0058994293212890625, 'total_build_block_time': 0.06903791427612305, 'forward_embedding': 0.09670519828796387, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.0854496955871582, 'total_forward': 0.12353324890136719, 'total_count_score': 0.029063940048217773, 'total_backward': 0.1533653736114502, 'total_prepare_mail': 0.0034186840057373047, 'total_update_mail': 0.0065250396728515625, 'total_update_memory': 0.009273767471313477, 'total_remote_update': 0.031594276428222656} {'total_sample_time': 0.08357095718383789, 'total_next_batch_time': 0.0010769367218017578, 'total_sample_core_time': 0.013947010040283203, 'total_fetch_prepare_time': 0.022614002227783203, 'total_comm_time': 0.019828319549560547, 'total_build_time': 0.019812345504760742, 'total_prepare_input_time': 0.0059702396392822266, 'total_build_block_time': 0.06908822059631348, 'forward_embedding': 0.09604144096374512, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+	train loss:18.9602  train ap:0.834282  val ap:0.641156  val auc:0.679962
+	train loss:16.9681  train ap:0.861386  val ap:0.641156  val auc:0.679962
+	train loss:18.5767  train ap:0.838985  val ap:0.641156  val auc:0.679962
+
+	train loss:22.9510  train ap:0.795044  val ap:0.641156  val auc:0.679962
+
+
+	total time:0.74s  prep time:0.44s
+	total time:0.74s  prep time:0.44s
+
+	total time:0.74s  prep time:0.44s
+
+
+	total time:0.74s  prep time:0.44s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 7:
+Epoch 7:
+Epoch 7:Epoch 7:
+
+time on every stage {'total_next_batch': 0.08716368675231934, 'total_forward': 0.12077689170837402, 'total_count_score': 0.028920888900756836, 'total_backward': 0.1582655906677246, 'total_prepare_mail': 0.00341033935546875, 'total_update_mail': 0.00644230842590332, 'total_update_memory': 0.008937358856201172, 'total_remote_update': 0.03554821014404297} {'total_sample_time': 0.0852499008178711, 'total_next_batch_time': 0.0010943412780761719, 'total_sample_core_time': 0.014049768447875977, 'total_fetch_prepare_time': 0.022179841995239258, 'total_comm_time': 0.022155284881591797, 'total_build_time': 0.019591808319091797, 'total_prepare_input_time': 0.00587916374206543, 'total_build_block_time': 0.07067704200744629, 'forward_embedding': 0.09450769424438477, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08871054649353027, 'total_forward': 0.12163805961608887, 'total_count_score': 0.029520273208618164, 'total_backward': 0.15734219551086426, 'total_prepare_mail': 0.0033979415893554688, 'total_update_mail': 0.006478309631347656, 'total_update_memory': 0.008998632431030273, 'total_remote_update': 0.033371686935424805} {'total_sample_time': 0.0867307186126709, 'total_next_batch_time': 0.0011341571807861328, 'total_sample_core_time': 0.014421463012695312, 'total_fetch_prepare_time': 0.02205181121826172, 'total_comm_time': 0.023096799850463867, 'total_build_time': 0.019928932189941406, 'total_prepare_input_time': 0.005791187286376953, 'total_build_block_time': 0.07175040245056152, 'forward_embedding': 0.09487128257751465, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08619928359985352, 'total_forward': 0.12408232688903809, 'total_count_score': 0.028551340103149414, 'total_backward': 0.15542006492614746, 'total_prepare_mail': 0.003326892852783203, 'total_update_mail': 0.006405830383300781, 'total_update_memory': 0.009244918823242188, 'total_remote_update': 0.036324262619018555} {'total_sample_time': 0.08432579040527344, 'total_next_batch_time': 0.0010693073272705078, 'total_sample_core_time': 0.013450145721435547, 'total_fetch_prepare_time': 0.022363662719726562, 'total_comm_time': 0.021764516830444336, 'total_build_time': 0.019381284713745117, 'total_prepare_input_time': 0.005918741226196289, 'total_build_block_time': 0.07033491134643555, 'forward_embedding': 0.09696030616760254, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+time on every stage {'total_next_batch': 0.08656620979309082, 'total_forward': 0.1253213882446289, 'total_count_score': 0.029893875122070312, 'total_backward': 0.15350055694580078, 'total_prepare_mail': 0.003427743911743164, 'total_update_mail': 0.006680727005004883, 'total_update_memory': 0.009490966796875, 'total_remote_update': 0.03467583656311035} {'total_sample_time': 0.08464908599853516, 'total_next_batch_time': 0.0010840892791748047, 'total_sample_core_time': 0.014713048934936523, 'total_fetch_prepare_time': 0.023135900497436523, 'total_comm_time': 0.019649982452392578, 'total_build_time': 0.01978325843811035, 'total_prepare_input_time': 0.0059545040130615234, 'total_build_block_time': 0.06939959526062012, 'forward_embedding': 0.09614944458007812, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+	train loss:18.5510  train ap:0.843735  val ap:0.647037  val auc:0.685067
+	train loss:18.1562  train ap:0.849052  val ap:0.647037  val auc:0.685067
+	train loss:16.6524  train ap:0.864627  val ap:0.647037  val auc:0.685067
+
+	train loss:22.4049  train ap:0.806027  val ap:0.647037  val auc:0.685067
+
+
+	total time:0.75s  prep time:0.45s
+
+	total time:0.75s  prep time:0.45s
+	total time:0.75s  prep time:0.45s
+
+	total time:0.75s  prep time:0.45s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 8:
+Epoch 8:Epoch 8:
+
+Epoch 8:
+time on every stage {'total_next_batch': 0.08680009841918945, 'total_forward': 0.1215674877166748, 'total_count_score': 0.02870965003967285, 'total_backward': 0.15998220443725586, 'total_prepare_mail': 0.0033941268920898438, 'total_update_mail': 0.006403207778930664, 'total_update_memory': 0.008903980255126953, 'total_remote_update': 0.03392314910888672} {'total_sample_time': 0.0848836898803711, 'total_next_batch_time': 0.0010938644409179688, 'total_sample_core_time': 0.014108896255493164, 'total_fetch_prepare_time': 0.022083282470703125, 'total_comm_time': 0.021739721298217773, 'total_build_time': 0.019657611846923828, 'total_prepare_input_time': 0.005873918533325195, 'total_build_block_time': 0.07023096084594727, 'forward_embedding': 0.0949547290802002, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08681416511535645, 'total_forward': 0.12287282943725586, 'total_count_score': 0.029022932052612305, 'total_backward': 0.1587216854095459, 'total_prepare_mail': 0.003399372100830078, 'total_update_mail': 0.006440639495849609, 'total_update_memory': 0.008951902389526367, 'total_remote_update': 0.033464908599853516} {'total_sample_time': 0.08490538597106934, 'total_next_batch_time': 0.0011065006256103516, 'total_sample_core_time': 0.014473915100097656, 'total_fetch_prepare_time': 0.022090435028076172, 'total_comm_time': 0.021222829818725586, 'total_build_time': 0.01986098289489746, 'total_prepare_input_time': 0.005830526351928711, 'total_build_block_time': 0.06988167762756348, 'forward_embedding': 0.09630060195922852, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08567380905151367, 'total_forward': 0.12299227714538574, 'total_count_score': 0.028361797332763672, 'total_backward': 0.15888190269470215, 'total_prepare_mail': 0.0033864974975585938, 'total_update_mail': 0.0065462589263916016, 'total_update_memory': 0.009352684020996094, 'total_remote_update': 0.03455066680908203} {'total_sample_time': 0.0837864875793457, 'total_next_batch_time': 0.0010716915130615234, 'total_sample_core_time': 0.0138702392578125, 'total_fetch_prepare_time': 0.02254486083984375, 'total_comm_time': 0.020617961883544922, 'total_build_time': 0.01940608024597168, 'total_prepare_input_time': 0.005960226058959961, 'total_build_block_time': 0.06939363479614258, 'forward_embedding': 0.09607315063476562, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+time on every stage {'total_next_batch': 0.08621692657470703, 'total_forward': 0.12602496147155762, 'total_count_score': 0.029242277145385742, 'total_backward': 0.1551527976989746, 'total_prepare_mail': 0.0034470558166503906, 'total_update_mail': 0.00655055046081543, 'total_update_memory': 0.009391546249389648, 'total_remote_update': 0.03371429443359375} {'total_sample_time': 0.08429956436157227, 'total_next_batch_time': 0.0010895729064941406, 'total_sample_core_time': 0.014272212982177734, 'total_fetch_prepare_time': 0.022817611694335938, 'total_comm_time': 0.019904375076293945, 'total_build_time': 0.019922494888305664, 'total_prepare_input_time': 0.0059473514556884766, 'total_build_block_time': 0.06947565078735352, 'forward_embedding': 0.09685349464416504, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+	train loss:18.3400  train ap:0.847698  val ap:0.652538  val auc:0.687562
+	train loss:16.0579  train ap:0.868031  val ap:0.652538  val auc:0.687562
+	train loss:18.0732  train ap:0.849229  val ap:0.652538  val auc:0.687562
+
+
+	train loss:22.2696  train ap:0.806205  val ap:0.652538  val auc:0.687562
+
+	total time:0.75s  prep time:0.45s
+	total time:0.75s  prep time:0.45s
+
+	total time:0.75s  prep time:0.45s
+
+
+
+	total time:0.75s  prep time:0.45s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 9:
+Epoch 9:Epoch 9:
+
+Epoch 9:
+time on every stage {'total_next_batch': 0.0864722728729248, 'total_forward': 0.12083077430725098, 'total_count_score': 0.02867722511291504, 'total_backward': 0.1555020809173584, 'total_prepare_mail': 0.0034329891204833984, 'total_update_mail': 0.006474018096923828, 'total_update_memory': 0.008909225463867188, 'total_remote_update': 0.03060007095336914} {'total_sample_time': 0.08456730842590332, 'total_next_batch_time': 0.0011022090911865234, 'total_sample_core_time': 0.013965845108032227, 'total_fetch_prepare_time': 0.02195882797241211, 'total_comm_time': 0.021596908569335938, 'total_build_time': 0.019751787185668945, 'total_prepare_input_time': 0.005884408950805664, 'total_build_block_time': 0.07007718086242676, 'forward_embedding': 0.09468531608581543, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08789396286010742, 'total_forward': 0.12120509147644043, 'total_count_score': 0.02902841567993164, 'total_backward': 0.15390467643737793, 'total_prepare_mail': 0.0034193992614746094, 'total_update_mail': 0.006437063217163086, 'total_update_memory': 0.008925914764404297, 'total_remote_update': 0.030100345611572266} {'total_sample_time': 0.08598637580871582, 'total_next_batch_time': 0.0010952949523925781, 'total_sample_core_time': 0.015218019485473633, 'total_fetch_prepare_time': 0.022769927978515625, 'total_comm_time': 0.01989912986755371, 'total_build_time': 0.019909381866455078, 'total_prepare_input_time': 0.006754159927368164, 'total_build_block_time': 0.07022380828857422, 'forward_embedding': 0.0948479175567627, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+time on every stage {'total_next_batch': 0.08538246154785156, 'total_forward': 0.12282419204711914, 'total_count_score': 0.028369903564453125, 'total_backward': 0.15383172035217285, 'total_prepare_mail': 0.003363370895385742, 'total_update_mail': 0.006456136703491211, 'total_update_memory': 0.009251117706298828, 'total_remote_update': 0.031508684158325195} {'total_sample_time': 0.08353042602539062, 'total_next_batch_time': 0.0010704994201660156, 'total_sample_core_time': 0.013590812683105469, 'total_fetch_prepare_time': 0.02239084243774414, 'total_comm_time': 0.02077341079711914, 'total_build_time': 0.01945185661315918, 'total_prepare_input_time': 0.005925893783569336, 'total_build_block_time': 0.06940436363220215, 'forward_embedding': 0.09598779678344727, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08561396598815918, 'total_forward': 0.12332391738891602, 'total_count_score': 0.028962373733520508, 'total_backward': 0.15258550643920898, 'total_prepare_mail': 0.00341033935546875, 'total_update_mail': 0.006568193435668945, 'total_update_memory': 0.009357213973999023, 'total_remote_update': 0.031140565872192383} {'total_sample_time': 0.08373689651489258, 'total_next_batch_time': 0.0010797977447509766, 'total_sample_core_time': 0.013941049575805664, 'total_fetch_prepare_time': 0.022454023361206055, 'total_comm_time': 0.02016162872314453, 'total_build_time': 0.019797563552856445, 'total_prepare_input_time': 0.0059795379638671875, 'total_build_block_time': 0.06926345825195312, 'forward_embedding': 0.09595775604248047, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+	train loss:17.7892  train ap:0.848096  val ap:0.656166  val auc:0.690938
+	train loss:17.5316  train ap:0.853196  val ap:0.656166  val auc:0.690938
+	train loss:15.4569  train ap:0.873677  val ap:0.656166  val auc:0.690938
+
+
+
+	total time:0.75s  prep time:0.44s
+	train loss:21.4558  train ap:0.816101  val ap:0.656166  val auc:0.690938
+	total time:0.75s  prep time:0.44s
+	total time:0.75s  prep time:0.44s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	total time:0.75s  prep time:0.44s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 10:
+Epoch 10:Epoch 10:
+
+Epoch 10:
+time on every stage {'total_next_batch': 0.08661437034606934, 'total_forward': 0.12074851989746094, 'total_count_score': 0.028640031814575195, 'total_backward': 0.1559607982635498, 'total_prepare_mail': 0.0033893585205078125, 'total_update_mail': 0.006389141082763672, 'total_update_memory': 0.008854150772094727, 'total_remote_update': 0.031145811080932617} {'total_sample_time': 0.08471083641052246, 'total_next_batch_time': 0.0010981559753417969, 'total_sample_core_time': 0.0143585205078125, 'total_fetch_prepare_time': 0.022736310958862305, 'total_comm_time': 0.02077794075012207, 'total_build_time': 0.019570350646972656, 'total_prepare_input_time': 0.005875349044799805, 'total_build_block_time': 0.06983566284179688, 'forward_embedding': 0.09449982643127441, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.0853266716003418, 'total_forward': 0.1226201057434082, 'total_count_score': 0.02826237678527832, 'total_backward': 0.15467071533203125, 'total_prepare_mail': 0.003318309783935547, 'total_update_mail': 0.006407976150512695, 'total_update_memory': 0.009260892868041992, 'total_remote_update': 0.03193163871765137} {'total_sample_time': 0.08346962928771973, 'total_next_batch_time': 0.001071929931640625, 'total_sample_core_time': 0.013586282730102539, 'total_fetch_prepare_time': 0.022406816482543945, 'total_comm_time': 0.020964384078979492, 'total_build_time': 0.01925945281982422, 'total_prepare_input_time': 0.005888938903808594, 'total_build_block_time': 0.06937026977539062, 'forward_embedding': 0.09566140174865723, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08671426773071289, 'total_forward': 0.12166571617126465, 'total_count_score': 0.029169082641601562, 'total_backward': 0.1552424430847168, 'total_prepare_mail': 0.003383159637451172, 'total_update_mail': 0.006426811218261719, 'total_update_memory': 0.008934497833251953, 'total_remote_update': 0.030211448669433594} {'total_sample_time': 0.08480024337768555, 'total_next_batch_time': 0.0010955333709716797, 'total_sample_core_time': 0.014260530471801758, 'total_fetch_prepare_time': 0.022048234939575195, 'total_comm_time': 0.021465301513671875, 'total_build_time': 0.019803524017333984, 'total_prepare_input_time': 0.005808591842651367, 'total_build_block_time': 0.07000613212585449, 'forward_embedding': 0.09496259689331055, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+
+time on every stage {'total_next_batch': 0.08546733856201172, 'total_forward': 0.12467098236083984, 'total_count_score': 0.029016494750976562, 'total_backward': 0.1519947052001953, 'total_prepare_mail': 0.0033974647521972656, 'total_update_mail': 0.006573200225830078, 'total_update_memory': 0.009319543838500977, 'total_remote_update': 0.03136801719665527} {'total_sample_time': 0.08357882499694824, 'total_next_batch_time': 0.0010862350463867188, 'total_sample_core_time': 0.014288187026977539, 'total_fetch_prepare_time': 0.022586345672607422, 'total_comm_time': 0.019777536392211914, 'total_build_time': 0.019628286361694336, 'total_prepare_input_time': 0.0059087276458740234, 'total_build_block_time': 0.06876158714294434, 'forward_embedding': 0.09709978103637695, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+	train loss:17.7225  train ap:0.850193  val ap:0.654240  val auc:0.690869
+	train loss:17.6551  train ap:0.850897  val ap:0.654240  val auc:0.690869
+	train loss:15.8942  train ap:0.864816  val ap:0.654240  val auc:0.690869
+
+
+	train loss:21.4740  train ap:0.818133  val ap:0.654240  val auc:0.690869
+
+	total time:0.74s  prep time:0.44s
+	total time:0.74s  prep time:0.44s
+
+	total time:0.74s  prep time:0.44s
+
+
+	total time:0.74s  prep time:0.44s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+Epoch 11:
+Epoch 11:
+Epoch 11:
+Epoch 11:
+time on every stage {'total_next_batch': 0.09210610389709473, 'total_forward': 0.12177467346191406, 'total_count_score': 0.029288053512573242, 'total_backward': 0.1559455394744873, 'total_prepare_mail': 0.0034019947052001953, 'total_update_mail': 0.006460905075073242, 'total_update_memory': 0.008933305740356445, 'total_remote_update': 0.033899784088134766} {'total_sample_time': 0.09018850326538086, 'total_next_batch_time': 0.0010995864868164062, 'total_sample_core_time': 0.014453649520874023, 'total_fetch_prepare_time': 0.02208995819091797, 'total_comm_time': 0.026432275772094727, 'total_build_time': 0.019943714141845703, 'total_prepare_input_time': 0.005825519561767578, 'total_build_block_time': 0.07517457008361816, 'forward_embedding': 0.09520649909973145, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.09086084365844727, 'total_forward': 0.12075066566467285, 'total_count_score': 0.028904438018798828, 'total_backward': 0.15678048133850098, 'total_prepare_mail': 0.0034208297729492188, 'total_update_mail': 0.006429433822631836, 'total_update_memory': 0.008905410766601562, 'total_remote_update': 0.0357966423034668} {'total_sample_time': 0.08893942832946777, 'total_next_batch_time': 0.0011053085327148438, 'total_sample_core_time': 0.014106273651123047, 'total_fetch_prepare_time': 0.022016286849975586, 'total_comm_time': 0.02584218978881836, 'total_build_time': 0.019677162170410156, 'total_prepare_input_time': 0.005896568298339844, 'total_build_block_time': 0.07430768013000488, 'forward_embedding': 0.09456205368041992, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08976078033447266, 'total_forward': 0.1228480339050293, 'total_count_score': 0.028881072998046875, 'total_backward': 0.15558409690856934, 'total_prepare_mail': 0.003358602523803711, 'total_update_mail': 0.006543636322021484, 'total_update_memory': 0.009433269500732422, 'total_remote_update': 0.03542137145996094} {'total_sample_time': 0.08789515495300293, 'total_next_batch_time': 0.0010673999786376953, 'total_sample_core_time': 0.013753890991210938, 'total_fetch_prepare_time': 0.02249765396118164, 'total_comm_time': 0.025020122528076172, 'total_build_time': 0.019345998764038086, 'total_prepare_input_time': 0.0058939456939697266, 'total_build_block_time': 0.07362818717956543, 'forward_embedding': 0.09600186347961426, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+
+time on every stage {'total_next_batch': 0.0902860164642334, 'total_forward': 0.12480330467224121, 'total_count_score': 0.02935194969177246, 'total_backward': 0.15254783630371094, 'total_prepare_mail': 0.003421306610107422, 'total_update_mail': 0.008722305297851562, 'total_update_memory': 0.009382963180541992, 'total_remote_update': 0.03338122367858887} {'total_sample_time': 0.08837389945983887, 'total_next_batch_time': 0.0010914802551269531, 'total_sample_core_time': 0.014632225036621094, 'total_fetch_prepare_time': 0.022989511489868164, 'total_comm_time': 0.023509740829467773, 'total_build_time': 0.01988697052001953, 'total_prepare_input_time': 0.00593876838684082, 'total_build_block_time': 0.07319951057434082, 'forward_embedding': 0.09685730934143066, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+	train loss:15.0409  train ap:0.869151  val ap:0.653366  val auc:0.685426
+	train loss:17.3609  train ap:0.849648  val ap:0.653366  val auc:0.685426
+	train loss:20.8160  train ap:0.817697  val ap:0.653366  val auc:0.685426
+
+	train loss:17.4735  train ap:0.850772  val ap:0.653366  val auc:0.685426
+
+
+	total time:0.75s  prep time:0.45s
+
+	total time:0.75s  prep time:0.45s
+	total time:0.75s  prep time:0.45s
+
+	total time:0.75s  prep time:0.45s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 12:
+Epoch 12:Epoch 12:
+
+Epoch 12:
+time on every stage {'total_next_batch': 0.08983707427978516, 'total_forward': 0.12080788612365723, 'total_count_score': 0.028636693954467773, 'total_backward': 0.1587209701538086, 'total_prepare_mail': 0.003399372100830078, 'total_update_mail': 0.006420612335205078, 'total_update_memory': 0.008908987045288086, 'total_remote_update': 0.031824350357055664} {'total_sample_time': 0.08792638778686523, 'total_next_batch_time': 0.0010921955108642578, 'total_sample_core_time': 0.014007568359375, 'total_fetch_prepare_time': 0.021948814392089844, 'total_comm_time': 0.024888277053833008, 'total_build_time': 0.019663572311401367, 'total_prepare_input_time': 0.0059964656829833984, 'total_build_block_time': 0.07339239120483398, 'forward_embedding': 0.09453606605529785, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.09010148048400879, 'total_forward': 0.12144112586975098, 'total_count_score': 0.029205799102783203, 'total_backward': 0.15803003311157227, 'total_prepare_mail': 0.0034062862396240234, 'total_update_mail': 0.006443500518798828, 'total_update_memory': 0.008975982666015625, 'total_remote_update': 0.030942678451538086} {'total_sample_time': 0.08813667297363281, 'total_next_batch_time': 0.0011105537414550781, 'total_sample_core_time': 0.016588449478149414, 'total_fetch_prepare_time': 0.023124217987060547, 'total_comm_time': 0.021120548248291016, 'total_build_time': 0.01999211311340332, 'total_prepare_input_time': 0.00588679313659668, 'total_build_block_time': 0.07100534439086914, 'forward_embedding': 0.09490561485290527, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+time on every stage {'total_next_batch': 0.08869385719299316, 'total_forward': 0.12351846694946289, 'total_count_score': 0.028295278549194336, 'total_backward': 0.15662384033203125, 'total_prepare_mail': 0.0033364295959472656, 'total_update_mail': 0.0064351558685302734, 'total_update_memory': 0.009305477142333984, 'total_remote_update': 0.032418012619018555} {'total_sample_time': 0.08682537078857422, 'total_next_batch_time': 0.0010714530944824219, 'total_sample_core_time': 0.014228343963623047, 'total_fetch_prepare_time': 0.023279428482055664, 'total_comm_time': 0.022598981857299805, 'total_build_time': 0.019392013549804688, 'total_prepare_input_time': 0.005948066711425781, 'total_build_block_time': 0.07207775115966797, 'forward_embedding': 0.09621953964233398, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08881926536560059, 'total_forward': 0.12540721893310547, 'total_count_score': 0.02931499481201172, 'total_backward': 0.15392446517944336, 'total_prepare_mail': 0.0034189224243164062, 'total_update_mail': 0.006611347198486328, 'total_update_memory': 0.009400367736816406, 'total_remote_update': 0.032071590423583984} {'total_sample_time': 0.08689260482788086, 'total_next_batch_time': 0.00110626220703125, 'total_sample_core_time': 0.014092206954956055, 'total_fetch_prepare_time': 0.022600412368774414, 'total_comm_time': 0.022859811782836914, 'total_build_time': 0.019942760467529297, 'total_prepare_input_time': 0.005966901779174805, 'total_build_block_time': 0.0722503662109375, 'forward_embedding': 0.09775710105895996, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+	train loss:17.0973  train ap:0.850573  val ap:0.645882  val auc:0.678150
+	train loss:16.8599  train ap:0.856818  val ap:0.645882  val auc:0.678150
+	train loss:14.9003  train ap:0.872196  val ap:0.645882  val auc:0.678150
+
+
+	train loss:20.7226  train ap:0.815223  val ap:0.645882  val auc:0.678150
+
+	total time:0.75s  prep time:0.45s
+	total time:0.75s  prep time:0.45s
+	total time:0.75s  prep time:0.45s
+
+
+
+
+	total time:0.75s  prep time:0.45s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 13:Epoch 13:
+
+Epoch 13:
+Epoch 13:
+time on every stage {'total_next_batch': 0.08634781837463379, 'total_forward': 0.12070298194885254, 'total_count_score': 0.028618812561035156, 'total_backward': 0.15628552436828613, 'total_prepare_mail': 0.0034096240997314453, 'total_update_mail': 0.006381988525390625, 'total_update_memory': 0.008852720260620117, 'total_remote_update': 0.031173229217529297} {'total_sample_time': 0.08443546295166016, 'total_next_batch_time': 0.0010945796966552734, 'total_sample_core_time': 0.013965845108032227, 'total_fetch_prepare_time': 0.02202606201171875, 'total_comm_time': 0.021540403366088867, 'total_build_time': 0.019622802734375, 'total_prepare_input_time': 0.005876064300537109, 'total_build_block_time': 0.06994390487670898, 'forward_embedding': 0.0944678783416748, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.08660244941711426, 'total_forward': 0.1229705810546875, 'total_count_score': 0.029297590255737305, 'total_backward': 0.15398693084716797, 'total_prepare_mail': 0.0034439563751220703, 'total_update_mail': 0.006416797637939453, 'total_update_memory': 0.008950471878051758, 'total_remote_update': 0.030116796493530273} {'total_sample_time': 0.08466696739196777, 'total_next_batch_time': 0.0011103153228759766, 'total_sample_core_time': 0.01475977897644043, 'total_fetch_prepare_time': 0.022331714630126953, 'total_comm_time': 0.0204012393951416, 'total_build_time': 0.019943714141845703, 'total_prepare_input_time': 0.005787849426269531, 'total_build_block_time': 0.06935286521911621, 'forward_embedding': 0.09479022026062012, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08511614799499512, 'total_forward': 0.12277626991271973, 'total_count_score': 0.028330326080322266, 'total_backward': 0.15458083152770996, 'total_prepare_mail': 0.003326416015625, 'total_update_mail': 0.0064084529876708984, 'total_update_memory': 0.009285926818847656, 'total_remote_update': 0.031995534896850586} {'total_sample_time': 0.08326411247253418, 'total_next_batch_time': 0.001066446304321289, 'total_sample_core_time': 0.013649225234985352, 'total_fetch_prepare_time': 0.02241349220275879, 'total_comm_time': 0.020556211471557617, 'total_build_time': 0.019352197647094727, 'total_prepare_input_time': 0.005913734436035156, 'total_build_block_time': 0.06909871101379395, 'forward_embedding': 0.09578394889831543, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08548712730407715, 'total_forward': 0.12337517738342285, 'total_count_score': 0.02898716926574707, 'total_backward': 0.15326452255249023, 'total_prepare_mail': 0.003400087356567383, 'total_update_mail': 0.0065076351165771484, 'total_update_memory': 0.009371519088745117, 'total_remote_update': 0.031439781188964844} {'total_sample_time': 0.08358979225158691, 'total_next_batch_time': 0.0010917186737060547, 'total_sample_core_time': 0.014177083969116211, 'total_fetch_prepare_time': 0.022747278213500977, 'total_comm_time': 0.019594430923461914, 'total_build_time': 0.019731760025024414, 'total_prepare_input_time': 0.005923032760620117, 'total_build_block_time': 0.06887507438659668, 'forward_embedding': 0.09590768814086914, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+	train loss:14.6447  train ap:0.870386  val ap:0.650172  val auc:0.683011
+	train loss:16.7707  train ap:0.854628  val ap:0.650172  val auc:0.683011
+
+	train loss:16.7546  train ap:0.856158  val ap:0.650172  val auc:0.683011
+
+	train loss:20.3328  train ap:0.817131  val ap:0.650172  val auc:0.683011
+	total time:0.75s  prep time:0.44s
+
+	total time:0.75s  prep time:0.44s
+
+
+	total time:0.75s  prep time:0.44s
+
+	total time:0.75s  prep time:0.44s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+Epoch 14:
+Epoch 14:
+Epoch 14:
+Epoch 14:
+time on every stage {'total_next_batch': 0.08662986755371094, 'total_forward': 0.12195944786071777, 'total_count_score': 0.02920222282409668, 'total_backward': 0.1561439037322998, 'total_prepare_mail': 0.0033922195434570312, 'total_update_mail': 0.006432771682739258, 'total_update_memory': 0.008936643600463867, 'total_remote_update': 0.03021240234375} {'total_sample_time': 0.08472537994384766, 'total_next_batch_time': 0.0011026859283447266, 'total_sample_core_time': 0.014343738555908203, 'total_fetch_prepare_time': 0.02214360237121582, 'total_comm_time': 0.021173477172851562, 'total_build_time': 0.019846439361572266, 'total_prepare_input_time': 0.005786895751953125, 'total_build_block_time': 0.0698394775390625, 'forward_embedding': 0.09530901908874512, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}time on every stage {'total_next_batch': 0.0865468978881836, 'total_forward': 0.1209404468536377, 'total_count_score': 0.028862476348876953, 'total_backward': 0.15702009201049805, 'total_prepare_mail': 0.0034127235412597656, 'total_update_mail': 0.006387948989868164, 'total_update_memory': 0.008844137191772461, 'total_remote_update': 0.030876874923706055} {'total_sample_time': 0.08458495140075684, 'total_next_batch_time': 0.0011148452758789062, 'total_sample_core_time': 0.014107465744018555, 'total_fetch_prepare_time': 0.022052526473999023, 'total_comm_time': 0.02142024040222168, 'total_build_time': 0.019693613052368164, 'total_prepare_input_time': 0.0058841705322265625, 'total_build_block_time': 0.06994462013244629, 'forward_embedding': 0.09454131126403809, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08530640602111816, 'total_forward': 0.12282681465148926, 'total_count_score': 0.028537988662719727, 'total_backward': 0.15554571151733398, 'total_prepare_mail': 0.0033278465270996094, 'total_update_mail': 0.006403446197509766, 'total_update_memory': 0.009270429611206055, 'total_remote_update': 0.031708478927612305} {'total_sample_time': 0.08344268798828125, 'total_next_batch_time': 0.0010704994201660156, 'total_sample_core_time': 0.013684511184692383, 'total_fetch_prepare_time': 0.022517919540405273, 'total_comm_time': 0.02051258087158203, 'total_build_time': 0.01943373680114746, 'total_prepare_input_time': 0.0059051513671875, 'total_build_block_time': 0.06923532485961914, 'forward_embedding': 0.09588956832885742, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+time on every stage {'total_next_batch': 0.08676862716674805, 'total_forward': 0.1234433650970459, 'total_count_score': 0.028965473175048828, 'total_backward': 0.15299534797668457, 'total_prepare_mail': 0.0034139156341552734, 'total_update_mail': 0.006541728973388672, 'total_update_memory': 0.009289979934692383, 'total_remote_update': 0.03154397010803223} {'total_sample_time': 0.08487176895141602, 'total_next_batch_time': 0.0010786056518554688, 'total_sample_core_time': 0.01439666748046875, 'total_fetch_prepare_time': 0.02271127700805664, 'total_comm_time': 0.019642114639282227, 'total_build_time': 0.020773649215698242, 'total_prepare_input_time': 0.005943775177001953, 'total_build_block_time': 0.06994271278381348, 'forward_embedding': 0.09601020812988281, 'forward_all_to_all': 0, 'backward_all_to_all': 0, 'memory_update': 0, 'memory_get': 0, 'memory_enc': 0, 'memory_historical_count': 0}
+
+Early stopping at epoch 14
+Early stopping at epoch 14
+Early stopping at epoch 14
+Early stopping at epoch 14
+
+
+
+
+Loading the best model at epoch 9
+Loading the best model at epoch 9
+Loading the best model at epoch 9
+Loading the best model at epoch 9
+
+
+
+
+7.149699687957764
+7.150128602981567
+7.14996933937072757.149208068847656
+
+	test AP:0.658803  test AUC:0.680960
+	test AP:0.658803  test AUC:0.680960
+	test AP:0.658803  test AUC:0.680960
+
+	test AP:0.658803  test AUC:0.680960
+
+
+test_dataset 1941 avg_time 0.47667524019877117 
+
+test_dataset 26571 avg_time 0.4766466458638509 
+
+test_dataset 10873 avg_time 0.4766138712565104 
+
+test_dataset 22378 avg_time 0.47666462262471515 
+
+

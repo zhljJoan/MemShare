@@ -1,0 +1,732 @@
+[2024-05-06 15:53:44,964] torch.distributed.run: [WARNING] 
+[2024-05-06 15:53:44,964] torch.distributed.run: [WARNING] *****************************************
+[2024-05-06 15:53:44,964] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-05-06 15:53:44,964] torch.distributed.run: [WARNING] *****************************************
+LOCAL RANK 3, RANK7
+LOCAL RANK 2, RANK6
+LOCAL RANK 0, RANK4
+LOCAL RANK 1, RANK5
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+use cuda on 0
+use cuda on 1
+use cuda on 3
+use cuda on 2
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.5 GB
+init Cached:    0.5 GB
+ids mem is 1.6398727893829346e-05 eids mem is 0.1558142974972725 edge_inde mem is 0.311628594994545
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.5 GB
+init Cached:    0.5 GB
+ids mem is 1.6316771507263184e-05 eids mem is 0.1803300902247429 edge_inde mem is 0.3606601804494858
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.5 GB
+init Cached:    0.5 GB
+ids mem is 1.6398727893829346e-05 eids mem is 0.15339478850364685 edge_inde mem is 0.3067895770072937
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.5 GB
+init Cached:    0.5 GB
+ids mem is 1.6398727893829346e-05 eids mem is 0.1770099177956581 edge_inde mem is 0.3540198355913162
+
+edge_index memory is 1.0854875445365906
+ts memory is 0.5427437722682953
+eids memory is 0.5427437722682953
+train_mask memory is 0.06784297153353691
+test_mask memory is 0.06784297153353691
+val_mask memory is 0.06784297153353691
+dist_eid memory is 0.5427437722682953
+mapper Memory Usage:
+mapper Allocated: 0.5 GB
+mapper Cached:    0.5 GB
+x Memory Usage:
+x Allocated: 0.5 GB
+x Cached:    0.6 GB
+edge_index memory is 1.2865824103355408
+ts memory is 0.6432912051677704
+eids memory is 0.6432912051677704
+train_mask memory is 0.0804114006459713
+test_mask memory is 0.0804114006459713
+val_mask memory is 0.0804114006459713
+dist_eid memory is 0.6432912051677704
+mapper Memory Usage:
+mapper Allocated: 0.6 GB
+mapper Cached:    0.6 GB
+edge_index memory is 1.08695650100708
+ts memory is 0.54347825050354
+eids memory is 0.54347825050354
+train_mask memory is 0.0679347813129425
+test_mask memory is 0.0679347813129425
+val_mask memory is 0.0679347813129425
+dist_eid memory is 0.54347825050354
+x Memory Usage:
+x Allocated: 0.6 GB
+x Cached:    0.6 GB
+mapper Memory Usage:
+mapper Allocated: 0.5 GB
+mapper Cached:    0.5 GB
+x Memory Usage:
+x Allocated: 0.6 GB
+x Cached:    0.6 GB
+edge_index memory is 1.2429963052272797
+ts memory is 0.6214981526136398
+eids memory is 0.6214981526136398
+train_mask memory is 0.07768726907670498
+test_mask memory is 0.07768726907670498
+val_mask memory is 0.07768726907670498
+dist_eid memory is 0.6214981526136398
+mapper Memory Usage:
+mapper Allocated: 0.6 GB
+mapper Cached:    0.6 GB
+x Memory Usage:
+x Allocated: 0.6 GB
+x Cached:    0.7 GB
+edge Memory Usage:
+edge Allocated: 7.5 GB
+edge Cached:    7.5 GB
+edge Memory Usage:
+edge Allocated: 7.6 GB
+edge Cached:    7.7 GB
+edge Memory Usage:
+edge Allocated: 8.7 GB
+edge Cached:    8.7 GB
+edge Memory Usage:
+edge Allocated: 8.8 GB
+edge Cached:    8.9 GB
+torch.Size([8659])
+torch.Size([8186])
+torch.Size([7896])
+torch.Size([8439])
+cache node Memory Usage:
+cache node Memory Usage:cache node Memory Usage:
+
+cache node Memory Usage:
+cache node Allocated: 8.9 GB
+cache node Cached:    10.0 GB
+cache node Allocated: 7.5 GB
+cache node Allocated: 8.7 GB
+cache node Cached:    8.5 GB
+cache node Cached:    9.8 GB
+cache node Allocated: 7.7 GB
+cache node Cached:    8.6 GB
+the cache shape is torch.Size([15834618]) the all shape is torch.Size([20588300])
+
+the cache shape is torch.Size([15559167]) the all shape is torch.Size([20913041])
+
+the cache shape is torch.Size([17504540]) the all shape is torch.Size([24203495])
+
+the cache shape is torch.Size([19412673]) the all shape is torch.Size([23757869])
+
+all Memory Usage:
+all Memory Usage:
+all Allocated: 14.5 GB
+all Memory Usage:
+all Allocated: 14.4 GB
+all Memory Usage:all Cached:   
+ 22.3 GB
+all Cached:    22.6 GB
+all Allocated: 16.3 GB
+all Allocated: 16.8 GB
+all Cached:    25.3 GB
+all Cached:    26.3 GB
+2201
+2201
+2190
+2201
+tensor([ 2201,  2202,  2203,  ...,    -1,    -1, 10859], device='cuda:0')
+16682
+tensor([2201, 2202, 2203,  ...,   -1, 2200,   -1], device='cuda:3')
+16682
+tensor([2201, 2202, 2203,  ...,   -1,   -1,   -1], device='cuda:1')
+16682
+tensor([ 2190,  2191,  2192,  ...,    -1,    -1, 10085], device='cuda:2')
+16682
+get_neighbors consume: 2.68292s
+get_neighbors consume: 2.75363s
+get_neighbors consume: 2.85838s
+get_neighbors consume: 3.05419s
+(10860, 100)
+torch.Size([10860, 100])
+(10387, 100)
+torch.Size([10387, 100])
+(10086, 100)
+torch.Size([10086, 100])
+(10640, 100)
+torch.Size([10640, 100])
+(10086, 100)
+(10387, 100)
+torch.Size([10086, 100])
+torch.Size([10387, 100])
+(10640, 100)(10860, 100)
+
+torch.Size([10860, 100])torch.Size([10640, 100])
+
+num_batchs:num_batchs:  num_batchs:num_batchs:  tensor([4643], device='cuda:0')tensor([5328], device='cuda:1')
+
+tensor([5594], device='cuda:2')
+tensor([4717], device='cuda:3')
+num_batchs:num_batchs:num_batchs:num_batchs:    tensor([1034], device='cuda:2')
+tensor([975], device='cuda:3')tensor([978], device='cuda:0')
+
+tensor([1133], device='cuda:1')
+num_batchs:num_batchs:num_batchs:  num_batchs:  tensor([1242], device='cuda:0')tensor([1279], device='cuda:3')
+tensor([1440], device='cuda:2')
+tensor([1459], device='cuda:1')
+
+Epoch 0:
+Epoch 0:
+Epoch 0:
+Epoch 0:
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+cache memory for 3176694 487309 cache embedding 2881662 2881131cache memory for 3021406 480795 cache embedding 2769319 2768906cache memory for 3187066 481745 cache embedding 2934066 2933518
+
+
+cache memory for 3083910 437130 cache embedding 2880512 2879809
+	train loss:2417.1495  train ap:0.941134  val ap:0.921401  val auc:0.927802
+
+	total time:195.67s  prep time:145.26s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+	train loss:2415.2070  train ap:0.939293  val ap:0.921401  val auc:0.927802
+	train loss:2455.0516  train ap:0.936816  val ap:0.921401  val auc:0.927802
+
+
+	total time:195.67s  prep time:145.26s
+
+	total time:195.67s  prep time:145.26s
+
+	 fetch time:0.00s write back time:0.00s
+
+	train loss:2311.4021  train ap:0.941159  val ap:0.921401  val auc:0.927802
+	 fetch time:0.00s write back time:0.00s
+
+
+forward_time backward_time0 0
+
+forward_time backward_time0 0
+	total time:195.67s  prep time:145.26s
+
+per time[0, 0, 0, 0]
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+per time[0, 0, 0, 0]
+Epoch 1:
+Epoch 1:
+Epoch 1:
+Epoch 1:
+cache memory for 4217867 623369 cache embedding 6691703 6461753cache memory for 4013587 612483 cache embedding 6433019 6231143cache memory for 4226107 611058 cache embedding 6808458 6579602
+cache memory for 4089606 585533 cache embedding 6682777 6454358
+
+
+	train loss:2356.0830  train ap:0.945941  val ap:0.934821  val auc:0.941037
+
+	total time:199.59s  prep time:161.37s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 2:
+	train loss:2243.6048  train ap:0.947230  val ap:0.934821  val auc:0.941037
+
+	total time:199.60s  prep time:161.37s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+	train loss:2419.6568  train ap:0.941104  val ap:0.934821  val auc:0.941037
+
+	train loss:2353.4197  train ap:0.943503  val ap:0.934821  val auc:0.941037
+
+	total time:199.60s  prep time:161.36s
+	total time:199.60s  prep time:161.37s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+forward_time backward_time0 0
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+per time[0, 0, 0, 0]
+
+Epoch 2:
+Epoch 2:
+Epoch 2:
+cache memory for 4218105 751243 cache embedding 10502443 10222762cache memory for 4010986 737084 cache embedding 10095094 9852854
+
+cache memory for 4093029 664964 cache embedding 10487573 10205583
+cache memory for 4227504 723843 cache embedding 10683845 10409619
+	train loss:2349.8559  train ap:0.946957  val ap:0.927884  val auc:0.930854
+
+	total time:185.10s  prep time:146.59s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 3:
+	train loss:2342.5961  train ap:0.944727  val ap:0.927884  val auc:0.930854
+
+	train loss:2403.5627  train ap:0.942213  val ap:0.927884  val auc:0.930854
+
+	total time:185.09s  prep time:146.57s
+	total time:185.09s  prep time:146.57s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+
+per time[0, 0, 0, 0]
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+	train loss:2232.0747  train ap:0.947616  val ap:0.927884  val auc:0.930854
+
+per time[0, 0, 0, 0]
+	total time:185.10s  prep time:146.58s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 3:
+Epoch 3:
+Epoch 3:
+cache memory for 4013851 926898 cache embedding 13758612 13492872cache memory for 4216857 949280 cache embedding 14311651 14002557
+
+cache memory for 4092998 878580 cache embedding 14293047 13982188cache memory for 4224777 929040 cache embedding 14558068 14257398
+
+	train loss:2228.0365  train ap:0.947229  val ap:0.936840  val auc:0.944433
+	train loss:2344.6001  train ap:0.946145  val ap:0.936840  val auc:0.944433
+
+
+	total time:185.62s  prep time:147.27s
+	total time:185.63s  prep time:147.28s
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+forward_time backward_time0 0
+forward_time backward_time0 0
+
+
+per time[0, 0, 0, 0]per time[0, 0, 0, 0]
+
+Epoch 4:
+Epoch 4:
+	train loss:2345.2598  train ap:0.943671  val ap:0.936840  val auc:0.944433
+
+	total time:185.62s  prep time:147.27s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+	train loss:2396.6159  train ap:0.941869  val ap:0.936840  val auc:0.944433
+
+	total time:185.63s  prep time:147.27s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 4:
+Epoch 4:
+cache memory for 4226307 1000319 cache embedding 18432835 18117960cache memory for 4218884 1036846 cache embedding 18122629 17798731
+
+cache memory for 4012520 1010496 cache embedding 17421286 17145799
+cache memory for 4097080 908879 cache embedding 18101030 17775491
+	train loss:2234.8346  train ap:0.946808  val ap:0.938491  val auc:0.945777
+
+	total time:186.06s  prep time:147.73s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+	train loss:2357.0768  train ap:0.945537  val ap:0.938491  val auc:0.945777
+
+	total time:186.06s  prep time:147.73s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 5:
+Epoch 5:
+	train loss:2404.1530  train ap:0.941575  val ap:0.938491  val auc:0.945777
+
+	total time:186.06s  prep time:147.72s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+	train loss:2351.8747  train ap:0.943332  val ap:0.938491  val auc:0.945777
+
+per time[0, 0, 0, 0]
+	total time:186.06s  prep time:147.72s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 5:
+Epoch 5:
+cache memory for 4012787 1138647 cache embedding 21083978 20797748
+cache memory for 4220462 1201523 cache embedding 21934472 21596062
+cache memory for 4226341 1169980 cache embedding 22308021 21979669
+cache memory for 4092720 1071436 cache embedding 21905714 21560752
+	train loss:2347.1394  train ap:0.946286  val ap:0.940971  val auc:0.950584
+
+	total time:188.21s  prep time:149.87s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 6:
+	train loss:2394.4772  train ap:0.942408  val ap:0.940971  val auc:0.950584
+
+	total time:188.21s  prep time:149.86s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+	train loss:2342.3458  train ap:0.943780  val ap:0.940971  val auc:0.950584
+
+	total time:188.21s  prep time:149.86s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+	train loss:2227.5012  train ap:0.947368  val ap:0.940971  val auc:0.950584
+
+	total time:188.22s  prep time:149.87s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 6:
+Epoch 6:
+Epoch 6:
+cache memory for 4095307 1064402 cache embedding 25712282 25348657
+cache memory for 4228260 1150731 cache embedding 26184847 25839560cache memory for 4014082 1146117 cache embedding 24747846 24448642
+cache memory for 4219008 1167276 cache embedding 25746120 25389410
+
+	train loss:2394.2341  train ap:0.941762  val ap:0.934224  val auc:0.939891
+
+	total time:188.04s  prep time:149.81s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+	train loss:2346.0389  train ap:0.945362  val ap:0.934224  val auc:0.939891
+
+	total time:188.04s  prep time:149.82s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 7:
+Epoch 7:
+	train loss:2228.8139  train ap:0.947261  val ap:0.934224  val auc:0.939891
+
+	train loss:2341.0482  train ap:0.942964  val ap:0.934224  val auc:0.939891
+	total time:188.04s  prep time:149.81s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	total time:188.04s  prep time:149.81s
+
+forward_time backward_time0 0
+	 fetch time:0.00s write back time:0.00s
+
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+per time[0, 0, 0, 0]
+Epoch 7:
+Epoch 7:
+cache memory for 4227618 1435300 cache embedding 30060837 29706179
+cache memory for 4012679 1426881 cache embedding 28411182 28103094
+cache memory for 4219145 1396814 cache embedding 29557606 29189199
+cache memory for 4094009 1295481 cache embedding 29517718 29138201
+	train loss:2194.6012  train ap:0.949357  val ap:0.935175  val auc:0.941905
+
+	total time:187.58s  prep time:148.13s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+	train loss:2319.3580  train ap:0.947772  val ap:0.935175  val auc:0.941905
+
+	total time:187.60s  prep time:148.15s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 8:
+Epoch 8:
+	train loss:2364.8065  train ap:0.944037  val ap:0.935175  val auc:0.941905
+
+	total time:187.60s  prep time:148.15s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+	train loss:2311.9711  train ap:0.945355  val ap:0.935175  val auc:0.941905
+
+	total time:187.59s  prep time:148.13s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 8:
+Epoch 8:
+cache memory for 4012042 1295828 cache embedding 32073354 31758752cache memory for 4218214 1296706 cache embedding 33367196 32988981
+
+cache memory for 4225791 1305751 cache embedding 33936027 33573090cache memory for 4092989 1183394 cache embedding 33322921 32930337
+
+	train loss:2418.6668  train ap:0.939430  val ap:0.931240  val auc:0.939500
+
+	total time:186.41s  prep time:147.37s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+	train loss:2367.6873  train ap:0.943087  val ap:0.931240  val auc:0.939500
+
+	total time:186.43s  prep time:147.38s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 9:
+Epoch 9:
+	train loss:2260.2578  train ap:0.944196  val ap:0.931240  val auc:0.939500
+
+	total time:186.43s  prep time:147.38s
+	train loss:2366.0872  train ap:0.940607  val ap:0.931240  val auc:0.939500
+
+
+	 fetch time:0.00s write back time:0.00s
+	total time:186.42s  prep time:147.36s
+
+
+forward_time backward_time0 0
+	 fetch time:0.00s write back time:0.00s
+
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+per time[0, 0, 0, 0]
+Epoch 9:Epoch 9:
+
+cache memory for 4226309 1316373 cache embedding 37811193 37440338cache memory for 4014641 1291282 cache embedding 35737318 35414535cache memory for 4218347 1320583 cache embedding 37178330 36790609
+
+
+cache memory for 4094178 1246186 cache embedding 37128725 36727217
+	train loss:2257.5525  train ap:0.945693  val ap:0.940171  val auc:0.947711
+
+	total time:188.75s  prep time:148.97s
+
+	 fetch time:0.00s write back time:0.00s
+
+	train loss:2365.9023  train ap:0.944046  val ap:0.940171  val auc:0.947711
+forward_time backward_time0 0
+
+
+	total time:188.76s  prep time:148.98s
+
+per time[0, 0, 0, 0]	 fetch time:0.00s write back time:0.00s
+
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 10:
+Epoch 10:
+	train loss:2362.2555  train ap:0.941669  val ap:0.940171  val auc:0.947711
+
+	total time:188.76s  prep time:148.97s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+	train loss:2413.7718  train ap:0.940635  val ap:0.940171  val auc:0.947711
+
+	total time:188.77s  prep time:148.98s
+
+	 fetch time:0.00s write back time:0.00s
+
+forward_time backward_time0 0
+
+per time[0, 0, 0, 0]
+Epoch 10:
+Epoch 10:
+cache memory for 4011935 1397585 cache embedding 39399518 39073667
+cache memory for 4226112 1399561 cache embedding 41686415 41311952cache memory for 4218065 1386492 cache embedding 40987933 40595671
+
+cache memory for 4092571 1272679 cache embedding 40932930 40526066
+Early stopping at epoch 10
+Early stopping at epoch 10
+
+
+Loading the best model at epoch 5
+Loading the best model at epoch 5
+
+
+Early stopping at epoch 10
+Early stopping at epoch 10
+
+
+Loading the best model at epoch 5
+
+Loading the best model at epoch 5
+
+0.9277251362800598 0.944579541683197 
+
+0.9277251362800598 0.944579541683197 
+
+0.9277251362800598 0.944579541683197 
+
+0.9277251362800598 0.944579541683197 
+
+0.9389734864234924 0.9496337175369263 
+0.9389734864234924 0.9496337175369263 
+
+
+0.9389734864234924 0.9496337175369263 
+0.9389734864234924 0.9496337175369263 
+
+
+	test AP:0.940021  test AUC:0.949968
+
+test_dataset 3099919 avg_time 149.08893531019038 
+
+	test AP:0.940021  test AUC:0.949968
+
+test_dataset 2933522 avg_time 149.09539532661438 
+
+	test AP:0.940021  test AUC:0.949968
+
+test_dataset 3397822 avg_time 149.0837241086093 
+
+	test AP:0.940021  test AUC:0.949968
+
+test_dataset 2924085 avg_time 149.08697707002813 
+

@@ -1,0 +1,831 @@
+LOCAL RANK 0, RANK0
+in
+local rank is 0 world_size is 1 memory group is 0 memory rank is 0 memory group size is 1
+
+[0]
+num nodes is tensor([157474])
+9228
+init 0
+cuda:0
+tensor([     0,      1,      2,  ..., 157471, 157472, 157473])
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  3072
+Max GPU memory reserved during this session:  2097152
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.005913257598876953
+Current GPU memory reserved:  0.021484375
+Max GPU memory allocated during this session:  6349312
+Max GPU memory reserved during this session:  23068672
+torch.Size([157474, 172])
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.10747575759887695
+Current GPU memory reserved:  0.123046875
+Max GPU memory allocated during this session:  115401216
+Max GPU memory reserved during this session:  132120576
+init data loader
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.10747575759887695
+Current GPU memory reserved:  0.123046875
+Max GPU memory allocated during this session:  115401216
+Max GPU memory reserved during this session:  132120576
+9228
+100
+torch.Size([0, 100])
+get_neighbors consume: 0.0108221s
+get_neighbors consume: 0.00946243s
+part tensor([[0, 0, 0,  ..., 0, 0, 0],
+        [0, 0, 0,  ..., 0, 0, 0]])
+
+ts tensor([      0,      36,      77,  ..., 1862639, 1862645, 1862652],
+       device='cuda:0') tensor([      0,      36,      77,  ..., 1862639, 1862645, 1862652],
+       device='cuda:0') tensor([2218300, 2218303, 2218304,  ..., 2678293, 2678333, 2678373],
+       device='cuda:0') tensor([1862653, 1862659, 1862666,  ..., 2218282, 2218288, 2218288],
+       device='cuda:0')
+tensor(36, device='cuda:0') 110232
+loc local tensor([     0,      1,      2,  ..., 157471, 157472, 157473])
+torch.Size([157474]) torch.Size([110232])
+torch.Size([110232]) torch.Size([110232]) torch.Size([110232])
+
+belong betch tensor([ 0,  0,  0,  ..., 36, 36, 36], device='cuda:0') tensor([True, True, True,  ..., True, True, True], device='cuda:0')
+
+local belong betch tensor([ 0,  0,  0,  ..., 36, 36, 36], device='cuda:0')
+
+tensor([     0,      1,      2,  ..., 110229, 110230, 110231], device='cuda:0')
+tensor([     0,   3000,   6000,   9000,  12000,  15000,  18000,  21000,  24000,
+         27000,  30000,  33000,  36000,  39000,  42000,  45000,  48000,  51000,
+         54000,  57000,  60000,  63000,  66000,  69000,  72000,  75000,  78000,
+         81000,  84000,  87000,  90000,  93000,  96000,  99000, 102000, 105000,
+        108000], device='cuda:0') tensor([  2999,   5999,   8999,  11999,  14999,  17999,  20999,  23999,  26999,
+         29999,  32999,  35999,  38999,  41999,  44999,  47999,  50999,  53999,
+         56999,  59999,  62999,  65999,  68999,  71999,  74999,  77999,  80999,
+         83999,  86999,  89999,  92999,  95999,  98999, 101999, 104999, 107999,
+        110231], device='cuda:0')
+tensor(7, device='cuda:0') 23621
+loc local tensor([     0,      1,      2,  ..., 157471, 157472, 157473])
+torch.Size([157474]) torch.Size([23621])
+torch.Size([23621]) torch.Size([23621]) torch.Size([23621])
+
+belong betch tensor([0, 0, 0,  ..., 7, 7, 7], device='cuda:0') tensor([True, True, True,  ..., True, True, True], device='cuda:0')
+
+local belong betch tensor([0, 0, 0,  ..., 7, 7, 7], device='cuda:0')
+
+tensor([    0,     1,     2,  ..., 23618, 23619, 23620], device='cuda:0')
+tensor([    0,  3000,  6000,  9000, 12000, 15000, 18000, 21000],
+       device='cuda:0') tensor([ 2999,  5999,  8999, 11999, 14999, 17999, 20999, 23620],
+       device='cuda:0')
+tensor(7, device='cuda:0') 23621
+loc local tensor([     0,      1,      2,  ..., 157471, 157472, 157473])
+torch.Size([157474]) torch.Size([23621])
+torch.Size([23621]) torch.Size([23621]) torch.Size([23621])
+
+belong betch tensor([0, 0, 0,  ..., 7, 7, 7], device='cuda:0') tensor([True, True, True,  ..., True, True, True], device='cuda:0')
+
+local belong betch tensor([0, 0, 0,  ..., 7, 7, 7], device='cuda:0')
+
+tensor([    0,     1,     2,  ..., 23618, 23619, 23620], device='cuda:0')
+tensor([    0,  3000,  6000,  9000, 12000, 15000, 18000, 21000],
+       device='cuda:0') tensor([ 2999,  5999,  8999, 11999, 14999, 17999, 20999, 23620],
+       device='cuda:0')
+init dataloader
+The model has 1.2405433654785156 trainable parameters
+Epoch 0:
+	train time:3.58s
+
+time_forward = 1.7029264421435073 time_backward =  1.57655700459145 time_sample =  0 pre_batch = 0 pre_input = 0.16702390927821398 pos_update = 0.12957003014162183 mem_update = 0.22276380681432784 time_zero = 0 time_nbrs = 0.1298613497056067 time_attention = 1.2513144090771675
+mode: val tensor([0.5639]) tensor([0.8852])
+mode: test tensor([0.5455]) tensor([0.8661])
+	train loss:44.5959  train ap: nan  val ap:0.563887  val auc:0.885171 test ap 0.545502 test auc0.866127
+
+	total time:4.96s  prep time:3.58s
+
+Epoch 1:
+	train time:2.68s
+
+time_forward = 1.232157678809017 time_backward =  1.2574140698416159 time_sample =  0 pre_batch = 0 pre_input = 0.10359854809939861 pos_update = 0.08826269663404673 mem_update = 0.17294459242839366 time_zero = 0 time_nbrs = 0.10197815124411136 time_attention = 0.8742272210074589
+mode: val tensor([0.6226]) tensor([0.9095])
+mode: test tensor([0.6061]) tensor([0.8953])
+	train loss:30.9488  train ap: nan  val ap:0.622564  val auc:0.909525 test ap 0.606073 test auc0.895335
+
+	total time:3.89s  prep time:2.68s
+
+Epoch 2:
+	train time:2.68s
+
+time_forward = 1.240405063261278 time_backward =  1.2463351417100057 time_sample =  0 pre_batch = 0 pre_input = 0.10181221726816148 pos_update = 0.08878276194445789 mem_update = 0.17736505274660885 time_zero = 0 time_nbrs = 0.10153039114084095 time_attention = 0.8800591588951647
+mode: val tensor([0.6452]) tensor([0.9144])
+mode: test tensor([0.6275]) tensor([0.8997])
+	train loss:27.7558  train ap: nan  val ap:0.645203  val auc:0.914432 test ap 0.627483 test auc0.899743
+
+	total time:3.89s  prep time:2.68s
+
+Epoch 3:
+	train time:2.68s
+
+time_forward = 1.2343679337063804 time_backward =  1.2508116960525513 time_sample =  0 pre_batch = 0 pre_input = 0.10113937337882817 pos_update = 0.08874206093605608 mem_update = 0.17390899162273854 time_zero = 0 time_nbrs = 0.10449842608068138 time_attention = 0.8777781594544649
+mode: val tensor([0.6581]) tensor([0.9200])
+mode: test tensor([0.6388]) tensor([0.9055])
+	train loss:26.1614  train ap: nan  val ap:0.658097  val auc:0.919954 test ap 0.638784 test auc0.905496
+
+	total time:3.90s  prep time:2.68s
+
+Epoch 4:
+	train time:2.67s
+
+time_forward = 1.2318901576800272 time_backward =  1.2499479312682524 time_sample =  0 pre_batch = 0 pre_input = 0.101609579869546 pos_update = 0.08841768023557961 mem_update = 0.1755968815414235 time_zero = 0 time_nbrs = 0.10162973636761308 time_attention = 0.8771643317304552
+mode: val tensor([0.6575]) tensor([0.9146])
+mode: test tensor([0.6389]) tensor([0.8969])
+	train loss:25.7969  train ap: nan  val ap:0.657529  val auc:0.914556 test ap 0.638853 test auc0.896918
+
+	total time:3.88s  prep time:2.67s
+
+Epoch 5:
+	train time:2.67s
+
+time_forward = 1.236310156644322 time_backward =  1.2471754241269082 time_sample =  0 pre_batch = 0 pre_input = 0.10100756189785898 pos_update = 0.08864816080313176 mem_update = 0.17741370329167694 time_zero = 0 time_nbrs = 0.1021225251024589 time_attention = 0.8769680028781295
+mode: val tensor([0.6637]) tensor([0.9174])
+mode: test tensor([0.6434]) tensor([0.9011])
+	train loss:25.8380  train ap: nan  val ap:0.663663  val auc:0.917423 test ap 0.643397 test auc0.901079
+
+	total time:3.89s  prep time:2.67s
+
+Epoch 6:
+	train time:2.67s
+
+time_forward = 1.2350258395308629 time_backward =  1.2496392879402265 time_sample =  0 pre_batch = 0 pre_input = 0.10109220026060939 pos_update = 0.08867406926583499 mem_update = 0.17921231628861278 time_zero = 0 time_nbrs = 0.09946910431608558 time_attention = 0.8776921461103484
+mode: val tensor([0.6801]) tensor([0.9264])
+mode: test tensor([0.6593]) tensor([0.9102])
+	train loss:24.6564  train ap: nan  val ap:0.680055  val auc:0.926395 test ap 0.659312 test auc0.910205
+
+	total time:3.89s  prep time:2.67s
+
+Epoch 7:
+	train time:2.68s
+
+time_forward = 1.2342603316064924 time_backward =  1.2521437394898385 time_sample =  0 pre_batch = 0 pre_input = 0.10107199568301439 pos_update = 0.08882806787732989 mem_update = 0.17327174451202154 time_zero = 0 time_nbrs = 0.10224024881608784 time_attention = 0.8773984739091247
+mode: val tensor([0.6963]) tensor([0.9317])
+mode: test tensor([0.6741]) tensor([0.9180])
+	train loss:23.8922  train ap: nan  val ap:0.696349  val auc:0.931726 test ap 0.674083 test auc0.918019
+
+	total time:3.90s  prep time:2.68s
+
+Epoch 8:
+	train time:2.67s
+
+time_forward = 1.2383720399811864 time_backward =  1.2436700239777565 time_sample =  0 pre_batch = 0 pre_input = 0.10138154786545783 pos_update = 0.08856705063953996 mem_update = 0.17728208017069846 time_zero = 0 time_nbrs = 0.10094083833973855 time_attention = 0.8779527943115681
+mode: val tensor([0.7256]) tensor([0.9433])
+mode: test tensor([0.7078]) tensor([0.9330])
+	train loss:22.8088  train ap: nan  val ap:0.725630  val auc:0.943333 test ap 0.707838 test auc0.932976
+
+	total time:3.88s  prep time:2.67s
+
+Epoch 9:
+	train time:2.68s
+
+time_forward = 1.236941673909314 time_backward =  1.247164289932698 time_sample =  0 pre_batch = 0 pre_input = 0.10130509722512215 pos_update = 0.08921576337888837 mem_update = 0.17634715989697725 time_zero = 0 time_nbrs = 0.0998380531091243 time_attention = 0.8773978125536814
+mode: val tensor([0.7432]) tensor([0.9468])
+mode: test tensor([0.7251]) tensor([0.9371])
+	train loss:21.7546  train ap: nan  val ap:0.743154  val auc:0.946783 test ap 0.725129 test auc0.937085
+
+	total time:3.89s  prep time:2.68s
+
+Epoch 10:
+	train time:2.67s
+
+time_forward = 1.2346122150775045 time_backward =  1.2477027671411633 time_sample =  0 pre_batch = 0 pre_input = 0.10109173506498337 pos_update = 0.08880413963925093 mem_update = 0.17663824162445962 time_zero = 0 time_nbrs = 0.10037279431708157 time_attention = 0.8784713256172836
+mode: val tensor([0.7573]) tensor([0.9509])
+mode: test tensor([0.7380]) tensor([0.9411])
+	train loss:20.7251  train ap: nan  val ap:0.757271  val auc:0.950897 test ap 0.737985 test auc0.941134
+
+	total time:3.88s  prep time:2.67s
+
+Epoch 11:
+	train time:2.67s
+
+time_forward = 1.2351555339992046 time_backward =  1.2472558800363913 time_sample =  0 pre_batch = 0 pre_input = 0.10099803155753762 pos_update = 0.08863969042431563 mem_update = 0.17762563424184918 time_zero = 0 time_nbrs = 0.10097841289825737 time_attention = 0.8778601443627849
+mode: val tensor([0.7733]) tensor([0.9544])
+mode: test tensor([0.7498]) tensor([0.9449])
+	train loss:20.1103  train ap: nan  val ap:0.773339  val auc:0.954414 test ap 0.749804 test auc0.944853
+
+	total time:3.89s  prep time:2.67s
+
+Epoch 12:
+	train time:2.68s
+
+time_forward = 1.247967537608929 time_backward =  1.2443311425158754 time_sample =  0 pre_batch = 0 pre_input = 0.10180203593336046 pos_update = 0.089146718964912 mem_update = 0.16078651533462107 time_zero = 0 time_nbrs = 0.1224833227461204 time_attention = 0.8800232597859576
+mode: val tensor([0.7861]) tensor([0.9582])
+mode: test tensor([0.7610]) tensor([0.9480])
+	train loss:19.4148  train ap: nan  val ap:0.786067  val auc:0.958174 test ap 0.761007 test auc0.947966
+
+	total time:3.90s  prep time:2.68s
+
+Epoch 13:
+	train time:2.68s
+
+time_forward = 1.2333303490886465 time_backward =  1.2572429607389495 time_sample =  0 pre_batch = 0 pre_input = 0.10206209274474531 pos_update = 0.08966273872647434 mem_update = 0.1466707397485152 time_zero = 0 time_nbrs = 0.10597069002687931 time_attention = 0.8534168021287769
+mode: val tensor([0.7946]) tensor([0.9602])
+mode: test tensor([0.7729]) tensor([0.9518])
+	train loss:18.5405  train ap: nan  val ap:0.794612  val auc:0.960157 test ap 0.772945 test auc0.951810
+
+	total time:3.90s  prep time:2.68s
+
+Epoch 14:
+	train time:2.68s
+
+time_forward = 1.2332384120672941 time_backward =  1.2586580829229206 time_sample =  0 pre_batch = 0 pre_input = 0.10144766501616687 pos_update = 0.08942456415388733 mem_update = 0.14397874823771417 time_zero = 0 time_nbrs = 0.11086947051808238 time_attention = 0.8546950379386544
+mode: val tensor([0.7986]) tensor([0.9596])
+mode: test tensor([0.7733]) tensor([0.9501])
+	train loss:18.5318  train ap: nan  val ap:0.798601  val auc:0.959631 test ap 0.773251 test auc0.950093
+
+	total time:3.90s  prep time:2.68s
+
+Epoch 15:
+	train time:2.68s
+
+time_forward = 1.2299557271180674 time_backward =  1.2570593073032796 time_sample =  0 pre_batch = 0 pre_input = 0.10145286179613322 pos_update = 0.08934095909353346 mem_update = 0.16245024697855115 time_zero = 0 time_nbrs = 0.10529280686751008 time_attention = 0.8675592737272382
+mode: val tensor([0.8102]) tensor([0.9628])
+mode: test tensor([0.7882]) tensor([0.9535])
+	train loss:18.0599  train ap: nan  val ap:0.810187  val auc:0.962843 test ap 0.788155 test auc0.953479
+
+	total time:3.90s  prep time:2.68s
+
+Epoch 16:
+	train time:2.68s
+
+time_forward = 1.2363868271932006 time_backward =  1.249073991086334 time_sample =  0 pre_batch = 0 pre_input = 0.1017758286325261 pos_update = 0.08905221801251173 mem_update = 0.1779870012542233 time_zero = 0 time_nbrs = 0.10004631371702999 time_attention = 0.8784845599438995
+mode: val tensor([0.8166]) tensor([0.9639])
+mode: test tensor([0.7897]) tensor([0.9548])
+	train loss:17.7052  train ap: nan  val ap:0.816608  val auc:0.963904 test ap 0.789656 test auc0.954785
+
+	total time:3.89s  prep time:2.68s
+
+Epoch 17:
+	train time:2.68s
+
+time_forward = 1.2402305010473356 time_backward =  1.2499998880084604 time_sample =  0 pre_batch = 0 pre_input = 0.10155810846481472 pos_update = 0.08938182611018419 mem_update = 0.17632980539929122 time_zero = 0 time_nbrs = 0.10022769984789193 time_attention = 0.8770444343099371
+mode: val tensor([0.8220]) tensor([0.9649])
+mode: test tensor([0.8024]) tensor([0.9576])
+	train loss:17.3189  train ap: nan  val ap:0.821988  val auc:0.964887 test ap 0.802385 test auc0.957609
+
+	total time:3.93s  prep time:2.68s
+
+Epoch 18:
+	train time:2.73s
+
+time_forward = 1.2641117306193337 time_backward =  1.278636304079555 time_sample =  0 pre_batch = 0 pre_input = 0.10242474311962724 pos_update = 0.08824002428445965 mem_update = 0.19063724938314408 time_zero = 0 time_nbrs = 0.10999813117086887 time_attention = 0.8770136560779065
+mode: val tensor([0.8316]) tensor([0.9661])
+mode: test tensor([0.8049]) tensor([0.9574])
+	train loss:16.9772  train ap: nan  val ap:0.831641  val auc:0.966087 test ap 0.804915 test auc0.957393
+
+	total time:3.99s  prep time:2.73s
+
+Epoch 19:
+	train time:2.74s
+
+time_forward = 1.2667661379091442 time_backward =  1.2811359240440652 time_sample =  0 pre_batch = 0 pre_input = 0.10149128397461027 pos_update = 0.08784794993698597 mem_update = 0.1953050276497379 time_zero = 0 time_nbrs = 0.10695328703150153 time_attention = 0.8779276739805937
+mode: val tensor([0.8336]) tensor([0.9672])
+mode: test tensor([0.8105]) tensor([0.9596])
+	train loss:16.5648  train ap: nan  val ap:0.833581  val auc:0.967248 test ap 0.810514 test auc0.959642
+
+	total time:4.00s  prep time:2.74s
+
+Epoch 20:
+	train time:2.73s
+
+time_forward = 1.2603148110210896 time_backward =  1.2810527079273015 time_sample =  0 pre_batch = 0 pre_input = 0.10155625164043158 pos_update = 0.08795405924320221 mem_update = 0.18876447528600693 time_zero = 0 time_nbrs = 0.11035651795100421 time_attention = 0.8768614858854562
+mode: val tensor([0.8412]) tensor([0.9680])
+mode: test tensor([0.8119]) tensor([0.9586])
+	train loss:16.4479  train ap: nan  val ap:0.841202  val auc:0.968025 test ap 0.811942 test auc0.958641
+
+	total time:4.00s  prep time:2.73s
+
+Epoch 21:
+	train time:2.74s
+
+time_forward = 1.2650660603540018 time_backward =  1.2847049189731479 time_sample =  0 pre_batch = 0 pre_input = 0.1019830129807815 pos_update = 0.08853894250933081 mem_update = 0.19260829128324986 time_zero = 0 time_nbrs = 0.1099489041371271 time_attention = 0.8772803406463936
+mode: val tensor([0.8495]) tensor([0.9699])
+mode: test tensor([0.8252]) tensor([0.9625])
+	train loss:16.0857  train ap: nan  val ap:0.849472  val auc:0.969878 test ap 0.825222 test auc0.962491
+
+	total time:4.00s  prep time:2.74s
+
+Epoch 22:
+	train time:2.74s
+
+time_forward = 1.2678737804526463 time_backward =  1.2820293497061357 time_sample =  0 pre_batch = 0 pre_input = 0.10189442103728652 pos_update = 0.0886115909088403 mem_update = 0.1917585670016706 time_zero = 0 time_nbrs = 0.10954936989583075 time_attention = 0.8787377680419013
+mode: val tensor([0.8558]) tensor([0.9709])
+mode: test tensor([0.8283]) tensor([0.9626])
+	train loss:15.7682  train ap: nan  val ap:0.855827  val auc:0.970917 test ap 0.828347 test auc0.962586
+
+	total time:4.00s  prep time:2.74s
+
+Epoch 23:
+	train time:2.76s
+
+time_forward = 1.2850479746703058 time_backward =  1.2839609428774565 time_sample =  0 pre_batch = 0 pre_input = 0.10142013942822814 pos_update = 0.08876414189580828 mem_update = 0.18890255654696375 time_zero = 0 time_nbrs = 0.12603078200481832 time_attention = 0.882239427883178
+mode: val tensor([0.8592]) tensor([0.9716])
+mode: test tensor([0.8367]) tensor([0.9648])
+	train loss:15.4350  train ap: nan  val ap:0.859245  val auc:0.971613 test ap 0.836720 test auc0.964755
+
+	total time:4.02s  prep time:2.76s
+
+Epoch 24:
+	train time:2.73s
+
+time_forward = 1.2335145090473816 time_backward =  1.3085770185571164 time_sample =  0 pre_batch = 0 pre_input = 0.10280364973004907 pos_update = 0.0881249934900552 mem_update = 0.16283740615472198 time_zero = 0 time_nbrs = 0.11853583587799221 time_attention = 0.8593098649289459
+mode: val tensor([0.8614]) tensor([0.9722])
+mode: test tensor([0.8397]) tensor([0.9654])
+	train loss:15.1693  train ap: nan  val ap:0.861426  val auc:0.972158 test ap 0.839708 test auc0.965411
+
+	total time:3.97s  prep time:2.73s
+
+Epoch 25:
+	train time:2.74s
+
+time_forward = 1.23443315573968 time_backward =  1.3163951262831688 time_sample =  0 pre_batch = 0 pre_input = 0.10057964385487139 pos_update = 0.0879769993480295 mem_update = 0.15672792051918805 time_zero = 0 time_nbrs = 0.12426908640190959 time_attention = 0.8577137041138485
+mode: val tensor([0.8685]) tensor([0.9734])
+mode: test tensor([0.8455]) tensor([0.9668])
+	train loss:14.8110  train ap: nan  val ap:0.868458  val auc:0.973368 test ap 0.845461 test auc0.966819
+
+	total time:3.97s  prep time:2.74s
+
+Epoch 26:
+	train time:2.74s
+
+time_forward = 1.222420469741337 time_backward =  1.3251760435523465 time_sample =  0 pre_batch = 0 pre_input = 0.10063712520059198 pos_update = 0.08805606444366276 mem_update = 0.15261308394838125 time_zero = 0 time_nbrs = 0.11900145106483251 time_attention = 0.8532594969728962
+mode: val tensor([0.8706]) tensor([0.9739])
+mode: test tensor([0.8521]) tensor([0.9674])
+	train loss:14.6124  train ap: nan  val ap:0.870585  val auc:0.973858 test ap 0.852105 test auc0.967385
+
+	total time:3.96s  prep time:2.74s
+
+Epoch 27:
+	train time:2.73s
+
+time_forward = 1.2259015231393278 time_backward =  1.3151826959801838 time_sample =  0 pre_batch = 0 pre_input = 0.10058956744614989 pos_update = 0.08814553311094642 mem_update = 0.15434204309713095 time_zero = 0 time_nbrs = 0.11940286005847156 time_attention = 0.8539628912694752
+mode: val tensor([0.8757]) tensor([0.9748])
+mode: test tensor([0.8487]) tensor([0.9669])
+	train loss:14.2713  train ap: nan  val ap:0.875696  val auc:0.974751 test ap 0.848723 test auc0.966853
+
+	total time:3.96s  prep time:2.73s
+
+Epoch 28:
+	train time:2.75s
+
+time_forward = 1.247161824372597 time_backward =  1.3098273421637714 time_sample =  0 pre_batch = 0 pre_input = 0.10173788317479193 pos_update = 0.08979963220190257 mem_update = 0.16129868000280112 time_zero = 0 time_nbrs = 0.12686308519914746 time_attention = 0.864005777053535
+mode: val tensor([0.8773]) tensor([0.9753])
+mode: test tensor([0.8535]) tensor([0.9676])
+	train loss:14.1390  train ap: nan  val ap:0.877304  val auc:0.975260 test ap 0.853487 test auc0.967639
+
+	total time:3.98s  prep time:2.75s
+
+Epoch 29:
+	train time:2.73s
+
+time_forward = 1.22490183764603 time_backward =  1.3145796179305762 time_sample =  0 pre_batch = 0 pre_input = 0.10097047686576843 pos_update = 0.08920794725418091 mem_update = 0.15584232797846198 time_zero = 0 time_nbrs = 0.11775777058210224 time_attention = 0.8518973836908117
+mode: val tensor([0.8789]) tensor([0.9757])
+mode: test tensor([0.8567]) tensor([0.9680])
+	train loss:14.0042  train ap: nan  val ap:0.878939  val auc:0.975658 test ap 0.856682 test auc0.968013
+
+	total time:3.97s  prep time:2.73s
+
+Epoch 30:
+	train time:2.75s
+
+time_forward = 1.239658072241582 time_backward =  1.3153126187389717 time_sample =  0 pre_batch = 0 pre_input = 0.10098386590834707 pos_update = 0.08919787872582674 mem_update = 0.16472288593649864 time_zero = 0 time_nbrs = 0.12261940108146518 time_attention = 0.8592338111484423
+mode: val tensor([0.8805]) tensor([0.9761])
+mode: test tensor([0.8620]) tensor([0.9696])
+	train loss:13.9617  train ap: nan  val ap:0.880536  val auc:0.976078 test ap 0.861992 test auc0.969606
+
+	total time:4.01s  prep time:2.75s
+
+Epoch 31:
+	train time:2.76s
+
+time_forward = 1.2538263959577307 time_backward =  1.311844275915064 time_sample =  0 pre_batch = 0 pre_input = 0.10202884988393635 pos_update = 0.08930600911844522 mem_update = 0.16544971242547035 time_zero = 0 time_nbrs = 0.12935120682232082 time_attention = 0.8676178709138185
+mode: val tensor([0.8838]) tensor([0.9766])
+mode: test tensor([0.8607]) tensor([0.9694])
+	train loss:13.5866  train ap: nan  val ap:0.883752  val auc:0.976622 test ap 0.860682 test auc0.969445
+
+	total time:3.99s  prep time:2.76s
+
+Epoch 32:
+	train time:2.75s
+
+time_forward = 1.248954608454369 time_backward =  1.3104276281083003 time_sample =  0 pre_batch = 0 pre_input = 0.1012333135586232 pos_update = 0.08977681561373174 mem_update = 0.17504801088944077 time_zero = 0 time_nbrs = 0.11520998319610953 time_attention = 0.8625395462149754
+mode: val tensor([0.8904]) tensor([0.9775])
+mode: test tensor([0.8638]) tensor([0.9705])
+	train loss:13.4610  train ap: nan  val ap:0.890360  val auc:0.977515 test ap 0.863848 test auc0.970538
+
+	total time:3.99s  prep time:2.75s
+
+Epoch 33:
+	train time:2.75s
+
+time_forward = 1.2461793791735545 time_backward =  1.3111307163489982 time_sample =  0 pre_batch = 0 pre_input = 0.10174492211081088 pos_update = 0.08976182003971189 mem_update = 0.16122088627889752 time_zero = 0 time_nbrs = 0.12624477944336832 time_attention = 0.8633296763291582
+mode: val tensor([0.8883]) tensor([0.9774])
+mode: test tensor([0.8648]) tensor([0.9704])
+	train loss:13.2605  train ap: nan  val ap:0.888265  val auc:0.977417 test ap 0.864788 test auc0.970396
+
+	total time:3.99s  prep time:2.75s
+
+Epoch 34:
+	train time:2.74s
+
+time_forward = 1.2425403881352395 time_backward =  1.3109435610240325 time_sample =  0 pre_batch = 0 pre_input = 0.10150702449027449 pos_update = 0.08912300388328731 mem_update = 0.16406737954821438 time_zero = 0 time_nbrs = 0.12335172749590129 time_attention = 0.860831959405914
+mode: val tensor([0.8925]) tensor([0.9784])
+mode: test tensor([0.8716]) tensor([0.9720])
+	train loss:13.1016  train ap: nan  val ap:0.892452  val auc:0.978409 test ap 0.871581 test auc0.972004
+
+	total time:3.98s  prep time:2.74s
+
+Epoch 35:
+	train time:2.75s
+
+time_forward = 1.2399182330118492 time_backward =  1.3153367686318234 time_sample =  0 pre_batch = 0 pre_input = 0.10091351962182671 pos_update = 0.0889697247184813 mem_update = 0.16500792908482254 time_zero = 0 time_nbrs = 0.12416984094306827 time_attention = 0.8593701190548018
+mode: val tensor([0.8927]) tensor([0.9786])
+mode: test tensor([0.8697]) tensor([0.9714])
+	train loss:12.8583  train ap: nan  val ap:0.892711  val auc:0.978604 test ap 0.869650 test auc0.971391
+
+	total time:4.01s  prep time:2.75s
+
+Epoch 36:
+	train time:2.74s
+
+time_forward = 1.2420176070882007 time_backward =  1.3104047664674 time_sample =  0 pre_batch = 0 pre_input = 0.10173841507639736 pos_update = 0.08899559988640249 mem_update = 0.1630840467987582 time_zero = 0 time_nbrs = 0.1227939926320687 time_attention = 0.8601470200810581
+mode: val tensor([0.8912]) tensor([0.9781])
+mode: test tensor([0.8704]) tensor([0.9713])
+	train loss:12.7771  train ap: nan  val ap:0.891236  val auc:0.978106 test ap 0.870361 test auc0.971330
+
+	total time:3.98s  prep time:2.74s
+
+Epoch 37:
+	train time:2.74s
+
+time_forward = 1.2420257774647325 time_backward =  1.3084603931056336 time_sample =  0 pre_batch = 0 pre_input = 0.10096707788761705 pos_update = 0.0891481643775478 mem_update = 0.16740039712749422 time_zero = 0 time_nbrs = 0.11987452604807913 time_attention = 0.8590526449261233
+mode: val tensor([0.8977]) tensor([0.9796])
+mode: test tensor([0.8749]) tensor([0.9731])
+	train loss:12.5996  train ap: nan  val ap:0.897694  val auc:0.979601 test ap 0.874852 test auc0.973127
+
+	total time:3.97s  prep time:2.74s
+
+Epoch 38:
+	train time:2.74s
+
+time_forward = 1.2438041497953236 time_backward =  1.3041756169404835 time_sample =  0 pre_batch = 0 pre_input = 0.1016767667606473 pos_update = 0.0895981159992516 mem_update = 0.16699179646093398 time_zero = 0 time_nbrs = 0.12174055399373174 time_attention = 0.8599674139404669
+mode: val tensor([0.8963]) tensor([0.9795])
+mode: test tensor([0.8726]) tensor([0.9725])
+	train loss:12.4826  train ap: nan  val ap:0.896337  val auc:0.979498 test ap 0.872569 test auc0.972481
+
+	total time:3.97s  prep time:2.74s
+
+Epoch 39:
+	train time:2.74s
+
+time_forward = 1.2492427013348788 time_backward =  1.302045872202143 time_sample =  0 pre_batch = 0 pre_input = 0.10108204570133239 pos_update = 0.08882075373549014 mem_update = 0.16018113621976227 time_zero = 0 time_nbrs = 0.132202306878753 time_attention = 0.8658073249971494
+mode: val tensor([0.8998]) tensor([0.9801])
+mode: test tensor([0.8742]) tensor([0.9736])
+	train loss:12.3148  train ap: nan  val ap:0.899802  val auc:0.980124 test ap 0.874163 test auc0.973631
+
+	total time:3.97s  prep time:2.74s
+
+Epoch 40:
+	train time:2.73s
+
+time_forward = 1.233414246700704 time_backward =  1.3106592001859099 time_sample =  0 pre_batch = 0 pre_input = 0.10080495162401348 pos_update = 0.08882739476393908 mem_update = 0.1610472440952435 time_zero = 0 time_nbrs = 0.11814910965040326 time_attention = 0.8556754670571536
+mode: val tensor([0.9003]) tensor([0.9801])
+mode: test tensor([0.8758]) tensor([0.9730])
+	train loss:12.0826  train ap: nan  val ap:0.900274  val auc:0.980101 test ap 0.875755 test auc0.973041
+
+	total time:3.96s  prep time:2.73s
+
+Epoch 41:
+	train time:2.73s
+
+time_forward = 1.2342155877267942 time_backward =  1.3074188793543726 time_sample =  0 pre_batch = 0 pre_input = 0.10075898666400462 pos_update = 0.08851829485502094 mem_update = 0.15912011393811554 time_zero = 0 time_nbrs = 0.12273291824385524 time_attention = 0.8571898960508406
+mode: val tensor([0.9037]) tensor([0.9808])
+mode: test tensor([0.8782]) tensor([0.9741])
+	train loss:12.0947  train ap: nan  val ap:0.903738  val auc:0.980780 test ap 0.878174 test auc0.974107
+
+	total time:3.96s  prep time:2.73s
+
+Epoch 42:
+	train time:2.72s
+
+time_forward = 1.2243131631985307 time_backward =  1.3073695964412764 time_sample =  0 pre_batch = 0 pre_input = 0.10065243090502918 pos_update = 0.08849503693636507 mem_update = 0.14974916633218527 time_zero = 0 time_nbrs = 0.12117411533836275 time_attention = 0.8530157819623128
+mode: val tensor([0.9018]) tensor([0.9805])
+mode: test tensor([0.8783]) tensor([0.9741])
+	train loss:11.9270  train ap: nan  val ap:0.901830  val auc:0.980499 test ap 0.878326 test auc0.974126
+
+	total time:3.96s  prep time:2.72s
+
+Epoch 43:
+	train time:2.74s
+
+time_forward = 1.238146269810386 time_backward =  1.31515161274001 time_sample =  0 pre_batch = 0 pre_input = 0.10077381844166666 pos_update = 0.088616075925529 mem_update = 0.16122115671169013 time_zero = 0 time_nbrs = 0.11794098292011768 time_attention = 0.8588644124101847
+mode: val tensor([0.9039]) tensor([0.9812])
+mode: test tensor([0.8797]) tensor([0.9746])
+	train loss:11.8710  train ap: nan  val ap:0.903904  val auc:0.981242 test ap 0.879723 test auc0.974643
+
+	total time:3.99s  prep time:2.74s
+
+Epoch 44:
+	train time:2.74s
+
+time_forward = 1.2415070362621918 time_backward =  1.3058183728717268 time_sample =  0 pre_batch = 0 pre_input = 0.10149295243900269 pos_update = 0.0887439816724509 mem_update = 0.16986875899601728 time_zero = 0 time_nbrs = 0.11730764177627861 time_attention = 0.860736567992717
+mode: val tensor([0.9065]) tensor([0.9816])
+mode: test tensor([0.8856]) tensor([0.9758])
+	train loss:11.6637  train ap: nan  val ap:0.906497  val auc:0.981577 test ap 0.885641 test auc0.975751
+
+	total time:3.97s  prep time:2.74s
+
+Epoch 45:
+	train time:2.74s
+
+time_forward = 1.2695877809310332 time_backward =  1.2839284901274368 time_sample =  0 pre_batch = 0 pre_input = 0.1008081060135737 pos_update = 0.088485958869569 mem_update = 0.19505857024341822 time_zero = 0 time_nbrs = 0.11051979917101562 time_attention = 0.8786834210623056
+mode: val tensor([0.9075]) tensor([0.9820])
+mode: test tensor([0.8901]) tensor([0.9765])
+	train loss:11.4867  train ap: nan  val ap:0.907459  val auc:0.982006 test ap 0.890051 test auc0.976539
+
+	total time:3.97s  prep time:2.74s
+
+Epoch 46:
+	train time:2.74s
+
+time_forward = 1.26455542340409 time_backward =  1.2825078713940457 time_sample =  0 pre_batch = 0 pre_input = 0.10055580479092896 pos_update = 0.08819539530668408 mem_update = 0.19391538307536393 time_zero = 0 time_nbrs = 0.10919811215717345 time_attention = 0.8768161530606449
+mode: val tensor([0.9077]) tensor([0.9819])
+mode: test tensor([0.8849]) tensor([0.9754])
+	train loss:11.3224  train ap: nan  val ap:0.907663  val auc:0.981875 test ap 0.884912 test auc0.975432
+
+	total time:3.97s  prep time:2.74s
+
+Epoch 47:
+	train time:2.74s
+
+time_forward = 1.2705007116310298 time_backward =  1.2827277198666707 time_sample =  0 pre_batch = 0 pre_input = 0.10068655118811876 pos_update = 0.08840310608502477 mem_update = 0.19738731835968792 time_zero = 0 time_nbrs = 0.10942462924867868 time_attention = 0.8789621383184567
+mode: val tensor([0.9088]) tensor([0.9819])
+mode: test tensor([0.8851]) tensor([0.9757])
+	train loss:11.3353  train ap: nan  val ap:0.908839  val auc:0.981939 test ap 0.885126 test auc0.975713
+
+	total time:3.97s  prep time:2.74s
+
+Epoch 48:
+	train time:2.74s
+
+time_forward = 1.270287842839025 time_backward =  1.2825044190976769 time_sample =  0 pre_batch = 0 pre_input = 0.10076800803653896 pos_update = 0.0883978414349258 mem_update = 0.19545668514911085 time_zero = 0 time_nbrs = 0.11006188578903675 time_attention = 0.8789763329550624
+mode: val tensor([0.9064]) tensor([0.9816])
+mode: test tensor([0.8872]) tensor([0.9760])
+	train loss:11.3407  train ap: nan  val ap:0.906425  val auc:0.981630 test ap 0.887162 test auc0.975996
+
+	total time:4.00s  prep time:2.74s
+
+Epoch 49:
+	train time:2.75s
+
+time_forward = 1.2765348355751485 time_backward =  1.2836459618993104 time_sample =  0 pre_batch = 0 pre_input = 0.1021158458897844 pos_update = 0.0886734607629478 mem_update = 0.1899843132123351 time_zero = 0 time_nbrs = 0.11366557714063674 time_attention = 0.8821909087710083
+mode: val tensor([0.9076]) tensor([0.9819])
+mode: test tensor([0.8848]) tensor([0.9754])
+	train loss:11.2940  train ap: nan  val ap:0.907627  val auc:0.981928 test ap 0.884796 test auc0.975434
+
+	total time:3.99s  prep time:2.75s
+
+Epoch 50:
+	train time:2.76s
+
+time_forward = 1.2816307639004663 time_backward =  1.2830593741964549 time_sample =  0 pre_batch = 0 pre_input = 0.10165442689321935 pos_update = 0.08860937680583447 mem_update = 0.2024661658797413 time_zero = 0 time_nbrs = 0.11169982713181525 time_attention = 0.8803703968878835
+mode: val tensor([0.9109]) tensor([0.9829])
+mode: test tensor([0.8916]) tensor([0.9772])
+	train loss:11.2084  train ap: nan  val ap:0.910925  val auc:0.982896 test ap 0.891560 test auc0.977245
+
+	total time:3.99s  prep time:2.76s
+
+Epoch 51:
+	train time:2.75s
+
+time_forward = 1.281180800171569 time_backward =  1.2803409391781315 time_sample =  0 pre_batch = 0 pre_input = 0.10090160521212965 pos_update = 0.08853060693945736 mem_update = 0.2011720568407327 time_zero = 0 time_nbrs = 0.11094039038289338 time_attention = 0.880740333464928
+mode: val tensor([0.9110]) tensor([0.9825])
+mode: test tensor([0.8903]) tensor([0.9770])
+	train loss:10.9549  train ap: nan  val ap:0.911012  val auc:0.982464 test ap 0.890314 test auc0.976975
+
+	total time:3.98s  prep time:2.75s
+
+Epoch 52:
+	train time:2.75s
+
+time_forward = 1.275998774333857 time_backward =  1.2849362010601908 time_sample =  0 pre_batch = 0 pre_input = 0.10090118867810816 pos_update = 0.0885636858874932 mem_update = 0.20093969895970076 time_zero = 0 time_nbrs = 0.1106621891958639 time_attention = 0.878553373971954
+mode: val tensor([0.9142]) tensor([0.9831])
+mode: test tensor([0.8916]) tensor([0.9771])
+	train loss:10.9124  train ap: nan  val ap:0.914191  val auc:0.983090 test ap 0.891627 test auc0.977124
+
+	total time:3.98s  prep time:2.75s
+
+Epoch 53:
+	train time:2.76s
+
+time_forward = 1.2869710356462747 time_backward =  1.285924021853134 time_sample =  0 pre_batch = 0 pre_input = 0.10082318889908493 pos_update = 0.08840771170798689 mem_update = 0.18954038061201572 time_zero = 0 time_nbrs = 0.13024645671248436 time_attention = 0.8809822369366884
+mode: val tensor([0.9159]) tensor([0.9837])
+mode: test tensor([0.8916]) tensor([0.9774])
+	train loss:10.7821  train ap: nan  val ap:0.915912  val auc:0.983652 test ap 0.891576 test auc0.977448
+
+	total time:4.01s  prep time:2.76s
+
+Epoch 54:
+	train time:2.77s
+
+time_forward = 1.292126995162107 time_backward =  1.2903121683048084 time_sample =  0 pre_batch = 0 pre_input = 0.10080457699950784 pos_update = 0.08833293558564037 mem_update = 0.19883449713233858 time_zero = 0 time_nbrs = 0.12318975699599832 time_attention = 0.8828433379530907
+mode: val tensor([0.9113]) tensor([0.9824])
+mode: test tensor([0.8900]) tensor([0.9767])
+	train loss:10.6683  train ap: nan  val ap:0.911293  val auc:0.982419 test ap 0.889955 test auc0.976721
+
+	total time:4.03s  prep time:2.77s
+
+Epoch 55:
+	train time:2.75s
+
+time_forward = 1.2761099084746093 time_backward =  1.2827474366640672 time_sample =  0 pre_batch = 0 pre_input = 0.10073649976402521 pos_update = 0.08831222204025835 mem_update = 0.20004204707220197 time_zero = 0 time_nbrs = 0.11116140603553504 time_attention = 0.87797147303354
+mode: val tensor([0.9161]) tensor([0.9837])
+mode: test tensor([0.8954]) tensor([0.9781])
+	train loss:10.6165  train ap: nan  val ap:0.916137  val auc:0.983669 test ap 0.895429 test auc0.978052
+
+	total time:4.00s  prep time:2.75s
+
+Epoch 56:
+	train time:2.75s
+
+time_forward = 1.278907606843859 time_backward =  1.285270045278594 time_sample =  0 pre_batch = 0 pre_input = 0.10086780099663883 pos_update = 0.08833754004444927 mem_update = 0.2001614464679733 time_zero = 0 time_nbrs = 0.11180136876646429 time_attention = 0.8805465929908678
+mode: val tensor([0.9120]) tensor([0.9829])
+mode: test tensor([0.8898]) tensor([0.9770])
+	train loss:10.5370  train ap: nan  val ap:0.912031  val auc:0.982913 test ap 0.889794 test auc0.976967
+
+	total time:4.00s  prep time:2.75s
+
+Epoch 57:
+	train time:2.75s
+
+time_forward = 1.2772028460167348 time_backward =  1.2860861780354753 time_sample =  0 pre_batch = 0 pre_input = 0.1008209838764742 pos_update = 0.0881486909929663 mem_update = 0.19946781790349633 time_zero = 0 time_nbrs = 0.11029378557577729 time_attention = 0.8798384973779321
+mode: val tensor([0.9122]) tensor([0.9828])
+mode: test tensor([0.8904]) tensor([0.9771])
+	train loss:10.4639  train ap: nan  val ap:0.912184  val auc:0.982783 test ap 0.890450 test auc0.977108
+
+	total time:4.00s  prep time:2.75s
+
+Epoch 58:
+	train time:2.75s
+
+time_forward = 1.2746342371683568 time_backward =  1.2840724777197465 time_sample =  0 pre_batch = 0 pre_input = 0.10067103209439665 pos_update = 0.0882537328870967 mem_update = 0.19756945502012968 time_zero = 0 time_nbrs = 0.11177801131270826 time_attention = 0.878564890474081
+mode: val tensor([0.9163]) tensor([0.9836])
+mode: test tensor([0.8956]) tensor([0.9783])
+	train loss:10.3956  train ap: nan  val ap:0.916322  val auc:0.983589 test ap 0.895560 test auc0.978251
+
+	total time:4.00s  prep time:2.75s
+
+Epoch 59:
+	train time:2.75s
+
+time_forward = 1.2737834769068286 time_backward =  1.285718622384593 time_sample =  0 pre_batch = 0 pre_input = 0.10063868691213429 pos_update = 0.0882172656711191 mem_update = 0.20219757070299238 time_zero = 0 time_nbrs = 0.10907105286605656 time_attention = 0.8779162252321839
+mode: val tensor([0.9172]) tensor([0.9839])
+mode: test tensor([0.8956]) tensor([0.9781])
+	train loss:10.2595  train ap: nan  val ap:0.917227  val auc:0.983898 test ap 0.895622 test auc0.978090
+
+	total time:4.00s  prep time:2.75s
+
+Epoch 60:
+	train time:2.74s
+
+time_forward = 1.2721334936795756 time_backward =  1.2835311215603724 time_sample =  0 pre_batch = 0 pre_input = 0.10056648275349289 pos_update = 0.08809757302515209 mem_update = 0.19682354014366865 time_zero = 0 time_nbrs = 0.1104657135438174 time_attention = 0.8769693679641932
+mode: val tensor([0.9166]) tensor([0.9837])
+mode: test tensor([0.8950]) tensor([0.9780])
+	train loss:10.1513  train ap: nan  val ap:0.916587  val auc:0.983723 test ap 0.894995 test auc0.978015
+
+	total time:4.00s  prep time:2.74s
+
+Epoch 61:
+	train time:2.75s
+
+time_forward = 1.2748169200494885 time_backward =  1.2881847262615338 time_sample =  0 pre_batch = 0 pre_input = 0.10067902726586908 pos_update = 0.08807703584898263 mem_update = 0.20054352888837457 time_zero = 0 time_nbrs = 0.10967416292987764 time_attention = 0.879267284180969
+mode: val tensor([0.9155]) tensor([0.9837])
+mode: test tensor([0.8947]) tensor([0.9778])
+	train loss:10.1718  train ap: nan  val ap:0.915492  val auc:0.983722 test ap 0.894740 test auc0.977787
+
+	total time:4.00s  prep time:2.75s
+
+Epoch 62:
+	train time:2.75s
+
+time_forward = 1.2748174254084006 time_backward =  1.284668908920139 time_sample =  0 pre_batch = 0 pre_input = 0.10072988155297935 pos_update = 0.0883827133802697 mem_update = 0.20134669041726738 time_zero = 0 time_nbrs = 0.10940190125256777 time_attention = 0.8783395611681044
+mode: val tensor([0.9177]) tensor([0.9838])
+mode: test tensor([0.8953]) tensor([0.9779])
+	train loss:10.0912  train ap: nan  val ap:0.917676  val auc:0.983829 test ap 0.895267 test auc0.977878
+
+	total time:4.02s  prep time:2.75s
+
+Epoch 63:
+	train time:2.75s
+
+time_forward = 1.278348160092719 time_backward =  1.283323640236631 time_sample =  0 pre_batch = 0 pre_input = 0.10192756645847112 pos_update = 0.08818999619688839 mem_update = 0.20317379815969616 time_zero = 0 time_nbrs = 0.10869104496669024 time_attention = 0.8787904215278104
+mode: val tensor([0.9165]) tensor([0.9836])
+mode: test tensor([0.8930]) tensor([0.9780])
+	train loss:10.1159  train ap: nan  val ap:0.916533  val auc:0.983562 test ap 0.892955 test auc0.977962
+
+	total time:4.01s  prep time:2.75s
+
+Epoch 64:
+	train time:2.75s
+
+time_forward = 1.2743196221999824 time_backward =  1.284884627093561 time_sample =  0 pre_batch = 0 pre_input = 0.10071451216936111 pos_update = 0.08819193404633552 mem_update = 0.1975181222660467 time_zero = 0 time_nbrs = 0.11170120525639504 time_attention = 0.8795050698099658
+mode: val tensor([0.9163]) tensor([0.9834])
+mode: test tensor([0.8949]) tensor([0.9780])
+	train loss:10.0887  train ap: nan  val ap:0.916264  val auc:0.983416 test ap 0.894913 test auc0.978047
+
+	total time:4.00s  prep time:2.75s
+
+Epoch 65:
+	train time:2.75s
+
+time_forward = 1.2742498194565997 time_backward =  1.2838301082374528 time_sample =  0 pre_batch = 0 pre_input = 0.10068086814135313 pos_update = 0.08823597384616733 mem_update = 0.19895485334564 time_zero = 0 time_nbrs = 0.11019932583440095 time_attention = 0.8784544547088444
+mode: val tensor([0.9184]) tensor([0.9841])
+mode: test tensor([0.8946]) tensor([0.9783])
+	train loss:10.0076  train ap: nan  val ap:0.918359  val auc:0.984053 test ap 0.894632 test auc0.978316
+
+	total time:4.00s  prep time:2.75s
+
+Epoch 66:
+	train time:2.75s
+
+time_forward = 1.2741764821112156 time_backward =  1.2851829786086455 time_sample =  0 pre_batch = 0 pre_input = 0.1006129487650469 pos_update = 0.08810185128822923 mem_update = 0.19954943074844778 time_zero = 0 time_nbrs = 0.1106927728978917 time_attention = 0.8774627551902086
+mode: val tensor([0.9174]) tensor([0.9839])
+mode: test tensor([0.8962]) tensor([0.9783])
+	train loss:9.9166  train ap: nan  val ap:0.917430  val auc:0.983941 test ap 0.896229 test auc0.978263
+
+	total time:4.00s  prep time:2.75s
+
+Epoch 67:
+	train time:2.75s
+
+time_forward = 1.272365519311279 time_backward =  1.2862652492476627 time_sample =  0 pre_batch = 0 pre_input = 0.10079535958357155 pos_update = 0.08846321003511548 mem_update = 0.2040280899964273 time_zero = 0 time_nbrs = 0.10534043016377836 time_attention = 0.8766691068885848
+mode: val tensor([0.9199]) tensor([0.9844])
+mode: test tensor([0.8987]) tensor([0.9789])
+	train loss:9.7558  train ap: nan  val ap:0.919940  val auc:0.984362 test ap 0.898702 test auc0.978906
+
+	total time:4.00s  prep time:2.75s
+
+Epoch 68:
+	train time:2.74s
+
+time_forward = 1.2679988227318972 time_backward =  1.2832898278720677 time_sample =  0 pre_batch = 0 pre_input = 0.10078867711126804 pos_update = 0.08833808673080057 mem_update = 0.1946977290790528 time_zero = 0 time_nbrs = 0.1094945608638227 time_attention = 0.8784342255676165
+mode: val tensor([0.9159]) tensor([0.9836])
+mode: test tensor([0.8970]) tensor([0.9784])
+	train loss:9.8051  train ap: nan  val ap:0.915942  val auc:0.983649 test ap 0.896980 test auc0.978371
+
+	total time:3.99s  prep time:2.74s
+
+Epoch 69:
+	train time:2.74s
+
+time_forward = 1.267237421241589 time_backward =  1.2794785047881305 time_sample =  0 pre_batch = 0 pre_input = 0.10068904224317521 pos_update = 0.08827095874585211 mem_update = 0.19234237575437874 time_zero = 0 time_nbrs = 0.11018310626968741 time_attention = 0.8771452255314216
+mode: val tensor([0.9176]) tensor([0.9839])
+mode: test tensor([0.8972]) tensor([0.9787])
+	train loss:9.6682  train ap: nan  val ap:0.917650  val auc:0.983917 test ap 0.897194 test auc0.978728
+
+	total time:4.00s  prep time:2.74s
+
+Epoch 70:
+	train time:2.74s
+
+time_forward = 1.2692548595368862 time_backward =  1.2847509176936 time_sample =  0 pre_batch = 0 pre_input = 0.10083752614445984 pos_update = 0.08836601593066007 mem_update = 0.19819508795626462 time_zero = 0 time_nbrs = 0.10773992189206183 time_attention = 0.8774298117496073
+mode: val tensor([0.9167]) tensor([0.9841])
+mode: test tensor([0.8985]) tensor([0.9794])
+	train loss:9.5987  train ap: nan  val ap:0.916714  val auc:0.984115 test ap 0.898503 test auc0.979369
+
+	total time:3.99s  prep time:2.74s
+
+Epoch 71:
+	train time:2.74s
+
+time_forward = 1.2710704890778288 time_backward =  1.280910424888134 time_sample =  0 pre_batch = 0 pre_input = 0.10079688555561006 pos_update = 0.08848691708408296 mem_update = 0.1975476985098794 time_zero = 0 time_nbrs = 0.10763001861050725 time_attention = 0.8780487858457491
+mode: val tensor([0.9196]) tensor([0.9845])
+mode: test tensor([0.9009]) tensor([0.9795])
+	train loss:9.5978  train ap: nan  val ap:0.919578  val auc:0.984507 test ap 0.900903 test auc0.979511
+
+	total time:3.99s  prep time:2.74s
+
+Epoch 72:
+	train time:2.74s
+
+time_forward = 1.2678280358668417 time_backward =  1.283085082191974 time_sample =  0 pre_batch = 0 pre_input = 0.10071026266086847 pos_update = 0.08841283502988517 mem_update = 0.1929501756094396 time_zero = 0 time_nbrs = 0.11097502917982638 time_attention = 0.8772115741157904
+mode: val tensor([0.9181]) tensor([0.9841])
+mode: test tensor([0.8969]) tensor([0.9788])
+Early stopping at epoch 72
+
+Loading the best model at epoch 67
+
+200.03873944282532
+best test AP:0.898702 test auc0.978906
+mode: train tensor([0.9441]) tensor([0.9918])
+mode: val tensor([0.9165]) tensor([0.9841])
+mode: test tensor([0.8972]) tensor([0.9787])
+	val ap:0.916522 val auc:0.984080 test AP:0.897209  test AUC:0.978735
+
+test_dataset 23621 avg_time 2.7402567046962374 
+

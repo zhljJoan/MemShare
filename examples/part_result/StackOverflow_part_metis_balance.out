@@ -1,0 +1,471 @@
+LOCAL RANK 0, RANK0
+LOCAL RANK 1, RANK1
+LOCAL RANK 2, RANK2
+LOCAL RANK 3, RANK3
+in
+in
+inin
+
+local rank is 0 world_size is 4 memory group is 0 memory rank is 0 memory group size is 4
+local rank is 3 world_size is 4 memory group is 0 memory rank is 3 memory group size is 4
+
+
+local rank is 2 world_size is 4 memory group is 0 memory rank is 2 memory group size is 4
+[0, 1, 2, 3][0, 1, 2, 3]
+
+
+[0, 1, 2, 3]
+local rank is 1 world_size is 4 memory group is 0 memory rank is 1 memory group size is 4
+
+[0, 1, 2, 3]
+memory used is torch.Size([2601977, 172]) torch.float32 1.6672165840864182
+
+dist rank is 0 after node feats defination:
+dist rank is 0 after node feats defination:
+
+dist rank is 3 after node feats defination:
+dist rank is 2 after node feats defination:
+
+
+dist rank is 1 after node feats defination:
+
+local node num 670041 ,local edge num 13534271
+
+local node num 670041 ,local edge num 18948600
+
+local node num 591854 ,local edge num 14583695
+
+local node num 670041 ,local edge num 16430483
+
+num nodes is tensor([63497049])
+num nodes is tensor([63497049])
+num nodes is tensor([63497049])
+num nodes is tensor([63497049])
+init 1
+cpu
+tensor([3377699720527872, 2251799813685248, 2251799813685249,  ...,
+        1125899920376892, 1125899920376893, 1125899920376894])
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+cpu 1
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+torch.Size([13534271, 172])
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+init data loader
+init 3
+cpu
+tensor([3377699720527872, 2251799813685248, 2251799813685249,  ...,
+        1125899920376892, 1125899920376893, 1125899920376894])
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+cpu 3
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+init 2
+Max GPU memory allocated during this session:  cpu0
+
+Max GPU memory reserved during this session:  0
+torch.Size([18948600, 172])
+Total GPU memory:  44.3516845703125
+tensor([3377699720527872, 2251799813685248, 2251799813685249,  ...,
+        1125899920376892, 1125899920376893, 1125899920376894])
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0Total GPU memory: 
+ 44.3516845703125
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+cpu 2
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+init data loader
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+torch.Size([16430483, 172])
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+init data loader
+init 0
+cpu
+tensor([3377699720527872, 2251799813685248, 2251799813685249,  ...,
+        1125899920376892, 1125899920376893, 1125899920376894])
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  4.76837158203125e-07
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  9728
+Max GPU memory reserved during this session:  2097152
+cpu 0
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  4.76837158203125e-07
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  9728
+Max GPU memory reserved during this session:  2097152
+torch.Size([14583695, 172])
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  4.76837158203125e-07
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  9728
+Max GPU memory reserved during this session:  2097152
+init data loader
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+tensor([], device='cuda:1', dtype=torch.int32)
+100
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  4.76837158203125e-07
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  9728
+Max GPU memory reserved during this session:  2097152
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+tensor([], device='cuda:0', dtype=torch.int32)
+100
+tensor([], device='cuda:2', dtype=torch.int32)
+100
+tensor([], device='cuda:3', dtype=torch.int32)
+100
+get_neighbors consume: 10.9002s
+1 tensor([3, 3, 3,  ..., 3, 1, 1])
+get_neighbors consume: 11.5704s
+2 tensor([3, 3, 3,  ..., 3, 1, 1])
+get_neighbors consume: 11.4988s
+3 tensor([3, 3, 3,  ..., 3, 1, 1])
+get_neighbors consume: 12.0851s
+0 tensor([3, 3, 3,  ..., 3, 1, 1])
+get_neighbors consume: 10.6625s
+1 tensor([3, 3, 3,  ..., 3, 1, 1])
+part tensor([[1, 1, 1,  ..., 1, 1, 1],
+        [3, 3, 1,  ..., 1, 2, 1]])
+
+get_neighbors consume: 11.5868s
+3 tensor([3, 3, 3,  ..., 3, 1, 1])
+ts tensor([    51254,     56130,     58386,  ..., 192790411, 192790414,
+        192790415], device='cuda:1') tensor([        0,     32446,     43838,  ..., 192790430, 192790431,
+        192790432], device='cuda:1') tensor([217089657, 217089660, 217089664,  ..., 239699619, 239699624,
+        239699627], device='cuda:1') tensor([192790433, 192790435, 192790435,  ..., 217089653, 217089655,
+        217089656], device='cuda:1')
+part tensor([[3, 3, 3,  ..., 3, 3, 3],
+        [3, 3, 3,  ..., 2, 3, 1]])
+
+get_neighbors consume: 11.8621s
+0 tensor([3, 3, 3,  ..., 3, 1, 1])
+get_neighbors consume: 12.2503s
+2 tensor([3, 3, 3,  ..., 3, 1, 1])
+seed is 69328
+tensor([     17,      46,      54,  ..., 2601973, 2601975, 2601976])
+part tensor([[0, 0, 0,  ..., 0, 0, 0],
+        [3, 3, 3,  ..., 0, 0, 0]])
+
+part tensor([[2, 2, 2,  ..., 2, 2, 2],
+        [3, 3, 3,  ..., 2, 0, 1]])
+
+seed is 46802
+tensor(3703, device='cuda:1') 44447934
+tensor([[ 905.,  711.,  816.,  ..., 2957., 2722., 3039.],
+        [ 770.,  797.,  801.,  ..., 3735., 3393., 3348.],
+        [ 786.,  855.,  960.,  ..., 2470., 2848., 2746.],
+        [9539., 9637., 9423.,  ..., 2838., 3037., 2801.]])
+average: 3.0133845806121826
+
+max average: 4295.3310546875
+
+min average: 1769.2294921875
+
+ts tensor([        0,     44381,     45559,  ..., 192790420, 192790428,
+        192790431], device='cuda:3') tensor([        0,     32446,     43838,  ..., 192790430, 192790431,
+        192790432], device='cuda:3') tensor([217089657, 217089660, 217089664,  ..., 239699619, 239699624,
+        239699627], device='cuda:3') tensor([192790433, 192790435, 192790435,  ..., 217089653, 217089655,
+        217089656], device='cuda:3')
+seed is 69328
+tensor([      0,       1,       2,  ..., 2601950, 2601967, 2601974])
+ts tensor([    44556,    107716,    108503,  ..., 192790418, 192790428,
+        192790429], device='cuda:0') tensor([        0,     32446,     43838,  ..., 192790430, 192790431,
+        192790432], device='cuda:0') tensor([217089657, 217089660, 217089664,  ..., 239699619, 239699624,
+        239699627], device='cuda:0') tensor([192790433, 192790435, 192790435,  ..., 217089653, 217089655,
+        217089656], device='cuda:0')
+ts tensor([    32446,     43838,     44438,  ..., 192790427, 192790430,
+        192790432], device='cuda:2') tensor([        0,     32446,     43838,  ..., 192790430, 192790431,
+        192790432], device='cuda:2') tensor([217089657, 217089660, 217089664,  ..., 239699619, 239699624,
+        239699627], device='cuda:2') tensor([192790433, 192790435, 192790435,  ..., 217089653, 217089655,
+        217089656], device='cuda:2')
+seed is 69328
+tensor([     11,      48,      61,  ..., 2601956, 2601964, 2601971])
+seed is 69328
+tensor([      8,      10,      15,  ..., 2601886, 2601945, 2601972])
+seed is 46802
+tensor(3703, device='cuda:3') 44447934
+seed is 46802
+tensor(3703, device='cuda:0') 44447934
+seed is 46802
+tensor(3703, device='cuda:2') 44447934
+tensor([[ 905.,  711.,  816.,  ..., 2957., 2722., 3039.],
+        [ 770.,  797.,  801.,  ..., 3735., 3393., 3348.],
+        [ 786.,  855.,  960.,  ..., 2470., 2848., 2746.],
+        [9539., 9637., 9423.,  ..., 2838., 3037., 2801.]])
+average: 3.0133845806121826
+
+max average: 4295.3310546875
+
+min average: 1769.2294921875
+
+tensor([[ 905.,  711.,  816.,  ..., 2957., 2722., 3039.],
+        [ 770.,  797.,  801.,  ..., 3735., 3393., 3348.],
+        [ 786.,  855.,  960.,  ..., 2470., 2848., 2746.],
+        [9539., 9637., 9423.,  ..., 2838., 3037., 2801.]])
+average: 3.0133845806121826
+
+max average: 4295.3310546875
+
+min average: 1769.2294921875
+
+tensor([[ 905.,  711.,  816.,  ..., 2957., 2722., 3039.],
+        [ 770.,  797.,  801.,  ..., 3735., 3393., 3348.],
+        [ 786.,  855.,  960.,  ..., 2470., 2848., 2746.],
+        [9539., 9637., 9423.,  ..., 2838., 3037., 2801.]])
+average: 3.0133845806121826
+
+max average: 4295.3310546875
+
+min average: 1769.2294921875
+
+all_cross_edge:tensor([20722816])  local edges num: 6865886
+
+all_cross_edge:tensor([20722816])  local edges num: 12561456
+all_cross_edge:tensor([20722816])  local edges num: 10055232
+
+
+all_cross_edge:tensor([20722816])  local edges num: 14965360
+
+tensor(14815, device='cuda:1')tensor(14815, device='cuda:0')tensor(14815, device='cuda:2')  tensor(14815, device='cuda:3') 4444793444447934 44447934
+
+44447934
+
+tensor([[ 251.,  338.,  173.,  ...,  750.,  787.,  780.],
+        [ 193.,  216.,  159.,  ...,  821.,  860.,  896.],
+        [ 156.,  233.,  194.,  ...,  698.,  662.,  608.],
+        [2400., 2213., 2474.,  ...,  731.,  691.,  650.]])
+average: 3.064913034439087
+
+max average: 1081.34326171875
+
+min average: 438.5188293457031
+
+tensor([[ 251.,  338.,  173.,  ...,  750.,  787.,  780.],
+        [ 193.,  216.,  159.,  ...,  821.,  860.,  896.],
+        [ 156.,  233.,  194.,  ...,  698.,  662.,  608.],
+        [2400., 2213., 2474.,  ...,  731.,  691.,  650.]])
+average: 3.064913034439087
+
+max average: 1081.34326171875
+
+min average: 438.5188293457031
+
+tensor([[ 251.,  338.,  173.,  ...,  750.,  787.,  780.],
+        [ 193.,  216.,  159.,  ...,  821.,  860.,  896.],
+        [ 156.,  233.,  194.,  ...,  698.,  662.,  608.],
+        [2400., 2213., 2474.,  ...,  731.,  691.,  650.]])
+average: 3.064913034439087
+
+max average: 1081.34326171875
+
+min average: 438.5188293457031
+
+tensor([[ 251.,  338.,  173.,  ...,  750.,  787.,  780.],
+        [ 193.,  216.,  159.,  ...,  821.,  860.,  896.],
+        [ 156.,  233.,  194.,  ...,  698.,  662.,  608.],
+        [2400., 2213., 2474.,  ...,  731.,  691.,  650.]])
+average: 3.064913034439087
+
+max average: 1081.34326171875
+
+min average: 438.5188293457031
+
+all_cross_edge:tensor([20722816])  local edges num: 6865886
+
+all_cross_edge:tensor([20722816])  local edges num: 12561456
+
+all_cross_edge:tensor([20722816])  local edges num: 14965360
+
+all_cross_edge:tensor([20722816])  local edges num: 10055232
+
+tensor(3174, device='cuda:2') 9524558
+tensor(3174, device='cuda:0')tensor(3174, device='cuda:1')  95245589524558
+
+tensor(3174, device='cuda:3') 9524558
+tensor([[ 682.,  692.,  685.,  ...,  663.,  658.,  592.],
+        [1005.,  924.,  927.,  ..., 1207., 1218., 1011.],
+        [ 604.,  694.,  725.,  ...,  611.,  581.,  459.],
+        [ 709.,  690.,  663.,  ...,  519.,  543.,  496.]])
+average: 2.0468852519989014
+
+max average: 1125.30615234375
+
+min average: 555.793701171875
+
+tensor([[ 682.,  692.,  685.,  ...,  663.,  658.,  592.],
+        [1005.,  924.,  927.,  ..., 1207., 1218., 1011.],
+        [ 604.,  694.,  725.,  ...,  611.,  581.,  459.],
+        [ 709.,  690.,  663.,  ...,  519.,  543.,  496.]])
+average: 2.0468852519989014
+
+max average: 1125.30615234375
+
+min average: 555.793701171875
+
+tensor([[ 682.,  692.,  685.,  ...,  663.,  658.,  592.],
+        [1005.,  924.,  927.,  ..., 1207., 1218., 1011.],
+        [ 604.,  694.,  725.,  ...,  611.,  581.,  459.],
+        [ 709.,  690.,  663.,  ...,  519.,  543.,  496.]])
+average: 2.0468852519989014
+
+max average: 1125.30615234375
+
+min average: 555.793701171875
+
+tensor([[ 682.,  692.,  685.,  ...,  663.,  658.,  592.],
+        [1005.,  924.,  927.,  ..., 1207., 1218., 1011.],
+        [ 604.,  694.,  725.,  ...,  611.,  581.,  459.],
+        [ 709.,  690.,  663.,  ...,  519.,  543.,  496.]])
+average: 2.0468852519989014
+
+max average: 1125.30615234375
+
+min average: 555.793701171875
+
+all_cross_edge:tensor([4101338])  local edges num: 3572847
+
+all_cross_edge:tensor([4101338])  local edges num: 1886862
+
+all_cross_edge:tensor([4101338])  local edges num: 1822916
+
+all_cross_edge:tensor([4101338])  local edges num: 2241933
+
+tensor(3174, device='cuda:3')tensor(3174, device='cuda:2') tensor(3174, device='cuda:0') 9524557 9524557tensor(3174, device='cuda:1')
+9524557
+ 
+9524557
+tensor([[ 724.,  746.,  711.,  ...,  651.,  681.,  519.],
+        [1045.,  937.,  924.,  ..., 1155., 1052.,  948.],
+        [ 630.,  622.,  605.,  ...,  546.,  603.,  502.],
+        [ 601.,  695.,  760.,  ...,  648.,  664.,  588.]])
+average: 1.5932013988494873
+
+max average: 975.138916015625
+
+min average: 617.8872680664062
+
+tensor([[ 724.,  746.,  711.,  ...,  651.,  681.,  519.],
+        [1045.,  937.,  924.,  ..., 1155., 1052.,  948.],
+        [ 630.,  622.,  605.,  ...,  546.,  603.,  502.],
+        [ 601.,  695.,  760.,  ...,  648.,  664.,  588.]])
+average: 1.5932013988494873
+
+max average: 975.138916015625
+
+min average: 617.8872680664062
+
+tensor([[ 724.,  746.,  711.,  ...,  651.,  681.,  519.],
+        [1045.,  937.,  924.,  ..., 1155., 1052.,  948.],
+        [ 630.,  622.,  605.,  ...,  546.,  603.,  502.],
+        [ 601.,  695.,  760.,  ...,  648.,  664.,  588.]])
+average: 1.5932013988494873
+
+max average: 975.138916015625
+
+min average: 617.8872680664062
+
+tensor([[ 724.,  746.,  711.,  ...,  651.,  681.,  519.],
+        [1045.,  937.,  924.,  ..., 1155., 1052.,  948.],
+        [ 630.,  622.,  605.,  ...,  546.,  603.,  502.],
+        [ 601.,  695.,  760.,  ...,  648.,  664.,  588.]])
+average: 1.5932013988494873
+
+max average: 975.138916015625
+
+min average: 617.8872680664062
+
+all_cross_edge:tensor([4315461])  local edges num: 3095538
+
+all_cross_edge:tensor([4315461])  local edges num: 2096378
+
+all_cross_edge:tensor([4315461])  local edges num: 2046111
+
+all_cross_edge:tensor([4315461])  local edges num: 2286530
+
+init dataloaderinit dataloaderinit dataloader
+
+
+init dataloader
+The model has 1.2405433654785156 trainable parametersThe model has 1.2405433654785156 trainable parameters
+
+The model has 1.2405433654785156 trainable parameters
+The model has 1.2405433654785156 trainable parameters
+Epoch 0:Epoch 0:
+
+Epoch 0:
+Epoch 0:
+	train time:206.56s
+	train time:206.56s
+	train time:206.56s
+	train time:206.56s
+
+
+
+
+tensor(62600230, device='cuda:3')tensor(17141364, device='cuda:1')tensor(51356887, device='cuda:2')
+
+
+tensor(37308081, device='cuda:0')
+local node number tensor([168406562]) remote node number tensor([175072823]) local edge tensor([404429081]) remote edgetensor([314937492])
+
+local node number tensor([168406562]) remote node number tensor([175072823]) local edge tensor([404429081]) remote edgetensor([314937492])
+local node number tensor([168406562]) remote node number tensor([175072823]) local edge tensor([404429081]) remote edgetensor([314937492])
+
+
+local node number tensor([168406562]) remote node number tensor([175072823]) local edge tensor([404429081]) remote edgetensor([314937492])
+
+memory comm tensor([13512518]) shared comm tensor([0])
+
+memory comm tensor([13512518]) shared comm tensor([0])
+time_forward = 125.62294251704589 time_backward =  37.62157172430307 time_sample =  0 pre_batch = 0 pre_input = 43.279293407686055 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 5.331971003673971 time_attention = 9.766453600022942memory comm tensor([13512518]) shared comm tensor([0])
+
+
+
+time_forward = 124.8380020596087 time_backward =  33.57677461951971 time_sample =  0 pre_batch = 0 pre_input = 48.110341768246144 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 5.197271470911801 time_attention = 8.755858279298991
+time_forward = 121.0106316707097 time_backward =  25.16922782920301 time_sample =  0 pre_batch = 0 pre_input = 60.345634343102574 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 3.6248520226217806 time_attention = 5.892399718053639
+memory comm tensor([13512518]) shared comm tensor([0])
+
+time_forward = 123.64598367689177 time_backward =  30.407549081370234 time_sample =  0 pre_batch = 0 pre_input = 52.46951307170093 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 4.907623601146042 time_attention = 7.336352225393057

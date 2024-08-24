@@ -1,0 +1,144 @@
+[2024-04-03 21:25:47,746] torch.distributed.run: [WARNING] 
+[2024-04-03 21:25:47,746] torch.distributed.run: [WARNING] *****************************************
+[2024-04-03 21:25:47,746] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-04-03 21:25:47,746] torch.distributed.run: [WARNING] *****************************************
+LOCAL RANK 0, RANK0
+LOCAL RANK 3, RANK3
+LOCAL RANK 1, RANK1
+LOCAL RANK 2, RANK2
+use cuda on 3
+use cuda on 1
+use cuda on 2
+use cuda on 0
+tensor([        0,         0,         1,  ..., 191290880, 191290881,
+        191290881])
+tensor([        0,         0,         1,  ..., 191290880, 191290881,
+        191290881])
+tensor([        0,         0,         1,  ..., 191290880, 191290881,
+        191290881])
+tensor([        0,         0,         1,  ..., 191290880, 191290881,
+        191290881])
+16682
+16682
+16682
+16682
+get_neighbors consume: 13.6615s
+get_neighbors consume: 13.6683s
+get_neighbors consume: 13.9419s
+num_batchs: tensor([81208], device='cuda:1')
+num_batchs: tensor([85313], device='cuda:3')
+get_neighbors consume: 14.1598s
+num_batchs: tensor([89455], device='cuda:2')
+num_batchs: tensor([82566], device='cuda:0')
+num_batchs: num_batchs: num_batchs:num_batchs:  tensor([18835], device='cuda:0')
+tensor([21171], device='cuda:2')
+tensor([18256], device='cuda:3')
+tensor([17487], device='cuda:1')
+num_batchs: num_batchs:num_batchs: num_batchs:  tensor([23328], device='cuda:0')tensor([23750], device='cuda:3')
+
+tensor([25835], device='cuda:2')
+tensor([21939], device='cuda:1')
+Epoch 0:
+Epoch 0:
+Epoch 0:
+Epoch 0:
+[2024-04-03 21:37:38,820] torch.distributed.elastic.agent.server.api: [WARNING] Received Signals.SIGINT death signal, shutting down workers
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/home/zlj/starrygl-historical/starrygl/examples/train_tgnn.py", line 428, in <module>
+  File "/home/zlj/starrygl-historical/starrygl/examples/train_tgnn.py", line 428, in <module>
+[2024-04-03 21:37:38,820] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2018409 closing signal SIGINT
+[2024-04-03 21:37:38,820] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2018410 closing signal SIGINT
+  File "/home/zlj/starrygl-historical/starrygl/examples/train_tgnn.py", line 333, in main
+[2024-04-03 21:37:38,820] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2018411 closing signal SIGINT
+  File "/home/zlj/starrygl-historical/starrygl/examples/train_tgnn.py", line 333, in main
+[2024-04-03 21:37:38,820] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2018412 closing signal SIGINT
+    pred_pos, pred_neg = model(mfgs,metadata)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    pred_pos, pred_neg = model(mfgs,metadata)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+
+    return self._call_impl(*args, **kwargs)    
+return forward_call(*args, **kwargs)  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+
+        else self._run_ddp_forward(*inputs, **kwargs)return forward_call(*args, **kwargs)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]    
+else self._run_ddp_forward(*inputs, **kwargs)  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/module/modules.py", line 104, in forward
+    rst = self.layers['l' + str(l) + 'h' + str(h)](mfgs[l][h])
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/module/modules.py", line 104, in forward
+    rst = self.layers['l' + str(l) + 'h' + str(h)](mfgs[l][h])
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/module/layers.py", line 145, in forward
+    Q = self.w_q(torch.cat([b.srcdata['h'][:b.num_dst_nodes()], zero_time_feat], dim=1))[b.edges()[1]]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/starrygl-historical/starrygl/starrygl/module/layers.py", line 90, in forward
+    time_feat = self.time_enc(b.edata['dt'])
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/dgl/heterograph.py", line 2298, in edata
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/linear.py", line 114, in forward
+    return F.linear(input, self.weight, self.bias)
+KeyboardInterrupt
+    return HeteroEdgeDataView(self, None, ALL)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/dgl/view.py", line 193, in __init__
+    else self._graph.get_etype_id(etype)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/dgl/heterograph.py", line 1405, in get_etype_id
+    if self._graph.number_of_etypes() != 1:
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/dgl/heterograph_index.py", line 95, in number_of_etypes
+    return self.metagraph.num_edges()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/dgl/heterograph_index.py", line 83, in metagraph
+    return _CAPI_DGLHeteroGetMetaGraph(self)
+  File "dgl/_ffi/_cython/./function.pxi", line 296, in dgl._ffi._cy3.core.FunctionBase.__call__
+  File "dgl/_ffi/_cython/./function.pxi", line 172, in dgl._ffi._cy3.core.make_ret
+  File "dgl/_ffi/_cython/./object.pxi", line 25, in dgl._ffi._cy3.core.make_ret_object
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/dgl/graph_index.py", line 39, in __new__
+    def __new__(cls):
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 8, in <module>
+    sys.exit(main())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 255, in launch_agent
+    result = agent.run()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/metrics/api.py", line 124, in wrapper
+    result = f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 736, in run
+    result = self._invoke_run(role)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 877, in _invoke_run
+    time.sleep(monitor_interval)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 2018343 got signal: 2

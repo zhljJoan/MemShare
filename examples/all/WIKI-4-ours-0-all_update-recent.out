@@ -1,0 +1,3480 @@
+LOCAL RANK 3, RANK3
+LOCAL RANK 0, RANK0
+LOCAL RANK 2, RANK2
+LOCAL RANK 1, RANK1
+inin
+
+in
+in
+local rank is 1 world_size is 4 memory group is 0 memory rank is 1 memory group size is 4
+local rank is 0 world_size is 4 memory group is 0 memory rank is 0 memory group size is 4
+
+
+[0, 1, 2, 3][0, 1, 2, 3]
+
+local rank is 3 world_size is 4 memory group is 0 memory rank is 3 memory group size is 4
+
+local rank is 2 world_size is 4 memory group is 0 memory rank is 2 memory group size is 4
+[0, 1, 2, 3]
+
+[0, 1, 2, 3]
+memory used is torch.Size([9228, 172]) torch.float32 0.005912840366363525
+
+dist rank is 0 after node feats defination:
+dist rank is 0 after node feats defination:
+
+dist rank is 3 after node feats defination:
+
+dist rank is 1 after node feats defination:
+
+dist rank is 2 after node feats defination:
+
+local node num 2304 ,local edge num 39462
+
+local node num 2373 ,local edge num 39403
+local node num 2357 ,local edge num 39186
+local node num 2193 ,local edge num 39423
+
+
+
+num nodes is tensor([157474])
+num nodes is tensor([157474])
+init 2
+cpu
+tensor([2251799813685248, 1125899906842624, 1125899906842625,  ...,
+        3377699720567273,            39461, 3377699720567274])
+init 1
+cpu
+Total GPU memory:  44.3516845703125
+num nodes is tensor([157474])
+Current GPU memory allocated: tensor([2251799813685248, 1125899906842624, 1125899906842625,  ...,
+        3377699720567273,            39461, 3377699720567274]) 
+0.0
+Total GPU memory:  44.3516845703125
+Current GPU memory reserved:  0.0
+Current GPU memory allocated: num nodes is tensor([157474]) 
+0.0
+Max GPU memory allocated during this session:  Current GPU memory reserved: 0 
+0.0
+Max GPU memory reserved during this session:  0
+cpu 2
+Total GPU memory:  44.3516845703125
+Max GPU memory allocated during this session:  0
+Current GPU memory allocated:  0.0
+Max GPU memory reserved during this session:  0
+cpu 1
+Total GPU memory:  44.3516845703125
+Current GPU memory reserved:  0.0
+Current GPU memory allocated:  0.0
+Max GPU memory allocated during this session:  0
+Current GPU memory reserved:  0.0
+Max GPU memory reserved during this session:  0
+torch.Size([39423, 172])
+Total GPU memory:  44.3516845703125
+Max GPU memory allocated during this session:  0
+Current GPU memory allocated:  0.0
+Max GPU memory reserved during this session:  0
+torch.Size([39186, 172])
+Total GPU memory:  44.3516845703125
+Current GPU memory reserved:  0.0
+Current GPU memory allocated:  0.0
+init 0
+cpu
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+Current GPU memory reserved:  0.0
+tensor([2251799813685248, 1125899906842624, 1125899906842625,  ...,
+        3377699720567273,            39461, 3377699720567274])
+Total GPU memory:  44.3516845703125
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+Current GPU memory allocated:  4.76837158203125e-07
+init data loader
+init 3
+cpu
+Current GPU memory reserved:  0.001953125
+init data loader
+tensor([2251799813685248, 1125899906842624, 1125899906842625,  ...,
+        3377699720567273,            39461, 3377699720567274])
+Total GPU memory:  Max GPU memory allocated during this session: 44.3516845703125 
+9728
+Max GPU memory reserved during this session:  2097152
+cpu 0
+Current GPU memory allocated:  0.0
+Total GPU memory:  44.3516845703125
+Current GPU memory reserved:  0.0
+Current GPU memory allocated:  4.76837158203125e-07
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  0
+Max GPU memory allocated during this session:  9728
+Total GPU memory:  44.3516845703125
+Max GPU memory reserved during this session:  0
+cpu 3
+Max GPU memory reserved during this session:  Total GPU memory: 2097152 
+44.3516845703125
+torch.Size([39462, 172])Current GPU memory allocated: 
+ 0.0
+Total GPU memory:  44.3516845703125
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Current GPU memory allocated:  4.76837158203125e-07
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Current GPU memory reserved:  0.0
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+Max GPU memory allocated during this session:  0
+Max GPU memory allocated during this session:  9728
+Max GPU memory reserved during this session:  0
+torch.Size([39403, 172])
+Total GPU memory:  44.3516845703125
+Max GPU memory reserved during this session:  0
+Max GPU memory reserved during this session:  2097152
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+init data loader
+Max GPU memory reserved during this session:  0
+init data loader
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  4.76837158203125e-07
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  9728
+Max GPU memory reserved during this session:  2097152
+tensor([], device='cuda:1', dtype=torch.int32)tensor([], device='cuda:2', dtype=torch.int32)
+
+100Total GPU memory: 
+100 
+44.3516845703125
+Current GPU memory allocated:  0.0
+Current GPU memory reserved:  0.0
+Max GPU memory allocated during this session:  0
+Max GPU memory reserved during this session:  0
+tensor([], device='cuda:3', dtype=torch.int32)
+100
+tensor([], device='cuda:0', dtype=torch.int32)
+100
+get_neighbors consume: 0.011948s
+get_neighbors consume: 1 0.0120166s
+2 tensor([1152,    2,    1,  ...,    1,    0,    3])tensor([1152,    2,    1,  ...,    1,    0,    3])
+
+get_neighbors consume: 0.0127293s
+3 tensor([62304,     2,     1,  ...,     1,     0,     3])
+get_neighbors consume: 0.0112191s
+0 tensor([58208,     2,     1,  ...,     1,     0,     3])
+get_neighbors consume: 0.0126048s
+2 tensor([1152,    2,    1,  ...,    1,    0,    3])
+get_neighbors consume: 0.0122609s
+1 tensor([1152,    2,    1,  ...,    1,    0,    3])
+part tensor([[2, 2, 2,  ..., 2, 2, 2],
+        [2, 2, 2,  ..., 2, 0, 0]])
+
+get_neighbors consume: 0.0107901s
+0 tensor([58208,     2,     1,  ...,     1,     0,     3])
+part tensor([[1, 1, 1,  ..., 1, 1, 1],
+        [1, 1, 1,  ..., 1, 1, 1]])
+
+part tensor([[0, 0, 0,  ..., 0, 0, 0],
+        [0, 0, 0,  ..., 0, 0, 0]])
+
+get_neighbors consume: 0.0125171s
+3 tensor([62304,     2,     1,  ...,     1,     0,     3])
+part tensor([[3, 3, 3,  ..., 1, 3, 3],
+        [3, 3, 3,  ..., 3, 2, 3]])
+
+ts tensor([    131,     153,     380,  ..., 1862638, 1862645, 1862652],
+       device='cuda:0') tensor([      0,      36,      77,  ..., 1862639, 1862645, 1862652],
+       device='cuda:0') tensor([2218300, 2218303, 2218304,  ..., 2678293, 2678333, 2678373],
+       device='cuda:0') tensor([1862653, 1862659, 1862666,  ..., 2218282, 2218288, 2218288],
+       device='cuda:0')
+seed is 69328
+tensor([8230, 8234, 8240, 8242, 8244, 8246, 8250, 8253, 8256, 8259, 8262, 8266,
+        8267, 8268, 8269, 8273, 8276, 8280, 8282, 8285, 8290, 8307, 8309, 8313,
+        8316, 8320, 8322, 8324, 8328, 8329, 8331, 8339, 8342, 8367, 8368, 8371,
+        8376, 8379, 8383, 8386, 8403, 8407, 8426, 8439, 8442, 8444, 8446, 8447,
+        8451, 8458, 8459, 8461, 8462, 8463, 8464, 8465, 8469, 8470, 8471, 8472,
+        8473, 8476, 8480, 8481, 8487, 8493, 8494, 8495, 8499, 8500, 8501, 8502,
+        8503, 8505, 8506, 8508, 8510, 8512, 8515, 8518, 8521, 8523, 8525, 8527,
+        8530, 8536, 8541, 8542, 8545, 8552, 8555, 8559, 8563, 8576, 8581, 8585,
+        8590, 8594, 8596, 8598, 8599, 8600, 8601, 8602, 8603, 8604, 8605, 8606,
+        8608, 8616, 8626, 8628, 8629, 8630, 8634, 8635, 8638, 8640, 8641, 8642,
+        8644, 8645, 8646, 8648, 8649, 8650, 8656, 8657, 8659, 8660, 8662, 8663,
+        8664, 8670, 8671, 8672, 8686, 8695, 8696, 8697, 8698, 8703, 8710, 8711,
+        8715, 8719, 8721, 8722, 8727, 8730, 8737, 8740, 8755, 8756, 8793, 8798,
+        8804, 8807, 8808, 8809, 8811, 8813, 8815, 8816, 8817, 8819, 8824, 8826,
+        8833, 8842, 8845, 8846, 8849, 8850, 8851, 8852, 8853, 8858, 8860, 8861,
+        8863, 8864, 8868, 8914, 8918, 8922, 8931, 8933, 8934, 8935, 8946, 8953,
+        8954, 8955, 8957, 8961, 8964, 8966, 8967, 8970, 8980, 8988, 9031, 9036,
+        9039, 9045, 9047, 9049, 9050, 9051, 9053, 9082, 9083, 9084, 9104, 9114,
+        9115, 9120, 9121, 9122, 9124, 9143, 9146, 9147, 9148, 9150, 9153, 9158,
+        9159, 9162, 9163, 9166, 9173, 9174, 9183, 9186, 9187, 9191, 9193, 9196,
+        9197, 9199, 9202, 9214, 9215, 9216, 9217, 9218, 9219, 9221, 9223, 9226])
+seed is 46802
+ts tensor([      0,     218,     242,  ..., 1862540, 1862559, 1862570],
+       device='cuda:2') tensor([      0,      36,      77,  ..., 1862639, 1862645, 1862652],
+       device='cuda:2') tensor([2218300, 2218303, 2218304,  ..., 2678293, 2678333, 2678373],
+       device='cuda:2') tensor([1862653, 1862659, 1862666,  ..., 2218282, 2218288, 2218288],
+       device='cuda:2')
+seed is 69328
+ts tensor([     36,      77,     150,  ..., 1862538, 1862577, 1862639],
+       device='cuda:1') tensor([      0,      36,      77,  ..., 1862639, 1862645, 1862652],
+       device='cuda:1') tensor([2218300, 2218303, 2218304,  ..., 2678293, 2678333, 2678373],
+       device='cuda:1') tensor([1862653, 1862659, 1862666,  ..., 2218282, 2218288, 2218288],
+       device='cuda:1')
+tensor([8228, 8232, 8236, 8238, 8243, 8249, 8264, 8272, 8275, 8278, 8283, 8286,
+        8288, 8291, 8293, 8295, 8296, 8297, 8298, 8300, 8310, 8314, 8317, 8318,
+        8319, 8323, 8326, 8327, 8330, 8333, 8336, 8345, 8346, 8347, 8348, 8351,
+        8353, 8355, 8357, 8360, 8361, 8364, 8365, 8377, 8380, 8384, 8389, 8392,
+        8398, 8404, 8408, 8409, 8418, 8425, 8430, 8432, 8433, 8434, 8435, 8440,
+        8455, 8457, 8460, 8466, 8467, 8468, 8507, 8509, 8511, 8514, 8516, 8517,
+        8519, 8520, 8529, 8531, 8534, 8546, 8549, 8550, 8554, 8556, 8558, 8560,
+        8561, 8562, 8564, 8565, 8567, 8568, 8569, 8571, 8610, 8611, 8612, 8613,
+        8614, 8615, 8637, 8639, 8643, 8647, 8651, 8652, 8653, 8654, 8655, 8665,
+        8666, 8690, 8699, 8701, 8704, 8705, 8706, 8707, 8708, 8709, 8716, 8717,
+        8726, 8728, 8731, 8742, 8753, 8754, 8758, 8759, 8760, 8762, 8763, 8764,
+        8765, 8767, 8768, 8769, 8770, 8771, 8772, 8774, 8775, 8776, 8777, 8778,
+        8779, 8782, 8785, 8787, 8828, 8829, 8830, 8831, 8832, 8834, 8835, 8836,
+        8837, 8838, 8839, 8841, 8843, 8844, 8856, 8857, 8859, 8869, 8870, 8871,
+        8877, 8879, 8880, 8881, 8882, 8883, 8898, 8903, 8905, 8907, 8908, 8909,
+        8910, 8911, 8912, 8913, 8919, 8923, 8924, 8925, 8926, 8928, 8929, 8930,
+        8932, 8941, 8942, 8943, 8947, 8962, 8965, 8971, 8973, 8989, 8990, 8991,
+        8992, 8993, 8994, 8995, 8996, 9005, 9010, 9015, 9029, 9030, 9032, 9033,
+        9037, 9040, 9041, 9044, 9046, 9048, 9052, 9057, 9071, 9087, 9088, 9089,
+        9098, 9100, 9105, 9106, 9108, 9110, 9111, 9113, 9125, 9126, 9127, 9128,
+        9136, 9137, 9138, 9140, 9141, 9149, 9151, 9152, 9155, 9156, 9157, 9160,
+        9168, 9170, 9171, 9184, 9192, 9194, 9195, 9198, 9205, 9209, 9210, 9211,
+        9213, 9220, 9222, 9224])
+seed is 69328
+seed is 46802
+tensor([8229, 8239, 8245, 8248, 8251, 8254, 8258, 8261, 8263, 8265, 8270, 8271,
+        8274, 8277, 8279, 8284, 8292, 8299, 8301, 8303, 8304, 8305, 8311, 8312,
+        8315, 8321, 8335, 8340, 8341, 8356, 8358, 8366, 8369, 8378, 8382, 8387,
+        8390, 8394, 8396, 8400, 8401, 8411, 8413, 8414, 8415, 8417, 8420, 8421,
+        8423, 8424, 8427, 8428, 8429, 8436, 8437, 8438, 8441, 8474, 8475, 8478,
+        8479, 8482, 8483, 8484, 8485, 8504, 8513, 8533, 8547, 8566, 8575, 8577,
+        8579, 8582, 8583, 8586, 8587, 8588, 8589, 8591, 8592, 8593, 8595, 8597,
+        8609, 8627, 8658, 8661, 8681, 8682, 8683, 8685, 8687, 8688, 8689, 8691,
+        8692, 8693, 8694, 8700, 8702, 8712, 8713, 8718, 8724, 8725, 8733, 8735,
+        8736, 8792, 8796, 8797, 8799, 8800, 8801, 8802, 8803, 8805, 8806, 8810,
+        8812, 8814, 8820, 8821, 8822, 8823, 8825, 8827, 8848, 8854, 8865, 8866,
+        8872, 8873, 8874, 8875, 8876, 8878, 8884, 8885, 8890, 8891, 8892, 8894,
+        8900, 8901, 8904, 8906, 8915, 8916, 8917, 8920, 8921, 8936, 8937, 8938,
+        8939, 8940, 8944, 8945, 8958, 8959, 8972, 8974, 8975, 8976, 8977, 8978,
+        8979, 8981, 8982, 8983, 8984, 8985, 8987, 8997, 8998, 8999, 9000, 9001,
+        9002, 9003, 9004, 9006, 9007, 9009, 9011, 9016, 9017, 9018, 9019, 9020,
+        9021, 9023, 9024, 9028, 9034, 9038, 9058, 9070, 9072, 9074, 9077, 9090,
+        9093, 9099, 9116, 9117, 9118, 9119, 9129, 9130, 9131, 9132, 9133, 9134,
+        9135, 9144, 9145, 9154, 9161, 9167, 9172, 9175, 9177, 9185, 9207, 9212,
+        9225])
+seed is 46802
+ts tensor([    169,     295,     387,  ..., 1862411, 1862591, 1862617],
+       device='cuda:3') tensor([      0,      36,      77,  ..., 1862639, 1862645, 1862652],
+       device='cuda:3') tensor([2218300, 2218303, 2218304,  ..., 2678293, 2678333, 2678373],
+       device='cuda:3') tensor([1862653, 1862659, 1862666,  ..., 2218282, 2218288, 2218288],
+       device='cuda:3')
+seed is 69328
+tensor(9, device='cuda:0') 110232
+tensor([8231, 8233, 8235, 8237, 8241, 8247, 8252, 8255, 8257, 8260, 8281, 8287,
+        8289, 8294, 8302, 8306, 8308, 8325, 8332, 8334, 8337, 8338, 8343, 8344,
+        8349, 8350, 8352, 8354, 8359, 8362, 8363, 8370, 8372, 8373, 8374, 8375,
+        8381, 8385, 8388, 8391, 8393, 8395, 8397, 8399, 8402, 8405, 8406, 8410,
+        8412, 8416, 8419, 8422, 8431, 8443, 8445, 8448, 8449, 8450, 8452, 8453,
+        8454, 8456, 8477, 8486, 8488, 8489, 8490, 8491, 8492, 8496, 8497, 8498,
+        8522, 8524, 8526, 8528, 8532, 8535, 8537, 8538, 8539, 8540, 8543, 8544,
+        8548, 8551, 8553, 8557, 8570, 8572, 8573, 8574, 8578, 8580, 8584, 8607,
+        8617, 8618, 8619, 8620, 8621, 8622, 8623, 8624, 8625, 8631, 8632, 8633,
+        8636, 8667, 8668, 8669, 8673, 8674, 8675, 8676, 8677, 8678, 8679, 8680,
+        8684, 8714, 8720, 8723, 8729, 8732, 8734, 8738, 8739, 8741, 8743, 8744,
+        8745, 8746, 8747, 8748, 8749, 8750, 8751, 8752, 8757, 8761, 8766, 8773,
+        8780, 8781, 8783, 8784, 8786, 8788, 8789, 8790, 8791, 8794, 8795, 8818,
+        8840, 8847, 8855, 8862, 8867, 8886, 8887, 8888, 8889, 8893, 8895, 8896,
+        8897, 8899, 8902, 8927, 8948, 8949, 8950, 8951, 8952, 8956, 8960, 8963,
+        8968, 8969, 8986, 9008, 9012, 9013, 9014, 9022, 9025, 9026, 9027, 9035,
+        9042, 9043, 9054, 9055, 9056, 9059, 9060, 9061, 9062, 9063, 9064, 9065,
+        9066, 9067, 9068, 9069, 9073, 9075, 9076, 9078, 9079, 9080, 9081, 9085,
+        9086, 9091, 9092, 9094, 9095, 9096, 9097, 9101, 9102, 9103, 9107, 9109,
+        9112, 9123, 9139, 9142, 9164, 9165, 9169, 9176, 9178, 9179, 9180, 9181,
+        9182, 9188, 9189, 9190, 9200, 9201, 9203, 9204, 9206, 9208, 9227])
+seed is 46802
+tensor(9, device='cuda:2') 110232
+tensor(9, device='cuda:1') 110232
+tensor(9, device='cuda:3') 110232
+tensor([[2924., 3088., 3032., 3123., 3112., 2925., 2838., 2798., 3159.,  552.],
+        [3145., 2879., 3025., 2992., 3188., 2949., 2956., 3174., 2877.,  564.],
+        [2979., 3055., 3019., 3160., 3045., 2962., 2919., 3111., 2946.,  550.],
+        [2952., 2978., 2924., 2725., 2655., 3164., 3287., 2917., 3018.,  566.]])
+average: 1.1046907901763916
+
+max average: 2896.300048828125
+
+min average: 2609.5
+
+tensor([[2924., 3088., 3032., 3123., 3112., 2925., 2838., 2798., 3159.,  552.],
+        [3145., 2879., 3025., 2992., 3188., 2949., 2956., 3174., 2877.,  564.],
+        [2979., 3055., 3019., 3160., 3045., 2962., 2919., 3111., 2946.,  550.],
+        [2952., 2978., 2924., 2725., 2655., 3164., 3287., 2917., 3018.,  566.]])
+average: 1.1046907901763916
+
+max average: 2896.300048828125
+
+min average: 2609.5
+
+tensor([[2924., 3088., 3032., 3123., 3112., 2925., 2838., 2798., 3159.,  552.],
+        [3145., 2879., 3025., 2992., 3188., 2949., 2956., 3174., 2877.,  564.],
+        [2979., 3055., 3019., 3160., 3045., 2962., 2919., 3111., 2946.,  550.],
+        [2952., 2978., 2924., 2725., 2655., 3164., 3287., 2917., 3018.,  566.]])
+average: 1.1046907901763916
+
+max average: 2896.300048828125
+
+min average: 2609.5
+
+tensor([[2924., 3088., 3032., 3123., 3112., 2925., 2838., 2798., 3159.,  552.],
+        [3145., 2879., 3025., 2992., 3188., 2949., 2956., 3174., 2877.,  564.],
+        [2979., 3055., 3019., 3160., 3045., 2962., 2919., 3111., 2946.,  550.],
+        [2952., 2978., 2924., 2725., 2655., 3164., 3287., 2917., 3018.,  566.]])
+average: 1.1046907901763916
+
+max average: 2896.300048828125
+
+min average: 2609.5
+
+all_cross_edge:tensor([27128])  local edges num: 27551
+
+all_cross_edge:tensor([27128])  local edges num: 27186
+
+all_cross_edge:tensor([27128])  local edges num: 27746
+
+all_cross_edge:tensor([27128])  local edges num: 27749
+
+tensor(36, device='cuda:3') 110232
+tensor(36, device='cuda:0') 110232
+tensor(36, device='cuda:1')tensor(36, device='cuda:2')  110232110232
+
+tensor([[ 743.,  705.,  725.,  751.,  741.,  723.,  903.,  721.,  721.,  782.,
+          758.,  771.,  715.,  826.,  745.,  837.,  786.,  672.,  800.,  854.,
+          675.,  709.,  760.,  781.,  734.,  654.,  675.,  775.,  899.,  533.,
+          698.,  668.,  790.,  802.,  904.,  663.,  552.],
+        [ 743.,  790.,  670.,  942.,  628.,  799.,  673.,  779.,  778.,  724.,
+          800.,  723.,  756.,  692.,  865.,  679.,  762., 1006.,  732.,  688.,
+          761.,  729.,  719.,  740.,  720.,  765.,  636.,  835.,  626.,  961.,
+          785.,  802.,  716.,  678.,  659.,  824.,  564.],
+        [ 758.,  763.,  862.,  596.,  817.,  751.,  729.,  758.,  742.,  827.,
+          719.,  731.,  741.,  829.,  863.,  727.,  671.,  737.,  898.,  739.,
+          756.,  702.,  723.,  781.,  672.,  746.,  862.,  639.,  719.,  772.,
+          819.,  801.,  787.,  685.,  775.,  699.,  550.],
+        [ 756.,  742.,  743.,  711.,  814.,  727.,  695.,  742.,  759.,  667.,
+          723.,  775.,  788.,  653.,  527.,  757.,  781.,  585.,  570.,  719.,
+          808.,  860.,  798.,  698.,  874.,  835.,  827.,  751.,  756.,  734.,
+          698.,  729.,  707.,  835.,  662.,  814.,  566.]])
+average: 1.2645710706710815
+
+max average: 830.9729614257812
+
+min average: 663.6216430664062
+
+tensor([[ 743.,  705.,  725.,  751.,  741.,  723.,  903.,  721.,  721.,  782.,
+          758.,  771.,  715.,  826.,  745.,  837.,  786.,  672.,  800.,  854.,
+          675.,  709.,  760.,  781.,  734.,  654.,  675.,  775.,  899.,  533.,
+          698.,  668.,  790.,  802.,  904.,  663.,  552.],
+        [ 743.,  790.,  670.,  942.,  628.,  799.,  673.,  779.,  778.,  724.,
+          800.,  723.,  756.,  692.,  865.,  679.,  762., 1006.,  732.,  688.,
+          761.,  729.,  719.,  740.,  720.,  765.,  636.,  835.,  626.,  961.,
+          785.,  802.,  716.,  678.,  659.,  824.,  564.],
+        [ 758.,  763.,  862.,  596.,  817.,  751.,  729.,  758.,  742.,  827.,
+          719.,  731.,  741.,  829.,  863.,  727.,  671.,  737.,  898.,  739.,
+          756.,  702.,  723.,  781.,  672.,  746.,  862.,  639.,  719.,  772.,
+          819.,  801.,  787.,  685.,  775.,  699.,  550.],
+        [ 756.,  742.,  743.,  711.,  814.,  727.,  695.,  742.,  759.,  667.,
+          723.,  775.,  788.,  653.,  527.,  757.,  781.,  585.,  570.,  719.,
+          808.,  860.,  798.,  698.,  874.,  835.,  827.,  751.,  756.,  734.,
+          698.,  729.,  707.,  835.,  662.,  814.,  566.]])
+tensor([[ 743.,  705.,  725.,  751.,  741.,  723.,  903.,  721.,  721.,  782.,
+          758.,  771.,  715.,  826.,  745.,  837.,  786.,  672.,  800.,  854.,
+          675.,  709.,  760.,  781.,  734.,  654.,  675.,  775.,  899.,  533.,
+          698.,  668.,  790.,  802.,  904.,  663.,  552.],
+        [ 743.,  790.,  670.,  942.,  628.,  799.,  673.,  779.,  778.,  724.,
+          800.,  723.,  756.,  692.,  865.,  679.,  762., 1006.,  732.,  688.,
+          761.,  729.,  719.,  740.,  720.,  765.,  636.,  835.,  626.,  961.,
+          785.,  802.,  716.,  678.,  659.,  824.,  564.],
+        [ 758.,  763.,  862.,  596.,  817.,  751.,  729.,  758.,  742.,  827.,
+          719.,  731.,  741.,  829.,  863.,  727.,  671.,  737.,  898.,  739.,
+          756.,  702.,  723.,  781.,  672.,  746.,  862.,  639.,  719.,  772.,
+          819.,  801.,  787.,  685.,  775.,  699.,  550.],
+        [ 756.,  742.,  743.,  711.,  814.,  727.,  695.,  742.,  759.,  667.,
+          723.,  775.,  788.,  653.,  527.,  757.,  781.,  585.,  570.,  719.,
+          808.,  860.,  798.,  698.,  874.,  835.,  827.,  751.,  756.,  734.,
+          698.,  729.,  707.,  835.,  662.,  814.,  566.]])average: 1.2645710706710815
+
+
+max average: 830.9729614257812
+
+min average: 663.6216430664062
+
+average: 1.2645710706710815
+
+max average: 830.9729614257812
+
+min average: 663.6216430664062
+
+tensor([[ 743.,  705.,  725.,  751.,  741.,  723.,  903.,  721.,  721.,  782.,
+          758.,  771.,  715.,  826.,  745.,  837.,  786.,  672.,  800.,  854.,
+          675.,  709.,  760.,  781.,  734.,  654.,  675.,  775.,  899.,  533.,
+          698.,  668.,  790.,  802.,  904.,  663.,  552.],
+        [ 743.,  790.,  670.,  942.,  628.,  799.,  673.,  779.,  778.,  724.,
+          800.,  723.,  756.,  692.,  865.,  679.,  762., 1006.,  732.,  688.,
+          761.,  729.,  719.,  740.,  720.,  765.,  636.,  835.,  626.,  961.,
+          785.,  802.,  716.,  678.,  659.,  824.,  564.],
+        [ 758.,  763.,  862.,  596.,  817.,  751.,  729.,  758.,  742.,  827.,
+          719.,  731.,  741.,  829.,  863.,  727.,  671.,  737.,  898.,  739.,
+          756.,  702.,  723.,  781.,  672.,  746.,  862.,  639.,  719.,  772.,
+          819.,  801.,  787.,  685.,  775.,  699.,  550.],
+        [ 756.,  742.,  743.,  711.,  814.,  727.,  695.,  742.,  759.,  667.,
+          723.,  775.,  788.,  653.,  527.,  757.,  781.,  585.,  570.,  719.,
+          808.,  860.,  798.,  698.,  874.,  835.,  827.,  751.,  756.,  734.,
+          698.,  729.,  707.,  835.,  662.,  814.,  566.]])
+average: 1.2645710706710815
+
+max average: 830.9729614257812
+
+min average: 663.6216430664062
+
+all_cross_edge:tensor([27128])  local edges num: 27551
+
+all_cross_edge:tensor([27128])  local edges num: 27186
+all_cross_edge:tensor([27128])  local edges num: 27746
+
+
+all_cross_edge:tensor([27128])  local edges num: 27749
+
+tensor(7, device='cuda:0') 23621
+tensor(7, device='cuda:3')tensor(7, device='cuda:2')  2362123621
+
+tensor(7, device='cuda:1') 23621
+tensor([[565., 741., 794., 789., 693., 716., 717., 753.],
+        [848., 885., 752., 799., 743., 709., 686., 548.],
+        [751., 715., 681., 852., 671., 799., 714., 603.],
+        [836., 659., 773., 560., 893., 776., 883., 717.]])
+average: 1.3312797546386719
+
+max average: 838.375
+
+min average: 634.875
+
+tensor([[565., 741., 794., 789., 693., 716., 717., 753.],
+        [848., 885., 752., 799., 743., 709., 686., 548.],
+        [751., 715., 681., 852., 671., 799., 714., 603.],
+        [836., 659., 773., 560., 893., 776., 883., 717.]])
+average: 1.3312797546386719
+
+tensor([[565., 741., 794., 789., 693., 716., 717., 753.],
+        [848., 885., 752., 799., 743., 709., 686., 548.],
+        [751., 715., 681., 852., 671., 799., 714., 603.],
+        [836., 659., 773., 560., 893., 776., 883., 717.]])
+max average: 838.375
+
+min average: 634.875
+
+average: 1.3312797546386719
+
+tensor([[565., 741., 794., 789., 693., 716., 717., 753.],
+        [848., 885., 752., 799., 743., 709., 686., 548.],
+        [751., 715., 681., 852., 671., 799., 714., 603.],
+        [836., 659., 773., 560., 893., 776., 883., 717.]])
+max average: 838.375
+
+min average: 634.875
+
+average: 1.3312797546386719
+
+max average: 838.375
+
+min average: 634.875
+
+all_cross_edge:tensor([7213])  local edges num: 5768
+
+all_cross_edge:tensor([7213])  local edges num: 6097
+
+all_cross_edge:tensor([7213])  local edges num: 5786
+all_cross_edge:tensor([7213])  local edges num: 5970
+
+
+tensor(7, device='cuda:0') 23621
+tensor(7, device='cuda:3') 23621
+tensor(7, device='cuda:1') tensor(7, device='cuda:2')23621 
+23621
+tensor([[814., 731., 656., 747., 875., 845., 741., 734.],
+        [579., 803., 729., 736., 781., 731., 665., 443.],
+        [702., 726., 654., 801., 768., 789., 700., 751.],
+        [905., 740., 961., 716., 576., 635., 894., 693.]])
+average: 1.3933327198028564
+
+max average: 854.375
+
+min average: 624.25
+
+tensor([[814., 731., 656., 747., 875., 845., 741., 734.],
+        [579., 803., 729., 736., 781., 731., 665., 443.],
+        [702., 726., 654., 801., 768., 789., 700., 751.],
+        [905., 740., 961., 716., 576., 635., 894., 693.]])
+average: 1.3933327198028564
+
+max average: 854.375
+
+min average: 624.25
+
+tensor([[814., 731., 656., 747., 875., 845., 741., 734.],
+        [579., 803., 729., 736., 781., 731., 665., 443.],
+        [702., 726., 654., 801., 768., 789., 700., 751.],
+        [905., 740., 961., 716., 576., 635., 894., 693.]])
+average: 1.3933327198028564
+
+max average: 854.375
+
+min average: 624.25
+
+tensor([[814., 731., 656., 747., 875., 845., 741., 734.],
+        [579., 803., 729., 736., 781., 731., 665., 443.],
+        [702., 726., 654., 801., 768., 789., 700., 751.],
+        [905., 740., 961., 716., 576., 635., 894., 693.]])
+average: 1.3933327198028564
+
+max average: 854.375
+
+min average: 624.25
+
+all_cross_edge:tensor([7372])  local edges num: 6143
+
+all_cross_edge:tensor([7372])  local edges num: 6120
+all_cross_edge:tensor([7372])  local edges num: 5891
+
+
+all_cross_edge:tensor([7372])  local edges num: 5467
+
+init dataloader
+init dataloaderinit dataloader
+
+init dataloader
+The model has 1.2405433654785156 trainable parameters
+The model has 1.2405433654785156 trainable parametersThe model has 1.2405433654785156 trainable parametersThe model has 1.2405433654785156 trainable parameters
+
+
+Epoch 0:
+Epoch 0:Epoch 0:Epoch 0:
+
+
+	train time:0.94s
+	train time:0.94s
+	train time:0.94s
+
+	train time:0.94s
+
+
+
+tensor(7813, device='cuda:2')
+tensor(7514, device='cuda:1')
+tensor(8366, device='cuda:0')
+tensor(8018, device='cuda:3')
+local node number tensor([31711]) remote node number tensor([15934]) local edge tensor([225417]) remote edgetensor([32810])
+
+local node number tensor([31711]) remote node number tensor([15934]) local edge tensor([225417]) remote edgetensor([32810])
+local node number tensor([31711]) remote node number tensor([15934]) local edge tensor([225417]) remote edgetensor([32810])
+
+
+local node number tensor([31711]) remote node number tensor([15934]) local edge tensor([225417]) remote edgetensor([32810])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.28628315194509923 time_backward =  0.17759188788477331 time_sample =  0 pre_batch = 0 pre_input = 0.4728331958176568 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002890452742576599 time_attention = 0.08162277191877365
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.29289411078207195 time_backward =  0.1714408170664683 time_sample =  0 pre_batch = 0 pre_input = 0.47273911209777 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003276278031989932 time_attention = 0.08229761000256985
+
+time_forward = 0.29108847491443157 time_backward =  0.1731570860138163 time_sample =  0 pre_batch = 0 pre_input = 0.47279232111759484 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0032659528078511357 time_attention = 0.08283535367809236
+time_forward = 0.32947058614809066 time_backward =  0.13672969222534448 time_sample =  0 pre_batch = 0 pre_input = 0.470805031247437 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003649652120657265 time_attention = 0.11408661724999547
+mode: val tensor([0.8432]) tensor([0.8143])mode: val tensor([0.8617]) tensor([0.8366])mode: val tensor([0.8833]) tensor([0.8562])
+
+
+mode: val tensor([0.8684]) tensor([0.8444])
+mode: test tensor([0.8385]) tensor([0.8094])
+mode: test tensor([0.8633]) tensor([0.8353])
+mode: test tensor([0.8402]) tensor([0.8119])mode: test tensor([0.8384]) tensor([0.8042])
+
+	train loss:13.3222  train ap: nan  val ap:0.864142  val auc:0.837878 test ap 0.845111 test auc0.815203
+
+	total time:1.29s  prep time:0.94s
+
+	train loss:13.2670  train ap: nan  val ap:0.864142  val auc:0.837878 test ap 0.845111 test auc0.815203
+
+	train loss:13.1961  train ap: nan  val ap:0.864142  val auc:0.837878 test ap 0.845111 test auc0.815203
+	total time:1.29s  prep time:0.94s
+
+
+	total time:1.29s  prep time:0.94s
+
+	train loss:13.2206  train ap: nan  val ap:0.864142  val auc:0.837878 test ap 0.845111 test auc0.815203
+
+	total time:1.29s  prep time:0.94s
+
+Epoch 1:
+Epoch 1:Epoch 1:
+
+Epoch 1:
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+
+
+
+
+tensor(7811, device='cuda:2')
+tensor(8281, device='cuda:0')tensor(7805, device='cuda:3')
+
+tensor(7476, device='cuda:1')
+local node number tensor([31373]) remote node number tensor([16280]) local edge tensor([223809]) remote edgetensor([33595])
+
+local node number tensor([31373]) remote node number tensor([16280]) local edge tensor([223809]) remote edgetensor([33595])
+
+local node number tensor([31373]) remote node number tensor([16280]) local edge tensor([223809]) remote edgetensor([33595])
+
+local node number tensor([31373]) remote node number tensor([16280]) local edge tensor([223809]) remote edgetensor([33595])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12865684600546956 time_backward =  0.08795264386571944 time_sample =  0 pre_batch = 0 pre_input = 0.02914279291871935 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002701061894185841 time_attention = 0.029314888059161603
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.130739517044276 time_backward =  0.08087734412401915 time_sample =  0 pre_batch = 0 pre_input = 0.034401235985569656 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0033210829133167863 time_attention = 0.02841967309359461
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1215071901679039 time_backward =  0.09793573489878327 time_sample =  0 pre_batch = 0 pre_input = 0.027017329935915768 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0031766382744535804 time_attention = 0.02720665279775858
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12496379506774247 time_backward =  0.09561849373858422 time_sample =  0 pre_batch = 0 pre_input = 0.025771097862161696 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027665148954838514 time_attention = 0.023757452960126102
+mode: val tensor([0.8805]) tensor([0.8763])
+mode: val tensor([0.8988]) tensor([0.8923])
+mode: val tensor([0.8677]) tensor([0.8624])
+mode: val tensor([0.8868]) tensor([0.8809])
+mode: test tensor([0.8657]) tensor([0.8575])mode: test tensor([0.8686]) tensor([0.8522])
+
+mode: test tensor([0.8885]) tensor([0.8791])
+mode: test tensor([0.8610]) tensor([0.8455])
+	train loss:10.2497  train ap: nan  val ap:0.883455  val auc:0.877978 test ap 0.870936 test auc0.858571
+
+	total time:0.58s  prep time:0.25s
+
+	train loss:10.5504  train ap: nan  val ap:0.883455  val auc:0.877978 test ap 0.870936 test auc0.858571
+
+	total time:0.58s  prep time:0.25s
+
+	train loss:10.4506  train ap: nan  val ap:0.883455  val auc:0.877978 test ap 0.870936 test auc0.858571
+
+	total time:0.58s  prep time:0.25s
+
+	train loss:10.1931  train ap: nan  val ap:0.883455  val auc:0.877978 test ap 0.870936 test auc0.858571
+
+	total time:0.58s  prep time:0.25s
+
+Epoch 2:Epoch 2:
+
+Epoch 2:
+Epoch 2:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7807, device='cuda:2')
+tensor(8228, device='cuda:0')tensor(7505, device='cuda:1')
+
+tensor(7810, device='cuda:3')
+local node number tensor([31350]) remote node number tensor([16242]) local edge tensor([223504]) remote edgetensor([33357])
+
+local node number tensor([31350]) remote node number tensor([16242]) local edge tensor([223504]) remote edgetensor([33357])
+
+local node number tensor([31350]) remote node number tensor([16242]) local edge tensor([223504]) remote edgetensor([33357])
+
+local node number tensor([31350]) remote node number tensor([16242]) local edge tensor([223504]) remote edgetensor([33357])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1151887180749327 time_backward =  0.08725971810054034 time_sample =  0 pre_batch = 0 pre_input = 0.0320440778741613 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0028037598822265863 time_attention = 0.024148112977854908
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.11677544191479683 time_backward =  0.09195275115780532 time_sample =  0 pre_batch = 0 pre_input = 0.026075310073792934 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025571411242708564 time_attention = 0.024361316114664078
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12104628281667829 time_backward =  0.08146281831432134 time_sample =  0 pre_batch = 0 pre_input = 0.032519158092327416 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003238447941839695 time_attention = 0.026284215738996863
+time_forward = 0.12037698610220104 time_backward =  0.07910655799787492 time_sample =  0 pre_batch = 0 pre_input = 0.03554832807276398 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003182385116815567 time_attention = 0.02424191532190889
+mode: val tensor([0.9087]) tensor([0.9019])mode: val tensor([0.8981]) tensor([0.8912])
+
+mode: val tensor([0.8752]) tensor([0.8703])
+mode: val tensor([0.8844]) tensor([0.8787])
+mode: test tensor([0.8731]) tensor([0.8654])mode: test tensor([0.8675]) tensor([0.8526])
+
+mode: test tensor([0.8618]) tensor([0.8516])
+mode: test tensor([0.8968]) tensor([0.8908])
+	train loss:8.3756  train ap: nan  val ap:0.891587  val auc:0.885540 test ap 0.874784 test auc0.865105
+	train loss:8.8535  train ap: nan  val ap:0.891587  val auc:0.885540 test ap 0.874784 test auc0.865105
+
+
+	total time:0.56s  prep time:0.24s
+	total time:0.56s  prep time:0.24s
+
+
+	train loss:8.2936  train ap: nan  val ap:0.891587  val auc:0.885540 test ap 0.874784 test auc0.865105
+
+	train loss:8.6591  train ap: nan  val ap:0.891587  val auc:0.885540 test ap 0.874784 test auc0.865105
+	total time:0.56s  prep time:0.24s
+
+
+	total time:0.56s  prep time:0.24s
+
+Epoch 3:Epoch 3:
+
+Epoch 3:
+Epoch 3:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8263, device='cuda:0')tensor(7795, device='cuda:2')
+
+tensor(7809, device='cuda:3')tensor(7507, device='cuda:1')
+
+local node number tensor([31374]) remote node number tensor([16263]) local edge tensor([223639]) remote edgetensor([33439])
+
+local node number tensor([31374]) remote node number tensor([16263]) local edge tensor([223639]) remote edgetensor([33439])
+
+local node number tensor([31374]) remote node number tensor([16263]) local edge tensor([223639]) remote edgetensor([33439])
+local node number tensor([31374]) remote node number tensor([16263]) local edge tensor([223639]) remote edgetensor([33439])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11687096394598484 time_backward =  0.0828489827690646 time_sample =  0 pre_batch = 0 pre_input = 0.0353101339424029 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002784266835078597 time_attention = 0.02562423818744719
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12199187988881022 time_backward =  0.07960581895895302 time_sample =  0 pre_batch = 0 pre_input = 0.033969299984164536 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003166085807606578 time_attention = 0.028427961049601436
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.11693635489791632 time_backward =  0.091792430030182 time_sample =  0 pre_batch = 0 pre_input = 0.026744279894046485 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027601139154285192 time_attention = 0.023564025876112282time_forward = 0.12171715928707272 time_backward =  0.07915823487564921 time_sample =  0 pre_batch = 0 pre_input = 0.03468918916769326 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0031931089470162988 time_attention = 0.025417270022444427
+
+mode: val tensor([0.9124]) tensor([0.9113])mode: val tensor([0.9046]) tensor([0.9024])mode: val tensor([0.8865]) tensor([0.8821])
+
+
+mode: val tensor([0.8934]) tensor([0.8912])
+mode: test tensor([0.8862]) tensor([0.8783])mode: test tensor([0.8699]) tensor([0.8627])
+
+mode: test tensor([0.9068]) tensor([0.9020])
+mode: test tensor([0.8748]) tensor([0.8645])
+	train loss:7.5401  train ap: nan  val ap:0.899212  val auc:0.896748 test ap 0.884420 test auc0.876860
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:8.0534  train ap: nan  val ap:0.899212  val auc:0.896748 test ap 0.884420 test auc0.876860
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:7.9637  train ap: nan  val ap:0.899212  val auc:0.896748 test ap 0.884420 test auc0.876860
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:7.4903  train ap: nan  val ap:0.899212  val auc:0.896748 test ap 0.884420 test auc0.876860
+
+	total time:0.56s  prep time:0.24s
+
+Epoch 4:Epoch 4:
+Epoch 4:
+
+Epoch 4:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8272, device='cuda:0')tensor(7792, device='cuda:2')
+tensor(7816, device='cuda:3')
+tensor(7494, device='cuda:1')
+
+local node number tensor([31374]) remote node number tensor([16296]) local edge tensor([223829]) remote edgetensor([33392])
+
+local node number tensor([31374]) remote node number tensor([16296]) local edge tensor([223829]) remote edgetensor([33392])
+
+local node number tensor([31374]) remote node number tensor([16296]) local edge tensor([223829]) remote edgetensor([33392])
+
+local node number tensor([31374]) remote node number tensor([16296]) local edge tensor([223829]) remote edgetensor([33392])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11293161008507013 time_backward =  0.08791034016758204 time_sample =  0 pre_batch = 0 pre_input = 0.032529888791032135 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002793660038150847 time_attention = 0.02518052887171507memory comm tensor([0]) shared comm tensor([0])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11620908707845956 time_backward =  0.08522760320920497 time_sample =  0 pre_batch = 0 pre_input = 0.03252330527175218 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002851641969755292 time_attention = 0.024258499150164425
+time_forward = 0.11482695175800472 time_backward =  0.08725403400603682 time_sample =  0 pre_batch = 0 pre_input = 0.03176513989455998 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002595806261524558 time_attention = 0.024783620261587203
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11575379793066531 time_backward =  0.09384233027230948 time_sample =  0 pre_batch = 0 pre_input = 0.024440060951747 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.00316602794919163 time_attention = 0.024891083012335002
+mode: val tensor([0.9075]) tensor([0.9003])
+mode: val tensor([0.9251]) tensor([0.9184])
+mode: val tensor([0.9133]) tensor([0.9110])
+mode: val tensor([0.9001]) tensor([0.8895])
+mode: test tensor([0.8858]) tensor([0.8727])
+mode: test tensor([0.8866]) tensor([0.8749])
+mode: test tensor([0.9147]) tensor([0.9111])
+mode: test tensor([0.8938]) tensor([0.8878])
+	train loss:7.7078  train ap: nan  val ap:0.911521  val auc:0.904792 test ap 0.895186 test auc0.886612
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:7.1483  train ap: nan  val ap:0.911521  val auc:0.904792 test ap 0.895186 test auc0.886612
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:7.0234  train ap: nan  val ap:0.911521  val auc:0.904792 test ap 0.895186 test auc0.886612
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:7.4655  train ap: nan  val ap:0.911521  val auc:0.904792 test ap 0.895186 test auc0.886612
+
+	total time:0.56s  prep time:0.24s
+
+Epoch 5:Epoch 5:
+
+Epoch 5:
+Epoch 5:
+	train time:0.27s
+	train time:0.27s
+	train time:0.27s
+	train time:0.27s
+
+
+
+
+tensor(7833, device='cuda:2')tensor(8260, device='cuda:0')
+
+tensor(7487, device='cuda:1')
+tensor(7794, device='cuda:3')
+local node number tensor([31374]) remote node number tensor([16292]) local edge tensor([223618]) remote edgetensor([33531])
+
+local node number tensor([31374]) remote node number tensor([16292]) local edge tensor([223618]) remote edgetensor([33531])
+local node number tensor([31374]) remote node number tensor([16292]) local edge tensor([223618]) remote edgetensor([33531])
+
+
+local node number tensor([31374]) remote node number tensor([16292]) local edge tensor([223618]) remote edgetensor([33531])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.12648188695311546 time_backward =  0.0862645321758464 time_sample =  0 pre_batch = 0 pre_input = 0.052903648116625845 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002881406922824681 time_attention = 0.025955591001547873
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.15393490297719836 time_backward =  0.07059538492467254 time_sample =  0 pre_batch = 0 pre_input = 0.043460780871100724 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.005440481239929795 time_attention = 0.03682538075372577memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.12633374601136893 time_backward =  0.09069891984108835 time_sample =  0 pre_batch = 0 pre_input = 0.05079245788510889 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0028822049498558044 time_attention = 0.02489227696787566
+
+
+time_forward = 0.13226274109911174 time_backward =  0.08721837704069912 time_sample =  0 pre_batch = 0 pre_input = 0.04680514498613775 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003289280110038817 time_attention = 0.026586600812152028
+mode: val tensor([0.9254]) tensor([0.9211])
+mode: val tensor([0.9077]) tensor([0.8984])
+mode: val tensor([0.9252]) tensor([0.9213])
+mode: val tensor([0.9070]) tensor([0.9024])
+mode: test tensor([0.8886]) tensor([0.8786])mode: test tensor([0.8868]) tensor([0.8787])
+
+mode: test tensor([0.9022]) tensor([0.8940])
+mode: test tensor([0.9212]) tensor([0.9167])
+	train loss:7.3414  train ap: nan  val ap:0.916336  val auc:0.910794 test ap 0.899706 test auc0.891994
+
+	total time:0.60s  prep time:0.27s
+
+	train loss:6.8802  train ap: nan  val ap:0.916336  val auc:0.910794 test ap 0.899706 test auc0.891994
+
+	total time:0.60s  prep time:0.27s
+
+	train loss:6.8027  train ap: nan  val ap:0.916336  val auc:0.910794 test ap 0.899706 test auc0.891994
+
+	total time:0.60s  prep time:0.27s
+
+	train loss:7.1533  train ap: nan  val ap:0.916336  val auc:0.910794 test ap 0.899706 test auc0.891994
+
+	total time:0.60s  prep time:0.27s
+
+Epoch 6:
+Epoch 6:
+Epoch 6:
+Epoch 6:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+	train time:0.24s
+
+tensor(7805, device='cuda:2')tensor(8268, device='cuda:0')
+
+tensor(7502, device='cuda:1')
+tensor(7814, device='cuda:3')
+local node number tensor([31389]) remote node number tensor([16247]) local edge tensor([223504]) remote edgetensor([33463])
+
+local node number tensor([31389]) remote node number tensor([16247]) local edge tensor([223504]) remote edgetensor([33463])
+local node number tensor([31389]) remote node number tensor([16247]) local edge tensor([223504]) remote edgetensor([33463])
+
+
+local node number tensor([31389]) remote node number tensor([16247]) local edge tensor([223504]) remote edgetensor([33463])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11713857599534094 time_backward =  0.08711994718760252 time_sample =  0 pre_batch = 0 pre_input = 0.03211283008567989 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002807198092341423 time_attention = 0.025506383855827153
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11684922385029495 time_backward =  0.09068771707825363 time_sample =  0 pre_batch = 0 pre_input = 0.029185730847530067 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.00268708320800215 time_attention = 0.023739533149637282
+time_forward = 0.12121481483336538 time_backward =  0.07909955794457346 time_sample =  0 pre_batch = 0 pre_input = 0.036681221099570394 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0031149748247116804 time_attention = 0.025101258186623454
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12151746614836156 time_backward =  0.07524158910382539 time_sample =  0 pre_batch = 0 pre_input = 0.03952454589307308 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003101734328083694 time_attention = 0.024730846285820007
+mode: val tensor([0.9185]) tensor([0.9130])
+mode: val tensor([0.8988]) tensor([0.8898])mode: val tensor([0.9152]) tensor([0.9101])
+
+mode: val tensor([0.9032]) tensor([0.8955])
+mode: test tensor([0.8814]) tensor([0.8694])
+mode: test tensor([0.9139]) tensor([0.9079])
+mode: test tensor([0.8825]) tensor([0.8721])
+mode: test tensor([0.8944]) tensor([0.8834])
+	train loss:6.8930  train ap: nan  val ap:0.908926  val auc:0.902108 test ap 0.893057 test auc0.883183
+	train loss:7.5850  train ap: nan  val ap:0.908926  val auc:0.902108 test ap 0.893057 test auc0.883183
+
+
+	total time:0.55s  prep time:0.24s
+	total time:0.55s  prep time:0.24s
+
+
+	train loss:7.1713  train ap: nan  val ap:0.908926  val auc:0.902108 test ap 0.893057 test auc0.883183
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:6.9666  train ap: nan  val ap:0.908926  val auc:0.902108 test ap 0.893057 test auc0.883183
+
+	total time:0.55s  prep time:0.24s
+
+Epoch 7:
+Epoch 7:
+Epoch 7:
+Epoch 7:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8280, device='cuda:0')tensor(7802, device='cuda:2')tensor(7805, device='cuda:3')
+
+
+tensor(7512, device='cuda:1')
+local node number tensor([31399]) remote node number tensor([16295]) local edge tensor([223841]) remote edgetensor([33480])
+
+local node number tensor([31399]) remote node number tensor([16295]) local edge tensor([223841]) remote edgetensor([33480])
+
+local node number tensor([31399]) remote node number tensor([16295]) local edge tensor([223841]) remote edgetensor([33480])
+
+local node number tensor([31399]) remote node number tensor([16295]) local edge tensor([223841]) remote edgetensor([33480])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11744611896574497 time_backward =  0.08936084690503776 time_sample =  0 pre_batch = 0 pre_input = 0.030003934167325497 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0028311569476500154 time_attention = 0.025694692856632173
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11928520014043897 time_backward =  0.07326629408635199 time_sample =  0 pre_batch = 0 pre_input = 0.0447089581284672 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0028202198445796967 time_attention = 0.02549665397964418
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.1199535250198096 time_backward =  0.0894767843419686 time_sample =  0 pre_batch = 0 pre_input = 0.027841452043503523 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027872436912730336 time_attention = 0.02360693400260061
+
+time_forward = 0.12218439381103963 time_backward =  0.0834090958815068 time_sample =  0 pre_batch = 0 pre_input = 0.031847657985053957 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0032732810359448195 time_attention = 0.024811293929815292
+mode: val tensor([0.9254]) tensor([0.9206])
+mode: val tensor([0.9071]) tensor([0.8998])
+mode: val tensor([0.9251]) tensor([0.9209])
+mode: val tensor([0.9079]) tensor([0.9036])
+mode: test tensor([0.9040]) tensor([0.8952])
+mode: test tensor([0.9236]) tensor([0.9175])
+mode: test tensor([0.8890]) tensor([0.8796])mode: test tensor([0.8923]) tensor([0.8809])
+
+	train loss:6.9109  train ap: nan  val ap:0.916381  val auc:0.911235 test ap 0.902238 test auc0.893288
+
+	total time:0.58s  prep time:0.24s
+
+	train loss:7.1979  train ap: nan  val ap:0.916381  val auc:0.911235 test ap 0.902238 test auc0.893288
+
+	total time:0.58s  prep time:0.24s
+
+	train loss:7.4213  train ap: nan  val ap:0.916381  val auc:0.911235 test ap 0.902238 test auc0.893288
+
+	total time:0.58s  prep time:0.24s
+
+	train loss:6.8419  train ap: nan  val ap:0.916381  val auc:0.911235 test ap 0.902238 test auc0.893288
+
+	total time:0.58s  prep time:0.24s
+
+Epoch 8:
+Epoch 8:
+Epoch 8:
+Epoch 8:
+	train time:0.26s
+	train time:0.26s
+	train time:0.26s
+	train time:0.26s
+
+
+
+
+tensor(7810, device='cuda:3')tensor(7803, device='cuda:2')
+
+tensor(8271, device='cuda:0')
+tensor(7490, device='cuda:1')
+local node number tensor([31374]) remote node number tensor([16265]) local edge tensor([223753]) remote edgetensor([33450])
+
+local node number tensor([31374]) remote node number tensor([16265]) local edge tensor([223753]) remote edgetensor([33450])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.13237780600320548 time_backward =  0.07406345591880381 time_sample =  0 pre_batch = 0 pre_input = 0.04939090111292899 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.00295238196849823 time_attention = 0.027170692919753492
+local node number tensor([31374]) remote node number tensor([16265]) local edge tensor([223753]) remote edgetensor([33450])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+local node number tensor([31374]) remote node number tensor([16265]) local edge tensor([223753]) remote edgetensor([33450])
+time_forward = 0.1309571429155767 time_backward =  0.09223007305990905 time_sample =  0 pre_batch = 0 pre_input = 0.032515910104848444 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002701127086766064 time_attention = 0.023293906822800636
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.13680054293945432 time_backward =  0.08288312016520649 time_sample =  0 pre_batch = 0 pre_input = 0.03380634821951389 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003114013932645321 time_attention = 0.027983412728644907
+time_forward = 0.13723396486602724 time_backward =  0.07631180400494486 time_sample =  0 pre_batch = 0 pre_input = 0.04046888812445104 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003446777001954615 time_attention = 0.028523660846985877
+mode: val tensor([0.9232]) tensor([0.9175])mode: val tensor([0.9239]) tensor([0.9199])
+
+mode: val tensor([0.9063]) tensor([0.8990])
+mode: val tensor([0.9108]) tensor([0.9029])
+mode: test tensor([0.8943]) tensor([0.8822])mode: test tensor([0.9185]) tensor([0.9115])mode: test tensor([0.8895]) tensor([0.8783])
+
+
+mode: test tensor([0.8981]) tensor([0.8904])
+	train loss:7.3660  train ap: nan  val ap:0.916044  val auc:0.909832 test ap 0.900085 test auc0.890607
+
+	train loss:6.7307  train ap: nan  val ap:0.916044  val auc:0.909832 test ap 0.900085 test auc0.890607
+	total time:0.58s  prep time:0.26s
+
+
+	total time:0.58s  prep time:0.26s
+
+	train loss:7.1171  train ap: nan  val ap:0.916044  val auc:0.909832 test ap 0.900085 test auc0.890607
+
+	total time:0.58s  prep time:0.26s
+
+	train loss:6.7037  train ap: nan  val ap:0.916044  val auc:0.909832 test ap 0.900085 test auc0.890607
+
+	total time:0.58s  prep time:0.26s
+
+Epoch 9:
+Epoch 9:
+Epoch 9:
+Epoch 9:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7753, device='cuda:2')tensor(8218, device='cuda:0')
+tensor(7797, device='cuda:3')
+
+tensor(7482, device='cuda:1')
+local node number tensor([31250]) remote node number tensor([16247]) local edge tensor([223106]) remote edgetensor([33453])
+
+local node number tensor([31250]) remote node number tensor([16247]) local edge tensor([223106]) remote edgetensor([33453])
+
+local node number tensor([31250]) remote node number tensor([16247]) local edge tensor([223106]) remote edgetensor([33453])
+
+local node number tensor([31250]) remote node number tensor([16247]) local edge tensor([223106]) remote edgetensor([33453])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.10827044316101819 time_backward =  0.09781884320545942 time_sample =  0 pre_batch = 0 pre_input = 0.028210369287990034 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002403376856818795 time_attention = 0.021238915738649666
+time_forward = 0.11965142772533 time_backward =  0.0713555671973154 time_sample =  0 pre_batch = 0 pre_input = 0.04382060596253723 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003183102118782699 time_attention = 0.02641299902461469
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11814782093279064 time_backward =  0.08723045897204429 time_sample =  0 pre_batch = 0 pre_input = 0.029474134906195104 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002720370073802769 time_attention = 0.021912802010774612
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11518851097207516 time_backward =  0.08308606105856597 time_sample =  0 pre_batch = 0 pre_input = 0.03663316695019603 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027070138603448868 time_attention = 0.023192383931018412
+mode: val tensor([0.9247]) tensor([0.9194])mode: val tensor([0.9179]) tensor([0.9136])mode: val tensor([0.9041]) tensor([0.8964])
+
+
+mode: val tensor([0.9108]) tensor([0.9058])
+mode: test tensor([0.9229]) tensor([0.9163])mode: test tensor([0.8915]) tensor([0.8781])mode: test tensor([0.8916]) tensor([0.8779])
+
+
+mode: test tensor([0.8970]) tensor([0.8895])
+	train loss:7.2601  train ap: nan  val ap:0.914391  val auc:0.908798 test ap 0.900757 test auc0.890461
+	train loss:6.7168  train ap: nan  val ap:0.914391  val auc:0.908798 test ap 0.900757 test auc0.890461
+
+
+	total time:0.55s  prep time:0.24s
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:6.9739  train ap: nan  val ap:0.914391  val auc:0.908798 test ap 0.900757 test auc0.890461
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:6.7896  train ap: nan  val ap:0.914391  val auc:0.908798 test ap 0.900757 test auc0.890461
+
+	total time:0.55s  prep time:0.24s
+
+Epoch 10:
+Epoch 10:
+Epoch 10:
+Epoch 10:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7788, device='cuda:2')
+tensor(7826, device='cuda:3')tensor(8248, device='cuda:0')
+
+tensor(7501, device='cuda:1')
+local node number tensor([31363]) remote node number tensor([16309]) local edge tensor([223752]) remote edgetensor([33383])
+
+local node number tensor([31363]) remote node number tensor([16309]) local edge tensor([223752]) remote edgetensor([33383])
+
+local node number tensor([31363]) remote node number tensor([16309]) local edge tensor([223752]) remote edgetensor([33383])
+
+local node number tensor([31363]) remote node number tensor([16309]) local edge tensor([223752]) remote edgetensor([33383])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11560195498168468 time_backward =  0.09533783688675612 time_sample =  0 pre_batch = 0 pre_input = 0.026324835140258074 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002551435958594084 time_attention = 0.023440239019691944
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12268501706421375 time_backward =  0.07488409709185362 time_sample =  0 pre_batch = 0 pre_input = 0.04014883004128933 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0032526900758966804 time_attention = 0.026783378911204636
+time_forward = 0.11822613701224327 time_backward =  0.09460855228826404 time_sample =  0 pre_batch = 0 pre_input = 0.02461155701894313 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025635011261329055 time_attention = 0.024080405244603753
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11734110803809017 time_backward =  0.08668683585710824 time_sample =  0 pre_batch = 0 pre_input = 0.03385768202133477 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027341211680322886 time_attention = 0.022392819169908762
+mode: val tensor([0.9161]) tensor([0.9090])
+mode: val tensor([0.9275]) tensor([0.9212])mode: val tensor([0.9300]) tensor([0.9229])
+
+mode: val tensor([0.9082]) tensor([0.9012])
+mode: test tensor([0.8960]) tensor([0.8852])
+mode: test tensor([0.9243]) tensor([0.9176])
+mode: test tensor([0.8957]) tensor([0.8830])
+mode: test tensor([0.9024]) tensor([0.8947])
+	train loss:7.1437  train ap: nan  val ap:0.920446  val auc:0.913586 test ap 0.904577 test auc0.895131
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:6.8763  train ap: nan  val ap:0.920446  val auc:0.913586 test ap 0.904577 test auc0.895131
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:6.6275  train ap: nan  val ap:0.920446  val auc:0.913586 test ap 0.904577 test auc0.895131
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:6.6446  train ap: nan  val ap:0.920446  val auc:0.913586 test ap 0.904577 test auc0.895131
+
+	total time:0.56s  prep time:0.24s
+
+Epoch 11:
+Epoch 11:
+Epoch 11:
+Epoch 11:
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+
+
+
+
+tensor(7805, device='cuda:3')tensor(8269, device='cuda:0')
+
+tensor(7503, device='cuda:1')
+tensor(7770, device='cuda:2')
+local node number tensor([31347]) remote node number tensor([16293]) local edge tensor([223603]) remote edgetensor([33472])
+
+local node number tensor([31347]) remote node number tensor([16293]) local edge tensor([223603]) remote edgetensor([33472])
+
+local node number tensor([31347]) remote node number tensor([16293]) local edge tensor([223603]) remote edgetensor([33472])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+local node number tensor([31347]) remote node number tensor([16293]) local edge tensor([223603]) remote edgetensor([33472])
+
+time_forward = 0.12107857805676758 time_backward =  0.09349773696158081 time_sample =  0 pre_batch = 0 pre_input = 0.030009823851287365 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025444328784942627 time_attention = 0.024540602113120258
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.128188501810655 time_backward =  0.07407884288113564 time_sample =  0 pre_batch = 0 pre_input = 0.04287369188386947 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003145742113701999 time_attention = 0.023905007867142558
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12304903310723603 time_backward =  0.08326607581693679 time_sample =  0 pre_batch = 0 pre_input = 0.03883268020581454 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002636863267980516 time_attention = 0.022319164010696113
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1251052119769156 time_backward =  0.09667538816574961 time_sample =  0 pre_batch = 0 pre_input = 0.022594059235416353 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002819869201630354 time_attention = 0.025094600045122206
+mode: val tensor([0.9356]) tensor([0.9302])mode: val tensor([0.9365]) tensor([0.9308])
+
+mode: val tensor([0.9165]) tensor([0.9086])
+mode: val tensor([0.9195]) tensor([0.9131])
+mode: test tensor([0.9283]) tensor([0.9238])
+mode: test tensor([0.9115]) tensor([0.9035])
+mode: test tensor([0.9011]) tensor([0.8902])
+mode: test tensor([0.9057]) tensor([0.8947])
+	train loss:6.4668  train ap: nan  val ap:0.927042  val auc:0.920662 test ap 0.911625 test auc0.903042
+
+	total time:0.58s  prep time:0.25s
+
+	train loss:6.9702  train ap: nan  val ap:0.927042  val auc:0.920662 test ap 0.911625 test auc0.903042
+
+	total time:0.58s  prep time:0.25s
+
+	train loss:6.7569  train ap: nan  val ap:0.927042  val auc:0.920662 test ap 0.911625 test auc0.903042
+
+	total time:0.58s  prep time:0.25s
+
+	train loss:6.4568  train ap: nan  val ap:0.927042  val auc:0.920662 test ap 0.911625 test auc0.903042
+
+	total time:0.58s  prep time:0.25s
+
+Epoch 12:Epoch 12:
+
+Epoch 12:
+Epoch 12:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7769, device='cuda:2')tensor(7501, device='cuda:1')
+tensor(7819, device='cuda:3')
+
+tensor(8294, device='cuda:0')
+local node number tensor([31383]) remote node number tensor([16279]) local edge tensor([223847]) remote edgetensor([33396])
+local node number tensor([31383]) remote node number tensor([16279]) local edge tensor([223847]) remote edgetensor([33396])
+
+
+local node number tensor([31383]) remote node number tensor([16279]) local edge tensor([223847]) remote edgetensor([33396])
+local node number tensor([31383]) remote node number tensor([16279]) local edge tensor([223847]) remote edgetensor([33396])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.11739469005260617 time_backward =  0.08257015910930932 time_sample =  0 pre_batch = 0 pre_input = 0.039603520068340003 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002653137198649347 time_attention = 0.022255722898989916time_forward = 0.11918639088980854 time_backward =  0.0913105309009552 time_sample =  0 pre_batch = 0 pre_input = 0.028507994138635695 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002432555193081498 time_attention = 0.025636660284362733
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11714307079091668 time_backward =  0.0838615819811821 time_sample =  0 pre_batch = 0 pre_input = 0.03817370010074228 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002735727233812213 time_attention = 0.022474515135399997time_forward = 0.11794924619607627 time_backward =  0.0928888781927526 time_sample =  0 pre_batch = 0 pre_input = 0.028669162071309984 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025359708815813065 time_attention = 0.023436457733623683
+
+mode: val tensor([0.9369]) tensor([0.9311])
+mode: val tensor([0.9356]) tensor([0.9308])mode: val tensor([0.9235]) tensor([0.9166])
+
+mode: val tensor([0.9141]) tensor([0.9086])
+mode: test tensor([0.9039]) tensor([0.8956])
+mode: test tensor([0.9378]) tensor([0.9316])
+mode: test tensor([0.9120]) tensor([0.9050])
+mode: test tensor([0.9062]) tensor([0.8955])
+	train loss:6.3518  train ap: nan  val ap:0.927528  val auc:0.921762 test ap 0.914963 test auc0.906920
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:6.9047  train ap: nan  val ap:0.927528  val auc:0.921762 test ap 0.914963 test auc0.906920
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:6.5244  train ap: nan  val ap:0.927528  val auc:0.921762 test ap 0.914963 test auc0.906920
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:6.2713  train ap: nan  val ap:0.927528  val auc:0.921762 test ap 0.914963 test auc0.906920
+
+	total time:0.56s  prep time:0.24s
+
+Epoch 13:Epoch 13:
+Epoch 13:
+
+Epoch 13:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8278, device='cuda:0')tensor(7516, device='cuda:1')
+
+tensor(7830, device='cuda:3')
+tensor(7798, device='cuda:2')
+local node number tensor([31422]) remote node number tensor([16322]) local edge tensor([223976]) remote edgetensor([33460])
+
+local node number tensor([31422]) remote node number tensor([16322]) local edge tensor([223976]) remote edgetensor([33460])
+
+local node number tensor([31422]) remote node number tensor([16322]) local edge tensor([223976]) remote edgetensor([33460])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+local node number tensor([31422]) remote node number tensor([16322]) local edge tensor([223976]) remote edgetensor([33460])
+
+time_forward = 0.11348171508871019 time_backward =  0.09575935883913189 time_sample =  0 pre_batch = 0 pre_input = 0.02734525967389345 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0024208950344473124 time_attention = 0.0240986937424168memory comm tensor([0]) shared comm tensor([0])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.12253455992322415 time_backward =  0.07298921712208539 time_sample =  0 pre_batch = 0 pre_input = 0.04158243315760046 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0030395969515666366 time_attention = 0.027496742899529636
+
+time_forward = 0.12116490595508367 time_backward =  0.08024822606239468 time_sample =  0 pre_batch = 0 pre_input = 0.03551711095497012 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002679336699657142 time_attention = 0.0231458090711385
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1200874438509345 time_backward =  0.09291991393547505 time_sample =  0 pre_batch = 0 pre_input = 0.0245182168437168 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002597003127448261 time_attention = 0.024068515980616212
+mode: val tensor([0.9286]) tensor([0.9225])
+mode: val tensor([0.9398]) tensor([0.9358])
+mode: val tensor([0.9250]) tensor([0.9173])
+mode: val tensor([0.9416]) tensor([0.9362])
+mode: test tensor([0.9131]) tensor([0.9079])mode: test tensor([0.9127]) tensor([0.9021])
+mode: test tensor([0.9414]) tensor([0.9355])
+mode: test tensor([0.9111]) tensor([0.8995])
+
+	train loss:6.0886  train ap: nan  val ap:0.933746  val auc:0.927940 test ap 0.919595 test auc0.911252
+
+	total time:0.57s  prep time:0.24s
+
+	train loss:6.6585  train ap: nan  val ap:0.933746  val auc:0.927940 test ap 0.919595 test auc0.911252
+
+	total time:0.57s  prep time:0.24s
+
+	train loss:6.3264  train ap: nan  val ap:0.933746  val auc:0.927940 test ap 0.919595 test auc0.911252
+
+	total time:0.57s  prep time:0.24s
+
+	train loss:6.0562  train ap: nan  val ap:0.933746  val auc:0.927940 test ap 0.919595 test auc0.911252
+
+	total time:0.57s  prep time:0.24s
+
+Epoch 14:
+Epoch 14:Epoch 14:
+Epoch 14:
+
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8268, device='cuda:0')tensor(7798, device='cuda:2')tensor(7796, device='cuda:3')
+
+
+tensor(7508, device='cuda:1')
+local node number tensor([31370]) remote node number tensor([16274]) local edge tensor([223823]) remote edgetensor([33342])
+
+local node number tensor([31370]) remote node number tensor([16274]) local edge tensor([223823]) remote edgetensor([33342])
+
+local node number tensor([31370]) remote node number tensor([16274]) local edge tensor([223823]) remote edgetensor([33342])
+
+local node number tensor([31370]) remote node number tensor([16274]) local edge tensor([223823]) remote edgetensor([33342])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12087259721010923 time_backward =  0.0734938660170883 time_sample =  0 pre_batch = 0 pre_input = 0.04227545589674264 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002978180884383619 time_attention = 0.02615151205100119
+time_forward = 0.10988005297258496 time_backward =  0.10167615604586899 time_sample =  0 pre_batch = 0 pre_input = 0.024582007084973156 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0023696807911619544 time_attention = 0.022530800313688815
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.11585158621892333 time_backward =  0.09582216187845916 time_sample =  0 pre_batch = 0 pre_input = 0.024943257099948823 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025394639233127236 time_attention = 0.023186974925920367
+
+time_forward = 0.12089187488891184 time_backward =  0.07954560802318156 time_sample =  0 pre_batch = 0 pre_input = 0.03623821586370468 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0033026880118995905 time_attention = 0.025769616710022092
+mode: val tensor([0.9444]) tensor([0.9398])mode: val tensor([0.9423]) tensor([0.9396])mode: val tensor([0.9282]) tensor([0.9205])
+
+
+mode: val tensor([0.9351]) tensor([0.9288])
+mode: test tensor([0.9163]) tensor([0.9070])mode: test tensor([0.9386]) tensor([0.9330])
+
+mode: test tensor([0.9199]) tensor([0.9089])
+mode: test tensor([0.9243]) tensor([0.9182])
+	train loss:5.8806  train ap: nan  val ap:0.937510  val auc:0.932200 test ap 0.924760 test auc0.916768
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:6.4939  train ap: nan  val ap:0.937510  val auc:0.932200 test ap 0.924760 test auc0.916768
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:5.8187  train ap: nan  val ap:0.937510  val auc:0.932200 test ap 0.924760 test auc0.916768
+	train loss:6.1140  train ap: nan  val ap:0.937510  val auc:0.932200 test ap 0.924760 test auc0.916768
+
+
+	total time:0.55s  prep time:0.24s
+	total time:0.55s  prep time:0.24s
+
+
+Epoch 15:
+Epoch 15:
+Epoch 15:
+Epoch 15:
+	train time:0.24s
+	train time:0.24s
+
+
+	train time:0.24s
+	train time:0.24s
+
+
+tensor(8300, device='cuda:0')tensor(7800, device='cuda:2')
+
+tensor(7789, device='cuda:3')
+tensor(7501, device='cuda:1')
+local node number tensor([31390]) remote node number tensor([16285]) local edge tensor([223794]) remote edgetensor([33470])
+
+local node number tensor([31390]) remote node number tensor([16285]) local edge tensor([223794]) remote edgetensor([33470])
+
+local node number tensor([31390]) remote node number tensor([16285]) local edge tensor([223794]) remote edgetensor([33470])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+local node number tensor([31390]) remote node number tensor([16285]) local edge tensor([223794]) remote edgetensor([33470])
+
+time_forward = 0.11463838315103203 time_backward =  0.08973966795019805 time_sample =  0 pre_batch = 0 pre_input = 0.029352986137382686 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0024133611004799604 time_attention = 0.02553104015532881
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11941841302905232 time_backward =  0.08299998694565147 time_sample =  0 pre_batch = 0 pre_input = 0.031601231661625206 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025468679377809167 time_attention = 0.023944297921843827
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.11684786691330373 time_backward =  0.07972678588703275 time_sample =  0 pre_batch = 0 pre_input = 0.03729316429235041 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025964610977098346 time_attention = 0.025370273971930146
+
+time_forward = 0.11707567423582077 time_backward =  0.08483576099388301 time_sample =  0 pre_batch = 0 pre_input = 0.03244315425399691 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0033150019589811563 time_attention = 0.02353799599222839
+mode: val tensor([0.9491]) tensor([0.9442])
+mode: val tensor([0.9370]) tensor([0.9296])
+mode: val tensor([0.9495]) tensor([0.9449])
+mode: val tensor([0.9373]) tensor([0.9321])
+mode: test tensor([0.9247]) tensor([0.9155])mode: test tensor([0.9259]) tensor([0.9181])
+
+mode: test tensor([0.9323]) tensor([0.9248])
+mode: test tensor([0.9473]) tensor([0.9413])
+	train loss:5.6525  train ap: nan  val ap:0.943224  val auc:0.937696 test ap 0.932548 test auc0.924905
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:6.1934  train ap: nan  val ap:0.943224  val auc:0.937696 test ap 0.932548 test auc0.924905
+	train loss:5.5645  train ap: nan  val ap:0.943224  val auc:0.937696 test ap 0.932548 test auc0.924905
+
+
+	total time:0.57s  prep time:0.24s
+	total time:0.57s  prep time:0.24s
+
+
+	train loss:5.8778  train ap: nan  val ap:0.943224  val auc:0.937696 test ap 0.932548 test auc0.924905
+
+	total time:0.57s  prep time:0.24s
+
+Epoch 16:
+Epoch 16:
+Epoch 16:
+Epoch 16:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8280, device='cuda:0')
+tensor(7816, device='cuda:2')
+tensor(7788, device='cuda:3')
+tensor(7474, device='cuda:1')
+local node number tensor([31358]) remote node number tensor([16270]) local edge tensor([223629]) remote edgetensor([33401])
+
+local node number tensor([31358]) remote node number tensor([16270]) local edge tensor([223629]) remote edgetensor([33401])
+local node number tensor([31358]) remote node number tensor([16270]) local edge tensor([223629]) remote edgetensor([33401])
+
+
+local node number tensor([31358]) remote node number tensor([16270]) local edge tensor([223629]) remote edgetensor([33401])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11551273392979056 time_backward =  0.0925775138894096 time_sample =  0 pre_batch = 0 pre_input = 0.030681176809594035 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0023443191312253475 time_attention = 0.024234130163677037
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.11586100899148732 time_backward =  0.0986286090919748 time_sample =  0 pre_batch = 0 pre_input = 0.024820740101858974 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027575360145419836 time_attention = 0.022915258654393256
+time_forward = 0.12087939167395234 time_backward =  0.07534786011092365 time_sample =  0 pre_batch = 0 pre_input = 0.04050083376932889 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002850082004442811 time_attention = 0.025090419803746045
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1196068978169933 time_backward =  0.08247609413228929 time_sample =  0 pre_batch = 0 pre_input = 0.03717270481865853 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002698406809940934 time_attention = 0.024802494910545647
+mode: val tensor([0.9512]) tensor([0.9457])mode: val tensor([0.9392]) tensor([0.9317])mode: val tensor([0.9523]) tensor([0.9473])
+
+
+mode: val tensor([0.9465]) tensor([0.9399])
+mode: test tensor([0.9269]) tensor([0.9181])mode: test tensor([0.9301]) tensor([0.9218])
+
+mode: test tensor([0.9341]) tensor([0.9290])
+mode: test tensor([0.9493]) tensor([0.9430])
+	train loss:5.4326  train ap: nan  val ap:0.947287  val auc:0.941141 test ap 0.935089 test auc0.927955
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:5.9935  train ap: nan  val ap:0.947287  val auc:0.941141 test ap 0.935089 test auc0.927955
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:5.4639  train ap: nan  val ap:0.947287  val auc:0.941141 test ap 0.935089 test auc0.927955
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:5.5898  train ap: nan  val ap:0.947287  val auc:0.941141 test ap 0.935089 test auc0.927955
+
+	total time:0.55s  prep time:0.24s
+
+Epoch 17:
+Epoch 17:
+Epoch 17:
+Epoch 17:
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+
+
+
+	train time:0.25s
+
+tensor(8281, device='cuda:0')tensor(7821, device='cuda:3')
+
+tensor(7814, device='cuda:2')
+tensor(7487, device='cuda:1')
+local node number tensor([31403]) remote node number tensor([16296]) local edge tensor([223920]) remote edgetensor([33576])
+
+local node number tensor([31403]) remote node number tensor([16296]) local edge tensor([223920]) remote edgetensor([33576])
+
+local node number tensor([31403]) remote node number tensor([16296]) local edge tensor([223920]) remote edgetensor([33576])
+
+local node number tensor([31403]) remote node number tensor([16296]) local edge tensor([223920]) remote edgetensor([33576])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.12090822285972536 time_backward =  0.09270925726741552 time_sample =  0 pre_batch = 0 pre_input = 0.03221609105821699 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0023796960012987256 time_attention = 0.0224500959739089
+
+time_forward = 0.12746968097053468 time_backward =  0.07222035084851086 time_sample =  0 pre_batch = 0 pre_input = 0.04526170308236033 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002881773980334401 time_attention = 0.026197126368060708
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12871055596042424 time_backward =  0.0874637181404978 time_sample =  0 pre_batch = 0 pre_input = 0.030027825036086142 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002807492041029036 time_attention = 0.024776283069513738memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.127317696926184 time_backward =  0.07801952224690467 time_sample =  0 pre_batch = 0 pre_input = 0.040922324056737125 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.00285608705598861 time_attention = 0.025421288213692605
+mode: val tensor([0.9568]) tensor([0.9530])mode: val tensor([0.9586]) tensor([0.9535])
+
+mode: val tensor([0.9455]) tensor([0.9386])mode: val tensor([0.9516]) tensor([0.9451])
+
+mode: test tensor([0.9559]) tensor([0.9516])mode: test tensor([0.9346]) tensor([0.9257])mode: test tensor([0.9376]) tensor([0.9284])
+
+
+mode: test tensor([0.9391]) tensor([0.9337])
+	train loss:5.8044  train ap: nan  val ap:0.953120  val auc:0.947550 test ap 0.941785 test auc0.934875
+
+	total time:0.56s  prep time:0.25s
+
+	train loss:5.3396  train ap: nan  val ap:0.953120  val auc:0.947550 test ap 0.941785 test auc0.934875
+
+	total time:0.56s  prep time:0.25s
+
+	train loss:5.1637  train ap: nan  val ap:0.953120  val auc:0.947550 test ap 0.941785 test auc0.934875
+
+	total time:0.56s  prep time:0.25s
+
+	train loss:5.1994  train ap: nan  val ap:0.953120  val auc:0.947550 test ap 0.941785 test auc0.934875
+
+	total time:0.56s  prep time:0.25s
+
+Epoch 18:
+Epoch 18:
+Epoch 18:
+Epoch 18:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8245, device='cuda:0')tensor(7830, device='cuda:2')tensor(7815, device='cuda:3')
+tensor(7498, device='cuda:1')
+
+
+local node number tensor([31388]) remote node number tensor([16281]) local edge tensor([223708]) remote edgetensor([33640])
+
+local node number tensor([31388]) remote node number tensor([16281]) local edge tensor([223708]) remote edgetensor([33640])
+local node number tensor([31388]) remote node number tensor([16281]) local edge tensor([223708]) remote edgetensor([33640])
+
+
+local node number tensor([31388]) remote node number tensor([16281]) local edge tensor([223708]) remote edgetensor([33640])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1129937608493492 time_backward =  0.0865299878641963 time_sample =  0 pre_batch = 0 pre_input = 0.032616132171824574 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0023501841351389885 time_attention = 0.025493101915344596
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11503872892353684 time_backward =  0.09042651881463826 time_sample =  0 pre_batch = 0 pre_input = 0.027088022092357278 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002593978075310588 time_attention = 0.023471358115784824memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.1106467820936814 time_backward =  0.07654805795755237 time_sample =  0 pre_batch = 0 pre_input = 0.04542456613853574 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026955949142575264 time_attention = 0.021741161006502807
+
+
+time_forward = 0.11286773032043129 time_backward =  0.08204548514913768 time_sample =  0 pre_batch = 0 pre_input = 0.03730452200397849 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0030099572613835335 time_attention = 0.02389889908954501
+mode: val tensor([0.9554]) tensor([0.9509])mode: val tensor([0.9576]) tensor([0.9536])mode: val tensor([0.9446]) tensor([0.9378])
+
+
+mode: val tensor([0.9500]) tensor([0.9448])
+mode: test tensor([0.9392]) tensor([0.9295])mode: test tensor([0.9548]) tensor([0.9489])mode: test tensor([0.9366]) tensor([0.9280])
+
+
+mode: test tensor([0.9428]) tensor([0.9345])
+	train loss:5.5377  train ap: nan  val ap:0.951890  val auc:0.946803 test ap 0.943342 test auc0.935228
+
+	train loss:4.9629  train ap: nan  val ap:0.951890  val auc:0.946803 test ap 0.943342 test auc0.935228
+	total time:0.54s  prep time:0.24s
+
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:5.1067  train ap: nan  val ap:0.951890  val auc:0.946803 test ap 0.943342 test auc0.935228
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:5.0792  train ap: nan  val ap:0.951890  val auc:0.946803 test ap 0.943342 test auc0.935228
+
+	total time:0.54s  prep time:0.24s
+
+Epoch 19:Epoch 19:
+
+Epoch 19:Epoch 19:
+
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8271, device='cuda:0')
+tensor(7797, device='cuda:3')
+tensor(7492, device='cuda:1')
+tensor(7801, device='cuda:2')
+local node number tensor([31361]) remote node number tensor([16277]) local edge tensor([223599]) remote edgetensor([33367])
+
+local node number tensor([31361]) remote node number tensor([16277]) local edge tensor([223599]) remote edgetensor([33367])
+local node number tensor([31361]) remote node number tensor([16277]) local edge tensor([223599]) remote edgetensor([33367])
+
+
+local node number tensor([31361]) remote node number tensor([16277]) local edge tensor([223599]) remote edgetensor([33367])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11753342731390148 time_backward =  0.0863718066830188 time_sample =  0 pre_batch = 0 pre_input = 0.03335628274362534 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002423254889436066 time_attention = 0.02246158686466515
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11710716900415719 time_backward =  0.07657714886590838 time_sample =  0 pre_batch = 0 pre_input = 0.0436555240303278 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026440181536599994 time_attention = 0.021506024291738868
+time_forward = 0.11620728997513652 time_backward =  0.09407912276219577 time_sample =  0 pre_batch = 0 pre_input = 0.027074443292804062 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026705029886215925 time_attention = 0.023519114940427244
+time_forward = 0.11921756691299379 time_backward =  0.0806156131438911 time_sample =  0 pre_batch = 0 pre_input = 0.037579495925456285 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.00298011873383075 time_attention = 0.023779897019267082
+mode: val tensor([0.9624]) tensor([0.9578])mode: val tensor([0.9636]) tensor([0.9590])mode: val tensor([0.9497]) tensor([0.9428])
+
+
+mode: val tensor([0.9555]) tensor([0.9496])
+mode: test tensor([0.9420]) tensor([0.9335])mode: test tensor([0.9414]) tensor([0.9330])
+
+mode: test tensor([0.9481]) tensor([0.9411])
+mode: test tensor([0.9616]) tensor([0.9556])
+	train loss:4.6260  train ap: nan  val ap:0.957784  val auc:0.952307 test ap 0.948309 test auc0.940811
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:5.3310  train ap: nan  val ap:0.957784  val auc:0.952307 test ap 0.948309 test auc0.940811
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:4.7006  train ap: nan  val ap:0.957784  val auc:0.952307 test ap 0.948309 test auc0.940811
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:4.9649  train ap: nan  val ap:0.957784  val auc:0.952307 test ap 0.948309 test auc0.940811
+
+	total time:0.55s  prep time:0.24s
+
+Epoch 20:Epoch 20:
+
+Epoch 20:
+Epoch 20:
+	train time:0.26s
+	train time:0.27s
+	train time:0.27s
+
+
+	train time:0.27s
+
+
+tensor(8266, device='cuda:0')
+tensor(7779, device='cuda:3')
+tensor(7838, device='cuda:2')
+tensor(7495, device='cuda:1')
+local node number tensor([31378]) remote node number tensor([16280]) local edge tensor([223643]) remote edgetensor([33387])
+
+local node number tensor([31378]) remote node number tensor([16280]) local edge tensor([223643]) remote edgetensor([33387])
+
+local node number tensor([31378]) remote node number tensor([16280]) local edge tensor([223643]) remote edgetensor([33387])
+
+local node number tensor([31378]) remote node number tensor([16280]) local edge tensor([223643]) remote edgetensor([33387])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.12747374619357288 time_backward =  0.08922222896944731 time_sample =  0 pre_batch = 0 pre_input = 0.04580735310446471 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0024211930576711893 time_attention = 0.021573088131844997
+
+time_forward = 0.1276899022050202 time_backward =  0.08973902044817805 time_sample =  0 pre_batch = 0 pre_input = 0.042124245781451464 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002855371218174696 time_attention = 0.020437181927263737
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.13523481297306716 time_backward =  0.08297951775602996 time_sample =  0 pre_batch = 0 pre_input = 0.04510251386091113 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002669965149834752 time_attention = 0.024858492892235518
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12019574735313654 time_backward =  0.1075969582889229 time_sample =  0 pre_batch = 0 pre_input = 0.035149126895703375 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003136588726192713 time_attention = 0.01991070411168039
+mode: val tensor([0.9638]) tensor([0.9591])
+mode: val tensor([0.9568]) tensor([0.9516])
+mode: val tensor([0.9502]) tensor([0.9450])
+mode: val tensor([0.9611]) tensor([0.9566])
+mode: test tensor([0.9414]) tensor([0.9329])mode: test tensor([0.9447]) tensor([0.9364])mode: test tensor([0.9477]) tensor([0.9411])
+
+
+mode: test tensor([0.9627]) tensor([0.9570])
+	train loss:5.1660  train ap: nan  val ap:0.957946  val auc:0.953099 test ap 0.949132 test auc0.941843
+
+	total time:0.58s  prep time:0.27s
+
+	train loss:4.5474  train ap: nan  val ap:0.957946  val auc:0.953099 test ap 0.949132 test auc0.941843
+
+	total time:0.58s  prep time:0.27s
+
+	train loss:4.6335  train ap: nan  val ap:0.957946  val auc:0.953099 test ap 0.949132 test auc0.941843
+
+	total time:0.58s  prep time:0.27s
+
+	train loss:4.6330  train ap: nan  val ap:0.957946  val auc:0.953099 test ap 0.949132 test auc0.941843
+
+	total time:0.58s  prep time:0.26s
+
+Epoch 21:Epoch 21:
+
+Epoch 21:
+Epoch 21:
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+
+
+
+	train time:0.25s
+
+tensor(7801, device='cuda:3')tensor(7491, device='cuda:1')
+
+tensor(8297, device='cuda:0')
+tensor(7764, device='cuda:2')
+local node number tensor([31353]) remote node number tensor([16294]) local edge tensor([223506]) remote edgetensor([33574])
+
+local node number tensor([31353]) remote node number tensor([16294]) local edge tensor([223506]) remote edgetensor([33574])
+
+local node number tensor([31353]) remote node number tensor([16294]) local edge tensor([223506]) remote edgetensor([33574])
+
+local node number tensor([31353]) remote node number tensor([16294]) local edge tensor([223506]) remote edgetensor([33574])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.12101641087792814 time_backward =  0.08789893321227282 time_sample =  0 pre_batch = 0 pre_input = 0.03968051797710359 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002790451981127262 time_attention = 0.022526518790982664
+
+time_forward = 0.11843423394020647 time_backward =  0.08894974598661065 time_sample =  0 pre_batch = 0 pre_input = 0.038907064124941826 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025571570731699467 time_attention = 0.02336066321004182
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12620146805420518 time_backward =  0.08505218802019954 time_sample =  0 pre_batch = 0 pre_input = 0.037515693926252425 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003155691083520651 time_attention = 0.02547780191525817
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12401421030517668 time_backward =  0.0819559171795845 time_sample =  0 pre_batch = 0 pre_input = 0.04053831531200558 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002786673023365438 time_attention = 0.025956557947210968
+mode: val tensor([0.9515]) tensor([0.9446])
+mode: val tensor([0.9665]) tensor([0.9618])
+mode: val tensor([0.9660]) tensor([0.9611])
+mode: val tensor([0.9544]) tensor([0.9489])
+mode: test tensor([0.9459]) tensor([0.9389])mode: test tensor([0.9657]) tensor([0.9597])
+
+mode: test tensor([0.9477]) tensor([0.9385])
+mode: test tensor([0.9504]) tensor([0.9455])
+	train loss:4.5308  train ap: nan  val ap:0.959631  val auc:0.954122 test ap 0.952421 test auc0.945656
+
+	total time:0.61s  prep time:0.25s
+
+	train loss:4.4812  train ap: nan  val ap:0.959631  val auc:0.954122 test ap 0.952421 test auc0.945656
+
+	total time:0.61s  prep time:0.25s
+
+	train loss:5.0904  train ap: nan  val ap:0.959631  val auc:0.954122 test ap 0.952421 test auc0.945656
+
+	total time:0.61s  prep time:0.25s
+
+	train loss:4.4182  train ap: nan  val ap:0.959631  val auc:0.954122 test ap 0.952421 test auc0.945656
+
+	total time:0.61s  prep time:0.25s
+
+Epoch 22:Epoch 22:
+
+Epoch 22:
+Epoch 22:
+	train time:0.26s
+	train time:0.27s
+	train time:0.27s
+	train time:0.26s
+
+
+
+
+tensor(8298, device='cuda:0')tensor(7801, device='cuda:3')
+
+tensor(7506, device='cuda:1')
+tensor(7792, device='cuda:2')
+local node number tensor([31397]) remote node number tensor([16304]) local edge tensor([223953]) remote edgetensor([33374])
+
+local node number tensor([31397]) remote node number tensor([16304]) local edge tensor([223953]) remote edgetensor([33374])
+
+local node number tensor([31397]) remote node number tensor([16304]) local edge tensor([223953]) remote edgetensor([33374])
+
+local node number tensor([31397]) remote node number tensor([16304]) local edge tensor([223953]) remote edgetensor([33374])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.13166700513102114 time_backward =  0.08952649415004998 time_sample =  0 pre_batch = 0 pre_input = 0.03661983914207667 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002602903754450381 time_attention = 0.0214390370529145
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1324212570907548 time_backward =  0.08504118584096432 time_sample =  0 pre_batch = 0 pre_input = 0.045300304307602346 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026036998024210334 time_attention = 0.021350683993659914
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12857091997284442 time_backward =  0.07806553586851805 time_sample =  0 pre_batch = 0 pre_input = 0.05104240996297449 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0034512339625507593 time_attention = 0.020879738149233162
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1295455259969458 time_backward =  0.09470446512568742 time_sample =  0 pre_batch = 0 pre_input = 0.03842814301606268 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002599908853881061 time_attention = 0.023516572080552578
+mode: val tensor([0.9647]) tensor([0.9586])mode: val tensor([0.9636]) tensor([0.9577])
+mode: val tensor([0.9499]) tensor([0.9426])
+
+mode: val tensor([0.9533]) tensor([0.9472])
+mode: test tensor([0.9449]) tensor([0.9362])mode: test tensor([0.9626]) tensor([0.9567])
+
+mode: test tensor([0.9447]) tensor([0.9354])
+mode: test tensor([0.9493]) tensor([0.9418])
+	train loss:4.9175  train ap: nan  val ap:0.957865  val auc:0.951515 test ap 0.950345 test auc0.942504
+
+	total time:0.58s  prep time:0.26s
+
+	train loss:4.4596  train ap: nan  val ap:0.957865  val auc:0.951515 test ap 0.950345 test auc0.942504
+
+	total time:0.58s  prep time:0.27s
+
+	train loss:4.3820  train ap: nan  val ap:0.957865  val auc:0.951515 test ap 0.950345 test auc0.942504
+
+	total time:0.58s  prep time:0.27s
+
+	train loss:4.4173  train ap: nan  val ap:0.957865  val auc:0.951515 test ap 0.950345 test auc0.942504
+
+	total time:0.58s  prep time:0.26s
+
+Epoch 23:
+Epoch 23:Epoch 23:
+
+Epoch 23:
+	train time:0.26s
+	train time:0.26s
+	train time:0.26s
+
+
+	train time:0.26s
+
+
+tensor(8244, device='cuda:0')
+tensor(7499, device='cuda:1')
+tensor(7848, device='cuda:3')
+tensor(7773, device='cuda:2')
+local node number tensor([31364]) remote node number tensor([16285]) local edge tensor([223974]) remote edgetensor([33439])
+
+local node number tensor([31364]) remote node number tensor([16285]) local edge tensor([223974]) remote edgetensor([33439])
+
+local node number tensor([31364]) remote node number tensor([16285]) local edge tensor([223974]) remote edgetensor([33439])
+
+local node number tensor([31364]) remote node number tensor([16285]) local edge tensor([223974]) remote edgetensor([33439])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11737556790467352 time_backward =  0.07869696686975658 time_sample =  0 pre_batch = 0 pre_input = 0.05579698598012328 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0023744201753288507 time_attention = 0.02029067906551063
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12064019485842437 time_backward =  0.09270777890924364 time_sample =  0 pre_batch = 0 pre_input = 0.03828298894222826 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002737412229180336 time_attention = 0.024089375976473093
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1261496670776978 time_backward =  0.07577655476052314 time_sample =  0 pre_batch = 0 pre_input = 0.05031740083359182 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0029075979255139828 time_attention = 0.027659587911330163
+time_forward = 0.1405118409311399 time_backward =  0.08236752008087933 time_sample =  0 pre_batch = 0 pre_input = 0.029489637934602797 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.00471480586566031 time_attention = 0.03216492698993534
+mode: val tensor([0.9692]) tensor([0.9649])mode: val tensor([0.9576]) tensor([0.9501])
+
+mode: val tensor([0.9622]) tensor([0.9558])
+mode: val tensor([0.9689]) tensor([0.9649])
+mode: test tensor([0.9674]) tensor([0.9620])
+mode: test tensor([0.9506]) tensor([0.9419])
+mode: test tensor([0.9527]) tensor([0.9451])mode: test tensor([0.9566]) tensor([0.9497])
+
+	train loss:4.7711  train ap: nan  val ap:0.964473  val auc:0.958931 test ap 0.956819 test auc0.949696
+
+	train loss:4.4069  train ap: nan  val ap:0.964473  val auc:0.958931 test ap 0.956819 test auc0.949696
+	total time:0.57s  prep time:0.26s
+
+
+	total time:0.57s  prep time:0.26s
+
+	train loss:4.3042  train ap: nan  val ap:0.964473  val auc:0.958931 test ap 0.956819 test auc0.949696
+
+	total time:0.57s  prep time:0.26s
+
+	train loss:4.3495  train ap: nan  val ap:0.964473  val auc:0.958931 test ap 0.956819 test auc0.949696
+
+	total time:0.57s  prep time:0.26s
+
+Epoch 24:
+Epoch 24:
+Epoch 24:
+Epoch 24:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7810, device='cuda:3')tensor(7505, device='cuda:1')
+
+tensor(7784, device='cuda:2')tensor(8266, device='cuda:0')
+
+local node number tensor([31365]) remote node number tensor([16255]) local edge tensor([223429]) remote edgetensor([33512])
+
+local node number tensor([31365]) remote node number tensor([16255]) local edge tensor([223429]) remote edgetensor([33512])
+
+local node number tensor([31365]) remote node number tensor([16255]) local edge tensor([223429]) remote edgetensor([33512])
+local node number tensor([31365]) remote node number tensor([16255]) local edge tensor([223429]) remote edgetensor([33512])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11758103570900857 time_backward =  0.08886121795512736 time_sample =  0 pre_batch = 0 pre_input = 0.02986909111496061 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002649413188919425 time_attention = 0.02327567688189447
+time_forward = 0.1179392533376813 time_backward =  0.07761736423708498 time_sample =  0 pre_batch = 0 pre_input = 0.040929836803115904 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002838029060512781 time_attention = 0.02167481929063797
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11482153681572527 time_backward =  0.09356433723587543 time_sample =  0 pre_batch = 0 pre_input = 0.028003302752040327 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002996809082105756 time_attention = 0.02372231474146247
+time_forward = 0.1178992431377992 time_backward =  0.09117968985810876 time_sample =  0 pre_batch = 0 pre_input = 0.02746059885248542 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026739019667729735 time_attention = 0.024368729791603982
+mode: val tensor([0.9683]) tensor([0.9632])mode: val tensor([0.9555]) tensor([0.9488])
+mode: val tensor([0.9598]) tensor([0.9542])
+
+mode: val tensor([0.9678]) tensor([0.9629])
+mode: test tensor([0.9539]) tensor([0.9476])mode: test tensor([0.9634]) tensor([0.9591])
+
+mode: test tensor([0.9509]) tensor([0.9433])
+mode: test tensor([0.9497]) tensor([0.9423])
+	train loss:4.1610  train ap: nan  val ap:0.962853  val auc:0.957274 test ap 0.954459 test auc0.948099
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:4.2457  train ap: nan  val ap:0.962853  val auc:0.957274 test ap 0.954459 test auc0.948099
+	train loss:4.1582  train ap: nan  val ap:0.962853  val auc:0.957274 test ap 0.954459 test auc0.948099
+
+
+	total time:0.55s  prep time:0.24s
+	total time:0.55s  prep time:0.24s
+
+
+	train loss:4.6501  train ap: nan  val ap:0.962853  val auc:0.957274 test ap 0.954459 test auc0.948099
+
+	total time:0.55s  prep time:0.24s
+
+Epoch 25:
+Epoch 25:Epoch 25:Epoch 25:
+
+
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+	train time:0.24s
+
+tensor(8300, device='cuda:0')tensor(7816, device='cuda:2')
+tensor(7802, device='cuda:3')
+
+tensor(7523, device='cuda:1')
+local node number tensor([31441]) remote node number tensor([16306]) local edge tensor([223859]) remote edgetensor([33498])
+
+local node number tensor([31441]) remote node number tensor([16306]) local edge tensor([223859]) remote edgetensor([33498])
+
+local node number tensor([31441]) remote node number tensor([16306]) local edge tensor([223859]) remote edgetensor([33498])
+
+local node number tensor([31441]) remote node number tensor([16306]) local edge tensor([223859]) remote edgetensor([33498])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11687367595732212 time_backward =  0.09515160694718361 time_sample =  0 pre_batch = 0 pre_input = 0.025107793044298887 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025289489421993494 time_attention = 0.021557492902502418
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.12006179301533848 time_backward =  0.07373784715309739 time_sample =  0 pre_batch = 0 pre_input = 0.043752448284067214 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.00259707891382277 time_attention = 0.02217016089707613
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11778705206234008 time_backward =  0.09547170193400234 time_sample =  0 pre_batch = 0 pre_input = 0.024418726097792387 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025811349041759968 time_attention = 0.022934230975806713
+time_forward = 0.1187447231495753 time_backward =  0.07865653920453042 time_sample =  0 pre_batch = 0 pre_input = 0.040015234029851854 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002699051983654499 time_attention = 0.024530479917302728
+mode: val tensor([0.9686]) tensor([0.9636])
+mode: val tensor([0.9624]) tensor([0.9570])
+mode: val tensor([0.9692]) tensor([0.9648])mode: val tensor([0.9570]) tensor([0.9507])
+
+mode: test tensor([0.9668]) tensor([0.9610])
+mode: test tensor([0.9561]) tensor([0.9496])mode: test tensor([0.9533]) tensor([0.9451])
+
+mode: test tensor([0.9561]) tensor([0.9488])
+	train loss:4.0398  train ap: nan  val ap:0.964305  val auc:0.959021 test ap 0.958089 test auc0.951119
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:4.2055  train ap: nan  val ap:0.964305  val auc:0.959021 test ap 0.958089 test auc0.951119
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:4.6635  train ap: nan  val ap:0.964305  val auc:0.959021 test ap 0.958089 test auc0.951119
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:4.1933  train ap: nan  val ap:0.964305  val auc:0.959021 test ap 0.958089 test auc0.951119
+
+	total time:0.55s  prep time:0.24s
+
+Epoch 26:
+Epoch 26:
+Epoch 26:
+Epoch 26:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8277, device='cuda:0')tensor(7806, device='cuda:3')tensor(7495, device='cuda:1')
+
+tensor(7827, device='cuda:2')
+
+local node number tensor([31405]) remote node number tensor([16293]) local edge tensor([223725]) remote edgetensor([33303])
+
+local node number tensor([31405]) remote node number tensor([16293]) local edge tensor([223725]) remote edgetensor([33303])
+
+local node number tensor([31405]) remote node number tensor([16293]) local edge tensor([223725]) remote edgetensor([33303])
+
+local node number tensor([31405]) remote node number tensor([16293]) local edge tensor([223725]) remote edgetensor([33303])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.11123893922194839 time_backward =  0.07906705583445728 time_sample =  0 pre_batch = 0 pre_input = 0.0450467070331797 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002519706846214831 time_attention = 0.021723866928368807
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.10893818130716681 time_backward =  0.09608143009245396 time_sample =  0 pre_batch = 0 pre_input = 0.030920745921321213 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002478133770637214 time_attention = 0.021381984115578234
+
+time_forward = 0.11547397484537214 time_backward =  0.09387740306556225 time_sample =  0 pre_batch = 0 pre_input = 0.02668966318015009 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0032202760921791196 time_attention = 0.02636604500003159
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11480384704191238 time_backward =  0.08506310300435871 time_sample =  0 pre_batch = 0 pre_input = 0.03454714210238308 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026952921180054545 time_attention = 0.02432404097635299
+mode: val tensor([0.9666]) tensor([0.9620])mode: val tensor([0.9614]) tensor([0.9553])
+mode: val tensor([0.9587]) tensor([0.9516])
+
+mode: val tensor([0.9697]) tensor([0.9658])
+mode: test tensor([0.9493]) tensor([0.9415])mode: test tensor([0.9647]) tensor([0.9595])
+mode: test tensor([0.9565]) tensor([0.9496])
+
+mode: test tensor([0.9542]) tensor([0.9478])
+	train loss:4.0842  train ap: nan  val ap:0.964094  val auc:0.958658 test ap 0.956180 test auc0.949630
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:4.4714  train ap: nan  val ap:0.964094  val auc:0.958658 test ap 0.956180 test auc0.949630
+	train loss:4.0289  train ap: nan  val ap:0.964094  val auc:0.958658 test ap 0.956180 test auc0.949630
+	train loss:4.0201  train ap: nan  val ap:0.964094  val auc:0.958658 test ap 0.956180 test auc0.949630
+
+
+
+	total time:0.55s  prep time:0.24s
+	total time:0.55s  prep time:0.24s
+
+	total time:0.55s  prep time:0.24s
+
+
+Epoch 27:
+Epoch 27:
+Epoch 27:Epoch 27:
+
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+
+	train time:0.25s
+
+
+
+tensor(7791, device='cuda:2')
+tensor(7798, device='cuda:3')
+tensor(7465, device='cuda:1')
+tensor(8291, device='cuda:0')
+local node number tensor([31345]) remote node number tensor([16224]) local edge tensor([223619]) remote edgetensor([33283])
+
+local node number tensor([31345]) remote node number tensor([16224]) local edge tensor([223619]) remote edgetensor([33283])
+
+local node number tensor([31345]) remote node number tensor([16224]) local edge tensor([223619]) remote edgetensor([33283])
+
+local node number tensor([31345]) remote node number tensor([16224]) local edge tensor([223619]) remote edgetensor([33283])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1170205712551251 time_backward =  0.08893120207358152 time_sample =  0 pre_batch = 0 pre_input = 0.03918466717004776 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026198190171271563 time_attention = 0.023197676055133343
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1161281798267737 time_backward =  0.09320119069889188 time_sample =  0 pre_batch = 0 pre_input = 0.036217496963217854 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026826539542526007 time_attention = 0.022344587021507323
+time_forward = 0.11988571705296636 time_backward =  0.0980156100122258 time_sample =  0 pre_batch = 0 pre_input = 0.027687920606695116 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0033871859777718782 time_attention = 0.027763038990087807
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12268536095507443 time_backward =  0.08708164619747549 time_sample =  0 pre_batch = 0 pre_input = 0.0354825392132625 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027109551010653377 time_attention = 0.024683671072125435
+mode: val tensor([0.9714]) tensor([0.9662])
+mode: val tensor([0.9590]) tensor([0.9523])mode: val tensor([0.9647]) tensor([0.9595])
+
+mode: val tensor([0.9726]) tensor([0.9683])
+mode: test tensor([0.9553]) tensor([0.9480])mode: test tensor([0.9699]) tensor([0.9642])
+
+mode: test tensor([0.9605]) tensor([0.9539])
+mode: test tensor([0.9585]) tensor([0.9521])
+	train loss:3.9195  train ap: nan  val ap:0.966925  val auc:0.961577 test ap 0.961056 test auc0.954557
+
+	total time:0.56s  prep time:0.25s
+
+	train loss:4.2679  train ap: nan  val ap:0.966925  val auc:0.961577 test ap 0.961056 test auc0.954557
+	train loss:3.9741  train ap: nan  val ap:0.966925  val auc:0.961577 test ap 0.961056 test auc0.954557
+
+	train loss:3.8826  train ap: nan  val ap:0.966925  val auc:0.961577 test ap 0.961056 test auc0.954557
+
+	total time:0.56s  prep time:0.25s
+
+
+	total time:0.56s  prep time:0.25s
+	total time:0.56s  prep time:0.25s
+
+
+Epoch 28:
+Epoch 28:Epoch 28:
+
+Epoch 28:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7497, device='cuda:1')
+tensor(7811, device='cuda:3')
+tensor(7779, device='cuda:2')
+tensor(8278, device='cuda:0')
+local node number tensor([31365]) remote node number tensor([16275]) local edge tensor([223553]) remote edgetensor([33264])
+
+local node number tensor([31365]) remote node number tensor([16275]) local edge tensor([223553]) remote edgetensor([33264])
+
+local node number tensor([31365]) remote node number tensor([16275]) local edge tensor([223553]) remote edgetensor([33264])
+
+local node number tensor([31365]) remote node number tensor([16275]) local edge tensor([223553]) remote edgetensor([33264])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11408895102795213 time_backward =  0.08879197505302727 time_sample =  0 pre_batch = 0 pre_input = 0.032050775829702616 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002570608165115118 time_attention = 0.022289056912995875
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.11649018188472837 time_backward =  0.08516404428519309 time_sample =  0 pre_batch = 0 pre_input = 0.03367632196750492 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0029904389521107078 time_attention = 0.02508960186969489
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11275665007997304 time_backward =  0.08218228979967535 time_sample =  0 pre_batch = 0 pre_input = 0.040274783270433545 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025767473271116614 time_attention = 0.022987127187661827time_forward = 0.11760268989019096 time_backward =  0.09262550296261907 time_sample =  0 pre_batch = 0 pre_input = 0.02626272290945053 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003105206065811217 time_attention = 0.02414140582550317
+
+mode: val tensor([0.9626]) tensor([0.9561])mode: val tensor([0.9728]) tensor([0.9675])
+mode: val tensor([0.9663]) tensor([0.9608])
+
+mode: val tensor([0.9732]) tensor([0.9694])
+mode: test tensor([0.9599]) tensor([0.9536])mode: test tensor([0.9553]) tensor([0.9490])
+
+mode: test tensor([0.9694]) tensor([0.9641])mode: test tensor([0.9582]) tensor([0.9511])
+
+	train loss:4.2032  train ap: nan  val ap:0.968701  val auc:0.963442 test ap 0.960701 test auc0.954441
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:3.6601  train ap: nan  val ap:0.968701  val auc:0.963442 test ap 0.960701 test auc0.954441
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:3.7902  train ap: nan  val ap:0.968701  val auc:0.963442 test ap 0.960701 test auc0.954441
+	train loss:3.9188  train ap: nan  val ap:0.968701  val auc:0.963442 test ap 0.960701 test auc0.954441
+
+
+	total time:0.54s  prep time:0.24s
+	total time:0.54s  prep time:0.24s
+
+
+Epoch 29:Epoch 29:Epoch 29:
+
+
+Epoch 29:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7486, device='cuda:1')tensor(7793, device='cuda:3')tensor(8296, device='cuda:0')
+tensor(7805, device='cuda:2')
+
+
+local node number tensor([31380]) remote node number tensor([16245]) local edge tensor([223605]) remote edgetensor([33322])
+local node number tensor([31380]) remote node number tensor([16245]) local edge tensor([223605]) remote edgetensor([33322])
+
+
+local node number tensor([31380]) remote node number tensor([16245]) local edge tensor([223605]) remote edgetensor([33322])
+local node number tensor([31380]) remote node number tensor([16245]) local edge tensor([223605]) remote edgetensor([33322])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.11848461488261819 time_backward =  0.08181549306027591 time_sample =  0 pre_batch = 0 pre_input = 0.03899490705225617 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003237520926631987 time_attention = 0.026245467131957412time_forward = 0.10724094591569155 time_backward =  0.0973033047048375 time_sample =  0 pre_batch = 0 pre_input = 0.03439554921351373 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002509977901354432 time_attention = 0.020304267876781523
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11655101284850389 time_backward =  0.083278673235327 time_sample =  0 pre_batch = 0 pre_input = 0.039665555697865784 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0029178549302741885 time_attention = 0.024738032487221062
+time_forward = 0.11335247615352273 time_backward =  0.08525294507853687 time_sample =  0 pre_batch = 0 pre_input = 0.04064763314090669 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002576048020273447 time_attention = 0.02287139603868127
+mode: val tensor([0.9599]) tensor([0.9533])mode: val tensor([0.9662]) tensor([0.9598])mode: val tensor([0.9727]) tensor([0.9676])
+
+
+mode: val tensor([0.9741]) tensor([0.9696])
+mode: test tensor([0.9573]) tensor([0.9504])
+mode: test tensor([0.9585]) tensor([0.9521])
+mode: test tensor([0.9712]) tensor([0.9656])
+mode: test tensor([0.9612]) tensor([0.9553])
+	train loss:3.6448  train ap: nan  val ap:0.968200  val auc:0.962572 test ap 0.962055 test auc0.955860
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:3.7077  train ap: nan  val ap:0.968200  val auc:0.962572 test ap 0.962055 test auc0.955860
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:3.8163  train ap: nan  val ap:0.968200  val auc:0.962572 test ap 0.962055 test auc0.955860
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:4.1775  train ap: nan  val ap:0.968200  val auc:0.962572 test ap 0.962055 test auc0.955860
+
+	total time:0.55s  prep time:0.24s
+
+Epoch 30:
+Epoch 30:Epoch 30:
+
+Epoch 30:
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+
+
+
+	train time:0.25s
+
+tensor(7489, device='cuda:1')tensor(8264, device='cuda:0')
+
+tensor(7798, device='cuda:2')
+tensor(7824, device='cuda:3')
+local node number tensor([31375]) remote node number tensor([16281]) local edge tensor([223371]) remote edgetensor([33349])
+
+local node number tensor([31375]) remote node number tensor([16281]) local edge tensor([223371]) remote edgetensor([33349])
+
+local node number tensor([31375]) remote node number tensor([16281]) local edge tensor([223371]) remote edgetensor([33349])
+
+local node number tensor([31375]) remote node number tensor([16281]) local edge tensor([223371]) remote edgetensor([33349])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11841498897410929 time_backward =  0.08387234702240676 time_sample =  0 pre_batch = 0 pre_input = 0.038780779927037656 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002683697151951492 time_attention = 0.02335049316752702
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.12131663190666586 time_backward =  0.0952182860346511 time_sample =  0 pre_batch = 0 pre_input = 0.0250870460877195 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002887075999751687 time_attention = 0.027364888228476048
+
+time_forward = 0.11961495399009436 time_backward =  0.08318388764746487 time_sample =  0 pre_batch = 0 pre_input = 0.038572817109525204 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027237108442932367 time_attention = 0.025179997202940285
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12245036091189831 time_backward =  0.08262969891075045 time_sample =  0 pre_batch = 0 pre_input = 0.036410028114914894 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026983037823811173 time_attention = 0.02339359710458666
+mode: val tensor([0.9648]) tensor([0.9587])
+mode: val tensor([0.9674]) tensor([0.9623])mode: val tensor([0.9747]) tensor([0.9701])
+
+mode: val tensor([0.9752]) tensor([0.9717])
+mode: test tensor([0.9709]) tensor([0.9668])mode: test tensor([0.9605]) tensor([0.9538])mode: test tensor([0.9624]) tensor([0.9575])
+
+
+mode: test tensor([0.9625]) tensor([0.9566])
+	train loss:3.5575  train ap: nan  val ap:0.970497  val auc:0.965717 test ap 0.964092 test auc0.958675
+
+	total time:0.55s  prep time:0.25s
+
+	train loss:3.5525  train ap: nan  val ap:0.970497  val auc:0.965717 test ap 0.964092 test auc0.958675
+	train loss:3.6413  train ap: nan  val ap:0.970497  val auc:0.965717 test ap 0.964092 test auc0.958675
+
+
+	total time:0.55s  prep time:0.25s
+
+	total time:0.55s  prep time:0.25s
+
+	train loss:4.0710  train ap: nan  val ap:0.970497  val auc:0.965717 test ap 0.964092 test auc0.958675
+
+	total time:0.55s  prep time:0.25s
+
+Epoch 31:Epoch 31:
+
+Epoch 31:
+Epoch 31:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8245, device='cuda:0')
+tensor(7490, device='cuda:1')
+tensor(7813, device='cuda:2')
+tensor(7779, device='cuda:3')
+local node number tensor([31327]) remote node number tensor([16294]) local edge tensor([223729]) remote edgetensor([33600])
+
+local node number tensor([31327]) remote node number tensor([16294]) local edge tensor([223729]) remote edgetensor([33600])
+
+local node number tensor([31327]) remote node number tensor([16294]) local edge tensor([223729]) remote edgetensor([33600])
+
+local node number tensor([31327]) remote node number tensor([16294]) local edge tensor([223729]) remote edgetensor([33600])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11132031492888927 time_backward =  0.09242483403068036 time_sample =  0 pre_batch = 0 pre_input = 0.03148361505009234 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002580519998446107 time_attention = 0.022285545943304896memory comm tensor([0]) shared comm tensor([0])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11446734389755875 time_backward =  0.08510374801699072 time_sample =  0 pre_batch = 0 pre_input = 0.03631687688175589 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002664071973413229 time_attention = 0.02206473075784743
+time_forward = 0.11796542117372155 time_backward =  0.07896543119568378 time_sample =  0 pre_batch = 0 pre_input = 0.039343396900221705 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003049486083909869 time_attention = 0.024379641050472856memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.1127319191582501 time_backward =  0.08106431912165135 time_sample =  0 pre_batch = 0 pre_input = 0.04189492203295231 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002604896086268127 time_attention = 0.023063698899932206
+mode: val tensor([0.9620]) tensor([0.9566])mode: val tensor([0.9758]) tensor([0.9722])
+mode: val tensor([0.9737]) tensor([0.9689])
+mode: val tensor([0.9680]) tensor([0.9624])
+
+mode: test tensor([0.9611]) tensor([0.9540])mode: test tensor([0.9630]) tensor([0.9568])mode: test tensor([0.9628]) tensor([0.9563])
+mode: test tensor([0.9701]) tensor([0.9660])
+
+
+	train loss:3.9844  train ap: nan  val ap:0.969865  val auc:0.965026 test ap 0.964224 test auc0.958285
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:3.5750  train ap: nan  val ap:0.969865  val auc:0.965026 test ap 0.964224 test auc0.958285
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:3.5004  train ap: nan  val ap:0.969865  val auc:0.965026 test ap 0.964224 test auc0.958285
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:3.7017  train ap: nan  val ap:0.969865  val auc:0.965026 test ap 0.964224 test auc0.958285
+
+	total time:0.54s  prep time:0.24s
+
+Epoch 32:Epoch 32:
+
+Epoch 32:
+Epoch 32:
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+
+
+
+
+tensor(7500, device='cuda:1')tensor(8282, device='cuda:0')
+
+tensor(7776, device='cuda:2')
+tensor(7836, device='cuda:3')
+local node number tensor([31394]) remote node number tensor([16274]) local edge tensor([223795]) remote edgetensor([33223])
+
+local node number tensor([31394]) remote node number tensor([16274]) local edge tensor([223795]) remote edgetensor([33223])
+
+local node number tensor([31394]) remote node number tensor([16274]) local edge tensor([223795]) remote edgetensor([33223])
+
+local node number tensor([31394]) remote node number tensor([16274]) local edge tensor([223795]) remote edgetensor([33223])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11787255201488733 time_backward =  0.09132521296851337 time_sample =  0 pre_batch = 0 pre_input = 0.032856345758773386 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0023444039979949594 time_attention = 0.020198477199301124
+time_forward = 0.12471516616642475 time_backward =  0.08416892809327692 time_sample =  0 pre_batch = 0 pre_input = 0.0336503196740523 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027805661084130406 time_attention = 0.02289426000788808
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.11781964509282261 time_backward =  0.10043959610629827 time_sample =  0 pre_batch = 0 pre_input = 0.02421470987610519 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0030943178571760654 time_attention = 0.02433181111700833
+
+time_forward = 0.1214555911719799 time_backward =  0.08124632795806974 time_sample =  0 pre_batch = 0 pre_input = 0.03945133090019226 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026060251984745264 time_attention = 0.02304625976830721
+mode: val tensor([0.9622]) tensor([0.9563])mode: val tensor([0.9769]) tensor([0.9732])
+
+mode: val tensor([0.9681]) tensor([0.9626])
+mode: val tensor([0.9742]) tensor([0.9691])
+mode: test tensor([0.9615]) tensor([0.9558])mode: test tensor([0.9586]) tensor([0.9532])
+mode: test tensor([0.9704]) tensor([0.9653])
+mode: test tensor([0.9629]) tensor([0.9573])
+
+	train loss:3.5041  train ap: nan  val ap:0.970358  val auc:0.965293 test ap 0.963349 test auc0.957866
+	train loss:3.4748  train ap: nan  val ap:0.970358  val auc:0.965293 test ap 0.963349 test auc0.957866
+
+
+	total time:0.55s  prep time:0.25s
+
+	total time:0.55s  prep time:0.25s
+
+	train loss:3.9210  train ap: nan  val ap:0.970358  val auc:0.965293 test ap 0.963349 test auc0.957866
+
+	total time:0.55s  prep time:0.25s
+	train loss:3.5615  train ap: nan  val ap:0.970358  val auc:0.965293 test ap 0.963349 test auc0.957866
+
+
+	total time:0.55s  prep time:0.25s
+
+Epoch 33:Epoch 33:
+
+Epoch 33:
+Epoch 33:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7818, device='cuda:2')
+tensor(7504, device='cuda:1')
+tensor(8272, device='cuda:0')tensor(7806, device='cuda:3')
+
+local node number tensor([31400]) remote node number tensor([16279]) local edge tensor([223813]) remote edgetensor([33432])
+
+local node number tensor([31400]) remote node number tensor([16279]) local edge tensor([223813]) remote edgetensor([33432])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12145341234281659 time_backward =  0.08063685172237456 time_sample =  0 pre_batch = 0 pre_input = 0.037631264072842896 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0029191761277616024 time_attention = 0.025901329121552408local node number tensor([31400]) remote node number tensor([16279]) local edge tensor([223813]) remote edgetensor([33432])
+
+local node number tensor([31400]) remote node number tensor([16279]) local edge tensor([223813]) remote edgetensor([33432])
+time_forward = 0.11282176594249904 time_backward =  0.08306537289172411 time_sample =  0 pre_batch = 0 pre_input = 0.043641919270157814 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0028215351048856974 time_attention = 0.024660552153363824
+
+
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.1167361781699583 time_backward =  0.08068420388735831 time_sample =  0 pre_batch = 0 pre_input = 0.04291645309422165 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.003137245657853782 time_attention = 0.025777626084163785time_forward = 0.11104614508803934 time_backward =  0.08900407119654119 time_sample =  0 pre_batch = 0 pre_input = 0.039714067010208964 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002570438082329929 time_attention = 0.022058197879232466
+
+mode: val tensor([0.9643]) tensor([0.9576])mode: val tensor([0.9771]) tensor([0.9738])
+
+mode: val tensor([0.9729]) tensor([0.9684])
+mode: val tensor([0.9698]) tensor([0.9649])
+mode: test tensor([0.9607]) tensor([0.9538])mode: test tensor([0.9644]) tensor([0.9587])mode: test tensor([0.9717]) tensor([0.9665])
+
+
+mode: test tensor([0.9637]) tensor([0.9574])
+	train loss:3.8967  train ap: nan  val ap:0.971050  val auc:0.966173 test ap 0.965122 test auc0.959100
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:3.4464  train ap: nan  val ap:0.971050  val auc:0.966173 test ap 0.965122 test auc0.959100
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:3.4011  train ap: nan  val ap:0.971050  val auc:0.966173 test ap 0.965122 test auc0.959100
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:3.5673  train ap: nan  val ap:0.971050  val auc:0.966173 test ap 0.965122 test auc0.959100
+
+	total time:0.56s  prep time:0.24s
+
+Epoch 34:Epoch 34:
+
+Epoch 34:Epoch 34:
+
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8252, device='cuda:0')
+tensor(7506, device='cuda:1')tensor(7809, device='cuda:2')tensor(7820, device='cuda:3')
+
+
+local node number tensor([31387]) remote node number tensor([16249]) local edge tensor([223901]) remote edgetensor([33569])
+
+local node number tensor([31387]) remote node number tensor([16249]) local edge tensor([223901]) remote edgetensor([33569])
+
+local node number tensor([31387]) remote node number tensor([16249]) local edge tensor([223901]) remote edgetensor([33569])
+
+local node number tensor([31387]) remote node number tensor([16249]) local edge tensor([223901]) remote edgetensor([33569])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11248782719485462 time_backward =  0.09156568290200084 time_sample =  0 pre_batch = 0 pre_input = 0.03366664703935385 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002337331883609295 time_attention = 0.019752173917368054
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11970168899279088 time_backward =  0.07903888518922031 time_sample =  0 pre_batch = 0 pre_input = 0.03971278725657612 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0028229482704773545 time_attention = 0.022509837755933404
+time_forward = 0.12140965485014021 time_backward =  0.0873378278920427 time_sample =  0 pre_batch = 0 pre_input = 0.02980620099697262 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002832286059856415 time_attention = 0.02496830269228667
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11306134914048016 time_backward =  0.0960666798055172 time_sample =  0 pre_batch = 0 pre_input = 0.02903327438980341 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026024531107395887 time_attention = 0.022549605928361416
+mode: val tensor([0.9775]) tensor([0.9741])mode: val tensor([0.9747]) tensor([0.9704])
+
+mode: val tensor([0.9680]) tensor([0.9619])
+mode: val tensor([0.9699]) tensor([0.9655])
+mode: test tensor([0.9725]) tensor([0.9685])mode: test tensor([0.9642]) tensor([0.9594])
+
+mode: test tensor([0.9638]) tensor([0.9577])
+mode: test tensor([0.9657]) tensor([0.9599])
+	train loss:3.7368  train ap: nan  val ap:0.972534  val auc:0.967982 test ap 0.966535 test auc0.961382
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:3.5753  train ap: nan  val ap:0.972534  val auc:0.967982 test ap 0.966535 test auc0.961382
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:3.2998  train ap: nan  val ap:0.972534  val auc:0.967982 test ap 0.966535 test auc0.961382
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:3.2142  train ap: nan  val ap:0.972534  val auc:0.967982 test ap 0.966535 test auc0.961382
+
+	total time:0.56s  prep time:0.24s
+
+Epoch 35:
+Epoch 35:
+Epoch 35:
+Epoch 35:
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+
+
+
+
+tensor(7839, device='cuda:3')tensor(7782, device='cuda:2')
+
+tensor(7497, device='cuda:1')
+tensor(8252, device='cuda:0')
+local node number tensor([31370]) remote node number tensor([16298]) local edge tensor([223790]) remote edgetensor([33592])
+local node number tensor([31370]) remote node number tensor([16298]) local edge tensor([223790]) remote edgetensor([33592])
+
+
+local node number tensor([31370]) remote node number tensor([16298]) local edge tensor([223790]) remote edgetensor([33592])
+
+local node number tensor([31370]) remote node number tensor([16298]) local edge tensor([223790]) remote edgetensor([33592])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.12290210009086877 time_backward =  0.07723671698477119 time_sample =  0 pre_batch = 0 pre_input = 0.04131041211076081 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002880079089663923 time_attention = 0.02600623108446598memory comm tensor([0]) shared comm tensor([0])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.12155179993715137 time_backward =  0.0905771650141105 time_sample =  0 pre_batch = 0 pre_input = 0.029192603076808155 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0028317261021584272 time_attention = 0.023334935889579356
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1169331130804494 time_backward =  0.0868764091283083 time_sample =  0 pre_batch = 0 pre_input = 0.037540684221312404 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025203218683600426 time_attention = 0.022417742875404656
+time_forward = 0.12150310096330941 time_backward =  0.08475367911159992 time_sample =  0 pre_batch = 0 pre_input = 0.03453576215542853 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0028662830591201782 time_attention = 0.02532570611219853
+mode: val tensor([0.9736]) tensor([0.9689])mode: val tensor([0.9783]) tensor([0.9749])mode: val tensor([0.9686]) tensor([0.9627])
+
+
+mode: val tensor([0.9648]) tensor([0.9591])
+mode: test tensor([0.9645]) tensor([0.9587])
+mode: test tensor([0.9710]) tensor([0.9659])
+mode: test tensor([0.9642]) tensor([0.9585])
+mode: test tensor([0.9590]) tensor([0.9539])
+	train loss:3.7312  train ap: nan  val ap:0.971307  val auc:0.966403 test ap 0.964658 test auc0.959252
+
+	train loss:3.2981  train ap: nan  val ap:0.971307  val auc:0.966403 test ap 0.964658 test auc0.959252
+	total time:0.55s  prep time:0.25s
+
+
+	total time:0.55s  prep time:0.25s
+
+	train loss:3.4132  train ap: nan  val ap:0.971307  val auc:0.966403 test ap 0.964658 test auc0.959252
+
+	total time:0.55s  prep time:0.25s
+
+	train loss:3.3267  train ap: nan  val ap:0.971307  val auc:0.966403 test ap 0.964658 test auc0.959252
+
+	total time:0.55s  prep time:0.25s
+
+Epoch 36:
+Epoch 36:
+Epoch 36:
+Epoch 36:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7803, device='cuda:3')tensor(8283, device='cuda:0')tensor(7506, device='cuda:1')
+
+
+tensor(7791, device='cuda:2')
+local node number tensor([31383]) remote node number tensor([16282]) local edge tensor([223779]) remote edgetensor([33471])
+
+local node number tensor([31383]) remote node number tensor([16282]) local edge tensor([223779]) remote edgetensor([33471])
+
+local node number tensor([31383]) remote node number tensor([16282]) local edge tensor([223779]) remote edgetensor([33471])
+
+local node number tensor([31383]) remote node number tensor([16282]) local edge tensor([223779]) remote edgetensor([33471])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11396126309409738 time_backward =  0.09023513307329267 time_sample =  0 pre_batch = 0 pre_input = 0.031627930933609605 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0024402738781645894 time_attention = 0.019519573892466724
+time_forward = 0.12226019229274243 time_backward =  0.07668051135260612 time_sample =  0 pre_batch = 0 pre_input = 0.03762264794204384 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.00291723501868546 time_attention = 0.02483747387304902
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11715416295919567 time_backward =  0.08678765094373375 time_sample =  0 pre_batch = 0 pre_input = 0.03266145184170455 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002668812172487378 time_attention = 0.023235867847688496
+time_forward = 0.11854621593374759 time_backward =  0.09100369818042964 time_sample =  0 pre_batch = 0 pre_input = 0.02697192516643554 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025542679941281676 time_attention = 0.022511863964609802
+mode: val tensor([0.9773]) tensor([0.9738])mode: val tensor([0.9741]) tensor([0.9693])
+
+mode: val tensor([0.9630]) tensor([0.9573])
+mode: val tensor([0.9688]) tensor([0.9637])
+mode: test tensor([0.9718]) tensor([0.9663])mode: test tensor([0.9643]) tensor([0.9591])
+
+mode: test tensor([0.9647]) tensor([0.9588])
+mode: test tensor([0.9606]) tensor([0.9546])
+	train loss:3.2348  train ap: nan  val ap:0.970825  val auc:0.966036 test ap 0.965366 test auc0.959686
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:3.6965  train ap: nan  val ap:0.970825  val auc:0.966036 test ap 0.965366 test auc0.959686
+	train loss:3.2837  train ap: nan  val ap:0.970825  val auc:0.966036 test ap 0.965366 test auc0.959686
+
+
+	total time:0.56s  prep time:0.24s
+	total time:0.56s  prep time:0.24s
+
+
+	train loss:3.3417  train ap: nan  val ap:0.970825  val auc:0.966036 test ap 0.965366 test auc0.959686
+
+	total time:0.56s  prep time:0.24s
+
+Epoch 37:Epoch 37:
+
+Epoch 37:Epoch 37:
+
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+
+	train time:0.25s
+
+
+
+tensor(8291, device='cuda:0')
+tensor(7504, device='cuda:1')tensor(7821, device='cuda:2')
+
+tensor(7836, device='cuda:3')
+local node number tensor([31452]) remote node number tensor([16340]) local edge tensor([224003]) remote edgetensor([33579])
+
+local node number tensor([31452]) remote node number tensor([16340]) local edge tensor([224003]) remote edgetensor([33579])
+local node number tensor([31452]) remote node number tensor([16340]) local edge tensor([224003]) remote edgetensor([33579])
+local node number tensor([31452]) remote node number tensor([16340]) local edge tensor([224003]) remote edgetensor([33579])
+
+
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11804702517110854 time_backward =  0.09013473708182573 time_sample =  0 pre_batch = 0 pre_input = 0.03594582004006952 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002389791770838201 time_attention = 0.020245556719601154
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.1247148459078744 time_backward =  0.0924300099723041 time_sample =  0 pre_batch = 0 pre_input = 0.027368941926397383 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0034152748994529247 time_attention = 0.028866239124909043
+time_forward = 0.11941776797175407 time_backward =  0.09938876214437187 time_sample =  0 pre_batch = 0 pre_input = 0.02569701394531876 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025787048507481813 time_attention = 0.026421134127303958
+time_forward = 0.12475082208402455 time_backward =  0.08202214387711138 time_sample =  0 pre_batch = 0 pre_input = 0.03797462582588196 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002887014066800475 time_attention = 0.0232343029929325
+mode: val tensor([0.9663]) tensor([0.9607])
+mode: val tensor([0.9694]) tensor([0.9640])
+mode: val tensor([0.9778]) tensor([0.9747])mode: val tensor([0.9756]) tensor([0.9709])
+
+mode: test tensor([0.9626]) tensor([0.9558])mode: test tensor([0.9658]) tensor([0.9603])mode: test tensor([0.9734]) tensor([0.9690])
+
+
+mode: test tensor([0.9640]) tensor([0.9581])
+	train loss:3.7145  train ap: nan  val ap:0.972265  val auc:0.967590 test ap 0.966448 test auc0.960791
+
+	total time:0.55s  prep time:0.25s
+
+	train loss:3.1125  train ap: nan  val ap:0.972265  val auc:0.967590 test ap 0.966448 test auc0.960791
+
+	total time:0.55s  prep time:0.25s
+
+	train loss:3.3166  train ap: nan  val ap:0.972265  val auc:0.967590 test ap 0.966448 test auc0.960791
+
+	total time:0.55s  prep time:0.25s
+
+	train loss:3.2601  train ap: nan  val ap:0.972265  val auc:0.967590 test ap 0.966448 test auc0.960791
+
+	total time:0.55s  prep time:0.25s
+
+Epoch 38:Epoch 38:
+Epoch 38:
+Epoch 38:
+
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7509, device='cuda:1')tensor(8320, device='cuda:0')tensor(7814, device='cuda:3')
+
+
+tensor(7760, device='cuda:2')
+local node number tensor([31403]) remote node number tensor([16298]) local edge tensor([223651]) remote edgetensor([33491])
+
+local node number tensor([31403]) remote node number tensor([16298]) local edge tensor([223651]) remote edgetensor([33491])
+
+local node number tensor([31403]) remote node number tensor([16298]) local edge tensor([223651]) remote edgetensor([33491])
+local node number tensor([31403]) remote node number tensor([16298]) local edge tensor([223651]) remote edgetensor([33491])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.10969464585650712 time_backward =  0.09508465917315334 time_sample =  0 pre_batch = 0 pre_input = 0.029413016862235963 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0022773361997678876 time_attention = 0.01977436093147844
+time_forward = 0.1205925380345434 time_backward =  0.07830044906586409 time_sample =  0 pre_batch = 0 pre_input = 0.03586862201336771 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0028012649854645133 time_attention = 0.02344122587237507
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.12457024306058884 time_backward =  0.08736427570693195 time_sample =  0 pre_batch = 0 pre_input = 0.02269733604043722 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0033578089205548167 time_attention = 0.02989303192589432time_forward = 0.11347082606516778 time_backward =  0.09035858209244907 time_sample =  0 pre_batch = 0 pre_input = 0.030823704204522073 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0023813920561224222 time_attention = 0.023227993748150766
+
+mode: val tensor([0.9779]) tensor([0.9753])mode: val tensor([0.9671]) tensor([0.9610])
+
+mode: val tensor([0.9721]) tensor([0.9681])mode: val tensor([0.9706]) tensor([0.9646])
+
+mode: test tensor([0.9666]) tensor([0.9611])mode: test tensor([0.9642]) tensor([0.9584])mode: test tensor([0.9664]) tensor([0.9599])
+
+
+mode: test tensor([0.9708]) tensor([0.9667])
+	train loss:3.5318  train ap: nan  val ap:0.971935  val auc:0.967260 test ap 0.967009 test auc0.961539
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:3.1653  train ap: nan  val ap:0.971935  val auc:0.967260 test ap 0.967009 test auc0.961539
+	train loss:3.2646  train ap: nan  val ap:0.971935  val auc:0.967260 test ap 0.967009 test auc0.961539
+
+
+	total time:0.54s  prep time:0.24s
+	total time:0.54s  prep time:0.24s
+
+
+	train loss:3.2777  train ap: nan  val ap:0.971935  val auc:0.967260 test ap 0.967009 test auc0.961539
+
+	total time:0.54s  prep time:0.24s
+
+Epoch 39:Epoch 39:
+Epoch 39:
+Epoch 39:
+
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7497, device='cuda:1')
+tensor(7819, device='cuda:3')
+tensor(8245, device='cuda:0')tensor(7821, device='cuda:2')
+
+local node number tensor([31382]) remote node number tensor([16311]) local edge tensor([223734]) remote edgetensor([33384])
+
+local node number tensor([31382]) remote node number tensor([16311]) local edge tensor([223734]) remote edgetensor([33384])
+local node number tensor([31382]) remote node number tensor([16311]) local edge tensor([223734]) remote edgetensor([33384])
+
+
+local node number tensor([31382]) remote node number tensor([16311]) local edge tensor([223734]) remote edgetensor([33384])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.10615170595701784 time_backward =  0.09244495793245733 time_sample =  0 pre_batch = 0 pre_input = 0.03311131917871535 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0023229459766298532 time_attention = 0.020357744302600622memory comm tensor([0]) shared comm tensor([0])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.10803219792433083 time_backward =  0.0919297591317445 time_sample =  0 pre_batch = 0 pre_input = 0.032392002060078084 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002493615262210369 time_attention = 0.02122972288634628
+time_forward = 0.11582999327220023 time_backward =  0.08106491703074425 time_sample =  0 pre_batch = 0 pre_input = 0.035231237998232245 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0031758345430716872 time_attention = 0.026745793991722167time_forward = 0.11148734402377158 time_backward =  0.0864757401868701 time_sample =  0 pre_batch = 0 pre_input = 0.034222912159748375 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025864479830488563 time_attention = 0.02399862522725016
+
+mode: val tensor([0.9660]) tensor([0.9602])mode: val tensor([0.9794]) tensor([0.9759])
+
+mode: val tensor([0.9758]) tensor([0.9715])mode: val tensor([0.9701]) tensor([0.9659])
+
+mode: test tensor([0.9671]) tensor([0.9619])mode: test tensor([0.9736]) tensor([0.9682])
+
+mode: test tensor([0.9638]) tensor([0.9578])
+mode: test tensor([0.9674]) tensor([0.9614])
+	train loss:3.6059  train ap: nan  val ap:0.972802  val auc:0.968370 test ap 0.967954 test auc0.962305
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:3.2750  train ap: nan  val ap:0.972802  val auc:0.968370 test ap 0.967954 test auc0.962305
+	train loss:3.1498  train ap: nan  val ap:0.972802  val auc:0.968370 test ap 0.967954 test auc0.962305
+
+
+	total time:0.54s  prep time:0.24s
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:3.1080  train ap: nan  val ap:0.972802  val auc:0.968370 test ap 0.967954 test auc0.962305
+
+	total time:0.54s  prep time:0.24s
+
+Epoch 40:
+Epoch 40:
+Epoch 40:
+Epoch 40:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8274, device='cuda:0')tensor(7804, device='cuda:3')
+
+tensor(7487, device='cuda:1')tensor(7806, device='cuda:2')
+
+local node number tensor([31371]) remote node number tensor([16273]) local edge tensor([223487]) remote edgetensor([33553])
+
+local node number tensor([31371]) remote node number tensor([16273]) local edge tensor([223487]) remote edgetensor([33553])
+
+local node number tensor([31371]) remote node number tensor([16273]) local edge tensor([223487]) remote edgetensor([33553])
+
+local node number tensor([31371]) remote node number tensor([16273]) local edge tensor([223487]) remote edgetensor([33553])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.10979436803609133 time_backward =  0.0958572190720588 time_sample =  0 pre_batch = 0 pre_input = 0.0318073439411819 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0023214835673570633 time_attention = 0.020004904246889055
+
+time_forward = 0.11360232182778418 time_backward =  0.09060336882248521 time_sample =  0 pre_batch = 0 pre_input = 0.03388384508434683 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002434222958981991 time_attention = 0.020624392898753285
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11911701993085444 time_backward =  0.08292716334108263 time_sample =  0 pre_batch = 0 pre_input = 0.03561306605115533 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026340032927691936 time_attention = 0.022486190195195377
+time_forward = 0.11655583616811782 time_backward =  0.08705021976493299 time_sample =  0 pre_batch = 0 pre_input = 0.0342767738038674 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002650519134476781 time_attention = 0.022662263712845743
+mode: val tensor([0.9751]) tensor([0.9709])mode: val tensor([0.9788]) tensor([0.9751])mode: val tensor([0.9658]) tensor([0.9606])
+
+
+mode: val tensor([0.9705]) tensor([0.9655])
+mode: test tensor([0.9733]) tensor([0.9689])mode: test tensor([0.9618]) tensor([0.9556])
+mode: test tensor([0.9662]) tensor([0.9621])
+
+mode: test tensor([0.9662]) tensor([0.9606])
+	train loss:3.0531  train ap: nan  val ap:0.972561  val auc:0.968013 test ap 0.966878 test auc0.961798
+
+	total time:0.57s  prep time:0.24s
+
+	train loss:3.1455  train ap: nan  val ap:0.972561  val auc:0.968013 test ap 0.966878 test auc0.961798
+
+	total time:0.57s  prep time:0.24s
+
+	train loss:3.1444  train ap: nan  val ap:0.972561  val auc:0.968013 test ap 0.966878 test auc0.961798
+
+	total time:0.57s  prep time:0.24s
+
+	train loss:3.4523  train ap: nan  val ap:0.972561  val auc:0.968013 test ap 0.966878 test auc0.961798
+
+	total time:0.57s  prep time:0.24s
+
+Epoch 41:
+Epoch 41:
+Epoch 41:
+Epoch 41:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7804, device='cuda:3')tensor(8270, device='cuda:0')
+
+tensor(7485, device='cuda:1')
+tensor(7822, device='cuda:2')
+local node number tensor([31381]) remote node number tensor([16285]) local edge tensor([223610]) remote edgetensor([33532])
+
+local node number tensor([31381]) remote node number tensor([16285]) local edge tensor([223610]) remote edgetensor([33532])
+
+local node number tensor([31381]) remote node number tensor([16285]) local edge tensor([223610]) remote edgetensor([33532])
+local node number tensor([31381]) remote node number tensor([16285]) local edge tensor([223610]) remote edgetensor([33532])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11694547301158309 time_backward =  0.09118386986665428 time_sample =  0 pre_batch = 0 pre_input = 0.03169123292900622 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002489278791472316 time_attention = 0.02239271206781268
+time_forward = 0.11575783707667142 time_backward =  0.08882689906749874 time_sample =  0 pre_batch = 0 pre_input = 0.0357311621773988 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0024033779045566916 time_attention = 0.020487849949859083
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.12211762787774205 time_backward =  0.0845563281327486 time_sample =  0 pre_batch = 0 pre_input = 0.03359470795840025 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002798458910547197 time_attention = 0.025459035765379667
+time_forward = 0.11885053711012006 time_backward =  0.09310416574589908 time_sample =  0 pre_batch = 0 pre_input = 0.028081393102183938 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027054946403950453 time_attention = 0.02477076684590429
+mode: val tensor([0.9794]) tensor([0.9762])mode: val tensor([0.9751]) tensor([0.9719])mode: val tensor([0.9697]) tensor([0.9637])
+
+
+mode: val tensor([0.9710]) tensor([0.9668])
+mode: test tensor([0.9741]) tensor([0.9703])mode: test tensor([0.9682]) tensor([0.9634])mode: test tensor([0.9633]) tensor([0.9568])
+
+
+mode: test tensor([0.9676]) tensor([0.9620])
+	train loss:2.9778  train ap: nan  val ap:0.973826  val auc:0.969637 test ap 0.968296 test auc0.963111
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:3.4522  train ap: nan  val ap:0.973826  val auc:0.969637 test ap 0.968296 test auc0.963111
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:3.0841  train ap: nan  val ap:0.973826  val auc:0.969637 test ap 0.968296 test auc0.963111
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:3.0421  train ap: nan  val ap:0.973826  val auc:0.969637 test ap 0.968296 test auc0.963111
+
+	total time:0.55s  prep time:0.24s
+
+Epoch 42:
+Epoch 42:
+Epoch 42:
+Epoch 42:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8255, device='cuda:0')tensor(7800, device='cuda:3')
+tensor(7505, device='cuda:1')
+tensor(7809, device='cuda:2')
+
+local node number tensor([31369]) remote node number tensor([16309]) local edge tensor([223535]) remote edgetensor([33221])
+
+local node number tensor([31369]) remote node number tensor([16309]) local edge tensor([223535]) remote edgetensor([33221])
+
+local node number tensor([31369]) remote node number tensor([16309]) local edge tensor([223535]) remote edgetensor([33221])
+
+local node number tensor([31369]) remote node number tensor([16309]) local edge tensor([223535]) remote edgetensor([33221])
+
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11447175894863904 time_backward =  0.08727608784101903 time_sample =  0 pre_batch = 0 pre_input = 0.03210342675447464 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026539640966802835 time_attention = 0.023793241940438747time_forward = 0.10984399705193937 time_backward =  0.0915975229581818 time_sample =  0 pre_batch = 0 pre_input = 0.03476515202783048 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0024437919491901994 time_attention = 0.0207837502239272
+
+time_forward = 0.11269748164340854 time_backward =  0.08583562402054667 time_sample =  0 pre_batch = 0 pre_input = 0.03767728211823851 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002535164006985724 time_attention = 0.021651729941368103
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.10898330307099968 time_backward =  0.09483976208139211 time_sample =  0 pre_batch = 0 pre_input = 0.030427254154346883 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002412301837466657 time_attention = 0.020564335864037275
+mode: val tensor([0.9771]) tensor([0.9727])mode: val tensor([0.9812]) tensor([0.9781])
+mode: val tensor([0.9681]) tensor([0.9630])
+
+mode: val tensor([0.9729]) tensor([0.9686])
+mode: test tensor([0.9711]) tensor([0.9660])
+mode: test tensor([0.9641]) tensor([0.9590])mode: test tensor([0.9756]) tensor([0.9716])
+
+mode: test tensor([0.9686]) tensor([0.9637])
+	train loss:2.9585  train ap: nan  val ap:0.974838  val auc:0.970618 test ap 0.969864 test auc0.965074
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:3.3537  train ap: nan  val ap:0.974838  val auc:0.970618 test ap 0.969864 test auc0.965074
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:2.9406  train ap: nan  val ap:0.974838  val auc:0.970618 test ap 0.969864 test auc0.965074
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:2.9918  train ap: nan  val ap:0.974838  val auc:0.970618 test ap 0.969864 test auc0.965074
+
+	total time:0.54s  prep time:0.24s
+
+Epoch 43:Epoch 43:
+
+Epoch 43:
+Epoch 43:
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+	train time:0.25s
+
+
+
+
+tensor(7473, device='cuda:1')
+tensor(8276, device='cuda:0')tensor(7821, device='cuda:3')tensor(7775, device='cuda:2')
+
+
+local node number tensor([31345]) remote node number tensor([16285]) local edge tensor([223810]) remote edgetensor([33609])
+
+local node number tensor([31345]) remote node number tensor([16285]) local edge tensor([223810]) remote edgetensor([33609])
+
+local node number tensor([31345]) remote node number tensor([16285]) local edge tensor([223810]) remote edgetensor([33609])
+
+local node number tensor([31345]) remote node number tensor([16285]) local edge tensor([223810]) remote edgetensor([33609])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.13810076797381043 time_backward =  0.08504252892453223 time_sample =  0 pre_batch = 0 pre_input = 0.02570275589823723 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0034056880977004766 time_attention = 0.0260634811129421
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1352192967897281 time_backward =  0.08148876018822193 time_sample =  0 pre_batch = 0 pre_input = 0.03434124309569597 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0034601929364725947 time_attention = 0.02763767191208899
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.1291470598662272 time_backward =  0.08263943972997367 time_sample =  0 pre_batch = 0 pre_input = 0.0386075311107561 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025318411644548178 time_attention = 0.02189857792109251
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11968053062446415 time_backward =  0.10578336892649531 time_sample =  0 pre_batch = 0 pre_input = 0.023309101816266775 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002354124910198152 time_attention = 0.02091686613857746
+mode: val tensor([0.9789]) tensor([0.9759])mode: val tensor([0.9753]) tensor([0.9719])
+
+mode: val tensor([0.9675]) tensor([0.9623])
+mode: val tensor([0.9705]) tensor([0.9663])
+mode: test tensor([0.9734]) tensor([0.9697])mode: test tensor([0.9687]) tensor([0.9640])mode: test tensor([0.9671]) tensor([0.9615])
+
+
+mode: test tensor([0.9634]) tensor([0.9584])
+	train loss:2.8462  train ap: nan  val ap:0.973026  val auc:0.969108 test ap 0.968143 test auc0.963404
+
+	total time:0.56s  prep time:0.25s
+
+	train loss:3.2749  train ap: nan  val ap:0.973026  val auc:0.969108 test ap 0.968143 test auc0.963404
+
+	total time:0.56s  prep time:0.25s
+
+	train loss:2.9660  train ap: nan  val ap:0.973026  val auc:0.969108 test ap 0.968143 test auc0.963404
+
+	total time:0.56s  prep time:0.25s
+
+	train loss:2.9447  train ap: nan  val ap:0.973026  val auc:0.969108 test ap 0.968143 test auc0.963404
+
+	total time:0.56s  prep time:0.25s
+
+Epoch 44:
+Epoch 44:
+Epoch 44:
+Epoch 44:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(8283, device='cuda:0')tensor(7501, device='cuda:1')
+tensor(7802, device='cuda:3')
+tensor(7814, device='cuda:2')
+
+local node number tensor([31400]) remote node number tensor([16287]) local edge tensor([224155]) remote edgetensor([33593])
+local node number tensor([31400]) remote node number tensor([16287]) local edge tensor([224155]) remote edgetensor([33593])
+local node number tensor([31400]) remote node number tensor([16287]) local edge tensor([224155]) remote edgetensor([33593])
+
+
+
+local node number tensor([31400]) remote node number tensor([16287]) local edge tensor([224155]) remote edgetensor([33593])
+
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.11774890590459108 time_backward =  0.08119084197096527 time_sample =  0 pre_batch = 0 pre_input = 0.036522552953101695 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002761450130492449 time_attention = 0.02364851103629917
+time_forward = 0.11327855486888438 time_backward =  0.093150619068183 time_sample =  0 pre_batch = 0 pre_input = 0.02847160818055272 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0023013927275314927 time_attention = 0.0202388190664351memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11423947685398161 time_backward =  0.09579674666747451 time_sample =  0 pre_batch = 0 pre_input = 0.025265203905291855 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025599357904866338 time_attention = 0.022980487090535462
+
+time_forward = 0.11128568404819816 time_backward =  0.10024933610111475 time_sample =  0 pre_batch = 0 pre_input = 0.02358144603203982 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025876850122585893 time_attention = 0.021878875675611198
+mode: val tensor([0.9792]) tensor([0.9757])mode: val tensor([0.9711]) tensor([0.9666])mode: val tensor([0.9668]) tensor([0.9614])
+
+
+mode: val tensor([0.9749]) tensor([0.9708])
+mode: test tensor([0.9633]) tensor([0.9576])mode: test tensor([0.9672]) tensor([0.9617])mode: test tensor([0.9678]) tensor([0.9629])
+
+
+mode: test tensor([0.9728]) tensor([0.9678])
+	train loss:3.3573  train ap: nan  val ap:0.972965  val auc:0.968647 test ap 0.967752 test auc0.962485
+
+	total time:0.55s  prep time:0.24s
+	train loss:2.9540  train ap: nan  val ap:0.972965  val auc:0.968647 test ap 0.967752 test auc0.962485
+
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:2.9600  train ap: nan  val ap:0.972965  val auc:0.968647 test ap 0.967752 test auc0.962485
+
+	total time:0.55s  prep time:0.24s
+
+	train loss:2.9837  train ap: nan  val ap:0.972965  val auc:0.968647 test ap 0.967752 test auc0.962485
+
+	total time:0.55s  prep time:0.24s
+
+Epoch 45:Epoch 45:
+
+Epoch 45:
+Epoch 45:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7500, device='cuda:1')tensor(8273, device='cuda:0')
+tensor(7772, device='cuda:3')
+
+tensor(7792, device='cuda:2')
+local node number tensor([31337]) remote node number tensor([16259]) local edge tensor([223564]) remote edgetensor([33376])
+
+local node number tensor([31337]) remote node number tensor([16259]) local edge tensor([223564]) remote edgetensor([33376])
+
+local node number tensor([31337]) remote node number tensor([16259]) local edge tensor([223564]) remote edgetensor([33376])
+local node number tensor([31337]) remote node number tensor([16259]) local edge tensor([223564]) remote edgetensor([33376])
+
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11443845101166517 time_backward =  0.08957425609696656 time_sample =  0 pre_batch = 0 pre_input = 0.030489130993373692 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002722780918702483 time_attention = 0.023849994642660022
+time_forward = 0.11734314123168588 time_backward =  0.07958352600689977 time_sample =  0 pre_batch = 0 pre_input = 0.038210983970202506 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002742022043094039 time_attention = 0.023931526113301516
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.11707491532433778 time_backward =  0.08397569577209651 time_sample =  0 pre_batch = 0 pre_input = 0.03572248888667673 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027545380871742964 time_attention = 0.025749226799234748time_forward = 0.11205616011284292 time_backward =  0.08945971203502268 time_sample =  0 pre_batch = 0 pre_input = 0.035225833184085786 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0024857918033376336 time_attention = 0.021899122861213982
+
+mode: val tensor([0.9795]) tensor([0.9762])
+mode: val tensor([0.9726]) tensor([0.9676])
+mode: val tensor([0.9684]) tensor([0.9625])
+mode: val tensor([0.9757]) tensor([0.9711])
+mode: test tensor([0.9671]) tensor([0.9630])mode: test tensor([0.9658]) tensor([0.9602])
+
+mode: test tensor([0.9653]) tensor([0.9590])
+mode: test tensor([0.9750]) tensor([0.9709])
+	train loss:3.3072  train ap: nan  val ap:0.974057  val auc:0.969337 test ap 0.968305 test auc0.963269
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:2.9976  train ap: nan  val ap:0.974057  val auc:0.969337 test ap 0.968305 test auc0.963269
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:2.8785  train ap: nan  val ap:0.974057  val auc:0.969337 test ap 0.968305 test auc0.963269
+
+	total time:0.56s  prep time:0.24s
+
+	train loss:2.9782  train ap: nan  val ap:0.974057  val auc:0.969337 test ap 0.968305 test auc0.963269
+
+	total time:0.56s  prep time:0.24s
+
+Epoch 46:
+Epoch 46:
+Epoch 46:
+Epoch 46:
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+	train time:0.24s
+
+
+
+
+tensor(7506, device='cuda:1')
+tensor(8260, device='cuda:0')
+tensor(7789, device='cuda:3')
+tensor(7786, device='cuda:2')
+local node number tensor([31341]) remote node number tensor([16260]) local edge tensor([223473]) remote edgetensor([33481])
+
+local node number tensor([31341]) remote node number tensor([16260]) local edge tensor([223473]) remote edgetensor([33481])
+
+local node number tensor([31341]) remote node number tensor([16260]) local edge tensor([223473]) remote edgetensor([33481])
+
+local node number tensor([31341]) remote node number tensor([16260]) local edge tensor([223473]) remote edgetensor([33481])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+time_forward = 0.11165704682935029 time_backward =  0.07797722273971885 time_sample =  0 pre_batch = 0 pre_input = 0.0452983909053728 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0023181610740721226 time_attention = 0.02015149116050452
+
+time_forward = 0.12074573873542249 time_backward =  0.07935059501323849 time_sample =  0 pre_batch = 0 pre_input = 0.035060843685641885 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.00302147027105093 time_attention = 0.025673645897768438
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.11761317809578031 time_backward =  0.09002782497555017 time_sample =  0 pre_batch = 0 pre_input = 0.027815580018796027 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0027505909092724323 time_attention = 0.025435548974201083
+time_forward = 0.11218747415114194 time_backward =  0.09773448994383216 time_sample =  0 pre_batch = 0 pre_input = 0.025319851003587246 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025873089907690883 time_attention = 0.021717683062888682
+mode: val tensor([0.9680]) tensor([0.9625])mode: val tensor([0.9690]) tensor([0.9645])mode: val tensor([0.9796]) tensor([0.9767])
+
+
+mode: val tensor([0.9739]) tensor([0.9700])
+mode: test tensor([0.9622]) tensor([0.9561])mode: test tensor([0.9676]) tensor([0.9614])
+mode: test tensor([0.9667]) tensor([0.9615])
+
+mode: test tensor([0.9725]) tensor([0.9679])
+	train loss:2.8821  train ap: nan  val ap:0.972658  val auc:0.968435 test ap 0.967244 test auc0.961733
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:3.2832  train ap: nan  val ap:0.972658  val auc:0.968435 test ap 0.967244 test auc0.961733
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:2.9205  train ap: nan  val ap:0.972658  val auc:0.968435 test ap 0.967244 test auc0.961733
+
+	total time:0.54s  prep time:0.24s
+
+	train loss:2.9950  train ap: nan  val ap:0.972658  val auc:0.968435 test ap 0.967244 test auc0.961733
+
+	total time:0.54s  prep time:0.24s
+
+Epoch 47:Epoch 47:
+
+Epoch 47:
+Epoch 47:
+	train time:0.23s
+	train time:0.23s
+	train time:0.23s
+	train time:0.23s
+
+
+
+
+tensor(7485, device='cuda:1')
+tensor(8274, device='cuda:0')
+tensor(7803, device='cuda:3')tensor(7807, device='cuda:2')
+
+local node number tensor([31369]) remote node number tensor([16288]) local edge tensor([223579]) remote edgetensor([33444])
+local node number tensor([31369]) remote node number tensor([16288]) local edge tensor([223579]) remote edgetensor([33444])
+
+
+local node number tensor([31369]) remote node number tensor([16288]) local edge tensor([223579]) remote edgetensor([33444])
+
+local node number tensor([31369]) remote node number tensor([16288]) local edge tensor([223579]) remote edgetensor([33444])
+
+memory comm tensor([0]) shared comm tensor([0])
+memory comm tensor([0]) shared comm tensor([0])
+
+
+time_forward = 0.11761338519863784 time_backward =  0.07407023303676397 time_sample =  0 pre_batch = 0 pre_input = 0.03702890092972666 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.002800180925987661 time_attention = 0.025938602862879634time_forward = 0.1142897178651765 time_backward =  0.0817692072596401 time_sample =  0 pre_batch = 0 pre_input = 0.03222440602257848 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026317592710256577 time_attention = 0.02324583614245057
+
+memory comm tensor([0]) shared comm tensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 0.10803491994738579 time_backward =  0.09601916873361915 time_sample =  0 pre_batch = 0 pre_input = 0.0244282711064443 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0025483190547674894 time_attention = 0.022176631959155202
+time_forward = 0.1122279497794807 time_backward =  0.09171503107063472 time_sample =  0 pre_batch = 0 pre_input = 0.02456553012598306 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 0.0026898521464318037 time_attention = 0.0239492371911183
+mode: val tensor([0.9673]) tensor([0.9628])mode: val tensor([0.9715]) tensor([0.9667])
+mode: val tensor([0.9765]) tensor([0.9729])
+
+mode: val tensor([0.9797]) tensor([0.9763])
+mode: test tensor([0.9649]) tensor([0.9588])mode: test tensor([0.9697]) tensor([0.9643])
+mode: test tensor([0.9683]) tensor([0.9633])
+
+mode: test tensor([0.9744]) tensor([0.9699])
+Early stopping at epoch 47
+Early stopping at epoch 47
+Early stopping at epoch 47
+
+
+Early stopping at epoch 47
+
+Loading the best model at epoch 42
+Loading the best model at epoch 42
+
+Loading the best model at epoch 42
+
+
+Loading the best model at epoch 42
+
+
+12.448770761489868
+best test AP:0.969864 test auc0.965074
+12.451017618179321
+best test AP:0.969864 test auc0.965074
+12.450842142105103
+best test AP:0.969864 test auc0.965074
+12.446453094482422
+best test AP:0.969864 test auc0.965074
+mode: train tensor([0.9810]) tensor([0.9784])mode: train tensor([0.9826]) tensor([0.9804])mode: train tensor([0.9782]) tensor([0.9760])
+
+
+mode: train tensor([0.9787]) tensor([0.9759])
+mode: val tensor([0.9690]) tensor([0.9645])mode: val tensor([0.9736]) tensor([0.9702])mode: val tensor([0.9787]) tensor([0.9767])
+
+
+mode: val tensor([0.9763]) tensor([0.9726])
+mode: test tensor([0.9654]) tensor([0.9602])mode: test tensor([0.9720]) tensor([0.9675])mode: test tensor([0.9674]) tensor([0.9628])
+
+
+mode: test tensor([0.9748]) tensor([0.9706])
+	val ap:0.974387 val auc:0.971019 test AP:0.969876  test AUC:0.965276
+
+	val ap:0.974387 val auc:0.971019 test AP:0.969876  test AUC:0.965276
+
+	val ap:0.974387 val auc:0.971019 test AP:0.969876  test AUC:0.965276
+
+test_dataset 23621 avg_time 0.25934939086437225 
+
+	val ap:0.974387 val auc:0.971019 test AP:0.969876  test AUC:0.965276
+test_dataset 23621 avg_time 0.25939620037873584 
+
+
+test_dataset 23621 avg_time 0.25939254462718964 
+
+test_dataset 23621 avg_time 0.2593011061350505 
+

@@ -1,0 +1,20 @@
+LOCAL RANK 3, RANK3
+LOCAL RANK 2, RANK2
+LOCAL RANK 0, RANK0
+LOCAL RANK 1, RANK1
+in
+in
+in
+in
+local rank is 3 world_size is 4 memory group is 0 memory rank is 3 memory group size is 4
+local rank is 1 world_size is 4 memory group is 0 memory rank is 1 memory group size is 4
+
+local rank is 0 world_size is 4 memory group is 0 memory rank is 0 memory group size is 4
+
+[0, 1, 2, 3]
+
+[0, 1, 2, 3]
+[0, 1, 2, 3]
+local rank is 2 world_size is 4 memory group is 0 memory rank is 2 memory group size is 4
+
+[0, 1, 2, 3]
