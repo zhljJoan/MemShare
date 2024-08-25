@@ -2,6 +2,7 @@ import argparse
 import os
 import profile
 import sys
+import psutil
 from os.path import abspath, join, dirname
 current_path = os.path.dirname(os.path.abspath(__file__))
 parent_path = os.path.abspath(os.path.join(current_path, os.pardir))
@@ -83,7 +84,15 @@ import random
 import numpy as np
 from sklearn.metrics import average_precision_score, roc_auc_score
 from torch.nn.parallel import DistributedDataParallel as DDP
+def get_network_interfaces_with_prefix(prefixs):
+    interfaces = psutil.net_if_addrs()
+    matching_interfaces = [iface for iface in interfaces if iface.startswith(prefixs[0]) or iface.startswith(prefixs[1])]
+    return matching_interfaces
 
+# Example usage
+prefix = ("ens4f1np1","ens6f0np0")
+matching_interfaces = get_network_interfaces_with_prefix(prefix)
+print(f"Network interfaces with prefix '{prefix}': {matching_interfaces}")
 #os.environ['CUDA_VISIBLE_DEVICES'] = '2'#str(args.rank)
 if not 'WORLD_SIZE'  in os.environ:
     os.environ["RANK"] = str(args.rank)
@@ -94,7 +103,7 @@ if not 'MASTER_ADDR' in os.environ:
 if not 'MASTER_PORT' in os.environ:
     os.environ["MASTER_PORT"] = '9337'
 os.environ["NCCL_IB_DISABLE"]='1'
-os.environ['NCCL_SOCKET_IFNAME']='ens6f0np0'
+os.environ['NCCL_SOCKET_IFNAME']=matching_interfaces[0]
 torch.cuda.set_device(int(os.environ["LOCAL_RANK"]))
 local_rank = int(os.environ["LOCAL_RANK"])
 def seed_everything(seed=42):
@@ -575,8 +584,8 @@ def main():
             print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f} test ap {:4f} test auc{:4f}\n'.format(total_loss,train_ap, ap, auc,test_ap,test_auc))
             print('\ttotal time:{:.2f}s  prep time:{:.2f}s\n'.format(time.time()-epoch_start_time, time_prep))    
             torch.save(model.module.state_dict(), get_checkpoint_path(e))
-    torch.save(val_list,'all/{}_val_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
-    torch.save(loss_list,'all/{}_loss_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
+    torch.save(val_list,'all/{}/val_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
+    torch.save(loss_list,'all/{}/loss_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
 
     print(avg_time)
     if not early_stop:        
