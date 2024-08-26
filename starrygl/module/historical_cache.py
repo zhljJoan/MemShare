@@ -80,7 +80,7 @@ class HistoricalCache:
         self.local_ts.zero_()
         self.loss_count.zero_()
 
-    def ssim(self,x,y,type = 'F'):
+    def ssim(self,x,y,type = 'cos'):
         
         if type == 'cos':
             return 1-torch.nn.functional.cosine_similarity(x,y) 
@@ -90,6 +90,7 @@ class HistoricalCache:
         if self.time_threshold is not None:
             return (self.ssim(new_data,self.local_historical_data[index]) > self.threshold | (ts - self.local_ts[index] > self.time_threshold | self.loss_count[index] > self.times_threshold))
         else:
+            #print('{} {} {} {}  \n'.format(index,self.ssim(new_data,self.local_historical_data[index]),new_data,self.local_historical_data[index]))
             #print(new_data,self.local_historical_data[index])
             #print(self.ssim(new_data,self.local_historical_data[index]) < self.threshold, (self.loss_count[index] > self.times_threshold))
             return (self.ssim(new_data,self.local_historical_data[index]) > self.threshold) | (self.loss_count[index] > self.times_threshold)
@@ -136,12 +137,13 @@ class HistoricalCache:
         shared_data = shared_data[:,:-1]
         #print(shared_index)
         unq_index,inv = torch.unique(shared_index,return_inverse = True)
-        #max_ts,idx = torch_scatter.scatter_mean(shared_ts,inv,0)
-        shared_ts =  torch_scatter.scatter_mean(shared_ts,inv,0)
-        shared_data =  torch_scatter.scatter_mean(shared_data,inv,0)
-        #shared_data = shared_data[idx]
-        #shared_ts = shared_ts[idx]
+        max_ts,idx = torch_scatter.scatter_max(shared_ts,inv,0)
+        #shared_ts =  torch_scatter.scatter_mean(shared_ts,inv,0)
+        #shared_data =  torch_scatter.scatter_mean(shared_data,inv,0)
+        shared_data = shared_data[idx]
+        shared_ts = shared_ts[idx]
         shared_index = unq_index
+        #print('{} {} {}\n'.format(shared_index,shared_data,shared_ts))
         # if filter is not None:
         #     change = shared_data - self.local_historical_data[shared_index] 
         #     if not (change.max().item() == 0):     

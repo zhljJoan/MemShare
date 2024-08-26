@@ -48,6 +48,7 @@ def load_feat(d, node_num = 0, edge_num = 0, rand_de=0, rand_dn=0):
 
 def load_graph(d):
     df = pd.read_csv('/mnt/nfs/fzz/TGL-DATA/{}/edges.csv'.format(d))
+    
     return df
 
 def build_shared_index(ids,shared_ids,to_shared_idexs):
@@ -130,6 +131,7 @@ def load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev = Tru
     df = load_graph(data)
     src = torch.from_numpy(np.array(df.src.values)).long()
     dst = torch.from_numpy(np.array(df.dst.values)).long()  
+    print('tot edge {} circ edge {} same edge {}\n'.format(src.shape[0],torch.stack((src,dst)).unique(dim = 1).shape[1],(src==dst).sum().item()))
     ts = torch.from_numpy(np.array(df.time.values)).long()
     train_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 0)
     val_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 1)
@@ -260,10 +262,10 @@ def get_eval_batch(eid,nid_mapper,eid_mapper,batch_size):
         eid_for_test = mask[eid.to('cpu')].to('cuda')
         local_belong_batch = belong_batch[eid_for_test]
         pos = torch.arange(eid_for_test.sum().item(),device=torch.device('cuda'),dtype=torch.long)
-        posl,_ = torch_scatter.scatter_min(pos,local_belong_batch)
-        posr,_ = torch_scatter.scatter_max(pos,local_belong_batch)
+        posl,_ = torch_scatter.scatter_min(pos,local_belong_batch,dim_size=max_batch+1)
+        posr,_ = torch_scatter.scatter_max(pos,local_belong_batch,dim_size=max_batch+1)
         global_edge[i] = posr-posl+1
-    print(global_edge)
+
     print('average: {}\n'.format((global_edge.max(dim = 0)[0]/global_edge.min(dim=0)[0]).float().mean()))
     print('max average: {}\n'.format((global_edge.max(dim = 0)[0]).float().mean()))
     print('min average: {}\n'.format((global_edge.min(dim = 0)[0]).float().mean()))
@@ -284,24 +286,35 @@ def load_from_speed(data,seed,top,sampler_graph_add_rev,device=torch.device('cud
         return load_from_shared_node_partition(data,None,None,sample_add_rev=sampler_graph_add_rev,device=device,feature_device=feature_device)
     else:
         if partition == 'ours':
-            fnode_i = '../../../SPEED/partition/divided_nodes_seed_t2/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-            fnode_share = '../../../SPEED/partition/divided_nodes_seed_t2/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
-            reorder = '../../../SPEED/partition/divided_nodes_seed_t2/{}/reorder.txt'.format(data)
-            edge_i = '../../../SPEED/partition/divided_nodes_seed_t2/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+            fnode_i = '../../SPEED/partition/divided_nodes_seed_t2/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+            fnode_share = '../../SPEED/partition/divided_nodes_seed_t2/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
+            reorder = '../../SPEED/partition/divided_nodes_seed_t2/{}/reorder.txt'.format(data)
+            edge_i = '../../SPEED/partition/divided_nodes_seed_t2/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
         elif partition == 'metis':
-            fnode_i = '../../../SPEED/partition/divided_nodes_metis_balance/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-            fnode_share = '../../../SPEED/partition/divided_nodes_metis_balance/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
-            reorder = '../../../SPEED/partition/divided_nodes_seed_ldg/{}/reorder.txt'.format(data)
-            edge_i = '../../../SPEED/partition/divided_nodes_metis_balance/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+            fnode_i = '../../SPEED/partition/divided_nodes_metis/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+            fnode_share = '../../SPEED/partition/divided_nodes_metis/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
+            reorder = '../../SPEED/partition/divided_nodes_metis/{}/reorder.txt'.format(data)
+            edge_i = '../../SPEED/partition/divided_nodes_metis/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+        elif partition == 'ldg':
+            fnode_i = '../../SPEED/partition/divided_nodes_ldg/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+            fnode_share = '../../SPEED/partition/divided_nodes_ldg/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
+            reorder = '../../SPEED/partition/divided_nodes_ldg/{}/reorder.txt'.format(data)
+            edge_i = '../../SPEED/partition/divided_nodes_ldg/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
         elif partition == 'random':
             df = load_graph(data)
             src = torch.from_numpy(np.array(df.src.values)).long()
             dst = torch.from_numpy(np.array(df.dst.values)).long() 
             num_node = max(src.max().item(),dst.max().item())+1 
             part = torch.randint(0,dist.get_world_size(),size = [num_node])
+            #part = torch.arange(num_node)%dist.get_world_size()
+            #edge_part  = torch.randint(0,dist.get_world_size(),size = [src.shape[0]])
             node_i = (part == dist.get_rank()).nonzero().reshape(-1)
             dist.broadcast(part,src=0,group=ctx.gloo_group)
+            #dist.broadcast(edge_part,src=0,group=ctx.gloo_group)
+            print(part)
+            #edge_i = (edge_part == dist.get_rank()).nonzero().reshape(-1)#
             edge_i = (part[src] == dist.get_rank()).nonzero().reshape(-1)
+            print(node_i,edge_i)
             shared_node_list = []
             shared_node = torch.tensor(shared_node_list).reshape(-1).to(torch.long)
             return load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev=sampler_graph_add_rev,edge_i=edge_i,reid=None,device=device,feature_device=feature_device)

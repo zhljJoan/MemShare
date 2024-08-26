@@ -99,7 +99,7 @@ class DistributedDataLoader:
             local_embedding = False,
             cache_mask = None,
             use_local_feature = True,
-            probability = 0,
+            probability = 1,
             **kwargs
     ):
         self.use_local_feature = use_local_feature
@@ -149,6 +149,7 @@ class DistributedDataLoader:
         self.remote_root = 0
         self.local_root = 0
         self.probability = probability
+        print('pro {}\n'.format(self.probability))
               
     def __iter__(self):
         if self.chunk_size is None:
@@ -215,19 +216,20 @@ class DistributedDataLoader:
         #        self.current_pos += self.batch_size
         #else:
 
-        if self.batch_pos_l[self.recv_idxs] == -1:
+        if self.batch_pos_l[self.submitted] == -1:
             next_data = self.input_dataset[torch.tensor([],device=self.device,dtype= torch.long)]
         else:
-            next_data = self.input_dataset[self.batch_pos_l[self.recv_idxs]:self.batch_pos_r[self.recv_idxs] +1]
+            next_data = self.input_dataset[self.batch_pos_l[self.submitted]:self.batch_pos_r[self.submitted] +1]
         if self.mode=='train' and self.probability < 1:
             mask = ((DistIndex(self.graph.nids_mapper[next_data.edges[0,:].to('cpu')]).part == dist.get_rank())&(DistIndex(self.graph.nids_mapper[next_data.edges[1,:].to('cpu')]).part == dist.get_rank()))
             if self.probability > 0:
                 mask[~mask] = (torch.rand((~mask)) < self.probability)
             next_data = next_data[mask.to(next_data.device)]
+        self.submitted = self.submitted + 1
         return next_data
     def submit(self):
         global executor
-        if(self.recv_idxs+1<=self.expected_idx):
+        if(self.submitted < self.expected_idx):
             data = self._next_data()  
             with torch.cuda.stream(stream):
                 fut = executor.submit(
@@ -306,9 +308,9 @@ class DistributedDataLoader:
                 edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid, is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
-                if(self.mailbox is not None and self.mailbox.historical_cache is not None):
-                    id = batch_data[1][0][0].srcdata['ID']
-                    mask = DistIndex(id).is_shared
+                #if(self.mailbox is not None and self.mailbox.historical_cache is not None):
+                #    id = batch_data[1][0][0].srcdata['ID']
+                #    mask = DistIndex(id).is_shared
                    # a = DistIndex(id[mask]).loc
                    # b = self.mailbox.historical_cache.local_historical_data[a]
                     #batch_data[1][0][0].srcdata['mem'][mask] = self.mailbox.historical_cache.local_historical_data[DistIndex(id[mask]).loc]
@@ -331,9 +333,9 @@ class DistributedDataLoader:
                 edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid,  is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,batch_data[1],dist_nid,dist_eid)
-                if(self.mailbox is not None and self.mailbox.historical_cache is not None):
-                    id = batch_data[1][0][0].srcdata['ID']
-                    mask = DistIndex(id).is_shared
+                #if(self.mailbox is not None and self.mailbox.historical_cache is not None):
+                #    id = batch_data[1][0][0].srcdata['ID']
+                #    mask = DistIndex(id).is_shared
                     #batch_data[1][0][0].srcdata['mem'][mask] = self.mailbox.historical_cache.local_historical_data[DistIndex(id).loc[mask]]
                 self.recv_idxs += 1
             else:

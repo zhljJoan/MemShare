@@ -300,6 +300,7 @@ class SharedMailBox():
             shared_memory_ts = memory_ts[mask]
             shared_mail = mail[mask]
             shared_mail_ts = mail_ts[mask]
+            update_index = self.historical_cache.historical_check(shared_memory_ind,shared_memory,shared_memory_ts)
             if mode == 'historical':
                 #print(shared_memory_ind)
                 update_index = self.historical_cache.historical_check(shared_memory_ind,shared_memory,shared_memory_ts)
@@ -350,6 +351,8 @@ class SharedMailBox():
                     #shared_mail = torch_scatter.scatter_mean(shared_mail,inv,0)
                     shared_index = unq_index
                     self.set_memory_local(self.shared_nodes_index[shared_index],shared_memory,shared_memory_ts)
+                    self.historical_cache.local_historical_data[shared_index] = shared_memory
+                    self.historical_cache.local_ts[shared_index] = shared_memory_ts
                     #self.set_mailbox_local(self.shared_nodes_index[shared_index],shared_mail,shared_mail_ts)
             else:
                 start = torch.cuda.Event(enable_timing=True)

@@ -320,10 +320,10 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             nxt_fetch_func()
     def p2p_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func):
         self.mailbox.handle_last_async()
+        submit_to_queue = False
         if nxt_fetch_func is not None:
             nxt_fetch_func()
             submit_to_queue = True
-        submit_to_queue = False
         self.mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = True,filter=None,mode=None,set_remote=True,submit = submit_to_queue)
     def all_reduce_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func):
         self.mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,mode='all_reduce',set_remote=False)
@@ -331,10 +331,10 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             nxt_fetch_func()
     def historical_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func):
         self.mailbox.sychronize_shared()
+        submit_to_queue = False
         if nxt_fetch_func is not None:
             nxt_fetch_func()
             submit_to_queue = True
-        submit_to_queue = False
         self.mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,mode='historical',set_remote=False,submit =  submit_to_queue)
     def local_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func):
         if nxt_fetch_func is not None:

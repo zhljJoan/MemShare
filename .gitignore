@@ -166,6 +166,7 @@ cython_debug/
 #.idea/
 
 *.pt
+*.out
 /*.out
 /a.out
 

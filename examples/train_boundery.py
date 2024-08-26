@@ -211,7 +211,7 @@ def main():
     num_layers = sample_param['layer'] if 'layer' in sample_param else 1
     fanout = sample_param['neighbor'] if 'neighbor' in sample_param else [10]
     policy = sample_param['strategy'] if 'strategy' in sample_param else 'recent'
-    policy = args.sample_type#'boundery_recent_decay'
+    policy_train = args.sample_type#'boundery_recent_decay'
 
     if memory_param['type'] != 'none':
         mailbox = SharedMailBox(graph.ids.shape[0], memory_param, dim_edge_feat = graph.efeat.shape[1] if graph.efeat is not None else 0,
@@ -219,7 +219,7 @@ def main():
     else:
         mailbox = None
 
-    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=10,policy = policy, graph_name = "train",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability)
+    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=1,policy = policy_train, graph_name = "train",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability)
     eval_sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=eval_sample_graph, workers=10,policy = 'recent', graph_name = "eval",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability)
 
     train_data = torch.masked_select(graph.edge_index,train_mask.to(graph.edge_index.device)).reshape(2,-1)
@@ -246,7 +246,9 @@ def main():
     print('ts {} {} {} {}'.format(train_data.ts,eval_train_data.ts,test_data.ts,val_data.ts))
     neg_samples = args.neg_samples
     mask = DistIndex(graph.nids_mapper[graph.edge_index[1,:]].to('cpu')).part == dist.get_rank()
+    
     if args.local_neg_sample:
+        print('dst len {} origin len {}'.format(graph.edge_index[1,mask].unique().shape[0],full_dst.unique().shape[0]))
         train_neg_sampler = LocalNegativeSampling('triplet',amount = neg_samples,dst_node_list = graph.edge_index[1,mask].unique())
     else:
         train_neg_sampler = LocalNegativeSampling('triplet',amount = neg_samples,dst_node_list = full_dst.unique())
@@ -266,7 +268,7 @@ def main():
                                         is_pipeline=True,
                                         use_local_feature = False,
                                         device = torch.device('cuda:{}'.format(local_rank)),
-                                        probability=1 if args.topk == 0 else 0
+                                        probability=1 if float(args.topk) == 0 else 0
                                         )
     
     eval_trainloader = DistributedDataLoader(graph,eval_train_data,sampler = eval_sampler,
@@ -440,8 +442,34 @@ def main():
             model.module.memory_updater.last_updated_ts = None
         t0 = time.time()
         t_s = tt.start()
+        sum_local_comm = 0
+        sum_remote_comm = 0
+        sum_local_edge_comm = 0
+        sum_remote_edge_comm = 0
+        local_access = []
+        remote_access = []
+        local_comm = []
+        remote_comm = []
+        local_edge_access = []
+        remote_edge_access = []
+        local_edge_comm = []
+        remote_edge_comm = []
+        b_cnt = 0
         for roots,mfgs,metadata in trainloader:
             #print('rank is {} batch max ts is {} batch min ts is {}'.format(dist.get_rank(),roots.ts.min(),roots.ts.max()))
+            b_cnt = b_cnt + 1
+            local_access.append(trainloader.local_node)
+            remote_access.append(trainloader.remote_node)
+            local_edge_access.append(trainloader.local_edge)
+            remote_edge_access.append(trainloader.remote_edge)
+            local_comm.append((DistIndex(mfgs[0][0].srcdata['ID']).part == dist.get_rank()).sum().item())
+            remote_comm.append((DistIndex(mfgs[0][0].srcdata['ID']).part != dist.get_rank()).sum().item())
+            local_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part == dist.get_rank()).sum().item())
+            remote_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part != dist.get_rank()).sum().item())
+            sum_local_comm +=local_comm[b_cnt-1]
+            sum_remote_comm +=remote_comm[b_cnt-1]
+            sum_local_edge_comm +=local_edge_comm[b_cnt-1]
+            sum_remote_edge_comm +=remote_edge_comm[b_cnt-1]
             tt.pre_input += tt.elapsed(t_s)
             t_prep_s = time.time()
             t1 = time.time()
@@ -547,7 +575,10 @@ def main():
         torch.distributed.all_reduce(tot_comm_count,group=ctx.gloo_group)
         torch.distributed.all_reduce(tot_shared_count,group=ctx.gloo_group)
         print('local node number {} remote node number {} local edge {} remote edge{}\n'.format(local_node,remote_node,local_edge,remote_edge))
+        print(' comm local node number {} remote node number {} local edge {} remote edge{}\n'.format(sum_local_comm,sum_remote_comm,sum_local_edge_comm,sum_remote_edge_comm))
         print('memory comm {} shared comm {}\n'.format(tot_comm_count,tot_shared_count))
+        if(e==0):
+            torch.save((local_access,remote_access,local_edge_access,remote_edge_access,local_comm,remote_comm,local_edge_comm,remote_edge_comm),'all/{}/comm/comm_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
         tt.print()
         ap = 0
         auc = 0
@@ -586,7 +617,7 @@ def main():
             torch.save(model.module.state_dict(), get_checkpoint_path(e))
     torch.save(val_list,'all/{}/val_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
     torch.save(loss_list,'all/{}/loss_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
-
+    
     print(avg_time)
     if not early_stop:        
         dist.barrier()

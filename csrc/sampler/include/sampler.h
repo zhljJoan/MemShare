@@ -244,6 +244,11 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
         double s_start_time = omp_get_wtime();
         
         if ((policy == "recent") || (end_index <= fanout)&& policy.substr(0,8) != "boundery" ){
+            int cnt  = 0;
+            for(int cid = end_index-1;cid>=0;cid--){
+                cnt++;
+                if(cnt>fanout)break;
+            }
             int start_index = max(0, end_index-fanout);
             tgb_i[tid].src_index.insert(tgb_i[tid].src_index.end(), end_index-start_index, i);
             tgb_i[tid].sample_nodes.insert(tgb_i[tid].sample_nodes.end(), tnb.neighbors[node].begin()+start_index, tnb.neighbors[node].begin()+end_index);

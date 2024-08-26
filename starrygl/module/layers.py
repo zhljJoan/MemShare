@@ -292,7 +292,6 @@ class TransfomerAttentionLayer(torch.nn.Module):
             V = torch.reshape(V*att[:, :, None], (V.shape[0], -1))
             b.edata['v'] = V
             b.update_all(dgl.function.copy_e('v', 'm'), dgl.function.sum('m', 'h'))
-            torch.set_printoptions(threshold=100000)
             #print('dst {}'.format(b.dstdata['h']))
             #b.srcdata['v'] = torch.cat([torch.zeros((b.num_dst_nodes(), V.shape[1]), device=torch.device('cuda:0')), V], dim=0)
             #b.update_all(dgl.function.copy_u('v', 'm'), dgl.function.sum('m', 'h'))

@@ -30,6 +30,11 @@ src_index: list[tensor,tensor, tensor...]
 delta_ts: list[tensor,tensor, tensor...]
 metadata
 """
+class CountComm:
+    origin_remote = 0
+    origin_local = 0
+    def __init__(self):
+        pass
 total_sample_core_time = 0
 total_fetch_prepare_time = 0
 total_comm_time = 0
@@ -213,7 +218,7 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
     dist_eid = eid_mapper[eid_tensor].to(device)
     dist_eid,eid_inv = dist_eid.unique(return_inverse=True)
     src_node = dst.to(graph.nids_mapper.device)
-
+    #print(src_node)
     src_ts = None  
     if metadata is None:
         root_node = data.nodes.to(graph.nids_mapper.device)
@@ -232,6 +237,11 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
                 metadata[k] = metadata[k].to(device)
     nid_tensor = torch.cat([root_node,src_node],dim = 0)
     dist_nid = nid_mapper[nid_tensor].to(device)
+    #print(CountComm.origin_local,CountComm.origin_remote)
+    #for p in range(dist.get_world_size()):
+    #    print((DistIndex(dist_nid).part == p).sum().item())
+    CountComm.origin_local = (DistIndex(dist_nid).part == dist.get_rank()).sum().item()
+    CountComm.origin_remote =(DistIndex(dist_nid).part != dist.get_rank()).sum().item()
     dist_nid,nid_inv = dist_nid.unique(return_inverse=True)
     #print('nid_tensor {} \n nid {}\n'.format(nid_tensor,dist_nid))
 

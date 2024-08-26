@@ -139,7 +139,7 @@ class NeighborSampler(BaseSampler):
         else:
             assert tnb is not None
             self.tnb = tnb
-        print(local_part,node_part)
+
         self.p_sampler = starrygl.sampler_ops.ParallelSampler(self.tnb, num_nodes, graph_data.num_edges, workers, 
                                          fanout, num_layers, policy, local_part,edge_part.to(torch.int),node_part.to(torch.int),probability)
         
@@ -257,7 +257,7 @@ class NeighborSampler(BaseSampler):
         ets: Optional[torch.Tensor] = None,
         neg_sampling: Optional[NegativeSampling] = None,
         with_outer_sample: SampleType = SampleType.Whole,
-        is_unique:bool = True,
+        is_unique:bool = False,
         nid_mapper = None,
         eid_mapper = None,
         out_device = None
@@ -349,6 +349,7 @@ class NeighborSampler(BaseSampler):
         #    dst_pos_index = first_block_id[dst_pos_index].contiguous()
         #    dst_neg_index = first_block_id[dst_neg_index].contiguous()
         #    src_neg_index = first_block_id[src_neg_index].contiguous()
+    
         metadata['seed'] = seed
         metadata['seed_ts'] = seed_ts
         metadata['src_pos_index']=src_pos_index
