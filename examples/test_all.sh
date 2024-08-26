@@ -4,19 +4,19 @@
 addr="192.168.1.107"
 partition_params=("ours" "metis" "ldg" "random")
 #("ours" "metis" "ldg" "random")
-partitions="4"
-nnodes="1"
+partitions="16"
+nnodes="4"
 node_rank="0"
 probability_params=("1" "0.5" "0.1" "0.05" "0.01" "0")
-#sample_type_params=("recent" "boundery_recent_decay" "boundery_recent_uniform")
-sample_type_params=("recent")
+sample_type_params=("recent" "boundery_recent_decay" "boundery_recent_uniform")
+#sample_type_params=("recent")
 #memory_type=("all_update" "p2p" "all_reduce" "historical" "local")
 #memory_type=("all_update" "local" "historical")
-memory_type=("local" "all_update")
+memory_type=("local" "all_update" "historical" "all_reduce")
 shared_memory_ssim=("0" "0.1" "0.2" "0.3" "0.4" )
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
-#data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk" "StackOverflow")
-data_param=("REDDIT" "WikiTalk")
+data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk" "StackOverflow")
+#data_param=("REDDIT" "WikiTalk")
 # 创建输出目录
 mkdir -p all
 
