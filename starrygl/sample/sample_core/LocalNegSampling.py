@@ -19,12 +19,15 @@ class LocalNegativeSampling(NegativeSampling):
         amount: Union[int, float] = 1,
         unique: bool = False,
         src_node_list: torch.Tensor = None,
-        dst_node_list: torch.Tensor = None
+        dst_node_list: torch.Tensor = None,
+        seed = False
     ):
         super(LocalNegativeSampling,self).__init__(mode,amount,unique=unique)
         self.src_node_list = src_node_list.to('cpu') if src_node_list is not None else None
         self.dst_node_list = dst_node_list.to('cpu') if dst_node_list is not None else None
         self.rdm = torch.Generator()
+        if seed is True:
+            random.seed(seed)
         seed = random.randint(0,100000)
         print('seed is',seed)
         ctx = DistributedContext.get_default_context()

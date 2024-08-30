@@ -209,7 +209,6 @@ class TransfomerAttentionLayer(torch.nn.Module):
         self.layer_norm = torch.nn.LayerNorm(dim_out)
 
     def forward(self, b):
-        t_s = tt.start()
         assert(self.dim_time + self.dim_node_feat + self.dim_edge_feat > 0)
         self.device = b.device
         if b.num_edges() == 0:
@@ -217,8 +216,6 @@ class TransfomerAttentionLayer(torch.nn.Module):
         if self.dim_time > 0:
             time_feat = self.time_enc(b.edata['dt'])
             zero_time_feat = self.time_enc(torch.zeros(b.num_dst_nodes(), dtype=torch.float32, device=self.device))
-        tt.time_nbrs += tt.elapsed(t_s)
-        t_s = tt.start()
         if self.combined:
             Q = torch.zeros((b.num_edges(), self.dim_out), device=self.device)
             K = torch.zeros((b.num_edges(), self.dim_out), device=self.device)
@@ -301,7 +298,6 @@ class TransfomerAttentionLayer(torch.nn.Module):
             rst = b.dstdata['h']
         rst = self.w_out(rst)
         rst = torch.nn.functional.relu(self.dropout(rst))
-        tt.time_attention+= tt.elapsed(t_s)
         return self.layer_norm(rst)
 
 class IdentityNormLayer(torch.nn.Module):

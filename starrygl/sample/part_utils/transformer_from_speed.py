@@ -291,10 +291,10 @@ def load_from_speed(data,seed,top,sampler_graph_add_rev,device=torch.device('cud
             reorder = '../../SPEED/partition/divided_nodes_seed_t2/{}/reorder.txt'.format(data)
             edge_i = '../../SPEED/partition/divided_nodes_seed_t2/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
         elif partition == 'metis':
-            fnode_i = '../../SPEED/partition/divided_nodes_metis/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-            fnode_share = '../../SPEED/partition/divided_nodes_metis/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
-            reorder = '../../SPEED/partition/divided_nodes_metis/{}/reorder.txt'.format(data)
-            edge_i = '../../SPEED/partition/divided_nodes_metis/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+            fnode_i = '../../SPEED/partition/divided_nodes_metis_test/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+            fnode_share = '../../SPEED/partition/divided_nodes_metis_test/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
+            reorder = '../../SPEED/partition/divided_nodes_metis_test/{}/reorder.txt'.format(data)
+            edge_i = '../../SPEED/partition/divided_nodes_metis_test/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
         elif partition == 'ldg':
             fnode_i = '../../SPEED/partition/divided_nodes_ldg/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
             fnode_share = '../../SPEED/partition/divided_nodes_ldg/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)

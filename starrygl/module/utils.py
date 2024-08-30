@@ -10,7 +10,7 @@ def parse_config(f):
     return sample_param, memory_param, gnn_param, train_param
 
 class EarlyStopMonitor(object):
-  def __init__(self, max_round=3, higher_better=True, tolerance=1e-10):
+  def __init__(self, max_round=10, higher_better=True, tolerance=1e-10):
     self.max_round = max_round
     self.num_round = 0
 

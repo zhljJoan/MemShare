@@ -286,6 +286,7 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
                 idx = block_node_list[0,b.srcnodes()].to(torch.long)
                 e_idx = eid_inv[col_len:col_len+elen]
                 b.srcdata['__ID'] = idx
+                
                 if sample_out[r].delta_ts().shape[0] > 0:
                     b.edata['dt'] = sample_out[r].delta_ts().to(device)
                 b.srcdata['ts'] = block_node_list[1,b.srcnodes()].to(torch.float)
