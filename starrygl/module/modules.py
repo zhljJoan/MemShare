@@ -114,14 +114,13 @@ class GeneralModel(torch.nn.Module):
             
                 
     def forward(self, mfgs, metadata = None,neg_samples=1, mode = 'triplet',async_param = None):
-        t0 = time.time()
+        t0 = tt.start_gpu()
         if self.memory_param['type'] == 'node':
             self.memory_updater(mfgs[0],async_param)
+        t_mem = tt.elapsed_event(t0)
+        tt.time_memory_updater += t_mem
         out = list()
-        start = torch.cuda.Event(enable_timing=True)
-        end = torch.cuda.Event(enable_timing=True)
-
-        start.record()
+        t1 = tt.start_gpu()
         for l in range(self.gnn_param['layer']):
             for h in range(self.sample_param['history']):
                 rst = self.layers['l' + str(l) + 'h' + str(h)](mfgs[l][h])
@@ -145,7 +144,10 @@ class GeneralModel(torch.nn.Module):
         #print('time {}\n'.format(elapsed_time_ms))
         #print('pos src {} \n pos dst {} \n neg dst{} \n'.format(h_pos_src, h_pos_dst,h_neg_dst))
         #print('pre predict {}'.format(mfgs[0][0].srcdata['ID']))
-        return self.edge_predictor(h_pos_src, h_pos_dst, None , h_neg_dst, neg_samples=neg_samples, mode = mode)
+        pred = self.edge_predictor(h_pos_src, h_pos_dst, None , h_neg_dst, neg_samples=neg_samples, mode = mode)
+        t_embedding = tt.elapsed_event(t1)
+        tt.time_embedding+=t_embedding
+        return pred
     
 
 class NodeClassificationModel(torch.nn.Module):

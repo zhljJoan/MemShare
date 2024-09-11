@@ -23,7 +23,7 @@ import torch.distributed as dist
 from torch_geometric.data import Data
 import os.path as osp
 import math
-
+from starrygl.sample.count_static import time_count as tt
 import data_loader as data_loader
 import concurrent.futures
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=1) 
@@ -294,6 +294,7 @@ class DistributedDataLoader:
         #with torch.cuda.stream(stream):
         if self.is_pipeline is False:
             if self.recv_idxs < self.expected_idx:
+                t0 = tt.start_gpu()
                 data = self._next_data()
                 batch_data,dist_nid,dist_eid = graph_sample(
                     self.graph,
@@ -305,9 +306,14 @@ class DistributedDataLoader:
                                       eid_mapper = self.graph.eids_mapper)
 
                 root,mfgs,metadata = batch_data
+                t_sample = tt.elapsed_event(t0)
+                tt.time_sample_and_build+=t_sample
+                t1 = tt.start_gpu()
                 edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid, is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
+                t_fetch = tt.elapsed_event(t1)
+                tt.time_memory_fetch += t_fetch
                 #if(self.mailbox is not None and self.mailbox.historical_cache is not None):
                 #    id = batch_data[1][0][0].srcdata['ID']
                 #    mask = DistIndex(id).is_shared
