@@ -136,52 +136,52 @@ class RNNMemeoryUpdater(torch.nn.Module):
     def empty_cache(self):
         pass
 
-class TransformerMemoryUpdater(torch.nn.Module):
+# class TransformerMemoryUpdater(torch.nn.Module):
 
-    def __init__(self, memory_param, dim_in, dim_out, dim_time, train_param):
-        super(TransformerMemoryUpdater, self).__init__()
-        self.memory_param = memory_param
-        self.dim_time = dim_time
-        self.att_h = memory_param['attention_head']
-        if dim_time > 0:
-            self.time_enc = TimeEncode(dim_time)
-        self.w_q = torch.nn.Linear(dim_out, dim_out)
-        self.w_k = torch.nn.Linear(dim_in + dim_time, dim_out)
-        self.w_v = torch.nn.Linear(dim_in + dim_time, dim_out)
-        self.att_act = torch.nn.LeakyReLU(0.2)
-        self.layer_norm = torch.nn.LayerNorm(dim_out)
-        self.mlp = torch.nn.Linear(dim_out, dim_out)
-        self.dropout = torch.nn.Dropout(train_param['dropout'])
-        self.att_dropout = torch.nn.Dropout(train_param['att_dropout'])
-        self.last_updated_memory = None
-        self.last_updated_ts = None
-        self.last_updated_nid = None
+    # def __init__(self, memory_param, dim_in, dim_out, dim_time, train_param):
+        # super(TransformerMemoryUpdater, self).__init__()
+        # self.memory_param = memory_param
+        # self.dim_time = dim_time
+        # self.att_h = memory_param['attention_head']
+        # if dim_time > 0:
+            # self.time_enc = TimeEncode(dim_time)
+        # self.w_q = torch.nn.Linear(dim_out, dim_out)
+        # self.w_k = torch.nn.Linear(dim_in + dim_time, dim_out)
+        # self.w_v = torch.nn.Linear(dim_in + dim_time, dim_out)
+        # self.att_act = torch.nn.LeakyReLU(0.2)
+        # self.layer_norm = torch.nn.LayerNorm(dim_out)
+        # self.mlp = torch.nn.Linear(dim_out, dim_out)
+        # self.dropout = torch.nn.Dropout(train_param['dropout'])
+        # self.att_dropout = torch.nn.Dropout(train_param['att_dropout'])
+        # self.last_updated_memory = None
+        # self.last_updated_ts = None
+        # self.last_updated_nid = None
 
-    def forward(self, mfg, param = None):
-        for b in mfg:
-            Q = self.w_q(b.srcdata['mem']).reshape((b.num_src_nodes(), self.att_h, -1))
-            mails = b.srcdata['mem_input'].reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], -1))
-            if self.dim_time > 0:
-                time_feat = self.time_enc(b.srcdata['ts'][:, None] - b.srcdata['mail_ts']).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], -1))
-                mails = torch.cat([mails, time_feat], dim=2)
-            K = self.w_k(mails).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], self.att_h, -1))
-            V = self.w_v(mails).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], self.att_h, -1))
-            att = self.att_act((Q[:,None,:,:]*K).sum(dim=3))
-            att = torch.nn.functional.softmax(att, dim=1)
-            att = self.att_dropout(att)
-            rst = (att[:,:,:,None]*V).sum(dim=1)
-            rst = rst.reshape((rst.shape[0], -1))
-            rst += b.srcdata['mem']
-            rst = self.layer_norm(rst)
-            rst = self.mlp(rst)
-            rst = self.dropout(rst)
-            rst = torch.nn.functional.relu(rst)
-            b.srcdata['h'] = rst
-            self.last_updated_memory = rst.detach().clone()
-            self.last_updated_nid = b.srcdata['ID'].detach().clone()
-            self.last_updated_ts = b.srcdata['ts'].detach().clone()
-    def empty_cache(self):
-        pass
+    # def forward(self, mfg, param = None):
+        # for b in mfg:
+            # Q = self.w_q(b.srcdata['mem']).reshape((b.num_src_nodes(), self.att_h, -1))
+            # mails = b.srcdata['mem_input'].reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], -1))
+            # if self.dim_time > 0:
+                # time_feat = self.time_enc(b.srcdata['ts'][:, None] - b.srcdata['mail_ts']).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], -1))
+                # mails = torch.cat([mails, time_feat], dim=2)
+            # K = self.w_k(mails).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], self.att_h, -1))
+            # V = self.w_v(mails).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], self.att_h, -1))
+            # att = self.att_act((Q[:,None,:,:]*K).sum(dim=3))
+            # att = torch.nn.functional.softmax(att, dim=1)
+            # att = self.att_dropout(att)
+            # rst = (att[:,:,:,None]*V).sum(dim=1)
+            # rst = rst.reshape((rst.shape[0], -1))
+            # rst += b.srcdata['mem']
+            # rst = self.layer_norm(rst)
+            # rst = self.mlp(rst)
+            # rst = self.dropout(rst)
+            # rst = torch.nn.functional.relu(rst)
+            # b.srcdata['h'] = rst
+            # self.last_updated_memory = rst.detach().clone()
+            # self.last_updated_nid = b.srcdata['ID'].detach().clone()
+            # self.last_updated_ts = b.srcdata['ts'].detach().clone()
+    # def empty_cache(self):
+        # pass
 
 
 
@@ -301,7 +301,7 @@ class HistoricalMemeoryUpdater(torch.nn.Module):
 #
             ##        new_memory[~local_mask] = self.time_for_historical(torch.cat((history_mem,history_mem_ts),dim = 1))
             self.lasted_memory = memory.detach().clone()
-            if self.memory_param['combine_node_feature']:
+            if self.memory_param['combine_node_feature'] and self.dim_node_feat > 0:
                 if self.dim_node_feat > 0:
                     if self.dim_node_feat == self.dim_hid:
                         b.srcdata['h'] += memory
@@ -309,9 +309,48 @@ class HistoricalMemeoryUpdater(torch.nn.Module):
                         b.srcdata['h'] = memory + self.node_feat_map(b.srcdata['h'])
                 else:
                     b.srcdata['h'] = memory
-
+            else:
+                b.srcdata['h'] = memory
         tt.mem_update += tt.elapsed(t_s)
 
+
+class TransformerMemoryUpdater(torch.nn.Module):
+
+    def __init__(self, memory_param, dim_in, dim_out, dim_time, train_param):
+        super(TransformerMemoryUpdater, self).__init__()
+        self.memory_param = memory_param
+        self.dim_time = dim_time
+        self.att_h = memory_param['attention_head']
+        if dim_time > 0:
+            self.time_enc = TimeEncode(dim_time)
+        self.w_q = torch.nn.Linear(dim_out, dim_out)
+        self.w_k = torch.nn.Linear(dim_in + dim_time, dim_out)
+        self.w_v = torch.nn.Linear(dim_in + dim_time, dim_out)
+        self.att_act = torch.nn.LeakyReLU(0.2)
+        self.layer_norm = torch.nn.LayerNorm(dim_out)
+        self.mlp = torch.nn.Linear(dim_out, dim_out)
+        self.dropout = torch.nn.Dropout(train_param['dropout'])
+        self.att_dropout = torch.nn.Dropout(train_param['att_dropout'])
+
+    def forward(self, b, param = None):
+        Q = self.w_q(b.srcdata['mem']).reshape((b.num_src_nodes(), self.att_h, -1))
+        mails = b.srcdata['mem_input'].reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], -1))
+        if self.dim_time > 0:
+            time_feat = self.time_enc(b.srcdata['ts'][:, None] - b.srcdata['mail_ts']).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], -1))
+            mails = torch.cat([mails, time_feat], dim=2)
+        K = self.w_k(mails).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], self.att_h, -1))
+        V = self.w_v(mails).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], self.att_h, -1))
+        att = self.att_act((Q[:,None,:,:]*K).sum(dim=3))
+        att = torch.nn.functional.softmax(att, dim=1)
+        att = self.att_dropout(att)
+        rst = (att[:,:,:,None]*V).sum(dim=1)
+        rst = rst.reshape((rst.shape[0], -1))
+        rst += b.srcdata['mem']
+        rst = self.layer_norm(rst)
+        rst = self.mlp(rst)
+        rst = self.dropout(rst)
+        rst = torch.nn.functional.relu(rst)
+        return rst
 
 class AsyncMemeoryUpdater(torch.nn.Module):
     def all_update_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func):
@@ -339,13 +378,26 @@ class AsyncMemeoryUpdater(torch.nn.Module):
     def local_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func):
         if nxt_fetch_func is not None:
             nxt_fetch_func()
-    def __init__(self, memory_param, dim_in, dim_hid, dim_time, dim_node_feat,updater,mode = None,mailbox = None):
+    def transformer_updater(self,b):
+        return self.ceil_updater(b)
+    def rnn_updater(self,b):
+        if self.dim_time > 0:
+                #print(b.srcdata['ts'].shape,b.srcdata['mem_ts'].shape)
+            time_feat = self.time_enc(b.srcdata['ts'] - b.srcdata['mem_ts'])
+            b.srcdata['mem_input'] = torch.cat([b.srcdata['mem_input'], time_feat], dim=1)
+        return self.ceil_updater(b.srcdata['mem_input'], b.srcdata['mem'])
+    def __init__(self, memory_param, dim_in, dim_hid, dim_time, dim_node_feat,updater,mode = None,mailbox = None,train_param=None):
         super(AsyncMemeoryUpdater, self).__init__()
         self.dim_hid = dim_hid
         self.dim_node_feat = dim_node_feat
         self.memory_param = memory_param
         self.dim_time = dim_time
-        self.updater = updater(dim_in + dim_time, dim_hid)
+        if memory_param['memory_update'] == 'transformer':
+            self.ceil_updater = updater(memory_param, dim_in, dim_hid, dim_time, train_param)
+            self.updater = self.transformer_updater
+        else: 
+            self.updater = updater(dim_in + dim_time, dim_hid)
+            self.updater = self.rnn_updater
         self.last_updated_memory = None
         self.last_updated_ts = None
         self.last_updated_nid = None
@@ -365,20 +417,15 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             self.update_hunk = self.all_reduce_func
         elif self.mode == 'historical':
             self.update_hunk = self.historical_func
-        elif self.mode == 'local':
+        elif self.mode == 'local' or self.mode=='all_local':
             self.update_hunk = self.local_func
 
     def forward(self, mfg, param = None):
         for b in mfg:
-            if self.dim_time > 0:
-                #print(b.srcdata['ts'].shape,b.srcdata['mem_ts'].shape)
-                time_feat = self.time_enc(b.srcdata['ts'] - b.srcdata['mem_ts'])
-                b.srcdata['mem_input'] = torch.cat([b.srcdata['mem_input'], time_feat], dim=1)
-            updated_memory = self.updater(b.srcdata['mem_input'], b.srcdata['mem'])
+            updated_memory = self.updater(b)
             self.last_updated_ts = b.srcdata['ts'].detach().clone()
             self.last_updated_memory = updated_memory.detach().clone()
             self.last_updated_nid = b.srcdata['ID'].detach().clone()
-            
             with torch.no_grad():
                 if param is not None:
                     _,src,dst,ts,edge_feats,nxt_fetch_func = param
@@ -401,14 +448,13 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                     self.mailbox.set_memory_local(DistIndex(index[local_mask]).loc,memory[local_mask],memory_ts[local_mask], Reduce_Op = 'max')
                     self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
                     
-            if self.memory_param['combine_node_feature']:
-                if self.dim_node_feat > 0:
-                    if self.dim_node_feat == self.dim_hid:
-                        b.srcdata['h'] += updated_memory
-                    else:
-                        b.srcdata['h'] = updated_memory + self.node_feat_map(b.srcdata['h'])
+            if self.memory_param['combine_node_feature'] and self.dim_node_feat > 0:
+                if self.dim_node_feat == self.dim_hid:
+                    b.srcdata['h'] += memory
                 else:
-                    b.srcdata['h'] = updated_memory
+                    b.srcdata['h'] = memory + self.node_feat_map(b.srcdata['h'])
+            else:
+                b.srcdata['h'] = memory
 
     def empty_cache(self):
         pass

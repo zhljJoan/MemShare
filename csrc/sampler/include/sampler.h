@@ -263,7 +263,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
             int cal_cnt = 0;
             for(int cid = end_index-1;cid>=0;cid--){
                 cal_cnt++;
-                if(cal_cnt > 2*fanout)break;
+                if(cal_cnt > fanout)break;
                 int eid = tnb.eid[node][cid];
                  if(part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part){
                     double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);

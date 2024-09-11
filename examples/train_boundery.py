@@ -79,6 +79,13 @@ parser.add_argument('--memory_type', default='all_update', type=str, metavar='W'
                     help='name of model')
 #boundery_recent_uniform boundery_recent_decay
 args = parser.parse_args()
+if args.memory_type == 'all_local' or args.topk != '0':
+    train_cross_probability = 0
+else:
+    train_cross_probability = 1
+if args.memory_type == 'all_local':
+    args.sample_type = 'boundery_recent_uniform'
+    args.probability = 0
 from sklearn.metrics import average_precision_score, roc_auc_score
 import torch
 import time
@@ -271,7 +278,7 @@ def main():
                                         is_pipeline=True,
                                         use_local_feature = False,
                                         device = torch.device('cuda:{}'.format(local_rank)),
-                                        probability=1 if float(args.topk) == 0 else 0
+                                        probability=train_cross_probability
                                         )
     
     eval_trainloader = DistributedDataLoader(graph,eval_train_data,sampler = eval_sampler,

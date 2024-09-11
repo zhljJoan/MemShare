@@ -2,12 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 # 读取文件内容
-ssim_values = [0, 0.1, 0.2, 0.3, 0.4, 2]  # 假设这是你的 ssim 参数值
-data_values = ['WikiTalk']  # 存储从文件中读取的数据
+ssim_values = [0, 0.5, 1.0, 1.5, 2]  # 假设这是你的 ssim 参数值
+data_values = ['WIKI','WikiTalk','REDDIT','LASTFM','DGraphFin']  # 存储从文件中读取的数据
 partition = 'ours_shared'
 # 从文件中读取数据，假设数据存储在文件 data.txt 中
 #all/"$data"/"$partitions"-ours_shared-0.01-"$mem"-"$ssim"-"$sample".out
-partitions=8
+partitions=4
 topk=0.01
 mem='historical'
 for data in data_values:
@@ -28,7 +28,7 @@ for data in data_values:
                     comm = int(line[pos+2+len('shared comm tensor'):len(line)-3])
         ap_list.append(ap)
         comm_list.append(comm)
-
+    print('{} TestAP={}\n'.format(data,ap_list))
 
     # 绘制柱状图
     bar_width = 0.4
@@ -40,12 +40,11 @@ for data in data_values:
 # 绘制柱状图
     plt.bar([b for b in bars], ap_list, width=bar_width)
     # 绘制柱状图
-    plt.ylim([0.9,1])
     plt.xticks([b for b in bars], ssim_values)
     plt.xlabel('SSIM threshold Values')
     plt.ylabel('Test AP')
     plt.title('{}({} partitions)'.format(data,partitions))
-    plt.savefig('ssim_{}.png'.format(data))
+    plt.savefig('ssim_{}_{}.png'.format(data,partitions))
     plt.clf()
 
     plt.bar([b for b in bars], comm_list, width=bar_width)
@@ -54,7 +53,7 @@ for data in data_values:
     plt.xlabel('SSIM threshold Values')
     plt.ylabel('Communication volume')
     plt.title('{}({} partitions)'.format(data,partitions))
-    plt.savefig('comm_{}.png'.format(data))
+    plt.savefig('ssim_comm_{}_{}.png'.format(data,partitions))
     plt.clf()
 
     if partition == 'ours_shared':
@@ -69,11 +68,12 @@ for data in data_values:
         val_ap = torch.tensor(torch.load(file))
         epoch = torch.arange(val_ap.shape[0])
     #绘制曲线图
+        print(val_ap)
         plt.plot(epoch,val_ap, label='ssim={}'.format(ssim))
     plt.xlabel('Epoch')
     plt.ylabel('Val AP')
     plt.title('{}({} partitions)'.format(data,partitions))
    # plt.grid(True)
     plt.legend()
-    plt.savefig('{}_ssim_Convergence_rate.png'.format(data))
+    plt.savefig('{}_{}_ssim_Convergence_rate.png'.format(data,partitions))
     plt.clf()
