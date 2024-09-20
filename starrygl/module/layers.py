@@ -2,6 +2,8 @@ from os.path import abspath, join, dirname
 import os
 import sys
 from os.path import abspath, join, dirname
+
+from starrygl.distributed.utils import DistIndex
 sys.path.insert(0, join(abspath(dirname(__file__))))
 import torch
 import dgl
@@ -172,7 +174,7 @@ class MixerMLP(torch.nn.Module):
         self.block_padding(b)
         #return x
     
-        
+
 class TransfomerAttentionLayer(torch.nn.Module):
 
     def __init__(self, dim_node_feat, dim_edge_feat, dim_time, num_head, dropout, att_dropout, dim_out, combined=False):
@@ -286,9 +288,22 @@ class TransfomerAttentionLayer(torch.nn.Module):
             #att = dgl.ops.e_div_v(b,att_e_sub_max,torch.clamp_min(dgl.ops.copy_e_sum(b,att_e_sub_max),1))
             att = dgl.ops.edge_softmax(b, self.att_act(torch.sum(Q*K, dim=2)))
             att = self.att_dropout(att)
+            tt.weight_count_remote+=torch.sum(att[DistIndex(b.srcdata['ID']).part[b.edges()[0]]!=torch.distributed.get_rank()]**2)
+            tt.weight_count_local+=torch.sum(att[DistIndex(b.srcdata['ID']).part[b.edges()[0]]==torch.distributed.get_rank()]**2)
             V = torch.reshape(V*att[:, :, None], (V.shape[0], -1))
+            V_local = V.clone()
+            V_remote = V.clone()
+            V_local[DistIndex(b.srcdata['ID']).part[b.edges()[0]]!=torch.distributed.get_rank()] = 0
+            V_remote[DistIndex(b.srcdata['ID']).part[b.edges()[0]]==torch.distributed.get_rank()] = 0
             b.edata['v'] = V
+            b.edata['v0'] = V_local
+            b.edata['v1'] = V_remote
+            b.update_all(dgl.function.copy_e('v0', 'm0'), dgl.function.sum('m0', 'h0'))
+            b.update_all(dgl.function.copy_e('v1', 'm1'), dgl.function.sum('m1', 'h1'))
             b.update_all(dgl.function.copy_e('v', 'm'), dgl.function.sum('m', 'h'))
+            tt.ssim_local+=torch.sum(torch.cosine_similarity(b.dstdata['h'],b.dstdata['h0']))
+            tt.ssim_remote+=torch.sum(torch.cosine_similarity(b.dstdata['h'],b.dstdata['h1']))
+            tt.ssim_cnt += b.num_dst_nodes()
             #print('dst {}'.format(b.dstdata['h']))
             #b.srcdata['v'] = torch.cat([torch.zeros((b.num_dst_nodes(), V.shape[1]), device=torch.device('cuda:0')), V], dim=0)
             #b.update_all(dgl.function.copy_u('v', 'm'), dgl.function.sum('m', 'h'))

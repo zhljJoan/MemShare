@@ -41,7 +41,7 @@ pinn_memory = {}
 class HistoricalCache:
 
 
-    def __init__(self,cache_index,layer,shape,dtype,device,threshold = 3,time_threshold = None, times_threshold = 5, use_rpc = True, num_threshold = 0):
+    def __init__(self,cache_index,layer,shape,dtype,device,threshold = 3,time_threshold = None, times_threshold = 10, use_rpc = True, num_threshold = 0):
         #self.cache_index = cache_index
         self.layer = layer
         print(shape)
@@ -88,12 +88,17 @@ class HistoricalCache:
             return torch.sum((x -y)**2,dim = 1)
     def historical_check(self,index,new_data,ts):
         if self.time_threshold is not None:
-            return (self.ssim(new_data,self.local_historical_data[index]) > self.threshold | (ts - self.local_ts[index] > self.time_threshold | self.loss_count[index] > self.times_threshold))
+            mask = (self.ssim(new_data,self.local_historical_data[index]) > self.threshold | (ts - self.local_ts[index] > self.time_threshold | self.loss_count[index] > self.times_threshold))
+            self.loss_count[index][~mask] += 1
+            self.loss_count[index][mask] = 0
         else:
             #print('{} {} {} {}  \n'.format(index,self.ssim(new_data,self.local_historical_data[index]),new_data,self.local_historical_data[index]))
             #print(new_data,self.local_historical_data[index])
             #print(self.ssim(new_data,self.local_historical_data[index]) < self.threshold, (self.loss_count[index] > self.times_threshold))
-            return (self.ssim(new_data,self.local_historical_data[index]) > self.threshold) | (self.loss_count[index] > self.times_threshold)
+            mask = (self.ssim(new_data,self.local_historical_data[index]) > self.threshold) | (self.loss_count[index] > self.times_threshold)
+            self.loss_count[index][~mask] += 1
+            self.loss_count[index][mask] = 0
+        return mask
     
     def read_synchronize(self):
         torch.cuda.synchronize(get_stream_set(self.layer))

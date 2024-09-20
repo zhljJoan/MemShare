@@ -123,7 +123,7 @@ def get_node_all_to_all_route(graph:DistributedGraphStore,mailbox:SharedMailBox,
             ind_dict = graph.nfeat.all_to_all_ind2ptr(query_nid_feature,group = group)
         memory,memory_ts,mail,mail_ts = mailbox.gather_local_memory(ind_dict['recv_ind'],compute_device=out_device)
         memory_ts = memory_ts.reshape(-1,1)
-        mail_ts = mail_ts.reshape(-1,1)
+        mail_ts = mail_ts.reshape(mail_ts.shape[0],-1)
         mail = mail.reshape(mail.shape[0],-1)
         data.append(torch.cat((memory,memory_ts,mail,mail_ts),dim = 1))
     if ind_dict is not None:
@@ -144,14 +144,14 @@ def get_edge_all_to_all_route(graph:DistributedGraphStore,query_eid_feature,out_
 def prepare_input(node_feat, edge_feat, mem_embedding,mfgs,dist_nid=None,dist_eid=None):
     for i,mfg in enumerate(mfgs):
         for b in mfg:
-            e_idx = b.edata['__ID']
             idx = b.srcdata['__ID']
-            if dist_eid is not None:
+            if '__ID' in b.edata:
+                e_idx = b.edata['__ID']
                 b.edata['ID'] = dist_eid[e_idx]
+                if edge_feat is not None:
+                    b.edata['f'] = edge_feat[e_idx]
             if dist_nid is not None:
-                b.srcdata['ID'] = dist_nid[idx]
-            if edge_feat is not None:
-                b.edata['f'] = edge_feat[e_idx]
+                b.srcdata['ID'] = dist_nid[idx]        
             if i == 0:
                 if node_feat is not None:
                     b.srcdata['h'] = node_feat[idx]
@@ -336,15 +336,96 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
         data,mfgs,metadata = build_block()
         return (data,mfgs,metadata),dist_nid,dist_eid
 
+def to_reversed_block(graph,data, sample_out,device = torch.device('cuda'),unique = True,identity=False):
+    if len(sample_out) > 1:
+        sample_out,metadata = sample_out
+    else:
+        metadata = None
+    nid_mapper: torch.Tensor = graph.nids_mapper
+    if identity is False:
+        assert len(sample_out) == 1
+        ret = sample_out[0]
+        eid_len = ret.eid().shape[0]
+        t0 = time.time()
+        dst_ts = ret.sample_nodes_ts().to(device)
+        dst = nid_mapper[ret.sample_nodes()].to(device)
+        dist_eid = torch.tensor([],dtype=torch.long,device=device)
+        src_index = ret.src_index().to(device)
+    else:
+        src_index = torch.tensor([],dtype=torch.long,device=device)
+        dst = torch.tensor([],dtype=torch.long,device=device)
+        dist_eid = torch.tensor([],dtype=torch.long,device=device)
+    if metadata is None:
+        root_node = data.nodes.to(graph.nids_mapper.device)
+        root_len = [root_node.shape[0]]
+        root_ts = data.ts.to(device)
+                                
+    elif 'seed' in metadata:
+        root_node = metadata.pop('seed').to(graph.nids_mapper.device)
+        root_len = root_node.shape[0]
+        if 'seed_ts' in metadata:
+            root_ts = metadata.pop('seed_ts').to(device)
+        for k in metadata:
+            if isinstance(metadata[k],torch.Tensor):
+                metadata[k] = metadata[k].to(device)
+    src_node = root_node
+    src_ts = root_ts
+    nid_tensor = torch.cat([root_node],dim = 0)
+    dist_nid = nid_mapper[nid_tensor].to(device)
+    CountComm.origin_local = (DistIndex(dist_nid).part == dist.get_rank()).sum().item()
+    CountComm.origin_remote =(DistIndex(dist_nid).part != dist.get_rank()).sum().item()
+    dist_nid,nid_inv = dist_nid.unique(return_inverse=True)
+
+    """
+    对于同id和同时间的节点去重取得index
+    """
+    block_node_list,unq_id = torch.stack((nid_inv.to(torch.float64),src_ts.to(torch.float64))).unique(dim = 1,return_inverse=True)
+    first_index,_ = torch_scatter.scatter_min(torch.arange(unq_id.shape[0],device=unq_id.device,dtype=unq_id.dtype),unq_id)
+    first_mask = torch.zeros(unq_id.shape[0],device = unq_id.device,dtype=torch.bool)
+    first_mask[first_index] = True
+    first_index = unq_id[first_mask]
+    first_block_id = torch.empty(first_index.shape[0],device=unq_id.device,dtype=unq_id.dtype)
+    first_block_id[first_index] = torch.arange(first_index.shape[0],device=first_index.device,dtype=first_index.dtype)
+    first_block_id = first_block_id[unq_id].contiguous()
+    block_node_list = block_node_list[:,first_index]
+    for k in metadata:
+        if isinstance(metadata[k],torch.Tensor):
+            metadata[k] = first_block_id[metadata[k]]
+    t2 = time.time()
+    
+    def build_block():
+        mfgs = list()
+        col_len = 0
+        row_len = root_len
+        col = first_block_id[:row_len]
+        max_row = col.max().item()+1
+        b = dgl.create_block((col[src_index].to(device),
+                                torch.arange(dst.shape[0],device=device,dtype=torch.long)),num_src_nodes=first_block_id.max().item()+1,
+                                num_dst_nodes=dst.shape[0])
+        idx = block_node_list[0,b.srcnodes()].to(torch.long)
+        b.srcdata['__ID'] = idx
+        b.srcdata['ts'] = block_node_list[1,b.srcnodes()].to(torch.float)
+        b.dstdata['ID'] = dst
+        mfgs.append(b)
+        mfgs = list(map(list, zip(*[iter(mfgs)])))
+        mfgs.reverse()
+        return data,mfgs,metadata
+    data,mfgs,metadata = build_block()
+    return (data,mfgs,metadata),dist_nid,dist_eid
+
+
 
 import concurrent.futures
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=1) 
 
-def graph_sample(graph,sampler,sample_fn,data,neg_sampling = None,out_device = torch.device('cuda'),nid_mapper = None,eid_mapper=None):
+def graph_sample(graph,sampler,sample_fn,data,neg_sampling = None,out_device = torch.device('cuda'),nid_mapper = None,eid_mapper=None,reversed=False):
     t_s  = time.time()
     param = {'is_unique':False,'nid_mapper':nid_mapper,'eid_mapper':eid_mapper,'out_device':out_device}
     out = sample_fn(sampler,data,neg_sampling,**param)
-    out,dist_nid,dist_eid = to_block(graph,data,out,out_device)
+    if reversed is False:
+        out,dist_nid,dist_eid = to_block(graph,data,out,out_device,reversed)
+    else:
+        out,dist_nid,dist_eid = to_reversed_block(graph,data,out,out_device,reversed)
     t_e = time.time()
     #print(t_e-t_s)
     return out,dist_nid,dist_eid

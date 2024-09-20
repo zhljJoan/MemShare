@@ -227,29 +227,14 @@ class NeighborSampler(BaseSampler):
             sampled_nodes: the node sampled
             sampled_edge_index_list: the edge sampled
         """
-        if(ts is None):
-            self.part_unique = True
-            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), None, self.part_unique)
-            ret = self.p_sampler.get_ret()
-            return ret
-        else:
+        if self.policy != 'identity':
             self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), ts.contiguous(), None)
             ret = self.p_sampler.get_ret()
-            metadata = {}
-            if is_unique:
-                self.p_sampler.sample_unique(
-                                             nodes,ts.float(),nid_mapper,
-                                         eid_mapper,'cpu' if out_device.type == 'cpu' else str(out_device.index))
-                metadata = {
-                    'eid_inv':self.p_sampler.eid_inv,
-                    'first_block_id':self.p_sampler.first_block_id,
-                    'block_node_list':self.p_sampler.block_node_list,
-                    'unq_id':self.p_sampler.unq_id,
-                    'dist_nid':self.p_sampler.dist_nid,
-                    'dist_eid':self.p_sampler.dist_eid,
-                }
-            #print(nodes.shape[0],ret[0].src_index().max(),ret[0].src_index().min())
-            return ret,metadata
+        else:
+            ret = None
+        metadata = {}
+        #print(nodes.shape[0],ret[0].src_index().max(),ret[0].src_index().min())
+        return ret,metadata
         
     def sample_from_edges(
         self,
@@ -329,13 +314,7 @@ class NeighborSampler(BaseSampler):
             else:
                 seed, inverse_seed = seed.unique(return_inverse=True)
         """
-        metadata = {}
-        if is_unique:
-            out,metadata = self.sample_from_nodes(seed, seed_ts, is_unique=is_unique,eid_mapper=eid_mapper,nid_mapper=nid_mapper,out_device=out_device)
-            first_block_id = self.p_sampler.first_block_id
-        else:
-            #print('is unique')
-            out,metadata = self.sample_from_nodes(seed, seed_ts, is_unique=False)
+        out,metadata = self.sample_from_nodes(seed, seed_ts, is_unique=False)
         src_pos_index = torch.arange(0,num_pos,dtype= torch.long,device=out_device)
         dst_pos_index = torch.arange(num_pos,2*num_pos,dtype= torch.long,device=out_device)
         if neg_sampling.is_triplet() or neg_sampling.is_tgbtriplet():
@@ -344,12 +323,6 @@ class NeighborSampler(BaseSampler):
         else:
             src_neg_index = torch.arange(2*num_pos,3*num_pos,dtype= torch.long,device=out_device)
             dst_neg_index=torch.arange(3*num_pos,seed.shape[0],dtype= torch.long,device=out_device)
-        #if is_unique:
-        #    src_pos_index = first_block_id[src_pos_index].contiguous()
-        #    dst_pos_index = first_block_id[dst_pos_index].contiguous()
-        #    dst_neg_index = first_block_id[dst_neg_index].contiguous()
-        #    src_neg_index = first_block_id[src_neg_index].contiguous()
-    
         metadata['seed'] = seed
         metadata['seed_ts'] = seed_ts
         metadata['src_pos_index']=src_pos_index

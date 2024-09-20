@@ -86,7 +86,7 @@ class GeneralModel(torch.nn.Module):
                 #    else:
                 #        self.memory_updater = HistoricalMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node,updater=updater,learnable=True,num_nodes=num_nodes)
             elif memory_param['memory_update'] == 'transformer':
-                self.memory_updater = TransformerMemoryUpdater
+                updater = TransformerMemoryUpdater
                 self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'],train_param=train_param)
             else:
                 raise NotImplementedError

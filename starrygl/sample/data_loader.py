@@ -100,8 +100,10 @@ class DistributedDataLoader:
             cache_mask = None,
             use_local_feature = True,
             probability = 1,
+            reversed = False,
             **kwargs
     ):
+        self.reversed = reversed
         self.use_local_feature = use_local_feature
         self.local_embedding = local_embedding
         self.chunk_size = chunk_size
@@ -223,7 +225,7 @@ class DistributedDataLoader:
         if self.mode=='train' and self.probability < 1:
             mask = ((DistIndex(self.graph.nids_mapper[next_data.edges[0,:].to('cpu')]).part == dist.get_rank())&(DistIndex(self.graph.nids_mapper[next_data.edges[1,:].to('cpu')]).part == dist.get_rank()))
             if self.probability > 0:
-                mask[~mask] = (torch.rand((~mask)) < self.probability)
+                mask[~mask] = (torch.rand((~mask).sum().item()) < self.probability)
             next_data = next_data[mask.to(next_data.device)]
         self.submitted = self.submitted + 1
         return next_data
@@ -239,13 +241,14 @@ class DistributedDataLoader:
                             self.device,
                             nid_mapper = self.graph.nids_mapper,
                             eid_mapper = self.graph.eids_mapper,
+                            reversed = self.reversed
                                       
                 )
 
                 self.result_queue.append((fut))
     @torch.no_grad()
     def async_feature(self):
-        if(self.recv_idxs >= self.expected_idx):
+        if(self.recv_idxs >= self.expected_idx or self.is_pipeline == False):
             return
         is_local = (self.is_train & self.use_local_feature)
         if(is_local):
@@ -303,7 +306,9 @@ class DistributedDataLoader:
                                       data,self.neg_sampler,
                                       self.device,
                                       nid_mapper = self.graph.nids_mapper,
-                                      eid_mapper = self.graph.eids_mapper)
+                                      eid_mapper = self.graph.eids_mapper,
+                                      reversed = self.reversed
+                                      )
 
                 root,mfgs,metadata = batch_data
                 t_sample = tt.elapsed_event(t0)
@@ -312,6 +317,12 @@ class DistributedDataLoader:
                 edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid, is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
+                batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
+                batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
+                mask = DistIndex(batch_data[1][0][0].srcdata['ID']).is_shared
+                indx =  self.mailbox.is_shared_mask[DistIndex(batch_data[1][0][0].srcdata['ID']).loc[mask]]
+                batch_data[1][0][0].srcdata['his_mem'][mask] = self.mailbox.historical_cache.local_historical_data[indx]
+                batch_data[1][0][0].srcdata['his_ts'][mask] = self.mailbox.historical_cache.local_ts[indx].reshape(-1,1)
                 t_fetch = tt.elapsed_event(t1)
                 tt.time_memory_fetch += t_fetch
                 #if(self.mailbox is not None and self.mailbox.historical_cache is not None):
@@ -335,10 +346,15 @@ class DistributedDataLoader:
                                       data,self.neg_sampler,
                                       self.device,
                                       nid_mapper = self.graph.nids_mapper,
-                                      eid_mapper = self.graph.eids_mapper)
+                                      eid_mapper = self.graph.eids_mapper,
+                                      reversed = self.reversed
+                                    )
                 edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid,  is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,batch_data[1],dist_nid,dist_eid)
+                batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
+                batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
+                
                 #if(self.mailbox is not None and self.mailbox.historical_cache is not None):
                 #    id = batch_data[1][0][0].srcdata['ID']
                 #    mask = DistIndex(id).is_shared
@@ -363,14 +379,14 @@ class DistributedDataLoader:
                             node_feat0 = node_feat0[0]
                             node_feat = node_feat0[:,:self.graph.nfeat.shape[1]]
                             if self.graph.nfeat.shape[1] < node_feat0.shape[1]:
-                                mem = self.mailbox.unpack(node_feat0[:,self.graph.nfeat.shape[1]:])
+                                mem = self.mailbox.unpack(node_feat0[:,self.graph.nfeat.shape[1]:],mailbox = True)
                             else:
                                 mem = None
                         elif self.mailbox is not None:
                             node_feat0[1].wait()
                             node_feat0 = node_feat0[0]
                             node_feat = None
-                            mem = self.mailbox.unpack(node_feat0)
+                            mem = self.mailbox.unpack(node_feat0,mailbox = True)
                         #print(node_feat.shape,edge_feat.shape,mem[0].shape)
                         #node_feat[1].wait()
                         #node_feat = node_feat[0]
@@ -394,7 +410,11 @@ class DistributedDataLoader:
                     if(self.mailbox is not None and self.mailbox.historical_cache is not None):
                         id = batch_data[1][0][0].srcdata['ID']
                         mask = DistIndex(id).is_shared
-                        batch_data[1][0][0].srcdata['mem'][mask] = self.mailbox.node_memory.accessor.data[DistIndex(id).loc[mask]]
+                        batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
+                        batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
+                        indx =  self.mailbox.is_shared_mask[DistIndex(batch_data[1][0][0].srcdata['ID']).loc[mask]]
+                        batch_data[1][0][0].srcdata['his_mem'][mask] = self.mailbox.historical_cache.local_historical_data[indx]
+                        batch_data[1][0][0].srcdata['his_ts'][mask] = self.mailbox.historical_cache.local_ts[indx].reshape(-1,1)#self.mailbox.node_memory.accessor.data[DistIndex(id).loc[mask]]
                         #his_mem = torch.clone(batch_data[1][0][0].srcdata['mem'])
                         #his_ts = self.mailbox.historical_cache.local_ts[DistIndex(id[mask]).loc]
                         #maxer = his_ts>batch_data[1][0][0].srcdata['mem_ts'][mask]

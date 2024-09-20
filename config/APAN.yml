@@ -14,6 +14,8 @@ memory:
     deliver_to: 'neighbors'
     mail_combine: 'last'
     memory_update: 'transformer'
+    historical_fix: False
+    async: True
     attention_head: 2
     mailbox_size: 10
     combine_node_feature: False
@@ -22,7 +24,7 @@ gnn:
   - arch: 'identity'
 train:
   - epoch: 100
-    batch_size: 600
+    batch_size: 1000
     lr: 0.0001
     dropout: 0.1
     att_dropout: 0.1

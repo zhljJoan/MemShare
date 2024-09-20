@@ -4,11 +4,11 @@ import torch
 # 读取文件内容
 ssim_values = [0, 0.1, 0.2, 0.3, 0.4, 2]  # 假设这是你的 ssim 参数值
 probability_values = [1,0.5,0.1,0.05,0.01,0]
-data_values = ['WIKI']  # 存储从文件中读取的数据
+data_values = ['WikiTalk','StackOverflow']  # 存储从文件中读取的数据
 partition = 'ours_shared'
 # 从文件中读取数据，假设数据存储在文件 data.txt 中
 #all/"$data"/"$partitions"-ours_shared-0.01-"$mem"-"$ssim"-"$sample".out
-partitions=4
+partitions=8
 topk=0.01
 mem='all_update'#'historical'
 for data in data_values:
@@ -35,11 +35,12 @@ for data in data_values:
 
 
     # 绘制柱状图
+    print('{} TestAP={}\n'.format(data,ap_list))
     bar_width = 0.4
     #shared comm tensor
 
 # 设置柱状图的位置
-    bars = range(len(ssim_values))
+    bars = range(len(probability_values))
 
 # 绘制柱状图
     plt.bar([b for b in bars], ap_list, width=bar_width)
@@ -49,7 +50,7 @@ for data in data_values:
     plt.xlabel('probability')
     plt.ylabel('Test AP')
     plt.title('{}({} partitions)'.format(data,partitions))
-    plt.savefig('boundary_AP_{}.png'.format(data))
+    plt.savefig('boundary_AP_{}_{}.png'.format(data,partitions))
     plt.clf()
 
     plt.bar([b for b in bars], comm_list, width=bar_width)
@@ -58,7 +59,7 @@ for data in data_values:
     plt.xlabel('probability')
     plt.ylabel('Communication volume')
     plt.title('{}({} partitions)'.format(data,partitions))
-    plt.savefig('boundary_comm_{}.png'.format(data))
+    plt.savefig('boundary_comm_{}_{}.png'.format(data,partitions))
     plt.clf()
 
     if partition == 'ours_shared':
@@ -76,5 +77,5 @@ for data in data_values:
     plt.title('{}({} partitions)'.format(data,partitions))
    # plt.grid(True)
     plt.legend()
-    plt.savefig('{}_boundary_Convergence_rate.png'.format(data))
+    plt.savefig('{}_{}_boundary_Convergence_rate.png'.format(data,partitions))
     plt.clf()

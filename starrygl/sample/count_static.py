@@ -12,6 +12,13 @@ class time_count:
     time_sample_and_build = 0
     time_memory_fetch = 0
     
+
+    weight_count_remote = 0
+    weight_count_local = 0
+    ssim_remote = 0
+    ssim_cnt = 0
+    ssim_local = 0
+    ssim_cnt = 0
     @staticmethod
     def _zero():
         time_count.time_forward = 0
@@ -34,8 +41,9 @@ class time_count:
     def start():
         return time.perf_counter(),0 
     @staticmethod
-    def elapsed_event(start_event,end_event):
-        if start_event.isinstance(torch.cuda.Event):
+    def elapsed_event(start_event):
+        if isinstance(start_event,tuple):
+            start_event,end_event = start_event
             end_event.record()
             end_event.synchronize()
             return start_event.elapsed_time(end_event)
@@ -52,3 +60,5 @@ class time_count:
             time_count.time_memory_sync,
             time_count.time_sample_and_build,
             time_count.time_memory_fetch ))
+    
+    

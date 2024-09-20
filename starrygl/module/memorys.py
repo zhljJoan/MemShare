@@ -331,6 +331,7 @@ class TransformerMemoryUpdater(torch.nn.Module):
         self.mlp = torch.nn.Linear(dim_out, dim_out)
         self.dropout = torch.nn.Dropout(train_param['dropout'])
         self.att_dropout = torch.nn.Dropout(train_param['att_dropout'])
+        
 
     def forward(self, b, param = None):
         Q = self.w_q(b.srcdata['mem']).reshape((b.num_src_nodes(), self.att_h, -1))
@@ -396,7 +397,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             self.ceil_updater = updater(memory_param, dim_in, dim_hid, dim_time, train_param)
             self.updater = self.transformer_updater
         else: 
-            self.updater = updater(dim_in + dim_time, dim_hid)
+            self.ceil_updater = updater(dim_in + dim_time, dim_hid)
             self.updater = self.rnn_updater
         self.last_updated_memory = None
         self.last_updated_ts = None
@@ -419,13 +420,30 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             self.update_hunk = self.historical_func
         elif self.mode == 'local' or self.mode=='all_local':
             self.update_hunk = self.local_func
-
+        if self.mode == 'historical':
+            self.gamma = torch.nn.Parameter(torch.tensor([0.9]),
+                               requires_grad=True)
+        else:
+            self.gamma = 1   
     def forward(self, mfg, param = None):
         for b in mfg:
-            updated_memory = self.updater(b)
+            mail_input = b.srcdata['mem_input']
+            updated_memory0 = self.updater(b)
+            mask = DistIndex(b.srcdata['ID']).is_shared
+            #incr = updated_memory[mask] - b.srcdata['mem'][mask]
+            time_feat = self.time_enc(b.srcdata['ts'][mask].reshape(-1,1) - b.srcdata['his_ts'][mask].reshape(-1,1))
+            his_mem = torch.cat((mail_input[mask],time_feat),dim = 1)
+            upd0 = torch.zeros_like(updated_memory0)
+            upd0[mask] = self.ceil_updater(his_mem, b.srcdata['his_mem'][mask])
+            #updated_memory = torch.where(mask.unsqueeze(1),self.gamma*updated_memory0 + (1-self.gamma)*(b.srcdata['his_mem']),updated_memory0)
+            updated_memory = torch.where(mask.unsqueeze(1),self.gamma*updated_memory0 + (1-self.gamma)*(upd0),updated_memory0)
+            print(torch.cosine_similarity(updated_memory[mask],b.srcdata['his_mem'][mask]).sum()/torch.sum(mask))
+            print(self.gamma)
+            self.pre_mem = b.srcdata['his_mem']
             self.last_updated_ts = b.srcdata['ts'].detach().clone()
             self.last_updated_memory = updated_memory.detach().clone()
             self.last_updated_nid = b.srcdata['ID'].detach().clone()
+
             with torch.no_grad():
                 if param is not None:
                     _,src,dst,ts,edge_feats,nxt_fetch_func = param
@@ -434,12 +452,14 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                                                                     self.last_updated_memory[indx],
                                                                     self.last_updated_ts[indx],
                                                                     None)
+                    #print(index.shape[0])
                     if param[0]:
                         index, mail, mail_ts = self.mailbox.get_update_mail(
                                                     b.srcdata['ID'],src,dst,ts,edge_feats,
                                                     self.last_updated_memory, 
-                                                    None,False,False,
+                                                    None,False,False,block=b
                                                 )
+                    #print(index.shape[0])
                     if torch.distributed.get_world_size() == 0:
                         self.mailbox.mon.add(index,self.mailbox.node_memory.accessor.data[index],memory)
                     ##print(index.shape,memory.shape,memory_ts.shape,mail.shape,mail_ts.shape)
@@ -447,14 +467,14 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                     self.mailbox.set_mailbox_local(DistIndex(index[local_mask]).loc,mail[local_mask],mail_ts[local_mask],Reduce_Op = 'max')
                     self.mailbox.set_memory_local(DistIndex(index[local_mask]).loc,memory[local_mask],memory_ts[local_mask], Reduce_Op = 'max')
                     self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
-                    
+
             if self.memory_param['combine_node_feature'] and self.dim_node_feat > 0:
                 if self.dim_node_feat == self.dim_hid:
-                    b.srcdata['h'] += memory
+                    b.srcdata['h'] += updated_memory
                 else:
-                    b.srcdata['h'] = memory + self.node_feat_map(b.srcdata['h'])
+                    b.srcdata['h'] = updated_memory + self.node_feat_map(b.srcdata['h'])
             else:
-                b.srcdata['h'] = memory
+                b.srcdata['h'] = updated_memory
 
     def empty_cache(self):
         pass

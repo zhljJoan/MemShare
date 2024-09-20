@@ -20,19 +20,23 @@ class LocalNegativeSampling(NegativeSampling):
         unique: bool = False,
         src_node_list: torch.Tensor = None,
         dst_node_list: torch.Tensor = None,
-        seed = False
+        local_mask = None,
+        seed = None
     ):
         super(LocalNegativeSampling,self).__init__(mode,amount,unique=unique)
         self.src_node_list = src_node_list.to('cpu') if src_node_list is not None else None
         self.dst_node_list = dst_node_list.to('cpu') if dst_node_list is not None else None
         self.rdm = torch.Generator()
-        if seed is True:
+        if seed is not None:
             random.seed(seed)
         seed = random.randint(0,100000)
         print('seed is',seed)
         ctx = DistributedContext.get_default_context()
         self.rdm.manual_seed(seed^ctx.rank)
         self.rdm = torch.Generator()
+        self.local_mask = local_mask
+        if self.local_mask is not None:
+            self.local_dst = dst_node_list[local_mask]
         #self.rdm.manual_seed(42)
         #print('dst_nde_list {}\n'.format(dst_node_list))
     def is_binary(self) -> bool:
@@ -53,6 +57,12 @@ class LocalNegativeSampling(NegativeSampling):
         else:   
             if self.dst_node_list is None:
                 return torch.randint(num_nodes, (num_samples, ),generator=self.rdm)
+            elif self.local_mask is not None:
+                p = torch.rand(size=(num_samples,))
+                sr = torch.randint(len(self.dst_node_list), (num_samples, ),generator=self.rdm)
+                sl = torch.randint(len(self.local_dst), (num_samples, ),generator=self.rdm)
+                return torch.where(p<0.9,sl,sr)
             else:
-                return self.dst_node_list[torch.randint(len(self.dst_node_list), (num_samples, ),generator=self.rdm)]
+                s = torch.randint(len(self.dst_node_list), (num_samples, ),generator=self.rdm)
+                return self.dst_node_list[s]
         

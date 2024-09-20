@@ -67,7 +67,7 @@ parser.add_argument('--probability', default=0.1, type=float, metavar='W',
                     help='name of model')
 parser.add_argument('--sample_type', default='recent', type=str, metavar='W',
                     help='name of model')
-parser.add_argument('--local_neg_sample', default=True, type=bool, metavar='W',
+parser.add_argument('--local_neg_sample', default=False, type=bool, metavar='W',
                     help='name of model')
 parser.add_argument('--shared_memory_ssim', default=2, type=float, metavar='W',
                     help='name of model')
@@ -196,7 +196,7 @@ def main():
     torch.set_num_threads(10)
     device_id = torch.cuda.current_device()
     graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition=args.partition)#torch.device('cpu'))
-    
+    torch.autograd.set_detect_anomaly(True)
 # 确保 CUDA 可用
     if torch.cuda.is_available():
         print("Total GPU memory: ", torch.cuda.get_device_properties(0).total_memory/1024**3)
@@ -230,7 +230,7 @@ def main():
         mailbox = None
 
     sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=10,policy = policy_train, graph_name = "train",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability)
-    eval_sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=eval_sample_graph, workers=10,policy = 'recent', graph_name = "eval",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability)
+    eval_sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=eval_sample_graph, workers=10,policy = policy_train, graph_name = "eval",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability)
 
     train_data = torch.masked_select(graph.edge_index,train_mask.to(graph.edge_index.device)).reshape(2,-1)
     train_ts = torch.masked_select(graph.ts,train_mask.to(graph.edge_index.device))
@@ -262,8 +262,9 @@ def main():
         train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = graph.edge_index[1,mask].unique())
     else:
         train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = full_dst.unique())
+        #train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = full_dst.unique(),local_mask=(DistIndex(graph.nids_mapper[full_dst.unique()].to('cpu')).part == dist.get_rank()))
     print(train_neg_sampler.dst_node_list)
-    neg_sampler = LocalNegativeSampling('triplet',amount= neg_samples,dst_node_list = full_dst.unique(),seed=12357)
+    neg_sampler = LocalNegativeSampling('triplet',amount= neg_samples,dst_node_list = full_dst.unique(),seed=6773)
 
     trainloader = DistributedDataLoader(graph,eval_train_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
@@ -278,7 +279,8 @@ def main():
                                         is_pipeline=True,
                                         use_local_feature = False,
                                         device = torch.device('cuda:{}'.format(local_rank)),
-                                        probability=train_cross_probability
+                                        probability=1,#train_cross_probability,
+                                        reversed = (gnn_param['arch'] == 'identity')
                                         )
     
     eval_trainloader = DistributedDataLoader(graph,eval_train_data,sampler = eval_sampler,
@@ -291,24 +293,26 @@ def main():
                                         mode='eval_train',
                                         queue_size = 100,
                                         mailbox = mailbox,
-                                        device = torch.device('cuda:{}'.format(local_rank))
+                                        device = torch.device('cuda:{}'.format(local_rank)),
+                                        reversed = (gnn_param['arch']=='identity')
                                         )
     testloader = DistributedDataLoader(graph,test_data,sampler = eval_sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
-                                        batch_size = train_param['batch_size'],
+                                        batch_size = train_param['batch_size']*dist.get_world_size(),
                                         shuffle=False,
                                         drop_last=False,
                                         chunk_size = None,
                                         mode='test',
                                         queue_size = 100,
                                         mailbox = mailbox,
-                                        device = torch.device('cuda:{}'.format(local_rank))
+                                        device = torch.device('cuda:{}'.format(local_rank)),
+                                        reversed = (gnn_param['arch']=='identity')
                                         )
     valloader = DistributedDataLoader(graph,val_data,sampler = eval_sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=neg_sampler,
-                                        batch_size = train_param['batch_size'],
+                                        batch_size = train_param['batch_size']*dist.get_world_size(),
                                         shuffle=False,
                                         drop_last=False,
                                         chunk_size = None,
@@ -316,13 +320,15 @@ def main():
                                         mode='val',
                                         queue_size = 100,
                                         mailbox = mailbox,
-                                        device = torch.device('cuda:{}'.format(local_rank))
+                                        device = torch.device('cuda:{}'.format(local_rank)),
+                                        reversed = (gnn_param['arch']=='identity')
                                         )
 
     print('init dataloader')
 
     gnn_dim_node = 0 if graph.nfeat is None else graph.nfeat.shape[1]
     gnn_dim_edge = 0 if graph.efeat is None else graph.efeat.shape[1]
+    print('dim_node {} dim_edge {}\n'.format(gnn_dim_node,gnn_dim_edge))
     avg_time  = 0
     if use_cuda:
         model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param,graph.ids.shape[0],mailbox).cuda()
@@ -337,6 +343,7 @@ def main():
     print(f'The model has {count_parameters(model):,} trainable parameters')
 
     train_stream = torch.cuda.Stream()
+
     def eval(mode='val'):
         model.eval()
         aps = list()
@@ -356,7 +363,7 @@ def main():
             total_loss = 0
             signal = torch.tensor([0],dtype = int,device = device)
             for roots,mfgs,metadata in loader:
-
+                """
                 if ctx.memory_group == 0:
                     pred_pos, pred_neg = model(mfgs,metadata,neg_samples=neg_samples)
                     #print('check {}\n'.format(model.module.memory_updater.last_updated_nid))
@@ -364,7 +371,28 @@ def main():
                     y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
                     aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
                     aucs_mrrs.append(roc_auc_score(y_true, y_pred))
-            
+                """
+                if mailbox is not None:
+                    if(graph.efeat.device.type != 'cpu'):
+                        edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')]).to('cuda')
+                            #edge_feats = graph.get_dist_efeat(graph.eids_mapper[roots.eids.to('cpu')].to('cuda'),is_sorted = False)    #graph.efeat[roots.eids.to('cpu')].to('cuda')
+                    else:
+                        edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')])
+                    src = metadata['src_pos_index']
+                    dst = metadata['dst_pos_index']
+                    ts = roots.ts
+                    update_mail = True
+                    param = (update_mail,src,dst,ts,edge_feats,loader.async_feature)
+                else:
+                    param = None
+                pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+                y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
+                y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
+                aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
+                aucs_mrrs.append(roc_auc_score(y_true, y_pred))
+                mailbox.update_shared()
+                mailbox.update_p2p()
+                """
                 if mailbox is not None:
                     src = metadata['src_pos_index']
                     dst = metadata['dst_pos_index']
@@ -399,7 +427,9 @@ def main():
                     if memory_param['historical_fix'] == True:
                         mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=model.module.memory_updater.filter,set_remote=True,mode='historical')
                     else:
-                        mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,set_remote=True,mode='all_reduce')
+                        mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,set_remote=True,mode='all_reduce',submit=False)
+                        mailbox.sychronize_shared()
+                    """
         ap = torch.empty([1])
         auc_mrr = torch.empty([1])
         if(ctx.memory_group==0):
@@ -471,12 +501,14 @@ def main():
             remote_edge_access.append(trainloader.remote_edge)
             local_comm.append((DistIndex(mfgs[0][0].srcdata['ID']).part == dist.get_rank()).sum().item())
             remote_comm.append((DistIndex(mfgs[0][0].srcdata['ID']).part != dist.get_rank()).sum().item())
-            local_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part == dist.get_rank()).sum().item())
-            remote_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part != dist.get_rank()).sum().item())
+            if 'ID' in mfgs[0][0].edata:
+                local_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part == dist.get_rank()).sum().item())
+                remote_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part != dist.get_rank()).sum().item())
+                sum_local_edge_comm +=local_edge_comm[b_cnt-1]
+                sum_remote_edge_comm +=remote_edge_comm[b_cnt-1]
             sum_local_comm +=local_comm[b_cnt-1]
             sum_remote_comm +=remote_comm[b_cnt-1]
-            sum_local_edge_comm +=local_edge_comm[b_cnt-1]
-            sum_remote_edge_comm +=remote_edge_comm[b_cnt-1]
+            
             if mailbox is not None:
                 if(graph.efeat.device.type != 'cpu'):
                     edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')]).to('cuda')
@@ -487,7 +519,7 @@ def main():
                 dst = metadata['dst_pos_index']
                 ts = roots.ts
                 update_mail = True
-                param = (update_mail,src,dst,ts,edge_feats,fetch_async)
+                param = (update_mail,src,dst,ts,edge_feats,trainloader.async_feature)
             else:
                 param = None
             model.train()
@@ -497,6 +529,7 @@ def main():
             if memory_param['historical_fix'] == True:
                 loss = creterion(pred_pos, torch.ones_like(pred_pos)) + 0.1*inner_prod(model.module.memory_updater.update_memory,model.module.memory_updater.prev_memory)
             else:
+                #loss = creterion(pred_pos, torch.ones_like(pred_pos)) + 0.1*inner_prod(model.module.memory_updater.last_updated_memory,model.module.memory_updater.pre_mem)
                 loss = creterion(pred_pos, torch.ones_like(pred_pos)) 
             loss += creterion(pred_neg, torch.zeros_like(pred_neg))
             total_loss += float(loss)
@@ -574,9 +607,14 @@ def main():
         print(' comm local node number {} remote node number {} local edge {} remote edge{}\n'.format(sum_local_comm,sum_remote_comm,sum_local_edge_comm,sum_remote_edge_comm))
         print('memory comm {} shared comm {}\n'.format(tot_comm_count,tot_shared_count))
         if(e==0):
-            torch.save((local_access,remote_access,local_edge_access,remote_edge_access,local_comm,remote_comm,local_edge_comm,remote_edge_comm),'all/{}/comm/comm_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
+            torch.save((local_access,remote_access,local_edge_access,remote_edge_access,local_comm,remote_comm,local_edge_comm,remote_edge_comm),'all/{}/{}/comm/comm_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
         ap = 0
         auc = 0
+        tt.ssim_remote=0
+        tt.ssim_local=0
+        tt.weight_count_local=0
+        tt.weight_count_remote=0
+        tt.ssim_cnt=0
         ap, auc = eval('val')
         test_ap,test_auc = eval('test')
         test_ap_list.append((test_ap,test_auc))
@@ -593,12 +631,13 @@ def main():
         counts = counts.to('cpu')
         node_degree[value] = counts
         if dist.get_world_size()==1:
-            mailbox.mon.draw(node_degree,args.dataname,e)
+            mailbox.mon.draw(node_degree,args.dataname,args.model,e)
             mailbox.mon.set_zero()            
         #mailbox.mon.draw(node_degree,args.dataname,e)
         #mailbox.mon.set_zero()
         loss_list.append(total_loss)
         val_list.append(ap)
+
         if early_stop:
             dist.barrier()
             print("Early stopping at epoch {:d}\n".format(e))
@@ -610,8 +649,12 @@ def main():
             print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f} test ap {:4f} test auc{:4f}\n'.format(total_loss,train_ap, ap, auc,test_ap,test_auc))
             print('\ttotal time:{:.2f}s  prep time:{:.2f}s\n'.format(time.time()-epoch_start_time, time_prep))    
             torch.save(model.module.state_dict(), get_checkpoint_path(e))
-    torch.save(val_list,'all/{}/val_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
-    torch.save(loss_list,'all/{}/loss_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
+        if args.model == 'TGN':
+            print('weight {} {}\n'.format(tt.weight_count_local,tt.weight_count_remote))
+            print('ssim {} {}\n'.format(tt.ssim_local/tt.ssim_cnt,tt.ssim_remote/tt.ssim_cnt))
+    torch.save(val_list,'all/{}/{}/val_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
+    torch.save(loss_list,'all/{}/{}/loss_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
+    torch.save(test_ap_list,'all/{}/{}/test_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
     
     print(avg_time)
     if not early_stop:        
