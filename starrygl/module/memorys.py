@@ -423,6 +423,9 @@ class AsyncMemeoryUpdater(torch.nn.Module):
         if self.mode == 'historical':
             self.gamma = torch.nn.Parameter(torch.tensor([0.9]),
                                requires_grad=True)
+            self.filter = Filter(n_nodes=mailbox.shared_nodes_index.shape[0],
+                           memory_dimension=self.dim_hid,
+                           )
         else:
             self.gamma = 1   
     def forward(self, mfg, param = None):
@@ -431,12 +434,36 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             updated_memory0 = self.updater(b)
             mask = DistIndex(b.srcdata['ID']).is_shared
             #incr = updated_memory[mask] - b.srcdata['mem'][mask]
-            time_feat = self.time_enc(b.srcdata['ts'][mask].reshape(-1,1) - b.srcdata['his_ts'][mask].reshape(-1,1))
-            his_mem = torch.cat((mail_input[mask],time_feat),dim = 1)
-            upd0 = torch.zeros_like(updated_memory0)
-            upd0[mask] = self.ceil_updater(his_mem, b.srcdata['his_mem'][mask])
-            #updated_memory = torch.where(mask.unsqueeze(1),self.gamma*updated_memory0 + (1-self.gamma)*(b.srcdata['his_mem']),updated_memory0)
+            #time_feat = self.time_enc(b.srcdata['ts'][mask].reshape(-1,1) - b.srcdata['his_ts'][mask].reshape(-1,1))
+            #his_mem = torch.cat((mail_input[mask],time_feat),dim = 1)
+            with torch.no_grad():
+                upd0 = torch.zeros_like(updated_memory0)
+                if self.mode == 'historical':
+                    shared_ind = self.mailbox.is_shared_mask[DistIndex(b.srcdata['ID'][mask]).loc]
+                
+                    transition_dense = self.filter.get_incretment(shared_ind)
+                    transition_dense*=2
+                    if not (transition_dense.max().item() == 0):      
+                        transition_dense -= transition_dense.min()
+                        transition_dense /=transition_dense.max() 
+                        transition_dense = 2*transition_dense - 1
+                    upd0[mask] = b.srcdata['his_mem'][mask] + transition_dense
+                else:
+                    upd0[mask] = b.srcdata['his_mem'][mask]
+            #upd0[mask] = self.ceil_updater(his_mem, b.srcdata['his_mem'][mask])
+            #updated_memory = torch.where(mask.unsqueeze(1),self.gamma*updated_memory0 + (1-self.gamma)*(b.srcdata['his_mem'])
+            # ,updated_memory0)
             updated_memory = torch.where(mask.unsqueeze(1),self.gamma*updated_memory0 + (1-self.gamma)*(upd0),updated_memory0)
+            with torch.no_grad():
+                if self.mode == 'historical':
+                    change = upd0[mask] - b.srcdata['his_mem'][mask]
+                    change.detach()
+                    if not (change.max().item() == 0):     
+                        change -= change.min()
+                        change /=change.max() 
+                        change = 2*change - 1
+                        self.filter.update(shared_ind,change)
+                        #print(transition_dense)
             print(torch.cosine_similarity(updated_memory[mask],b.srcdata['his_mem'][mask]).sum()/torch.sum(mask))
             print(self.gamma)
             self.pre_mem = b.srcdata['his_mem']

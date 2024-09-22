@@ -2,13 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 # 读取文件内容
-ssim_values = [-1,0,0.3,0.7,2]  # 假设这是你的 ssim 参数值
+ssim_values = [-1,0.3,0.5,0.7,2]  # 假设这是你的 ssim 参数值
 data_values = ['WIKI','LASTFM','WikiTalk','REDDIT','LASTFM','DGraphFin']  # 存储从文件中读取的数据
 partition = 'ours_shared'
 # 从文件中读取数据，假设数据存储在文件 data.txt 中
 #all/"$data"/"$partitions"-ours_shared-0.01-"$mem"-"$ssim"-"$sample".out
 partitions=4
-model = 'JODIE'
+model = 'TGN'
 topk=0.01
 mem='historical'
 for data in data_values:

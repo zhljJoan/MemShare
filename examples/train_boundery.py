@@ -261,8 +261,8 @@ def main():
         print('dst len {} origin len {}'.format(graph.edge_index[1,mask].unique().shape[0],full_dst.unique().shape[0]))
         train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = graph.edge_index[1,mask].unique())
     else:
-        train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = full_dst.unique())
-        #train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = full_dst.unique(),local_mask=(DistIndex(graph.nids_mapper[full_dst.unique()].to('cpu')).part == dist.get_rank()))
+        #train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = full_dst.unique())
+        train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = full_dst.unique(),local_mask=(DistIndex(graph.nids_mapper[full_dst.unique()].to('cpu')).part == dist.get_rank()))
     print(train_neg_sampler.dst_node_list)
     neg_sampler = LocalNegativeSampling('triplet',amount= neg_samples,dst_node_list = full_dst.unique(),seed=6773)
 
@@ -279,7 +279,7 @@ def main():
                                         is_pipeline=True,
                                         use_local_feature = False,
                                         device = torch.device('cuda:{}'.format(local_rank)),
-                                        probability=1,#train_cross_probability,
+                                        probability=0.1,#train_cross_probability,
                                         reversed = (gnn_param['arch'] == 'identity')
                                         )
     
@@ -454,7 +454,7 @@ def main():
         cos = torch.nn.CosineSimilarity(dim=0)
         return cos(normalize(x1),normalize(x2)).sum()/x1.size(dim=0)
     creterion = torch.nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'])
+    optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'],weight_decay=1e-4)
     early_stopper = EarlyStopMonitor(max_round=args.patience)
     MODEL_SAVE_PATH = f'../saved_models/{args.model}-{args.dataname}-{dist.get_world_size()}.pth'
     epoch_cnt = 0
