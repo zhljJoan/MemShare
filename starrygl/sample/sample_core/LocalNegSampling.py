@@ -21,7 +21,8 @@ class LocalNegativeSampling(NegativeSampling):
         src_node_list: torch.Tensor = None,
         dst_node_list: torch.Tensor = None,
         local_mask = None,
-        seed = None
+        seed = None,
+        prob = None
     ):
         super(LocalNegativeSampling,self).__init__(mode,amount,unique=unique)
         self.src_node_list = src_node_list.to('cpu') if src_node_list is not None else None
@@ -37,6 +38,7 @@ class LocalNegativeSampling(NegativeSampling):
         self.local_mask = local_mask
         if self.local_mask is not None:
             self.local_dst = dst_node_list[local_mask]
+        self.prob = prob
         #self.rdm.manual_seed(42)
         #print('dst_nde_list {}\n'.format(dst_node_list))
     def is_binary(self) -> bool:
@@ -61,7 +63,7 @@ class LocalNegativeSampling(NegativeSampling):
                 p = torch.rand(size=(num_samples,))
                 sr = self.dst_node_list[torch.randint(len(self.dst_node_list), (num_samples, ),generator=self.rdm)]
                 sl = self.local_dst[torch.randint(len(self.local_dst), (num_samples, ),generator=self.rdm)]
-                s=torch.where(p<=1,sl,sr)
+                s=torch.where(p<=self.prob,sl,sr)
                 return sr
             else:
                 s = torch.randint(len(self.dst_node_list), (num_samples, ),generator=self.rdm)

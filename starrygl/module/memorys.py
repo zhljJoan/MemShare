@@ -464,8 +464,8 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                         change = 2*change - 1
                         self.filter.update(shared_ind,change)
                         #print(transition_dense)
-            print(torch.cosine_similarity(updated_memory[mask],b.srcdata['his_mem'][mask]).sum()/torch.sum(mask))
-            print(self.gamma)
+            #print(torch.cosine_similarity(updated_memory[mask],b.srcdata['his_mem'][mask]).sum()/torch.sum(mask))
+            #print(self.gamma)
             self.pre_mem = b.srcdata['his_mem']
             self.last_updated_ts = b.srcdata['ts'].detach().clone()
             self.last_updated_memory = updated_memory.detach().clone()
