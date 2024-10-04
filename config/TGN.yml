@@ -1,7 +1,7 @@
 sampling:
   - layer: 1
     neighbor: 
-      - 20
+      - 10
     strategy: 'recent'
     prop_time: False
     history: 1
@@ -27,10 +27,10 @@ gnn:
     dim_time: 100
     dim_out: 100
 train:
-  - epoch: 200
+  - epoch: 100
     batch_size: 1000
     # reorder: 16
-    lr: 0.0004
+    lr: 0.0008
     dropout: 0.2
     att_dropout: 0.2
     all_on_gpu: True

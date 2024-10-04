@@ -253,7 +253,7 @@ class SharedMailBox():
     def sychronize_shared(self):
         out=self.historical_cache.synchronize_shared_update()
         if out is not None:
-            shared_index,shared_data,shared_ts,mail,mail_ts = out
+            shared_index,shared_data,shared_ts = out
             index = self.shared_nodes_index[shared_index]
             mask= (shared_ts > self.node_memory_ts.accessor.data[index])
             self.node_memory.accessor.data[index][mask] = shared_data[mask]
@@ -320,8 +320,10 @@ class SharedMailBox():
             #mem = self.pack(memory=shared_memory,memory_ts=shared_memory_ts,mail=shared_mail,mail_ts=shared_mail_ts,index=shared_memory_ind,mode=mode)
             #mem = self.pack(memory=shared_mail,memory_ts=shared_mail_ts,index=shared_memory_ind,mode=mode)
             
+                mem = self.pack(memory=shared_memory,memory_ts=shared_memory_ts,index=shared_memory_ind,mode=mode)    
+            else:
+                mem = self.pack(memory=shared_memory,memory_ts=shared_memory_ts,mail=shared_mail,mail_ts = shared_mail_ts,index=shared_memory_ind,mode=mode)
             self.tot_shared_count += shared_memory_ind.shape[0]
-            mem = self.pack(memory=shared_memory,memory_ts=shared_memory_ts,mail=shared_mail,mail_ts = shared_mail_ts,index=shared_memory_ind,mode=mode)
             broadcast_len = torch.empty([1],device = mem.device,dtype = torch.int)
             broadcast_len[0] = shared_memory_ind.shape[0]
             shared_len = [torch.empty([1],device = mem.device,dtype = torch.int) for _ in range(ctx.memory_group_size)] 

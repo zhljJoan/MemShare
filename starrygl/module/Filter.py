@@ -31,7 +31,7 @@ class Filter(nn.Module):
   def get_incretment(self, node_idxs):
     #print(self.incretment[node_idxs,:].shape,self.count[node_idxs].shape)
     
-    return self.incretment[node_idxs,:]/torch.clamp(self.count[node_idxs,:],1)
+    return self.incretment[node_idxs,:]#/torch.clamp(self.count[node_idxs,:],1)
   
   def get_incretment_remote(self, idx):
     remote_tensor = DistributedTensor(self.incretment)

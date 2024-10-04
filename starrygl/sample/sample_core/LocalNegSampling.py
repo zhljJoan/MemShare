@@ -63,8 +63,8 @@ class LocalNegativeSampling(NegativeSampling):
                 p = torch.rand(size=(num_samples,))
                 sr = self.dst_node_list[torch.randint(len(self.dst_node_list), (num_samples, ),generator=self.rdm)]
                 sl = self.local_dst[torch.randint(len(self.local_dst), (num_samples, ),generator=self.rdm)]
-                s=torch.where(p<=self.prob,sl,sr)
-                return sr
+                s=torch.where(p<=self.prob,sr,sl)
+                return s
             else:
                 s = torch.randint(len(self.dst_node_list), (num_samples, ),generator=self.rdm)
                 return self.dst_node_list[s]

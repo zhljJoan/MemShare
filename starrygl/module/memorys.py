@@ -445,7 +445,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                     transition_dense*=2
                     if not (transition_dense.max().item() == 0):      
                         transition_dense -= transition_dense.min()
-                        transition_dense /=transition_dense.max() 
+                        transition_dense /=torch.clamp(transition_dense.max() ,1)
                         transition_dense = 2*transition_dense - 1
                     upd0[mask] = b.srcdata['his_mem'][mask] + transition_dense
                 else:
@@ -456,7 +456,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             updated_memory = torch.where(mask.unsqueeze(1),self.gamma*updated_memory0 + (1-self.gamma)*(upd0),updated_memory0)
             with torch.no_grad():
                 if self.mode == 'historical':
-                    change = upd0[mask] - b.srcdata['his_mem'][mask]
+                    change = updated_memory[mask] - b.srcdata['his_mem'][mask]
                     change.detach()
                     if not (change.max().item() == 0):     
                         change -= change.min()

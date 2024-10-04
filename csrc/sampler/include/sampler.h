@@ -300,13 +300,16 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
             cal_cnt = 0;
             for(int cid = end_index-1;cid>=0;cid--){
                 cal_cnt++;
-                if(cal_cnt > fanout)break;
+                //if(cal_cnt > fanout)break;
                 int eid = tnb.eid[node][cid];
                 
-                if(part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part){
-                    double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);
-                    double ep = boundery_probility*pr[cal_cnt-1]/sum_p*sum_1;
-                    if(p0 > ep)continue;
+                if((part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part)){
+                    if(cal_cnt<=fanout){
+                        double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);
+                        double ep = boundery_probility*pr[cal_cnt-1]/sum_p*sum_1;
+                        if(p0 > ep)continue;
+                    }
+                    else continue;
                     //cout<<"in"<<endl;
                 }
                 tgb_i[tid].src_index.emplace_back(i);

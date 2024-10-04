@@ -139,8 +139,8 @@ class HistoricalCache:
         if(shared_data.shape[0] == 0):
             return None
         len = self.local_historical_data.shape[1]
-        mail_ts = shared_data[:,-1]
-        mail_data = shared_data[:,len+1:-1]
+        #mail_ts = shared_data[:,-1]
+        #mail_data = shared_data[:,len+1:-1]
         shared_ts = shared_data[:,len]
         shared_mem = shared_data[:,:len]
         #print(shared_index)
@@ -150,8 +150,8 @@ class HistoricalCache:
         #shared_data =  torch_scatter.scatter_mean(shared_data,inv,0)
         shared_mem = shared_mem[idx]
         shared_ts = shared_ts[idx]
-        mail_data = mail_data[idx]
-        mail_ts = mail_ts[idx]
+        #mail_data = mail_data[idx]
+        #mail_ts = mail_ts[idx]
         shared_index = unq_index
         #print('{} {} {}\n'.format(shared_index,shared_data,shared_ts))
         # if filter is not None:
@@ -164,7 +164,7 @@ class HistoricalCache:
         self.local_historical_data[shared_index] = shared_mem
         self.local_ts[shared_index] = shared_ts
         self.last_shared_update_wait = None
-        return shared_index,shared_mem,shared_ts,mail_data,mail_ts
+        return shared_index,shared_mem,shared_ts#,mail_data,mail_ts
         
 
         

@@ -42,14 +42,15 @@ class time_count:
         return time.perf_counter(),0 
     @staticmethod
     def elapsed_event(start_event):
-        if isinstance(start_event,tuple):
-            start_event,end_event = start_event
-            end_event.record()
-            end_event.synchronize()
-            return start_event.elapsed_time(end_event)
-        else:
-            torch.cuda.synchronize()
-            return time.perf_counter() - start_event
+        #if isinstance(start_event,tuple):
+        #    start_event,end_event = start_event
+        #    end_event.record()
+        #    end_event.synchronize()
+        #    return start_event.elapsed_time(end_event)
+        #else:
+        #    torch.cuda.synchronize()
+        #    return time.perf_counter() - start_event
+        return 0
     @staticmethod
     def print():
         print('time_count.time_forward={} time_count.time_backward={} time_count.time_memory_updater={} time_count.time_embedding={} time_count.time_local_update={} time_count.time_memory_sync={} time_count.time_sample_and_build={} time_count.time_memory_fetch={}\n'.format(
