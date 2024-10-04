@@ -63,7 +63,7 @@ parser.add_argument('--partition', default='part', type=str, metavar='W',
                     help='name of model')
 parser.add_argument('--topk', default='0', type=str, metavar='W',
                     help='name of model')
-parser.add_argument('--probability', default=0.1, type=float, metavar='W',
+parser.add_argument('--probability', default=1, type=float, metavar='W',
                     help='name of model')
 parser.add_argument('--sample_type', default='recent', type=str, metavar='W',
                     help='name of model')
@@ -653,7 +653,7 @@ def main():
             break
         else:
             print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f} test ap {:4f} test auc{:4f}\n'.format(total_loss,train_ap, ap, auc,test_ap,test_auc))
-            print('\ttotal time:{:.2f}s  prep time:{:.2f}s\n test time {:.2f}'.format(time.time()-epoch_start_time, time_prep),t_test)    
+            print('\ttotal time:{:.2f}s  prep time:{:.2f}s\n test time {:.2f}'.format(time.time()-epoch_start_time, time_prep,t_test))    
             torch.save(model.module.state_dict(), get_checkpoint_path(e))
         if args.model == 'TGN':
             print('weight {} {}\n'.format(tt.weight_count_local,tt.weight_count_remote))
