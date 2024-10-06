@@ -257,10 +257,10 @@ class DistributedDataLoader:
             pass
         batch_data,dist_nid,dist_eid = self.result_queue[0].result()
         b = batch_data[1][0][0]
-        #self.remote_node += (DistIndex(dist_nid).part != dist.get_rank()).sum()
-        #self.local_node += (DistIndex(dist_nid).part == dist.get_rank()).sum()
-        #self.remote_edge += (DistIndex(dist_eid).part != dist.get_rank()).sum()
-        #self.local_edge += (DistIndex(dist_eid).part == dist.get_rank()).sum()
+        self.remote_node += (DistIndex(dist_nid).part != dist.get_rank()).sum().item()
+        self.local_node += (DistIndex(dist_nid).part == dist.get_rank()).sum().item()
+        self.remote_edge += (DistIndex(dist_eid).part != dist.get_rank()).sum().item()
+        self.local_edge += (DistIndex(dist_eid).part == dist.get_rank()).sum().item()
         #self.remote_root += (DistIndex(dist_nid[b.srcdata['__ID'][:self.batch_size*2]]).part != dist.get_rank()).sum()
         #self.local_root += (DistIndex(dist_nid[b.srcdata['__ID'][:self.batch_size*2]]).part == dist.get_rank()).sum()
                     #torch.cuda.synchronize(stream)
