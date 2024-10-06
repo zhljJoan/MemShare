@@ -196,7 +196,7 @@ def main():
     ctx = DistributedContext.init(backend="nccl", use_gpu=True,memory_group_num=1,cache_use_rpc=True)
     torch.set_num_threads(10)
     device_id = torch.cuda.current_device()
-    if (args.dataname =='GDELT' & dist.get_world_size() <=4 ):
+    if ((args.dataname =='GDELT') & (dist.get_world_size() <=4 )):
         graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cpu'),partition=args.partition)#torch.device('cpu'))
     else:
         graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition=args.partition)#torch.device('cpu'))
