@@ -63,11 +63,11 @@ parser.add_argument('--partition', default='part', type=str, metavar='W',
                     help='name of model')
 parser.add_argument('--topk', default='0', type=str, metavar='W',
                     help='name of model')
-parser.add_argument('--probability', default=True, type=float, metavar='W',
+parser.add_argument('--probability', default=1, type=float, metavar='W',
                     help='name of model')
 parser.add_argument('--sample_type', default='recent', type=str, metavar='W',
                     help='name of model')
-parser.add_argument('--local_neg_sample', default=True, type=bool, metavar='W',
+parser.add_argument('--local_neg_sample', default=False, type=bool, metavar='W',
                     help='name of model')
 parser.add_argument('--shared_memory_ssim', default=2, type=float, metavar='W',
                     help='name of model')
@@ -656,8 +656,9 @@ def main():
             print('\ttotal time:{:.2f}s  prep time:{:.2f}s\n test time {:.2f}'.format(time.time()-epoch_start_time, time_prep,t_test))    
             torch.save(model.module.state_dict(), get_checkpoint_path(e))
         if args.model == 'TGN':
-            print('weight {} {}\n'.format(tt.weight_count_local,tt.weight_count_remote))
-            print('ssim {} {}\n'.format(tt.ssim_local/tt.ssim_cnt,tt.ssim_remote/tt.ssim_cnt))
+            pass
+#            print('weight {} {}\n'.format(tt.weight_count_local,tt.weight_count_remote))
+#            print('ssim {} {}\n'.format(tt.ssim_local/tt.ssim_cnt,tt.ssim_remote/tt.ssim_cnt))
     torch.save(val_list,'all/{}/{}/val_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
     torch.save(loss_list,'all/{}/{}/loss_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
     torch.save(test_ap_list,'all/{}/{}/test_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
