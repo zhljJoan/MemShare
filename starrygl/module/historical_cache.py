@@ -101,7 +101,7 @@ class HistoricalCache:
         return mask
     
     def read_synchronize(self):
-        torch.cuda.synchronize(get_stream_set(self.layer))
+        get_stream_set(self.layer).synchronize()
     
     # def get_cold_data(self,index,to_device):
     #     with get_stream_set(self.layer):

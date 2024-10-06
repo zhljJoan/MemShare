@@ -240,8 +240,8 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
     #print(CountComm.origin_local,CountComm.origin_remote)
     #for p in range(dist.get_world_size()):
     #    print((DistIndex(dist_nid).part == p).sum().item())
-    CountComm.origin_local = (DistIndex(dist_nid).part == dist.get_rank()).sum().item()
-    CountComm.origin_remote =(DistIndex(dist_nid).part != dist.get_rank()).sum().item()
+    #CountComm.origin_local = (DistIndex(dist_nid).part == dist.get_rank()).sum().item()
+    #CountComm.origin_remote =(DistIndex(dist_nid).part != dist.get_rank()).sum().item()
     dist_nid,nid_inv = dist_nid.unique(return_inverse=True)
     #print('nid_tensor {} \n nid {}\n'.format(nid_tensor,dist_nid))
 
@@ -250,7 +250,7 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
     """
     if unique:
         block_node_list,unq_id = torch.stack((nid_inv.to(torch.float64),src_ts.to(torch.float64))).unique(dim = 1,return_inverse=True)
-
+        #print(block_node_list.shape,unq_id.shape)
         first_index,_ = torch_scatter.scatter_min(torch.arange(unq_id.shape[0],device=unq_id.device,dtype=unq_id.dtype),unq_id)
         first_mask = torch.zeros(unq_id.shape[0],device = unq_id.device,dtype=torch.bool)
         first_mask[first_index] = True
@@ -423,9 +423,9 @@ def graph_sample(graph,sampler,sample_fn,data,neg_sampling = None,out_device = t
     param = {'is_unique':False,'nid_mapper':nid_mapper,'eid_mapper':eid_mapper,'out_device':out_device}
     out = sample_fn(sampler,data,neg_sampling,**param)
     if reversed is False:
-        out,dist_nid,dist_eid = to_block(graph,data,out,out_device,reversed)
+        out,dist_nid,dist_eid = to_block(graph,data,out,out_device)
     else:
-        out,dist_nid,dist_eid = to_reversed_block(graph,data,out,out_device,reversed)
+        out,dist_nid,dist_eid = to_reversed_block(graph,data,out,out_device,identity=(sampler.policy=='identity'))
     t_e = time.time()
     #print(t_e-t_s)
     return out,dist_nid,dist_eid

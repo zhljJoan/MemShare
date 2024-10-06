@@ -13,10 +13,10 @@ class MemoryMoniter:
         else:
             return torch.sum((x-y)**2,dim=1) 
     def add(self,nid,pre_memory,now_memory):
-
-        self.memorychange.append(self.ssim(pre_memory,now_memory,method = 'F'))
-        self.memory_ssim.append(self.ssim(pre_memory,now_memory,method = 'cos'))
-        self.nid_list.append(nid)
+        pass
+        #self.memorychange.append(self.ssim(pre_memory,now_memory,method = 'F'))
+        #self.memory_ssim.append(self.ssim(pre_memory,now_memory,method = 'cos'))
+        #self.nid_list.append(nid)
     def draw(self,degree,data,model,e):
         torch.save(self.nid_list,'all/{}/{}/memorynid_{}.pt'.format(data,model,e))
         torch.save(self.memorychange,'all/{}/{}/memoryF_{}.pt'.format(data,model,e))

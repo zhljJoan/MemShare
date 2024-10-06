@@ -421,7 +421,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
         elif self.mode == 'local' or self.mode=='all_local':
             self.update_hunk = self.local_func
         if self.mode == 'historical':
-            self.gamma = torch.nn.Parameter(torch.tensor([0.9]),
+            self.gamma = torch.nn.Parameter(torch.tensor([0.5]),
                                requires_grad=True)
             self.filter = Filter(n_nodes=mailbox.shared_nodes_index.shape[0],
                            memory_dimension=self.dim_hid,
@@ -430,7 +430,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             self.gamma = 1   
     def forward(self, mfg, param = None):
         for b in mfg:
-            mail_input = b.srcdata['mem_input']
+            #print(b.srcdata['ID'].shape[0])
             updated_memory0 = self.updater(b)
             mask = DistIndex(b.srcdata['ID']).is_shared
             #incr = updated_memory[mask] - b.srcdata['mem'][mask]
@@ -440,14 +440,15 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                 upd0 = torch.zeros_like(updated_memory0)
                 if self.mode == 'historical':
                     shared_ind = self.mailbox.is_shared_mask[DistIndex(b.srcdata['ID'][mask]).loc]
-                
-                    transition_dense = self.filter.get_incretment(shared_ind)
-                    transition_dense*=2
+
+                    transition_dense = b.srcdata['his_mem'][mask] + self.filter.get_incretment(shared_ind)
                     if not (transition_dense.max().item() == 0):      
                         transition_dense -= transition_dense.min()
-                        transition_dense /=torch.clamp(transition_dense.max() ,1)
+                        transition_dense /= transition_dense.max() 
                         transition_dense = 2*transition_dense - 1
-                    upd0[mask] = b.srcdata['his_mem'][mask] + transition_dense
+                    upd0[mask] = transition_dense#b.srcdata['his_mem'][mask] + transition_dense
+                    #print(self.gamma)
+                    #print('tran {} {} {}\n'.format(transition_dense.max().item(),upd0[mask].max().item(),b.srcdata['his_mem'][mask].max().item()))
                 else:
                     upd0[mask] = b.srcdata['his_mem'][mask]
             #upd0[mask] = self.ceil_updater(his_mem, b.srcdata['his_mem'][mask])
@@ -457,16 +458,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             with torch.no_grad():
                 if self.mode == 'historical':
                     change = updated_memory[mask] - b.srcdata['his_mem'][mask]
-                    change.detach()
-                    if not (change.max().item() == 0):     
-                        change -= change.min()
-                        change /=change.max() 
-                        change = 2*change - 1
-                        self.filter.update(shared_ind,change)
-                        #print(transition_dense)
-            #print(torch.cosine_similarity(updated_memory[mask],b.srcdata['his_mem'][mask]).sum()/torch.sum(mask))
-            #print(self.gamma)
-            self.pre_mem = b.srcdata['his_mem']
+                    self.filter.update(shared_ind,change)
             self.last_updated_ts = b.srcdata['ts'].detach().clone()
             self.last_updated_memory = updated_memory.detach().clone()
             self.last_updated_nid = b.srcdata['ID'].detach().clone()
@@ -504,4 +496,6 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                 b.srcdata['h'] = updated_memory
 
     def empty_cache(self):
-        pass
+        if self.mode == 'historical':
+            print('clear\n')
+            self.filter.clear()

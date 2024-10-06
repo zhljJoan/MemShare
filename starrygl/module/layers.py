@@ -291,19 +291,19 @@ class TransfomerAttentionLayer(torch.nn.Module):
             #tt.weight_count_remote+=torch.sum(att[DistIndex(b.srcdata['ID']).part[b.edges()[0]]!=torch.distributed.get_rank()]**2)
             #tt.weight_count_local+=torch.sum(att[DistIndex(b.srcdata['ID']).part[b.edges()[0]]==torch.distributed.get_rank()]**2)
             V = torch.reshape(V*att[:, :, None], (V.shape[0], -1))
-            V_local = V.clone()
-            V_remote = V.clone()
-            V_local[DistIndex(b.srcdata['ID']).part[b.edges()[0]]!=torch.distributed.get_rank()] = 0
-            V_remote[DistIndex(b.srcdata['ID']).part[b.edges()[0]]==torch.distributed.get_rank()] = 0
+            #V_local = V.clone()
+            #V_remote = V.clone()
+            #V_local[DistIndex(b.srcdata['ID']).part[b.edges()[0]]!=torch.distributed.get_rank()] = 0
+            #V_remote[DistIndex(b.srcdata['ID']).part[b.edges()[0]]==torch.distributed.get_rank()] = 0
             b.edata['v'] = V
-            b.edata['v0'] = V_local
-            b.edata['v1'] = V_remote
-            b.update_all(dgl.function.copy_e('v0', 'm0'), dgl.function.sum('m0', 'h0'))
-            b.update_all(dgl.function.copy_e('v1', 'm1'), dgl.function.sum('m1', 'h1'))
+            #b.edata['v0'] = V_local
+            #b.edata['v1'] = V_remote
+            #b.update_all(dgl.function.copy_e('v0', 'm0'), dgl.function.sum('m0', 'h0'))
+            #b.update_all(dgl.function.copy_e('v1', 'm1'), dgl.function.sum('m1', 'h1'))
             b.update_all(dgl.function.copy_e('v', 'm'), dgl.function.sum('m', 'h'))
-            tt.ssim_local+=torch.sum(torch.cosine_similarity(b.dstdata['h'],b.dstdata['h0']))
-            tt.ssim_remote+=torch.sum(torch.cosine_similarity(b.dstdata['h'],b.dstdata['h1']))
-            tt.ssim_cnt += b.num_dst_nodes()
+            #tt.ssim_local+=torch.sum(torch.cosine_similarity(b.dstdata['h'],b.dstdata['h0']))
+            #tt.ssim_remote+=torch.sum(torch.cosine_similarity(b.dstdata['h'],b.dstdata['h1']))
+            #tt.ssim_cnt += b.num_dst_nodes()
             #print('dst {}'.format(b.dstdata['h']))
             #b.srcdata['v'] = torch.cat([torch.zeros((b.num_dst_nodes(), V.shape[1]), device=torch.device('cuda:0')), V], dim=0)
             #b.update_all(dgl.function.copy_u('v', 'm'), dgl.function.sum('m', 'h'))

@@ -63,11 +63,11 @@ parser.add_argument('--partition', default='part', type=str, metavar='W',
                     help='name of model')
 parser.add_argument('--topk', default='0', type=str, metavar='W',
                     help='name of model')
-parser.add_argument('--probability', default=1, type=float, metavar='W',
+parser.add_argument('--probability', default=True, type=float, metavar='W',
                     help='name of model')
 parser.add_argument('--sample_type', default='recent', type=str, metavar='W',
                     help='name of model')
-parser.add_argument('--local_neg_sample', default=False, type=bool, metavar='W',
+parser.add_argument('--local_neg_sample', default=True, type=bool, metavar='W',
                     help='name of model')
 parser.add_argument('--shared_memory_ssim', default=2, type=float, metavar='W',
                     help='name of model')
@@ -197,7 +197,9 @@ def main():
     torch.set_num_threads(10)
     device_id = torch.cuda.current_device()
     graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition=args.partition)#torch.device('cpu'))
-    torch.autograd.set_detect_anomaly(True)
+    if(args.dataname=='GDELT'):
+        train_param['epoch'] = 10
+    #torch.autograd.set_detect_anomaly(True)
 # 确保 CUDA 可用
     if torch.cuda.is_available():
         print("Total GPU memory: ", torch.cuda.get_device_properties(0).total_memory/1024**3)
@@ -209,7 +211,7 @@ def main():
         print("CUDA is not available.")
     
     full_dst = full_sampler_graph['edge_index'][1,torch.arange(0,full_sampler_graph['edge_index'].shape[1],2)]   
-    sample_graph = TemporalNeighborSampleGraph(full_sampler_graph,mode = 'full',dist_eid_mapper=graph.eids_mapper)#,local_eids=graph.eids)
+    sample_graph = TemporalNeighborSampleGraph(full_sampler_graph,mode = 'full',dist_eid_mapper=graph.eids_mapper)
     eval_sample_graph = TemporalNeighborSampleGraph(full_sampler_graph,mode = 'full',dist_eid_mapper=graph.eids_mapper)
     Path("../saved_models/").mkdir(parents=True, exist_ok=True)
     Path("../saved_checkpoints/").mkdir(parents=True, exist_ok=True)
@@ -495,19 +497,19 @@ def main():
         for roots,mfgs,metadata in trainloader:
             #print('rank is {} batch max ts is {} batch min ts is {}'.format(dist.get_rank(),roots.ts.min(),roots.ts.max()))
             b_cnt = b_cnt + 1
-            local_access.append(trainloader.local_node)
-            remote_access.append(trainloader.remote_node)
-            local_edge_access.append(trainloader.local_edge)
-            remote_edge_access.append(trainloader.remote_edge)
-            local_comm.append((DistIndex(mfgs[0][0].srcdata['ID']).part == dist.get_rank()).sum().item())
-            remote_comm.append((DistIndex(mfgs[0][0].srcdata['ID']).part != dist.get_rank()).sum().item())
-            if 'ID' in mfgs[0][0].edata:
-                local_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part == dist.get_rank()).sum().item())
-                remote_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part != dist.get_rank()).sum().item())
-                sum_local_edge_comm +=local_edge_comm[b_cnt-1]
-                sum_remote_edge_comm +=remote_edge_comm[b_cnt-1]
-            sum_local_comm +=local_comm[b_cnt-1]
-            sum_remote_comm +=remote_comm[b_cnt-1]
+            #local_access.append(trainloader.local_node)
+            #remote_access.append(trainloader.remote_node)
+            #local_edge_access.append(trainloader.local_edge)
+            #remote_edge_access.append(trainloader.remote_edge)
+            #local_comm.append((DistIndex(mfgs[0][0].srcdata['ID']).part == dist.get_rank()).sum().item())
+            #remote_comm.append((DistIndex(mfgs[0][0].srcdata['ID']).part != dist.get_rank()).sum().item())
+            #if 'ID' in mfgs[0][0].edata:
+            #    local_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part == dist.get_rank()).sum().item())
+            #    remote_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part != dist.get_rank()).sum().item())
+            #    sum_local_edge_comm +=local_edge_comm[b_cnt-1]
+            #    sum_remote_edge_comm +=remote_edge_comm[b_cnt-1]
+            #sum_local_comm +=local_comm[b_cnt-1]
+            #sum_remote_comm +=remote_comm[b_cnt-1]
             
             if mailbox is not None:
                 if(graph.efeat.device.type != 'cpu'):
@@ -526,13 +528,9 @@ def main():
             
             optimizer.zero_grad()
             pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
-            if memory_param['historical_fix'] == True:
-                loss = creterion(pred_pos, torch.ones_like(pred_pos)) + 0.1*inner_prod(model.module.memory_updater.update_memory,model.module.memory_updater.prev_memory)
-            else:
-                #loss = creterion(pred_pos, torch.ones_like(pred_pos)) + 0.1*inner_prod(model.module.memory_updater.last_updated_memory,model.module.memory_updater.pre_mem)
-                loss = creterion(pred_pos, torch.ones_like(pred_pos)) 
+            loss = creterion(pred_pos, torch.ones_like(pred_pos)) 
             loss += creterion(pred_neg, torch.zeros_like(pred_neg))
-            total_loss += float(loss)
+            total_loss += float(loss.item())
             #mailbox.handle_last_async()
             #trainloader.async_feature()
             #torch.cuda.synchronize()
@@ -546,6 +544,8 @@ def main():
             #torch.cuda.synchronize()
             mailbox.update_shared()
             mailbox.update_p2p()
+            #torch.cuda.empty_cache()
+
             """
             if mailbox is not None:
                 #src = metadata['src_pos_index']
@@ -606,8 +606,8 @@ def main():
         print('local node number {} remote node number {} local edge {} remote edge{}\n'.format(local_node,remote_node,local_edge,remote_edge))
         print(' comm local node number {} remote node number {} local edge {} remote edge{}\n'.format(sum_local_comm,sum_remote_comm,sum_local_edge_comm,sum_remote_edge_comm))
         print('memory comm {} shared comm {}\n'.format(tot_comm_count,tot_shared_count))
-        if(e==0):
-            torch.save((local_access,remote_access,local_edge_access,remote_edge_access,local_comm,remote_comm,local_edge_comm,remote_edge_comm),'all/{}/{}/comm/comm_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
+        #if(e==0):
+        #    torch.save((local_access,remote_access,local_edge_access,remote_edge_access,local_comm,remote_comm,local_edge_comm,remote_edge_comm),'all/{}/{}/comm/comm_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
         ap = 0
         auc = 0
         tt.ssim_remote=0
