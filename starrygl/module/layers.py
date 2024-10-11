@@ -295,11 +295,17 @@ class TransfomerAttentionLayer(torch.nn.Module):
             #V_remote = V.clone()
             #V_local[DistIndex(b.srcdata['ID']).part[b.edges()[0]]!=torch.distributed.get_rank()] = 0
             #V_remote[DistIndex(b.srcdata['ID']).part[b.edges()[0]]==torch.distributed.get_rank()] = 0
-            b.edata['v'] = V
             #b.edata['v0'] = V_local
             #b.edata['v1'] = V_remote
             #b.update_all(dgl.function.copy_e('v0', 'm0'), dgl.function.sum('m0', 'h0'))
             #b.update_all(dgl.function.copy_e('v1', 'm1'), dgl.function.sum('m1', 'h1'))
+            if 'weight' in b.edata:
+                with torch.no_grad():
+                    weight = b.edata['weight'].reshape(-1,1)#(b.edata['weight']/torch.sum(b.edata['weight']).item()).reshape(-1,1)
+                #print(weight.max())
+                b.edata['v'] = V*weight
+            else:
+                b.edata['v'] = V
             b.update_all(dgl.function.copy_e('v', 'm'), dgl.function.sum('m', 'h'))
             #tt.ssim_local+=torch.sum(torch.cosine_similarity(b.dstdata['h'],b.dstdata['h0']))
             #tt.ssim_remote+=torch.sum(torch.cosine_similarity(b.dstdata['h'],b.dstdata['h1']))
