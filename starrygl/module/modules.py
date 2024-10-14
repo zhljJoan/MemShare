@@ -52,20 +52,36 @@ class all_to_all_embedding(torch.autograd.Function):
         grad[dst_pos_index] = grad_pos_dst
         grad[dst_neg_index] = grad_neg_dst
         return grad,None,None
-    
+class NegFixLayer(torch.autograd.Function):
+    def __init__(self):
+        super(NegFixLayer, self).__init__()
+
+    def forward(ctx, input, weight):
+        ctx.save_for_backward(weight)
+        return input
+
+    def backward(ctx, grad_output):
+        # Define your backward pass
+        # ...
+        weight, = ctx.saved_tensors
+        #print(weight)
+        return grad_output/weight,None
+
 class GeneralModel(torch.nn.Module):
 
-    def __init__(self, dim_node, dim_edge, sample_param, memory_param, gnn_param, train_param, num_nodes = None,mailbox = None,combined=False):
+    def __init__(self, dim_node, dim_edge, sample_param, memory_param, gnn_param, train_param, num_nodes = None,mailbox = None,combined=False,train_ratio = None):
         super(GeneralModel, self).__init__()
         self.dim_node = dim_node
         self.dim_node_input = dim_node
         self.dim_edge = dim_edge
         self.sample_param = sample_param
         self.memory_param = memory_param
+        self.train_pos_ratio,self.train_neg_ratio = train_ratio
         if not 'dim_out' in gnn_param:
             gnn_param['dim_out'] = memory_param['dim_out']
         self.gnn_param = gnn_param
         self.train_param = train_param
+        self.neg_fix_layer = NegFixLayer()
         if memory_param['type'] == 'node':
             if memory_param['memory_update'] == 'gru':
                 #if memory_param['async'] == False:
@@ -138,12 +154,24 @@ class GeneralModel(torch.nn.Module):
         h_pos_src = out[metadata['src_pos_index']]
         h_pos_dst = out[metadata['dst_pos_index']]
         h_neg_dst = out[metadata['dst_neg_index']]
+    
         #end.record()
         #end.synchronize()
         #elapsed_time_ms = start.elapsed_time(end)
         #print('time {}\n'.format(elapsed_time_ms))
         #print('pos src {} \n pos dst {} \n neg dst{} \n'.format(h_pos_src, h_pos_dst,h_neg_dst))
         #print('pre predict {}'.format(mfgs[0][0].srcdata['ID']))
+        #if self.training is True:
+        #    with torch.no_grad():
+        #        ones = torch.ones(h_neg_dst.shape[0],device = h_neg_dst.device,dtype=torch.float)
+        #        weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones/self.train_pos_ratio,ones/self.train_neg_ratio).reshape(-1,1)
+                #weight = torch.clip(weigh)
+                #weight = weight/weight.max().item()
+                #print(weight)
+                #weight = 
+            #h_neg_dst*weight
+        #    pred = self.edge_predictor(h_pos_src, h_pos_dst, None , self.neg_fix_layer.apply(h_neg_dst,weight), neg_samples=neg_samples, mode = mode)
+        #else:
         pred = self.edge_predictor(h_pos_src, h_pos_dst, None , h_neg_dst, neg_samples=neg_samples, mode = mode)
         t_embedding = tt.elapsed_event(t1)
         tt.time_embedding+=t_embedding
