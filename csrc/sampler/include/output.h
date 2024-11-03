@@ -11,6 +11,7 @@ class TemporalGraphBlock
         vector<int64_t> src_index;
         vector<NodeIDType> sample_nodes;
         vector<TimeStampType> sample_nodes_ts;
+        vector<float> sample_weight; 
         vector<WeightType> e_weights;
         double sample_time = 0;
         double tot_time = 0;

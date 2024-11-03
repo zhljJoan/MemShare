@@ -18,9 +18,9 @@ class MemoryMoniter:
         #self.memory_ssim.append(self.ssim(pre_memory,now_memory,method = 'cos'))
         #self.nid_list.append(nid)
     def draw(self,degree,data,model,e):
-        torch.save(self.nid_list,'all/{}/{}/memorynid_{}.pt'.format(data,model,e))
-        torch.save(self.memorychange,'all/{}/{}/memoryF_{}.pt'.format(data,model,e))
-        torch.save(self.memory_ssim,'all/{}/{}/memcos_{}.pt'.format(data,model,e))
+        torch.save(self.nid_list,'all_args.seed/{}/{}/memorynid_{}.pt'.format(data,model,e))
+        torch.save(self.memorychange,'all_args.seed/{}/{}/memoryF_{}.pt'.format(data,model,e))
+        torch.save(self.memory_ssim,'all_args.seed/{}/{}/memcos_{}.pt'.format(data,model,e))
         # path = './memory/{}/'.format(data)
 
         # if not os.path.exists(path):

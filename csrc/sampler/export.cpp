@@ -37,6 +37,9 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
         .def("src_index", [](const TemporalGraphBlock &tgb) { return vecToTensor<EdgeIDType>(tgb.src_index); })
         .def("sample_nodes", [](const TemporalGraphBlock &tgb) { return vecToTensor<NodeIDType>(tgb.sample_nodes); })
         .def("sample_nodes_ts", [](const TemporalGraphBlock &tgb) { return vecToTensor<TimeStampType>(tgb.sample_nodes_ts); })
+        .def("sample_weight",[](const TemporalGraphBlock &tgb){
+            return vecToTensor<float>(tgb.sample_weight);
+        })
         .def_readonly("sample_time", &TemporalGraphBlock::sample_time, py::return_value_policy::reference)
         .def_readonly("tot_time", &TemporalGraphBlock::tot_time, py::return_value_policy::reference)
         .def_readonly("sample_edge_num", &TemporalGraphBlock::sample_edge_num, py::return_value_policy::reference);
