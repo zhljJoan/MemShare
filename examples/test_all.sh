@@ -1,13 +1,13 @@
 #!/bin/bash
-
+#跑了4卡的TaoBao
 # 定义数组变量
 addr="192.168.1.105"
 partition_params=("ours" )
 #"metis" "ldg" "random")
 #("ours" "metis" "ldg" "random")
-partitions="4"
+partitions="8"
 node_per="4"
-nnodes="1"
+nnodes="2"
 node_rank="0"
 probability_params=("0.1" "0" "0.05" "0.01")
 sample_type_params=("boundery_recent_decay" "recent")
@@ -17,7 +17,7 @@ memory_type=( "historical" "local" "all_update")
 #memory_type=("local" "all_update" "historical" "all_reduce")
 shared_memory_ssim=("0.3" "0.7")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
-data_param=("TaoBao" "StackOverflow"  "GDELT")
+data_param=("GDELT")
 #data_param=("WIKI" "REDDIT" "LASTFM" "DGraphFin" "WikiTalk" "StackOverflow")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk" "StackOverflow")
 #data_param=("REDDIT" "WikiTalk")
