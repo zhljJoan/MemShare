@@ -6,19 +6,20 @@ addr="192.168.1.107"
 partition_params=("ours" )
 #"metis" "ldg" "random")
 #("ours" "metis" "ldg" "random")
-partitions="4"
+partitions="8"
 node_per="4"
-nnodes="1"
-node_rank="0"
-probability_params=("0.1" "0" "0.05" "0.01")
-sample_type_params=("boundery_recent_decay" "recent")
+nnodes="2"
+node_rank="1"
+probability_params=("0.1" "0.05")
+sample_type_params=("boundery_recent_decay")
 #sample_type_params=("recent" "boundery_recent_decay") #"boundery_recent_uniform")
 #memory_type=("all_update" "p2p" "all_reduce" "historical" "local")
-memory_type=( "all_update")
+
+memory_type=( "all_update" "historical" "local")
 #memory_type=("local" "all_update" "historical" "all_reduce")
 shared_memory_ssim=("0.3" "0.7")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
-data_param=("WIKI" "LASTFM" "WikiTalk" "DGraphFin")
+data_param=("StackOverflow")
 #data_param=("WIKI" "REDDIT" "LASTFM" "DGraphFin" "WikiTalk" "StackOverflow")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk" "StackOverflow")
 #data_param=("REDDIT" "WikiTalk")
@@ -30,9 +31,9 @@ data_param=("WIKI" "LASTFM" "WikiTalk" "DGraphFin")
 #seed=(( RANDOM % 1000000 + 1 ))
 mkdir -p all_"$seed"
 for data in "${data_param[@]}"; do
-    model="TGN_large"
+    model="JODIE"
     if [ "$data" = "WIKI" ] || [ "$data" = "REDDIT" ] || [ "$data" = "LASTFM" ]; then
-        model="TGN"
+        model="JODIE"
     fi
     #model="APAN"
     mkdir all_"$seed"/"$data"
@@ -57,8 +58,8 @@ for data in "${data_param[@]}"; do
                             wait
                         fi
                     else
-                        torchrun --nnodes "$nnodes" --node_rank "$node_rank" --nproc-per-node "$node_per" --master-addr "$addr" --master-port 9445 train_boundery.py --dataname "$data" --mode "$model" --partition "$partition" --topk 0 --sample_type "$sample" --memory_type "$mem" --seed "$seed" > all_"$seed"/"$data"/"$model"/"$partitions"-"$partition"-0-"$mem"-"$sample".out &
-                        wait
+                        # torchrun --nnodes "$nnodes" --node_rank "$node_rank" --nproc-per-node "$node_per" --master-addr "$addr" --master-port 9445 train_boundery.py --dataname "$data" --mode "$model" --partition "$partition" --topk 0 --sample_type "$sample" --memory_type "$mem" --seed "$seed" > all_"$seed"/"$data"/"$model"/"$partitions"-"$partition"-0-"$mem"-"$sample".out &
+                        # wait
                         if [ "$partition" = "ours" ] && [ "$mem" != "all_local" ]; then
                             torchrun --nnodes "$nnodes" --node_rank "$node_rank" --nproc-per-node "$node_per" --master-addr "$addr" --master-port 9445 train_boundery.py --dataname "$data" --mode "$model" --partition "$partition" --topk 0.1 --sample_type "$sample" --memory_type "$mem" --seed "$seed" > all_"$seed"/"$data"/"$model"/"$partitions"-ours_shared-0.01-"$mem"-"$sample".out &
                             wait
@@ -80,13 +81,13 @@ for data in "${data_param[@]}"; do
                                 torchrun --nnodes "$nnodes" --node_rank "$node_rank" --nproc-per-node "$node_per" --master-addr "$addr" --master-port 9445 train_boundery.py --dataname "$data" --mode "$model" --partition "$partition" --topk 0.1 --sample_type "$sample" --probability "$pro" --memory_type "$mem"  --seed "$seed" > all_"$seed"/"$data"/"$model"/"$partitions"-ours_shared-0.01-"$mem"-"$sample"-"$pro".out&
                                 wait
                             fi
-                        else
-                            torchrun --nnodes "$nnodes" --node_rank "$node_rank" --nproc-per-node "$node_per" --master-addr "$addr" --master-port 9445 train_boundery.py --dataname "$data" --mode "$model" --partition "$partition" --topk 0 --sample_type "$sample" --probability "$pro" --memory_type "$mem" --seed "$seed" > all_"$seed"/"$data"/"$model"/"$partitions"-"$partition"-0-"$mem"-"$sample"-"$pro".out &
-                            wait
-                            if [ "$partition" = "ours" ] && [ "$mem" != "all_local" ]; then
-                                torchrun --nnodes "$nnodes" --node_rank "$node_rank" --nproc-per-node "$node_per" --master-addr "$addr" --master-port 9445 train_boundery.py --dataname "$data" --mode "$model" --partition "$partition" --topk 0.1 --sample_type "$sample" --probability "$pro" --memory_type "$mem" --seed "$seed" > all_"$seed"/"$data"/"$model"/"$partitions"-ours_shared-0.01-"$mem"-"$sample"-"$pro".out &
-                                wait
-                            fi
+                        #else
+                            # torchrun --nnodes "$nnodes" --node_rank "$node_rank" --nproc-per-node "$node_per" --master-addr "$addr" --master-port 9445 train_boundery.py --dataname "$data" --mode "$model" --partition "$partition" --topk 0 --sample_type "$sample" --probability "$pro" --memory_type "$mem" --seed "$seed" > all_"$seed"/"$data"/"$model"/"$partitions"-"$partition"-0-"$mem"-"$sample"-"$pro".out &
+                            # wait
+                            # if [ "$partition" = "ours" ] && [ "$mem" != "all_local" ]; then
+                            #     torchrun --nnodes "$nnodes" --node_rank "$node_rank" --nproc-per-node "$node_per" --master-addr "$addr" --master-port 9445 train_boundery.py --dataname "$data" --mode "$model" --partition "$partition" --topk 0.1 --sample_type "$sample" --probability "$pro" --memory_type "$mem" --seed "$seed" > all_"$seed"/"$data"/"$model"/"$partitions"-ours_shared-0.01-"$mem"-"$sample"-"$pro".out &
+                            #     wait
+                            # fi
                         fi
                     done
                 done

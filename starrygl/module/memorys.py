@@ -352,31 +352,60 @@ class TransformerMemoryUpdater(torch.nn.Module):
         rst = self.dropout(rst)
         rst = torch.nn.functional.relu(rst)
         return rst
-
+"""
+(self,index,memory,memory_ts,
+                              mail_index,mail,mail_ts,
+                              reduce_Op=None,
+                              async_op=True,
+                              set_p2p=False,
+                              mode=None,
+                              filter=None,
+                              wait_submit=True,
+                              spread_mail=True,
+                              update_cross_mm = False)
+"""
 class AsyncMemeoryUpdater(torch.nn.Module):
-    def all_update_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func):
-        self.mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,mode='all_reduce',set_remote=True)
+    
+    def all_update_func(self,index,memory,memory_ts,mail_index,mail,mail_ts,nxt_fetch_func,spread_mail=False):
+        self.mailbox.set_memory_all_reduce(
+                                           index,memory,memory_ts,
+                                           mail_index,mail,mail_ts,
+                                           reduce_Op='max',async_op=False,
+                                           mode='all_reduce',
+                                           wait_submit=False,spread_mail=spread_mail,
+                                           update_cross_mm=True,
+                                           )
+        #self.mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,mode='all_reduce',set_remote=True)
         if nxt_fetch_func is not None:
             nxt_fetch_func()
-    def p2p_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func):
+    # def p2p_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func,mail_index = None):
+    #     self.mailbox.handle_last_async()
+    #     submit_to_queue = False
+    #     if nxt_fetch_func is not None:
+    #         nxt_fetch_func()
+    #         submit_to_queue = True
+    #     self.mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = True,filter=None,mode=None,set_remote=True,submit = submit_to_queue)
+    # def all_reduce_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func,mail_index = None):
+    #    self.mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,mode='all_reduce',set_remote=False)
+    #    if nxt_fetch_func is not None:
+    #        nxt_fetch_func()
+    def historical_func(self,index,memory,memory_ts,mail_index,mail,mail_ts,nxt_fetch_func,spread_mail=False):
+        self.mailbox.sychronize_shared()
         self.mailbox.handle_last_async()
         submit_to_queue = False
         if nxt_fetch_func is not None:
             nxt_fetch_func()
             submit_to_queue = True
-        self.mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = True,filter=None,mode=None,set_remote=True,submit = submit_to_queue)
-    def all_reduce_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func):
-        self.mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,mode='all_reduce',set_remote=False)
-        if nxt_fetch_func is not None:
-            nxt_fetch_func()
-    def historical_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func):
-        self.mailbox.sychronize_shared()
-        submit_to_queue = False
-        if nxt_fetch_func is not None:
-            nxt_fetch_func()
-            submit_to_queue = True
-        self.mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,mode='historical',set_remote=False,submit =  submit_to_queue)
-    def local_func(self,index,memory,memory_ts,mail,mail_ts,nxt_fetch_func):
+        self.mailbox.set_memory_all_reduce(
+                                           index,memory,memory_ts,
+                                           mail_index,mail,mail_ts,
+                                           reduce_Op='max',async_op=True,
+                                           mode='historical',
+                                           wait_submit=submit_to_queue,spread_mail=spread_mail,
+                                           update_cross_mm=False,
+                                           )
+
+    def local_func(self,index,memory,memory_ts,mail_index,mail,mail_ts,nxt_fetch_func,spread_mail=False):
         if nxt_fetch_func is not None:
             nxt_fetch_func()
     def transformer_updater(self,b):
@@ -473,7 +502,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                                                                     None)
                     #print(index.shape[0])
                     if param[0]:
-                        index, mail, mail_ts = self.mailbox.get_update_mail(
+                        index0, mail, mail_ts = self.mailbox.get_update_mail(
                                                     b.srcdata['ID'],src,dst,ts,edge_feats,
                                                     self.last_updated_memory, 
                                                     None,False,False,block=b
@@ -483,9 +512,12 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                         self.mailbox.mon.add(index,self.mailbox.node_memory.accessor.data[index],memory)
                     ##print(index.shape,memory.shape,memory_ts.shape,mail.shape,mail_ts.shape)
                     local_mask = (DistIndex(index).part==torch.distributed.get_rank())
-                    self.mailbox.set_mailbox_local(DistIndex(index[local_mask]).loc,mail[local_mask],mail_ts[local_mask],Reduce_Op = 'max')
-                    self.mailbox.set_memory_local(DistIndex(index[local_mask]).loc,memory[local_mask],memory_ts[local_mask], Reduce_Op = 'max')
-                    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+                    local_mask_mail = (DistIndex(index0).part==torch.distributed.get_rank())
+                    
+                    #self.mailbox.set_mailbox_local(DistIndex(index0[local_mask_mail]).loc,mail[local_mask_mail],mail_ts[local_mask_mail],Reduce_Op = 'max')
+                    #self.mailbox.set_memory_local(DistIndex(index[local_mask]).loc,memory[local_mask],memory_ts[local_mask], Reduce_Op = 'max')
+                    is_deliver=(self.mailbox.deliver_to == 'neighbors')
+                    self.update_hunk(index,memory,memory_ts,index0,mail,mail_ts,nxt_fetch_func,spread_mail= is_deliver)
 
             if self.memory_param['combine_node_feature'] and self.dim_node_feat > 0:
                 if self.dim_node_feat == self.dim_hid:

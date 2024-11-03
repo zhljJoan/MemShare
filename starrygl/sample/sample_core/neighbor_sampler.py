@@ -97,6 +97,7 @@ class NeighborSampler(BaseSampler):
         node_part = None,
         edge_part = None,
         probability = 1,
+        no_neg = False,
     ) -> None:
         r"""__init__
         Args:
@@ -122,7 +123,7 @@ class NeighborSampler(BaseSampler):
         self.is_distinct = is_distinct
         assert graph_name is not None
         self.graph_name = graph_name
-
+        self.no_neg = no_neg
         if(tnb is None):
             if(graph_data.edge_ts is not None):
                 timestamp,ind = graph_data.edge_ts.sort()
@@ -314,7 +315,10 @@ class NeighborSampler(BaseSampler):
             else:
                 seed, inverse_seed = seed.unique(return_inverse=True)
         """
-        out,metadata = self.sample_from_nodes(seed, seed_ts, is_unique=False)
+        if self.no_neg:
+            out,metadata = self.sample_from_nodes(seed[:seed.shape[0]//3*2], seed_ts[:seed.shape[0]//3*2], is_unique=False)
+        else:
+            out,metadata = self.sample_from_nodes(seed[:seed.shape[0]], seed_ts[:seed.shape[0]//3*2], is_unique=False)
         src_pos_index = torch.arange(0,num_pos,dtype= torch.long,device=out_device)
         dst_pos_index = torch.arange(num_pos,2*num_pos,dtype= torch.long,device=out_device)
         if neg_sampling.is_triplet() or neg_sampling.is_tgbtriplet():

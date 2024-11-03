@@ -18,7 +18,7 @@ class CachePushRoute():
     def __init__(self,local_num, local_drop_edge, dist_index):
         ctx = DistributedContext.get_default_context()
         dist_drop = dist_index[local_drop_edge]
-        id_mask = ~(DistIndex(dist_drop) == ctx.memory_group_rank)
+        id_mask = not (DistIndex(dist_drop) == ctx.memory_group_rank)
         remote_id = local_drop_edge[id_mask]
         route = torch.zeros(local_num,dtype=torch.long)
         src_mask = DistIndex(dist_drop[0,:]).part == ctx.memory_group_rank

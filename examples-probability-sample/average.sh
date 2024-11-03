@@ -1,5 +1,3 @@
-bash test_all.sh 13357 > 13357.out
-wait
 bash test_all.sh 12347 > 12347.out
 wait
 bash test_all.sh 63377 > 63377.out

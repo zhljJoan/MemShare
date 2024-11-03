@@ -1,6 +1,7 @@
 sampling:
-  - no_sample: True
+  - strategy: 'identity'
     history: 1
+
 memory: 
   - type: 'node'
     dim_time: 100
