@@ -2,7 +2,7 @@
 #跑了4卡的TaoBao
 # 定义数组变量
 seed=$1
-addr="192.168.1.107"
+addr="192.168.1.106"
 partition_params=("ours" )
 #"metis" "ldg" "random")
 #("ours" "metis" "ldg" "random")
@@ -11,13 +11,13 @@ node_per="4"
 nnodes="2"
 <<<<<<< Updated upstream
 node_rank="0"
-probability_params=("0.1" "0.01" "0.05")
+probability_params=("0.1")
 sample_type_params=("boundery_recent_decay")
 #sample_type_params=("recent" "boundery_recent_decay") #"boundery_recent_uniform")
 #memory_type=("all_update" "p2p" "all_reduce" "historical" "local")
-memory_type=( "all_update")
+memory_type=( "historical")
 #memory_type=("local" "all_update" "historical" "all_reduce")
-shared_memory_ssim=("0.3" "0.7")
+shared_memory_ssim=("0.3")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
 <<<<<<< HEAD
 data_param=("GDELT")
@@ -48,9 +48,9 @@ data_param=("WIKI" "LASTFM" "WikiTalk" "StackOverflow" "GDELT" "TaoBao")
 #seed=(( RANDOM % 1000000 + 1 ))
 mkdir -p all_"$seed"
 for data in "${data_param[@]}"; do
-    model="TGN_large"
+    model="APAN"
     if [ "$data" = "WIKI" ] || [ "$data" = "REDDIT" ] || [ "$data" = "LASTFM" ]; then
-        model="TGN"
+        model="APAN"
     fi
     #model="APAN"
     mkdir all_"$seed"/"$data"

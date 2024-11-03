@@ -228,16 +228,19 @@ def main():
     num_layers = sample_param['layer'] if 'layer' in sample_param else 1
     fanout = sample_param['neighbor'] if 'neighbor' in sample_param else [10]
     policy = sample_param['strategy'] if 'strategy' in sample_param else 'recent'
-    policy_train = args.sample_type#'boundery_recent_decay'
-
+    no_neg = sample_param['no_neg'] if 'no_neg' in sample_param else False
+    if policy != 'recent':
+        policy_train = args.sample_type#'boundery_recent_decay'
+    else:
+        policy_train = policy
     if memory_param['type'] != 'none':
         mailbox = SharedMailBox(graph.ids.shape[0], memory_param, dim_edge_feat = graph.efeat.shape[1] if graph.efeat is not None else 0,
-        shared_nodes_index=graph.shared_nids_list[ctx.memory_group_rank],device = torch.device('cuda:{}'.format(local_rank)),cache_route = cache_route,shared_ssim=args.shared_memory_ssim)
+        shared_nodes_index=graph.shared_nids_list[ctx.memory_group_rank],device = torch.device('cuda:{}'.format(local_rank)),shared_ssim=args.shared_memory_ssim)
     else:
         mailbox = None
 
-    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=10,policy = policy_train, graph_name = "train",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability)
-    eval_sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=eval_sample_graph, workers=10,policy = policy_train, graph_name = "eval",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability)
+    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=10,policy = policy_train, graph_name = "train",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability,no_neg=no_neg)
+    eval_sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=eval_sample_graph, workers=10,policy = policy_train, graph_name = "eval",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability,no_neg=no_neg)
 
     train_data = torch.masked_select(graph.edge_index,train_mask.to(graph.edge_index.device)).reshape(2,-1)
     train_ts = torch.masked_select(graph.ts,train_mask.to(graph.edge_index.device))
@@ -272,8 +275,10 @@ def main():
         #train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = full_dst.unique())
         train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = full_dst.unique(),local_mask=(DistIndex(graph.nids_mapper[full_dst.unique()].to('cpu')).part == dist.get_rank()),prob=args.probability)
         remote_ratio = train_neg_sampler.local_dst.shape[0] / train_neg_sampler.dst_node_list.shape[0]
-        train_ratio_pos = (1 - args.probability) + args.probability *  remote_ratio
-        train_ratio_neg = args.probability * (1-remote_ratio)
+        #train_ratio_pos = (1 - args.probability) + args.probability *  remote_ratio
+        #train_ratio_neg = args.probability * (1-remote_ratio)
+        train_ratio_pos = 1.0/(1-args.probability+ args.probability * remote_ratio) if ((args.probability <1) & (args.probability > 0)) else 1
+        train_ratio_neg = 1.0/(args.probability*remote_ratio) if ((args.probability <1) & (args.probability > 0)) else 1
     print(train_neg_sampler.dst_node_list)
     neg_sampler = LocalNegativeSampling('triplet',amount= neg_samples,dst_node_list = full_dst.unique(),seed=args.seed)
 
@@ -402,7 +407,8 @@ def main():
                 aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
                 aucs_mrrs.append(roc_auc_score(y_true, y_pred))
                 mailbox.update_shared()
-                mailbox.update_p2p()
+                mailbox.update_p2p_mem()
+                mailbox.update_p2p_mail()
                 """
                 if mailbox is not None:
                     src = metadata['src_pos_index']
@@ -536,7 +542,7 @@ def main():
             
             optimizer.zero_grad()
             ones = torch.ones(metadata['dst_neg_index'].shape[0],device = model.device,dtype=torch.float)
-            weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones/train_ratio_pos,ones/train_ratio_neg).reshape(-1,1)
+            weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones*train_ratio_pos,ones*train_ratio_neg).reshape(-1,1)
             pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
             loss = creterion(pred_pos, torch.ones_like(pred_pos)) 
             neg_creterion = torch.nn.BCEWithLogitsLoss(weight)
@@ -554,7 +560,8 @@ def main():
             #train_aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
             #torch.cuda.synchronize()
             mailbox.update_shared()
-            mailbox.update_p2p()
+            mailbox.update_p2p_mem()
+            mailbox.update_p2p_mail()
             #torch.cuda.empty_cache()
 
             """

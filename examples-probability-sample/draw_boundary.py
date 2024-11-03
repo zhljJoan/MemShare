@@ -4,15 +4,15 @@ import torch
 # 读取文件内容
 ssim_values = [0, 0.1, 0.2, 0.3, 0.4, 2]  # 假设这是你的 ssim 参数值
 probability_values = [1,0.1,0.05,0.01,0]
-data_values = ['WIKI','LASTFM','WikiTalk','DGraphFin']  # 存储从文件中读取的数据
-seed = ['13357','12347','63377','53473',' 54763']
+data_values = ['WIKI','WikiTalk']  # 存储从文件中读取的数据
+seed = ['13357','12347','63377','53473','54763']
 partition = 'ours_shared'
 
 # 从文件中读取数据，假设数据存储在文件 data.txt 中
 #all/"$data"/"$partitions"-ours_shared-0.01-"$mem"-"$ssim"-"$sample".out
 partitions=4
 topk=0.01
-mem='all_update'#'historical'
+mem='local'#'historical'
 model='TGN'
 for sd in seed :
     for data in data_values:
