@@ -18,11 +18,7 @@ memory_type=( "historical")
 #memory_type=("local" "all_update" "historical" "all_reduce")
 shared_memory_ssim=("0.3")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
-<<<<<<< HEAD
-data_param=("GDELT")
-=======
 data_param=("LASTFM")
->>>>>>> 8233776274204f6cf2f8a2eb37022d426d6197d8
 #data_param=("WIKI" "REDDIT" "LASTFM" "DGraphFin" "WikiTalk" "StackOverflow")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk" "StackOverflow")
 #data_param=("REDDIT" "WikiTalk")
