@@ -336,9 +336,12 @@ class TransformerMemoryUpdater(torch.nn.Module):
     def forward(self, b, param = None):
         Q = self.w_q(b.srcdata['mem']).reshape((b.num_src_nodes(), self.att_h, -1))
         mails = b.srcdata['mem_input'].reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], -1))
+        #print(mails.shape,b.srcdata['mem_input'].shape,b.srcdata['mail_ts'].shape)
         if self.dim_time > 0:
             time_feat = self.time_enc(b.srcdata['ts'][:, None] - b.srcdata['mail_ts']).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], -1))
+            #print(time_feat.shape)
             mails = torch.cat([mails, time_feat], dim=2)
+            #print(mails.shape)
         K = self.w_k(mails).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], self.att_h, -1))
         V = self.w_v(mails).reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], self.att_h, -1))
         att = self.att_act((Q[:,None,:,:]*K).sum(dim=3))
@@ -394,7 +397,6 @@ class AsyncMemeoryUpdater(torch.nn.Module):
         self.mailbox.handle_last_async()
         submit_to_queue = False
         if nxt_fetch_func is not None:
-            nxt_fetch_func()
             submit_to_queue = True
         self.mailbox.set_memory_all_reduce(
                                            index,memory,memory_ts,
@@ -404,6 +406,8 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                                            wait_submit=submit_to_queue,spread_mail=spread_mail,
                                            update_cross_mm=False,
                                            )
+        if nxt_fetch_func is not None:
+            nxt_fetch_func()
 
     def local_func(self,index,memory,memory_ts,mail_index,mail,mail_ts,nxt_fetch_func,spread_mail=False):
         if nxt_fetch_func is not None:
@@ -471,6 +475,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                     shared_ind = self.mailbox.is_shared_mask[DistIndex(b.srcdata['ID'][mask]).loc]
 
                     transition_dense = b.srcdata['his_mem'][mask] + self.filter.get_incretment(shared_ind)
+                    #print(transition_dense.shape)
                     if not (transition_dense.max().item() == 0):      
                         transition_dense -= transition_dense.min()
                         transition_dense /= transition_dense.max() 
@@ -514,8 +519,8 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                     local_mask = (DistIndex(index).part==torch.distributed.get_rank())
                     local_mask_mail = (DistIndex(index0).part==torch.distributed.get_rank())
                     
-                    #self.mailbox.set_mailbox_local(DistIndex(index0[local_mask_mail]).loc,mail[local_mask_mail],mail_ts[local_mask_mail],Reduce_Op = 'max')
-                    #self.mailbox.set_memory_local(DistIndex(index[local_mask]).loc,memory[local_mask],memory_ts[local_mask], Reduce_Op = 'max')
+                    self.mailbox.set_mailbox_local(DistIndex(index0[local_mask_mail]).loc,mail[local_mask_mail],mail_ts[local_mask_mail],Reduce_Op = 'max')
+                    self.mailbox.set_memory_local(DistIndex(index[local_mask]).loc,memory[local_mask],memory_ts[local_mask], Reduce_Op = 'max')
                     is_deliver=(self.mailbox.deliver_to == 'neighbors')
                     self.update_hunk(index,memory,memory_ts,index0,mail,mail_ts,nxt_fetch_func,spread_mail= is_deliver)
 

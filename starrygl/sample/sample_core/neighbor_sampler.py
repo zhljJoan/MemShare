@@ -317,8 +317,9 @@ class NeighborSampler(BaseSampler):
         """
         if self.no_neg:
             out,metadata = self.sample_from_nodes(seed[:seed.shape[0]//3*2], seed_ts[:seed.shape[0]//3*2], is_unique=False)
+
         else:
-            out,metadata = self.sample_from_nodes(seed[:seed.shape[0]], seed_ts[:seed.shape[0]//3*2], is_unique=False)
+            out,metadata = self.sample_from_nodes(seed, seed_ts, is_unique=False)
         src_pos_index = torch.arange(0,num_pos,dtype= torch.long,device=out_device)
         dst_pos_index = torch.arange(num_pos,2*num_pos,dtype= torch.long,device=out_device)
         if neg_sampling.is_triplet() or neg_sampling.is_tgbtriplet():

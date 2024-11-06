@@ -2,41 +2,24 @@
 #跑了4卡的TaoBao
 # 定义数组变量
 seed=$1
-addr="192.168.1.106"
+addr="192.168.1.105"
 partition_params=("ours" )
 #"metis" "ldg" "random")
 #("ours" "metis" "ldg" "random")
-partitions="8"
+partitions="4"
 node_per="4"
-nnodes="2"
-<<<<<<< Updated upstream
+nnodes="1"
 node_rank="0"
 probability_params=("0.1")
 sample_type_params=("boundery_recent_decay")
 #sample_type_params=("recent" "boundery_recent_decay") #"boundery_recent_uniform")
 #memory_type=("all_update" "p2p" "all_reduce" "historical" "local")
-memory_type=( "historical")
+memory_type=("historical")
+#"historical")
 #memory_type=("local" "all_update" "historical" "all_reduce")
 shared_memory_ssim=("0.3")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
-<<<<<<< HEAD
-data_param=("GDELT")
-=======
-data_param=("LASTFM")
->>>>>>> 8233776274204f6cf2f8a2eb37022d426d6197d8
-=======
-node_rank="1"
-probability_params=("0.1" "0.05" "0.01" "0")
-sample_type_params=("recent" "boundery_recent_decay")
-#sample_type_params=("recent" "boundery_recent_decay") #"boundery_recent_uniform")
-#memory_type=("all_update" "p2p" "all_reduce" "historical" "local")
-#memory_type=("all_update" "historical" "local")
-memory_type=("historical" "all_update" "local")
-#memory_type=("local" "all_update" "historical" "all_reduce")
-shared_memory_ssim=("0.3" "0.7")
-#data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
-data_param=("WIKI" "LASTFM" "WikiTalk" "StackOverflow" "GDELT" "TaoBao")
->>>>>>> Stashed changes
+data_param=("WIKI" "LASTFM" "WikiTalk" "StackOverflow" "GDELT")
 #data_param=("WIKI" "REDDIT" "LASTFM" "DGraphFin" "WikiTalk" "StackOverflow")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk" "StackOverflow")
 #data_param=("REDDIT" "WikiTalk")
@@ -48,9 +31,9 @@ data_param=("WIKI" "LASTFM" "WikiTalk" "StackOverflow" "GDELT" "TaoBao")
 #seed=(( RANDOM % 1000000 + 1 ))
 mkdir -p all_"$seed"
 for data in "${data_param[@]}"; do
-    model="APAN"
+    model="JODIE"
     if [ "$data" = "WIKI" ] || [ "$data" = "REDDIT" ] || [ "$data" = "LASTFM" ]; then
-        model="APAN"
+        model="JODIE"
     fi
     #model="APAN"
     mkdir all_"$seed"/"$data"
@@ -89,11 +72,7 @@ for data in "${data_param[@]}"; do
                         if [ "$mem" = "historical" ]; then
                             for ssim in "${shared_memory_ssim[@]}"; do
                                  if [ "$partition" = "ours" ]; then
-<<<<<<< Updated upstream
                                      torchrun --nnodes "$nnodes" --node_rank "$node_rank" --nproc-per-node "$node_per" --master-addr "$addr" --master-port 9445 train_boundery.py --dataname "$data" --mode "$model" --partition "$partition" --topk 0.1 --sample_type "$sample" --probability "$pro" --memory_type "$mem" --shared_memory_ssim "$ssim" --seed "$seed" > all_"$seed"/"$data"/"$model"/"$partitions"-ours_shared-0.01-"$mem"-"$ssim"-"$sample"-"$pro".out &
-=======
-                                     torchrun --nnodes "$nnodes" --node_rank "$node_rank" --nproc-per-node "$node_per" --master-addr "$addr" --master-port 9445 train_boundery.py --dataname "$data" --mode "$model" --partition "$partition" --topk 0.1 --sample_type "$sample" --probability "$pro" --memory_type "$mem" --shared_memory_ssim "$ssim" > all/"$data"/"$model"/"$partitions"-ours_shared-0.01-"$mem"-"$ssim"-"$sample"-"$pro".out &
->>>>>>> Stashed changes
                                      wait
                                  fi
                              done

@@ -344,6 +344,7 @@ def to_reversed_block(graph,data, sample_out,device = torch.device('cuda'),uniqu
     else:
         metadata = None
     nid_mapper: torch.Tensor = graph.nids_mapper
+    #print('reverse block {}\n'.format(identity))
     if identity is False:
         assert len(sample_out) == 1
         ret = sample_out[0]
@@ -354,6 +355,8 @@ def to_reversed_block(graph,data, sample_out,device = torch.device('cuda'),uniqu
         dist_eid = torch.tensor([],dtype=torch.long,device=device)
         src_index = ret.src_index().to(device)
     else:
+        #print('is jodie')
+        #print(sample_out)
         src_index = torch.tensor([],dtype=torch.long,device=device)
         dst = torch.tensor([],dtype=torch.long,device=device)
         dist_eid = torch.tensor([],dtype=torch.long,device=device)
@@ -401,6 +404,7 @@ def to_reversed_block(graph,data, sample_out,device = torch.device('cuda'),uniqu
         row_len = root_len
         col = first_block_id[:row_len]
         max_row = col.max().item()+1
+        #print(src_index,dst)
         b = dgl.create_block((col[src_index].to(device),
                                 torch.arange(dst.shape[0],device=device,dtype=torch.long)),num_src_nodes=first_block_id.max().item()+1,
                                 num_dst_nodes=dst.shape[0])
@@ -424,6 +428,7 @@ def graph_sample(graph,sampler,sample_fn,data,neg_sampling = None,out_device = t
     t_s  = time.time()
     param = {'is_unique':False,'nid_mapper':nid_mapper,'eid_mapper':eid_mapper,'out_device':out_device}
     out = sample_fn(sampler,data,neg_sampling,**param)
+    #print(sampler.policy)
     if reversed is False:
         out,dist_nid,dist_eid = to_block(graph,data,out,out_device)
     else:

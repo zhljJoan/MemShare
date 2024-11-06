@@ -146,7 +146,7 @@ class SharedMailBox():
             source_ts = max_ts
             source = source[id]
             index = unq_id
-
+        #print(self.next_mail_pos[index])
         self.mailbox_ts.accessor.data[index, self.next_mail_pos[index]] = source_ts
         self.mailbox.accessor.data[index, self.next_mail_pos[index]] = source
         if self.memory_param['mailbox_size'] > 1:
@@ -180,9 +180,23 @@ class SharedMailBox():
         if self.deliver_to == 'neighbors':
             
             assert block is not None and Reduce_score is None
-            mail = torch.cat([mail, mail[block.edges()[0].long()]], dim=0)
-            mail_ts = torch.cat([mail_ts, mail_ts[block.edges()[0].long()]], dim=0)
+#            print(block.edges().shape)
+            root = torch.cat([src,dst]).reshape(-1)
+            #pos = torch.empty(root.max()+1,dtype=torch.long,device=block.device)
+            #print('edge {} {}\n'.format(block.num_src_nodes(),block.edges()[0].max()))
+            #print('root is {} {} {} {}\n'.format(root,root.shape,root.max(),block.edges()[0].shape))
+            #pos_index = torch.arange(root.shape[0],device=root.device,dtype=root.dtype)
+            pos,idx = torch_scatter.scatter_max(mail_ts,root,0)
+            mail = torch.cat([mail, mail[idx]],dim=0)
+            mail_ts = torch.cat([mail_ts, mail_ts[idx]], dim=0)
+            #print('pos is {} {}\n'.format(pos,block.edges()[0].long()))
+            #mail = torch.cat([mail, mail[pos[block.edges()[0].long()]]],dim=0)
+            #mail_ts = torch.cat([mail_ts, mail_ts[pos[block.edges()[0].long()]]], dim=0)
+            #print(root,block.edges()[1].long())
             index = torch.cat([index,block.dstdata['ID'][block.edges()[1].long()]],dim=0)
+            #mail = torch.cat([mail, mail[block.edges()[0].long()]], dim=0)
+            #mail_ts = torch.cat([mail_ts, mail_ts[block.edges()[0].long()]], dim=0)
+            #index = torch.cat([index,block.dstdata['ID'][block.edges()[1].long()]],dim=0)
         if Reduce_score is not None:
             Reduce_score = torch.cat((Reduce_score,Reduce_score),-1).to(self.device)
         if Reduce_score is None:
@@ -192,12 +206,19 @@ class SharedMailBox():
             mail = mail[idx]
             index = unq_index
         else:
-            unq_index,inv = torch.unique(index,return_inverse = True)
+            uni, inv = torch.unique(index, return_inverse=True)
+            perm = torch.arange(inv.size(0), dtype=inv.dtype, device=inv.device)
+            perm = inv.new_empty(uni.size(0)).scatter_(0, inv, perm)
+            index = index[perm]
+            mail = mail[perm]
+            mail_ts = mail_ts[perm]
+            #unq_index,inv = torch.unique(index,return_inverse = True)
             #print(inv.shape,Reduce_score.shape)
-            max_score,idx = torch_scatter.scatter_max(Reduce_score,inv,0)
-            mail_ts = mail_ts[idx]
-            mail = mail[idx]
-            index = unq_index
+            #max_score,idx = torch_scatter.scatter_max(Reduce_score,inv,0)
+            #mail_ts = mail_ts[idx]
+            #mail = mail[idx]
+            #index = unq_index
+        #print('mail {} {}\n'.format(index.shape,mail.shape,mail_ts.shape))
         return index,mail,mail_ts
     
     def get_update_memory(self,index,memory,memory_ts,embedding):
@@ -205,7 +226,8 @@ class SharedMailBox():
         max_ts,idx = torch_scatter.scatter_max(memory_ts,inv,0)
         ts = max_ts
         index = unq_index
-        memory = memory[idx] 
+        memory = memory[idx]
+        #print('memory {} {}\n'.format(index.shape,memory.shape,ts.shape)) 
         return index,memory,ts
     
     def pack(self,memory=None,memory_ts=None,mail=None,mail_ts=None,index = None,mode=None):
@@ -250,6 +272,7 @@ class SharedMailBox():
                 self.set_mailbox_local(DistIndex(gather_id_list).loc,gather_mail,gather_mail_ts,Reduce_Op = reduce_Op)
             else:
                 gather_memory,gather_memory_ts = self.unpack(gather_memory)
+            #print(gather_id_list.shape,gather_memory.shape,gather_memory_ts.shape)
             self.set_memory_local(DistIndex(gather_id_list).loc,gather_memory,gather_memory_ts, Reduce_Op = reduce_Op)
     def handle_last_mail(self,reduce_Op=None,):
         if self.last_mail_sync is not None:
@@ -260,6 +283,7 @@ class SharedMailBox():
             if isinstance(gather_memory,list):
                 gather_memory = torch.cat(gather_memory,dim = 0)
             gather_memory,gather_memory_ts = self.unpack(gather_memory)
+            #print(gather_id_list.shape,gather_memory.shape,gather_memory_ts.shape)
             self.set_mailbox_local(DistIndex(gather_id_list).loc,gather_memory,gather_memory_ts, Reduce_Op = reduce_Op)
     def handle_last_async(self,reduce_Op = None):
        self.handle_last_memory(reduce_Op)
@@ -303,6 +327,7 @@ class SharedMailBox():
             return
         index,gather_id_list,mem,gather_memory,input_split,output_split,group,async_op = self.next_wait_mail_job
         self.next_wait_mail_job = None
+        #print(index,gather_id_list)
         handle0 = torch.distributed.all_to_all_single(
             gather_id_list,index,output_split_sizes=output_split, 
             input_split_sizes=input_split,group = group,async_op=async_op)
@@ -409,6 +434,7 @@ class SharedMailBox():
                 self.update_p2p_mail()
                 self.update_p2p_mem()
                 self.handle_last_async()
+
         ctx = DistributedContext.get_default_context()
         
 
@@ -483,7 +509,7 @@ class SharedMailBox():
                     unq_index,inv = torch.unique(shared_index,return_inverse = True)
                     max_ts,idx = torch_scatter.scatter_max(shared_memory_ts,inv,0)
                     shared_memory = shared_memory[idx]
-                    shared_memory = shared_memory[idx]
+                    #shared_memory = shared_memory[idx]
                     shared_memory_ts = shared_memory_ts[idx]
                     shared_mail_ts = shared_mail_ts[idx]
                     shared_mail = shared_mail[idx]
@@ -495,11 +521,13 @@ class SharedMailBox():
                 self.set_mailbox_local(self.shared_nodes_index[shared_mail_indx],shared_mail,shared_mail_ts)
             else:
                 self.next_wait_gather_memory_job = (shared_list,mem,shared_id_list,shared_memory_ind)
+
             if not wait_submit:
                 self.update_shared()
                 self.update_p2p_mail()
                 self.update_p2p_mem()
-            
+                self.handle_last_async()
+                self.sychronize_shared()
                 #self.historical_cache.add_shared_to_queue(handle0,handle1,shared_id_list,shared_list)
             """
             shared_memory = self.node_memory.accessor.data[self.shared_nodes_index]

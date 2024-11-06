@@ -229,7 +229,8 @@ def main():
     fanout = sample_param['neighbor'] if 'neighbor' in sample_param else [10]
     policy = sample_param['strategy'] if 'strategy' in sample_param else 'recent'
     no_neg = sample_param['no_neg'] if 'no_neg' in sample_param else False
-    if policy != 'recent':
+    print(policy)
+    if policy == 'recent':
         policy_train = args.sample_type#'boundery_recent_decay'
     else:
         policy_train = policy
@@ -480,7 +481,7 @@ def main():
     val_list = []
     loss_list = []
     for e in range(train_param['epoch']):
-        model.module.memory_updater.empty_cache()
+#        model.module.memory_updater.empty_cache()
         tt._zero()
         torch.cuda.synchronize()
         epoch_start_time = time.time()
