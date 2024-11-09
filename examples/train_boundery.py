@@ -472,7 +472,7 @@ def main():
         cos = torch.nn.CosineSimilarity(dim=0)
         return cos(normalize(x1),normalize(x2)).sum()/x1.size(dim=0)
     creterion = torch.nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'],weight_decay=1e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'])#,weight_decay=1e-4)
     early_stopper = EarlyStopMonitor(max_round=args.patience)
     MODEL_SAVE_PATH = f'../saved_models/{args.model}-{args.dataname}-{dist.get_world_size()}.pth'
     total_test_time = 0
@@ -481,7 +481,7 @@ def main():
     val_list = []
     loss_list = []
     for e in range(train_param['epoch']):
-#        model.module.memory_updater.empty_cache()
+        model.module.memory_updater.empty_cache()
         tt._zero()
         torch.cuda.synchronize()
         epoch_start_time = time.time()
@@ -509,7 +509,10 @@ def main():
         local_edge_comm = []
         remote_edge_comm = []
         b_cnt = 0
+        start = time_count.start_gpu()
         for roots,mfgs,metadata in trainloader:
+            end = time_count.elapsed_event(start)
+            #print('time {}'.format(end))
             #print('rank is {} batch max ts is {} batch min ts is {}'.format(dist.get_rank(),roots.ts.min(),roots.ts.max()))
             b_cnt = b_cnt + 1
             #local_access.append(trainloader.local_node)
@@ -525,7 +528,7 @@ def main():
             #    sum_remote_edge_comm +=remote_edge_comm[b_cnt-1]
             #sum_local_comm +=local_comm[b_cnt-1]
             #sum_remote_comm +=remote_comm[b_cnt-1]
-            
+            t1 = time_count.start_gpu()
             if mailbox is not None:
                 if(graph.efeat.device.type != 'cpu'):
                     edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')]).to('cuda')
@@ -539,12 +542,14 @@ def main():
                 param = (update_mail,src,dst,ts,edge_feats,trainloader.async_feature)
             else:
                 param = None
+            #print(time_count.elapsed_event(t1))
             model.train()
-            
+            t2 = time_count.start_gpu()
             optimizer.zero_grad()
             ones = torch.ones(metadata['dst_neg_index'].shape[0],device = model.device,dtype=torch.float)
             weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones*train_ratio_pos,ones*train_ratio_neg).reshape(-1,1)
             pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+            #print(time_count.elapsed_event(t2))
             loss = creterion(pred_pos, torch.ones_like(pred_pos)) 
             neg_creterion = torch.nn.BCEWithLogitsLoss(weight)
             loss += neg_creterion(pred_neg, torch.zeros_like(pred_neg))
@@ -563,6 +568,7 @@ def main():
             mailbox.update_shared()
             mailbox.update_p2p_mem()
             mailbox.update_p2p_mail()
+            start = time_count.start_gpu()
             #torch.cuda.empty_cache()
 
             """

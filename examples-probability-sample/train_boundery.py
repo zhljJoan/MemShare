@@ -504,7 +504,9 @@ def main():
         local_edge_comm = []
         remote_edge_comm = []
         b_cnt = 0
+        start = time_count.start_gpu()
         for roots,mfgs,metadata in trainloader:
+            t1 = time_count.elapsed_event(start)
             #print('rank is {} batch max ts is {} batch min ts is {}'.format(dist.get_rank(),roots.ts.min(),roots.ts.max()))
             b_cnt = b_cnt + 1
             #local_access.append(trainloader.local_node)
@@ -557,6 +559,7 @@ def main():
             #torch.cuda.synchronize()
             mailbox.update_shared()
             mailbox.update_p2p()
+            start = time_count.start_gpu()
             #torch.cuda.empty_cache()
 
             """
