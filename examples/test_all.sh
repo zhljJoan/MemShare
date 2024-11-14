@@ -2,14 +2,14 @@
 #跑了4卡的TaoBao
 # 定义数组变量
 seed=$1
-addr="192.168.1.106"
+addr="192.168.1.107"
 partition_params=("ours" )
 #"metis" "ldg" "random")
 #("ours" "metis" "ldg" "random")
-partitions="4"
+partitions="12"
 node_per="4"
-nnodes="1"
-node_rank="0"
+nnodes="3"
+node_rank="1"
 probability_params=("0.1")
 sample_type_params=("boundery_recent_decay")
 #sample_type_params=("recent" "boundery_recent_decay") #"boundery_recent_uniform")
@@ -163,11 +163,11 @@ for data in "${data_param[@]}"; do
         done
     done
 done
-data_param=("StackOverflow" "GDELT")
+
 for data in "${data_param[@]}"; do
-    model="TGN"
+    model="TGN_large"
     if [ "$data" = "WIKI" ] || [ "$data" = "REDDIT" ] || [ "$data" = "LASTFM" ]; then
-        model="TGN_large"
+        model="TGN"
         #continue
     fi
     #model="APAN"

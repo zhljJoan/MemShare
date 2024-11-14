@@ -110,7 +110,7 @@ if not 'WORLD_SIZE'  in os.environ:
     os.environ["WORLD_SIZE"] = str(args.world_size)
     os.environ["LOCAL_RANK"] = str(args.local_rank)
 if not 'MASTER_ADDR' in os.environ:
-    os.environ["MASTER_ADDR"] = '192.168.2.107'
+    os.environ["MASTER_ADDR"] = '192.168.1.107'
 if not 'MASTER_PORT' in os.environ:
     os.environ["MASTER_PORT"] = '9337'
     
@@ -379,7 +379,10 @@ def main():
         with torch.no_grad():
             total_loss = 0
             signal = torch.tensor([0],dtype = int,device = device)
+            batch_cnt = 0
             for roots,mfgs,metadata in loader:
+                print(batch_cnt)
+                batch_cnt = batch_cnt+1
                 """
                 if ctx.memory_group == 0:
                     pred_pos, pred_neg = model(mfgs,metadata,neg_samples=neg_samples)
@@ -450,15 +453,15 @@ def main():
                     """
         ap = torch.empty([1])
         auc_mrr = torch.empty([1])
-        if(ctx.memory_group==0):
-            world_size = dist.get_world_size()
-            ap[0] = torch.tensor(aps).mean()
-            auc_mrr[0] = torch.tensor(aucs_mrrs).mean()#float(aucs_mrrs.clone().mean())
-            print('mode: {} {} {}'.format(mode,ap,auc_mrr))
-            dist.all_reduce(ap,group = ctx.gloo_group)
-            ap/=ctx.memory_group_size
-            dist.all_reduce(auc_mrr,group=ctx.gloo_group)
-            auc_mrr/=ctx.memory_group_size
+        #if(ctx.memory_group==0):
+        world_size = dist.get_world_size()
+        ap[0] = torch.tensor(aps).mean()
+        auc_mrr[0] = torch.tensor(aucs_mrrs).mean()#float(aucs_mrrs.clone().mean())
+        print('mode: {} {} {}\n'.format(mode,ap,auc_mrr))
+        dist.all_reduce(ap,group = ctx.gloo_group)
+        ap/=ctx.memory_group_size
+        dist.all_reduce(auc_mrr,group=ctx.gloo_group)
+        auc_mrr/=ctx.memory_group_size
         dist.broadcast(ap,0,group=ctx.gloo_group)
         dist.broadcast(auc_mrr,0,group=ctx.gloo_group)
         return ap.item(), auc_mrr.item()    
@@ -641,10 +644,13 @@ def main():
         tt.weight_count_remote=0
         tt.ssim_cnt=0
         ap, auc = eval('val')
-        torch.cuda.synchronize()
+        print('finish val')
+        #torch.cuda.synchronize()
+        print('start')
         t_test = time.time()
-        test_ap,test_auc = eval('test')
-        torch.cuda.synchronize()
+        print('test')
+        test_ap,test_auc = 0,0#eval('test')
+        #torch.cuda.synchronize()
         t_test = time.time() - t_test
         total_test_time += t_test
         test_ap_list.append((test_ap,test_auc))
