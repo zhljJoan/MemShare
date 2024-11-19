@@ -295,7 +295,7 @@ def main():
                                         mode='train',
                                         queue_size = 200,
                                         mailbox = mailbox,
-                                        is_pipeline=True,
+                                        is_pipeline=False,
                                         use_local_feature = False,
                                         device = torch.device('cuda:{}'.format(local_rank)),
                                         probability=args.probability,
