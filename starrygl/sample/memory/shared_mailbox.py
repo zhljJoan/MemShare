@@ -107,6 +107,8 @@ class SharedMailBox():
         
         if start_historical:
             self.historical_cache = historical_cache.HistoricalCache(self.shared_nodes_index,0,self.node_memory.shape[1],self.node_memory.dtype,self.node_memory.device,threshold=shared_ssim)
+        else:
+            self.historical_cache = None
         self._mem_pin = {}
         self._mail_pin = {}
         self.use_pin = use_pin
@@ -124,7 +126,8 @@ class SharedMailBox():
         self.mailbox.accessor.data.zero_()
         self.mailbox_ts.accessor.data.zero_()
         self.next_mail_pos.zero_()
-        self.historical_cache.empty()
+        if self.historical_cache is not None:
+            self.historical_cache.empty()
         self.last_memory_sync = None
         self.last_mail_sync = None
     
@@ -276,6 +279,8 @@ class SharedMailBox():
         sychronization last async all-gather memory communication task
     """
     def sychronize_shared(self):
+        if self.historical_cache is None:
+            return
         out=self.historical_cache.synchronize_shared_update()
         if out is not None:
             shared_index,shared_data,shared_ts = out
@@ -466,8 +471,8 @@ class SharedMailBox():
                     shared_memory_ts = shared_memory_ts[idx]
                     shared_index = unq_index
                     
-                    self.historical_cache.local_historical_data[shared_index] = shared_memory
-                    self.historical_cache.local_ts[shared_index] = shared_memory_ts
+                    #self.historical_cache.local_historical_data[shared_index] = shared_memory
+                    #self.historical_cache.local_ts[shared_index] = shared_memory_ts
                     broadcast_len = torch.empty([1],device = mem.device,dtype = torch.int)
                     broadcast_len[0] = shared_mail_indx.shape[0]
                     shared_len = [torch.empty([1],device = mail.device,dtype = torch.int) for _ in range(ctx.memory_group_size)] 
@@ -499,8 +504,8 @@ class SharedMailBox():
                     shared_index = unq_index
                     shared_mail_indx = unq_index
                 self.set_memory_local(self.shared_nodes_index[shared_index],shared_memory,shared_memory_ts)
-                self.historical_cache.local_historical_data[shared_index] = shared_memory
-                self.historical_cache.local_ts[shared_index] = shared_memory_ts
+                #self.historical_cache.local_historical_data[shared_index] = shared_memory
+                #self.historical_cache.local_ts[shared_index] = shared_memory_ts
                 self.set_mailbox_local(self.shared_nodes_index[shared_mail_indx],shared_mail,shared_mail_ts)
             else:
                 self.next_wait_gather_memory_job = (shared_list,mem,shared_id_list,shared_memory_ind)
@@ -509,8 +514,8 @@ class SharedMailBox():
                 self.update_shared()
                 self.update_p2p_mail()
                 self.update_p2p_mem()
-                self.handle_last_async()
-                self.sychronize_shared()
+                #self.handle_last_async()
+                #self.sychronize_shared()
                 #self.historical_cache.add_shared_to_queue(handle0,handle1,shared_id_list,shared_list)
             """
             shared_memory = self.node_memory.accessor.data[self.shared_nodes_index]
