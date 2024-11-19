@@ -484,7 +484,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                     #print(self.gamma)
                     #print('tran {} {} {}\n'.format(transition_dense.max().item(),upd0[mask].max().item(),b.srcdata['his_mem'][mask].max().item()))
                 else:
-                    upd0[mask] = b.srcdata['his_mem'][mask]
+                    upd0[mask] = updated_memory0[mask]
             #upd0[mask] = self.ceil_updater(his_mem, b.srcdata['his_mem'][mask])
             #updated_memory = torch.where(mask.unsqueeze(1),self.gamma*updated_memory0 + (1-self.gamma)*(b.srcdata['his_mem'])
             # ,updated_memory0)

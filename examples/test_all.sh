@@ -6,7 +6,7 @@ addr="192.168.1.107"
 partition_params=("ours" )
 #"metis" "ldg" "random")
 #("ours" "metis" "ldg" "random")
-partitions="12"
+partitions="8"
 node_per="4"
 nnodes="2"
 node_rank="0"
