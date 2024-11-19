@@ -237,7 +237,7 @@ def main():
     if memory_param['type'] != 'none':
         mailbox = SharedMailBox(graph.ids.shape[0], memory_param, dim_edge_feat = graph.efeat.shape[1] if graph.efeat is not None else 0,
         shared_nodes_index=graph.shared_nids_list[ctx.memory_group_rank],device = torch.device('cuda:{}'.format(local_rank)),
-        start_historical=(args.memory_type=='historical')
+        start_historical=(args.memory_type=='historical'),
         shared_ssim=args.shared_memory_ssim)
     else:
         mailbox = None

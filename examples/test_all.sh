@@ -8,9 +8,8 @@ partition_params=("ours" )
 #("ours" "metis" "ldg" "random")
 partitions="12"
 node_per="4"
-nnodes="3"
-node_rank="1"
-probability_params=("0.1")
+nnodes="2"
+node_rank="0"
 probability_params=("0.1")
 sample_type_params=("boundery_recent_decay")
 #sample_type_params=("recent" "boundery_recent_decay") #"boundery_recent_uniform")
