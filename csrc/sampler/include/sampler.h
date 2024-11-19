@@ -308,14 +308,14 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
                         double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);
                         double ep = boundery_probility*pr[cal_cnt-1]/sum_p*sum_1;
                         if(p0 > ep)continue;
-                        tgb_i[tid].sample_weight.emplace_back((float)ep);
+                        //tgb_i[tid].sample_weight.emplace_back((float)ep);
                     }
                     else continue;
                     //cout<<"in"<<endl;
                     
                 }
                 else{
-                    tgb_i[tid].sample_weight.emplace_back((float)1.0);
+                    //tgb_i[tid].sample_weight.emplace_back((float)1.0);
                 }
                 tgb_i[tid].src_index.emplace_back(i);
                 tgb_i[tid].sample_nodes.emplace_back(tnb.neighbors[node][cid]);
@@ -373,8 +373,8 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
 
 #pragma omp parallel for schedule(static, 1)
     for(int i = 0; i<threads; i++){
-        if(policy == "boundery_recent_decay")
-            copy(tgb_i[i].sample_weight.begin(), tgb_i[i].sample_weight.end(), ret[cur_layer].sample_weight.begin()+each_begin[i]);
+        //if(policy == "boundery_recent_decay")
+        //    copy(tgb_i[i].sample_weight.begin(), tgb_i[i].sample_weight.end(), ret[cur_layer].sample_weight.begin()+each_begin[i]);
         copy(tgb_i[i].eid.begin(), tgb_i[i].eid.end(), ret[cur_layer].eid.begin()+each_begin[i]);
         copy(tgb_i[i].src_index.begin(), tgb_i[i].src_index.end(), ret[cur_layer].src_index.begin()+each_begin[i]);
         copy(tgb_i[i].delta_ts.begin(), tgb_i[i].delta_ts.end(), ret[cur_layer].delta_ts.begin()+each_begin[i]);

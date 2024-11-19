@@ -496,7 +496,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             self.last_updated_ts = b.srcdata['ts'].detach().clone()
             self.last_updated_memory = updated_memory.detach().clone()
             self.last_updated_nid = b.srcdata['ID'].detach().clone()
-
+            """
             with torch.no_grad():
                 if param is not None:
                     _,src,dst,ts,edge_feats,nxt_fetch_func = param
@@ -523,7 +523,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                     self.mailbox.set_memory_local(DistIndex(index[local_mask]).loc,memory[local_mask],memory_ts[local_mask], Reduce_Op = 'max')
                     is_deliver=(self.mailbox.deliver_to == 'neighbors')
                     self.update_hunk(index,memory,memory_ts,index0,mail,mail_ts,nxt_fetch_func,spread_mail= is_deliver)
-
+            """
             if self.memory_param['combine_node_feature'] and self.dim_node_feat > 0:
                 if self.dim_node_feat == self.dim_hid:
                     b.srcdata['h'] += updated_memory
