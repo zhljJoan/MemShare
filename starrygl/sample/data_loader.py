@@ -317,20 +317,14 @@ class DistributedDataLoader:
                 edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid, is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
-                batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
-                batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
-                mask = DistIndex(batch_data[1][0][0].srcdata['ID']).is_shared
-                indx =  self.mailbox.is_shared_mask[DistIndex(batch_data[1][0][0].srcdata['ID']).loc[mask]]
-                batch_data[1][0][0].srcdata['his_mem'][mask] = self.mailbox.historical_cache.local_historical_data[indx]
-                batch_data[1][0][0].srcdata['his_ts'][mask] = self.mailbox.historical_cache.local_ts[indx].reshape(-1,1)
-                t_fetch = tt.elapsed_event(t1)
-                tt.time_memory_fetch += t_fetch
-                #if(self.mailbox is not None and self.mailbox.historical_cache is not None):
-                #    id = batch_data[1][0][0].srcdata['ID']
-                #    mask = DistIndex(id).is_shared
-                   # a = DistIndex(id[mask]).loc
-                   # b = self.mailbox.historical_cache.local_historical_data[a]
-                    #batch_data[1][0][0].srcdata['mem'][mask] = self.mailbox.historical_cache.local_historical_data[DistIndex(id[mask]).loc]
+                if(self.mailbox is not None and self.mailbox.historical_cache is not None):
+                        id = batch_data[1][0][0].srcdata['ID']
+                        mask = DistIndex(id).is_shared
+                        batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
+                        batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
+                        indx =  self.mailbox.is_shared_mask[DistIndex(batch_data[1][0][0].srcdata['ID']).loc[mask]]
+                        batch_data[1][0][0].srcdata['his_mem'][mask] = self.mailbox.historical_cache.local_historical_data[indx]
+                        batch_data[1][0][0].srcdata['his_ts'][mask] = self.mailbox.historical_cache.local_ts[indx].reshape(-1,1)
                 self.recv_idxs += 1
                 assert batch_data is not None
                 return root,mfgs,metadata
@@ -352,8 +346,9 @@ class DistributedDataLoader:
                 edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid,  is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,batch_data[1],dist_nid,dist_eid)
-                batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
-                batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
+                if(self.mailbox is not None and self.mailbox.historical_cache is not None):
+                    batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
+                    batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
                 
                 #if(self.mailbox is not None and self.mailbox.historical_cache is not None):
                 #    id = batch_data[1][0][0].srcdata['ID']
@@ -414,16 +409,7 @@ class DistributedDataLoader:
                         batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
                         indx =  self.mailbox.is_shared_mask[DistIndex(batch_data[1][0][0].srcdata['ID']).loc[mask]]
                         batch_data[1][0][0].srcdata['his_mem'][mask] = self.mailbox.historical_cache.local_historical_data[indx]
-                        batch_data[1][0][0].srcdata['his_ts'][mask] = self.mailbox.historical_cache.local_ts[indx].reshape(-1,1)#self.mailbox.node_memory.accessor.data[DistIndex(id).loc[mask]]
-                        #his_mem = torch.clone(batch_data[1][0][0].srcdata['mem'])
-                        #his_ts = self.mailbox.historical_cache.local_ts[DistIndex(id[mask]).loc]
-                        #maxer = his_ts>batch_data[1][0][0].srcdata['mem_ts'][mask]
-                        #his_mem[mask&maxer] = self.mailbox.historical_cache.local_historical_data[DistIndex(id[mask]).loc]
-                        #print((mask&maxer).sum(),mask.sum())
-                        #batch_data[1][0][0].srcdata['mem'] = his_mem
-                        #batch_data[1][0][0].srcdata['mem_ts'][mask & maxer] = his_ts
-                        #batch_data[1][0][0].srcdata['his_mem'] = his_mem
-                        #batch_data[1][0][0].srcdata['his_mem'][mask] = self.mailbox.historical_cache.local_historical_data[DistIndex(id).loc[mask]]#batch_data[1][0][0].srcdata['his_mem'] = self.mailbox.historical_cache.local_historical_data[DistIndex(id).loc]
+                        batch_data[1][0][0].srcdata['his_ts'][mask] = self.mailbox.historical_cache.local_ts[indx].reshape(-1,1)
                     self.recv_idxs += 1
                 else:
                     raise StopIteration
