@@ -67,7 +67,7 @@ parser.add_argument('--probability', default=1, type=float, metavar='W',
                     help='name of model')
 parser.add_argument('--sample_type', default='recent', type=str, metavar='W',
                     help='name of model')
-parser.add_argument('--local_neg_sample', default=True, type=bool, metavar='W',
+parser.add_argument('--local_neg_sample', default=False, type=bool, metavar='W',
                     help='name of model')
 parser.add_argument('--shared_memory_ssim', default=2, type=float, metavar='W',
                     help='name of model')
@@ -295,7 +295,7 @@ def main():
                                         mode='train',
                                         queue_size = 200,
                                         mailbox = mailbox,
-                                        is_pipeline=False,
+                                        is_pipeline=True,
                                         use_local_feature = False,
                                         device = torch.device('cuda:{}'.format(local_rank)),
                                         probability=args.probability,
@@ -619,6 +619,7 @@ def main():
             """
             
         torch.cuda.synchronize()
+        dist.barrier()
         time_prep = time.time() - epoch_start_time
         avg_time += time.time() - epoch_start_time
         train_ap = float(torch.tensor(train_aps).mean())  
@@ -650,12 +651,13 @@ def main():
         tt.ssim_cnt=0
         ap, auc = eval('val')
         print('finish val')
-        #torch.cuda.synchronize()
-        print('start')
+        torch.cuda.synchronize()
+        dist.barrier()
         t_test = time.time()
         print('test')
-        test_ap,test_auc = 0,0#eval('test')
-        #torch.cuda.synchronize()
+        test_ap,test_auc = eval('test')
+        torch.cuda.synchronize()
+        dist.barrier()
         t_test = time.time() - t_test
         total_test_time += t_test
         test_ap_list.append((test_ap,test_auc))
