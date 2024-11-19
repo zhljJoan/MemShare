@@ -105,7 +105,7 @@ class SharedMailBox():
             self.is_shared_mask[shared_nodes_index] = torch.arange(self.shared_nodes_index.shape[0],dtype=torch.int,
                                                                    device=torch.device('cuda:{}'.format(ctx.local_rank)))
         
-        if start_historical is not None:
+        if start_historical:
             self.historical_cache = historical_cache.HistoricalCache(self.shared_nodes_index,0,self.node_memory.shape[1],self.node_memory.dtype,self.node_memory.device,threshold=shared_ssim)
         self._mem_pin = {}
         self._mail_pin = {}
@@ -180,26 +180,12 @@ class SharedMailBox():
         if self.deliver_to == 'neighbors':
             
             assert block is not None and Reduce_score is None
-#            print(block.edges().shape)
             root = torch.cat([src,dst]).reshape(-1)
-            #pos = torch.empty(root.max()+1,dtype=torch.long,device=block.device)
-            #print('edge {} {}\n'.format(block.num_src_nodes(),block.edges()[0].max()))
-            #print('root is {} {} {} {}\n'.format(root,root.shape,root.max(),block.edges()[0].shape))
-            #pos_index = torch.arange(root.shape[0],device=root.device,dtype=root.dtype)
-            pos,idx = torch_scatter.scatter_max(mail_ts,root,0)
-            #print(block.number_of_edges())
+            _,idx = torch_scatter.scatter_max(mail_ts,root,0)
             mail = torch.cat([mail, mail[idx[block.edges()[0].long()]]],dim=0)
             mail_ts = torch.cat([mail_ts, mail_ts[idx[block.edges()[0].long()]]], dim=0)
-            
-            #print('pos is {} {}\n'.format(pos,block.edges()[0].long()))
-            #mail = torch.cat([mail, mail[pos[block.edges()[0].long()]]],dim=0)
-            #mail_ts = torch.cat([mail_ts, mail_ts[pos[block.edges()[0].long()]]], dim=0)
-            #print(root,block.edges()[1].long())
             index = torch.cat([index,block.dstdata['ID'][block.edges()[1].long()]],dim=0)
-            #print(index)
-            #mail = torch.cat([mail, mail[block.edges()[0].long()]], dim=0)
-            #mail_ts = torch.cat([mail_ts, mail_ts[block.edges()[0].long()]], dim=0)
-            #index = torch.cat([index,block.dstdata['ID'][block.edges()[1].long()]],dim=0)
+
         if Reduce_score is not None:
             Reduce_score = torch.cat((Reduce_score,Reduce_score),-1).to(self.device)
         if Reduce_score is None:
@@ -209,18 +195,12 @@ class SharedMailBox():
             mail = mail[idx]
             index = unq_index
         else:
-            uni, inv = torch.unique(index, return_inverse=True)
-            perm = torch.arange(inv.size(0), dtype=inv.dtype, device=inv.device)
-            perm = inv.new_empty(uni.size(0)).scatter_(0, inv, perm)
-            index = index[perm]
-            mail = mail[perm]
-            mail_ts = mail_ts[perm]
-            #unq_index,inv = torch.unique(index,return_inverse = True)
-            #print(inv.shape,Reduce_score.shape)
-            #max_score,idx = torch_scatter.scatter_max(Reduce_score,inv,0)
-            #mail_ts = mail_ts[idx]
-            #mail = mail[idx]
-            #index = unq_index
+            unq_index,inv = torch.unique(index,return_inverse = True)
+            print(inv.shape,Reduce_score.shape)
+            max_score,idx = torch_scatter.scatter_max(Reduce_score,inv,0)
+            mail_ts = mail_ts[idx]
+            mail = mail[idx]
+            index = unq_index
         #print('mail {} {}\n'.format(index.shape,mail.shape,mail_ts.shape))
         return index,mail,mail_ts
     

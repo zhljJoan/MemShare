@@ -11,15 +11,16 @@ node_per="4"
 nnodes="3"
 node_rank="1"
 probability_params=("0.1")
+probability_params=("0.1")
 sample_type_params=("boundery_recent_decay")
 #sample_type_params=("recent" "boundery_recent_decay") #"boundery_recent_uniform")
 #memory_type=("all_update" "p2p" "all_reduce" "historical" "local")
-memory_type=("historical")
+memory_type=("local")
 #"historical")
 #memory_type=("local" "all_update" "historical" "all_reduce")
 shared_memory_ssim=("0.3")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
-data_param=("WIKI" "LASTFM" "WikiTalk" "StackOverflow" "GDELT")
+data_param=("WIKI" )
 #"GDELT")
 #data_param=("WIKI" "REDDIT" "LASTFM" "DGraphFin" "WikiTalk" "StackOverflow")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk" "StackOverflow")
@@ -34,7 +35,7 @@ mkdir -p all_"$seed"
 for data in "${data_param[@]}"; do
     model="APAN_large"
     if [ "$data" = "WIKI" ] || [ "$data" = "REDDIT" ] || [ "$data" = "LASTFM" ]; then
-        model="APAN"
+        model="TGN"
     fi
     #model="APAN"
     mkdir all_"$seed"/"$data"

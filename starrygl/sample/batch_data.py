@@ -290,9 +290,9 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
                 if sample_out[r].delta_ts().shape[0] > 0:
                     b.edata['dt'] = sample_out[r].delta_ts().to(device)
                 b.srcdata['ts'] = block_node_list[1,b.srcnodes()].to(torch.float)
-                weight =  sample_out[r].sample_weight()
-                if(weight.shape[0] > 0):
-                    b.edata['weight'] = 1/torch.clamp(sample_out[r].sample_weight(),0.0001).to(b.device)
+                #weight =  sample_out[r].sample_weight()
+                #if(weight.shape[0] > 0):
+                #    b.edata['weight'] = 1/torch.clamp(sample_out[r].sample_weight(),0.0001).to(b.device)
                 b.edata['__ID'] = e_idx
                 col = row
                 col_len += eid_len[r]

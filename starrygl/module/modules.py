@@ -76,12 +76,12 @@ class GeneralModel(torch.nn.Module):
         self.dim_edge = dim_edge
         self.sample_param = sample_param
         self.memory_param = memory_param
-        self.train_pos_ratio,self.train_neg_ratio = train_ratio
+        #self.train_pos_ratio,self.train_neg_ratio = train_ratio
         if not 'dim_out' in gnn_param:
             gnn_param['dim_out'] = memory_param['dim_out']
         self.gnn_param = gnn_param
         self.train_param = train_param
-        self.neg_fix_layer = NegFixLayer()
+        #self.neg_fix_layer = NegFixLayer()
         if memory_param['type'] == 'node':
             if memory_param['memory_update'] == 'gru':
                 #if memory_param['async'] == False:
