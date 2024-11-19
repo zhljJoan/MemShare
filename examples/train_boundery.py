@@ -67,7 +67,7 @@ parser.add_argument('--probability', default=1, type=float, metavar='W',
                     help='name of model')
 parser.add_argument('--sample_type', default='recent', type=str, metavar='W',
                     help='name of model')
-parser.add_argument('--local_neg_sample', default=False, type=bool, metavar='W',
+parser.add_argument('--local_neg_sample', default=True, type=bool, metavar='W',
                     help='name of model')
 parser.add_argument('--shared_memory_ssim', default=2, type=float, metavar='W',
                     help='name of model')
@@ -350,10 +350,10 @@ def main():
     print('dim_node {} dim_edge {}\n'.format(gnn_dim_node,gnn_dim_edge))
     avg_time  = 0
     if use_cuda:
-        model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param,graph.ids.shape[0],mailbox,train_ratio=(train_ratio_pos,train_ratio_neg)).cuda()
+        model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param,graph.ids.shape[0],mailbox).cuda()
         device = torch.device('cuda')
     else:
-        model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param,graph.ids.shape[0],mailbox,train_ratio=(train_ratio_pos,train_ratio_neg))
+        model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param,graph.ids.shape[0],mailbox)
         device = torch.device('cpu')
     model = DDP(model,find_unused_parameters=True)
     def count_parameters(model):
@@ -552,12 +552,15 @@ def main():
             t2 = time_count.start_gpu()
             optimizer.zero_grad()
             ones = torch.ones(metadata['dst_neg_index'].shape[0],device = model.device,dtype=torch.float)
-            weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones*train_ratio_pos,ones*train_ratio_neg).reshape(-1,1)
             pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
             #print(time_count.elapsed_event(t2))
             loss = creterion(pred_pos, torch.ones_like(pred_pos)) 
-            neg_creterion = torch.nn.BCEWithLogitsLoss(weight)
-            loss += neg_creterion(pred_neg, torch.zeros_like(pred_neg))
+            if args.local_neg_sample is False:
+                weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones*train_ratio_pos,ones*train_ratio_neg).reshape(-1,1)
+                neg_creterion = torch.nn.BCEWithLogitsLoss(weight)
+                loss += neg_creterion(pred_neg, torch.zeros_like(pred_neg))
+            else:
+                loss += creterion(pred_neg, torch.zeros_like(pred_neg))
             total_loss += float(loss.item())
             #mailbox.handle_last_async()
             #trainloader.async_feature()
