@@ -1,0 +1,7 @@
+[submodule "third_party/ldg_partition"]
+	path = third_party/ldg_partition
+	url = https://gitee.com/onlynagesha/graph-partition-v4
+[submodule "third_party/METIS"]
+	path = third_party/METIS
+	url = https://github.com/KarypisLab/METIS
+	branch = v5.1.1-DistDGL-v0.5
