@@ -3,23 +3,23 @@
 # 定义数组变量
 seed=$1
 addr="192.168.1.107"
-partition_params=("ours" )
+partition_params=("ours")
 #"metis" "ldg" "random")
 #("ours" "metis" "ldg" "random")
-partitions="8"
+partitions="4"
 node_per="4"
-nnodes="2"
+nnodes="1"
 node_rank="0"
 probability_params=("0.1")
-sample_type_params=("recent")
+sample_type_params=("boundery_recent_decay")
 #sample_type_params=("recent" "boundery_recent_decay") #"boundery_recent_uniform")
 #memory_type=("all_update" "p2p" "all_reduce" "historical" "local")
-memory_type=("all_update")
+memory_type=("historical")
 #"historical")
 #memory_type=("local" "all_update" "historical" "all_reduce")
 shared_memory_ssim=("0.3")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
-data_param=("LASTFM" "WikiTalk" "StackOverflow" "GDELT")
+data_param=("WIKI" "LASTFM")
 #"GDELT")
 #data_param=("WIKI" "REDDIT" "LASTFM" "DGraphFin" "WikiTalk" "StackOverflow")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk" "StackOverflow")
@@ -32,9 +32,9 @@ data_param=("LASTFM" "WikiTalk" "StackOverflow" "GDELT")
 #seed=(( RANDOM % 1000000 + 1 ))
 mkdir -p all_"$seed"
 for data in "${data_param[@]}"; do
-    model="APAN_large"
+    model="TGN_large"
     if [ "$data" = "WIKI" ] || [ "$data" = "REDDIT" ] || [ "$data" = "LASTFM" ]; then
-        model="APAN"
+        model="TGN"
     fi
     #model="APAN"
     mkdir all_"$seed"/"$data"
@@ -165,9 +165,9 @@ for data in "${data_param[@]}"; do
 done
 
 for data in "${data_param[@]}"; do
-    model="TGN_large"
+    model="APAN_large"
     if [ "$data" = "WIKI" ] || [ "$data" = "REDDIT" ] || [ "$data" = "LASTFM" ]; then
-        model="TGN"
+        model="APAN"
         #continue
     fi
     #model="APAN"
