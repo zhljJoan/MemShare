@@ -6,9 +6,9 @@ addr="192.168.1.107"
 partition_params=("ours")
 #"metis" "ldg" "random")
 #("ours" "metis" "ldg" "random")
-partitions="4"
+partitions="8"
 node_per="4"
-nnodes="1"
+nnodes="2"
 node_rank="0"
 probability_params=("0.1")
 sample_type_params=("boundery_recent_decay")
@@ -19,7 +19,7 @@ memory_type=("historical")
 #memory_type=("local" "all_update" "historical" "all_reduce")
 shared_memory_ssim=("0.3")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
-data_param=("WikiTalk")
+data_param=("LASTFM" "WikiTalk" "StackOverflow") 
 #"GDELT")
 #data_param=("WIKI" "REDDIT" "LASTFM" "DGraphFin" "WikiTalk" "StackOverflow")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk" "StackOverflow")
@@ -32,9 +32,9 @@ data_param=("WikiTalk")
 #seed=(( RANDOM % 1000000 + 1 ))
 mkdir -p all_"$seed"
 for data in "${data_param[@]}"; do
-    model="JODIE_large"
+    model="TGN_large"
     if [ "$data" = "WIKI" ] || [ "$data" = "REDDIT" ] || [ "$data" = "LASTFM" ]; then
-        model="JODIE"
+        model="TGN"
     fi
     #model="APAN"
     mkdir all_"$seed"/"$data"

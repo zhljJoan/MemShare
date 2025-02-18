@@ -224,10 +224,10 @@ class DistributedDataLoader:
             next_data = self.input_dataset[torch.tensor([],device=self.device,dtype= torch.long)]
         else:
             next_data = self.input_dataset[self.batch_pos_l[self.submitted]:self.batch_pos_r[self.submitted] +1]
-        if self.mode=='train' and self.probability < 1:
+        if self.mode=='train' and self.ada_param.beta < 1:
             mask = ((DistIndex(self.graph.nids_mapper[next_data.edges[0,:].to('cpu')]).part == dist.get_rank())&(DistIndex(self.graph.nids_mapper[next_data.edges[1,:].to('cpu')]).part == dist.get_rank()))
-            if self.probability > 0:
-                mask[~mask] = (torch.rand((~mask).sum().item()) < self.probability)
+            if self.ada_param.beta > 0:
+                mask[~mask] = (torch.rand((~mask).sum().item()) < self.ada_param.beta)
             next_data = next_data[mask.to(next_data.device)]
         self.submitted = self.submitted + 1
         return next_data

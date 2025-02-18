@@ -137,7 +137,7 @@ class AdaParameter:
     self.alpha = max(min(self.alpha, self.max_alpha),self.min_alpha)
     print('gnn aggregate {} fetch {} memory sync {} memory update {}'.format(average_gnn_aggregate,average_fetch,average_memory_sync_time,average_memory_update_time))
     print('beta is {} alpha is {}\n'.format(self.beta,self.alpha))
-    self.reset_time()
+    #self.reset_time()
     #log（2-a1 ） = log(2-a2) * t1/t2 * (1 + wait_threshold)
     #2-a1 = 2-a2 ^(t1/t2 * (1 + wait_threshold))
     #a1 = 2 - 2-a2 ^(t1/t2 * (1 + wait_threshold))
