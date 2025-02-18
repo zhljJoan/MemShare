@@ -19,7 +19,7 @@ memory_type=("historical")
 #memory_type=("local" "all_update" "historical" "all_reduce")
 shared_memory_ssim=("0.3")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
-data_param=("WIKI" "LASTFM")
+data_param=("WikiTalk")
 #"GDELT")
 #data_param=("WIKI" "REDDIT" "LASTFM" "DGraphFin" "WikiTalk" "StackOverflow")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk" "StackOverflow")
@@ -32,9 +32,9 @@ data_param=("WIKI" "LASTFM")
 #seed=(( RANDOM % 1000000 + 1 ))
 mkdir -p all_"$seed"
 for data in "${data_param[@]}"; do
-    model="TGN_large"
+    model="JODIE_large"
     if [ "$data" = "WIKI" ] || [ "$data" = "REDDIT" ] || [ "$data" = "LASTFM" ]; then
-        model="TGN"
+        model="JODIE"
     fi
     #model="APAN"
     mkdir all_"$seed"/"$data"

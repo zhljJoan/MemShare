@@ -69,13 +69,14 @@ class NegFixLayer(torch.autograd.Function):
 
 class GeneralModel(torch.nn.Module):
 
-    def __init__(self, dim_node, dim_edge, sample_param, memory_param, gnn_param, train_param, num_nodes = None,mailbox = None,combined=False,train_ratio = None):
+    def __init__(self, dim_node, dim_edge, sample_param, memory_param, gnn_param, train_param, num_nodes = None,mailbox = None,combined=False,train_ratio = None,ada_param = None):
         super(GeneralModel, self).__init__()
         self.dim_node = dim_node
         self.dim_node_input = dim_node
         self.dim_edge = dim_edge
         self.sample_param = sample_param
         self.memory_param = memory_param
+        self.ada_param = ada_param
         #self.train_pos_ratio,self.train_neg_ratio = train_ratio
         if not 'dim_out' in gnn_param:
             gnn_param['dim_out'] = memory_param['dim_out']
@@ -89,7 +90,7 @@ class GeneralModel(torch.nn.Module):
                 #else:
                 updater = torch.nn.GRUCell
                 #    if memory_param['historical_fix'] == False:
-                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'])
+                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'],ada_param=ada_param)
                 #    else:
                 #        self.memory_updater = HistoricalMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node,updater=updater,learnable=True,num_nodes=num_nodes)
             elif memory_param['memory_update'] == 'rnn':
@@ -98,12 +99,12 @@ class GeneralModel(torch.nn.Module):
                 #else:
                 updater = torch.nn.RNNCell
                     #if memory_param['historical_fix'] == False:
-                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'])
+                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'],ada_param=ada_param)
                 #    else:
                 #        self.memory_updater = HistoricalMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node,updater=updater,learnable=True,num_nodes=num_nodes)
             elif memory_param['memory_update'] == 'transformer':
                 updater = TransformerMemoryUpdater
-                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'],train_param=train_param)
+                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'],train_param=train_param,ada_param=ada_param)
             else:
                 raise NotImplementedError
             self.dim_node_input = memory_param['dim_out']

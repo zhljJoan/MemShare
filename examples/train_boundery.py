@@ -238,6 +238,7 @@ def main():
             ada_param = AdaParameter(init_alpha=args.shared_memory_ssim, init_beta=args.probability)
     else:
         policy_train = policy
+        ada_param = AdaParameter(init_alpha=args.shared_memory_ssim, init_beta=args.probability)
     if memory_param['type'] != 'none':
         mailbox = SharedMailBox(graph.ids.shape[0], memory_param, dim_edge_feat = graph.efeat.shape[1] if graph.efeat is not None else 0,
         shared_nodes_index=graph.shared_nids_list[ctx.memory_group_rank],device = torch.device('cuda:{}'.format(local_rank)),

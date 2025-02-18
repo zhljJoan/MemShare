@@ -22,7 +22,7 @@ class LocalNegativeSampling(NegativeSampling):
         dst_node_list: torch.Tensor = None,
         local_mask = None,
         seed = None,
-        prob = None
+        ada_param = None
     ):
         super(LocalNegativeSampling,self).__init__(mode,amount,unique=unique)
         self.src_node_list = src_node_list.to('cpu') if src_node_list is not None else None
@@ -38,7 +38,11 @@ class LocalNegativeSampling(NegativeSampling):
         self.local_mask = local_mask
         if self.local_mask is not None:
             self.local_dst = dst_node_list[local_mask]
-        self.prob = prob
+        self.ada_param = ada_param
+
+        self.remote_weight = None
+        self.local_weight = None
+        #self.prob = prob
         #self.rdm.manual_seed(42)
         #print('dst_nde_list {}\n'.format(dst_node_list))
     def is_binary(self) -> bool:
@@ -50,6 +54,7 @@ class LocalNegativeSampling(NegativeSampling):
     def sample(self, num_samples: int,
                num_nodes: Optional[int] = None) -> Tensor:
         r"""Generates :obj:`num_samples` negative samples."""
+        
         if self.is_binary():
             if self.src_node_list is None or self.dst_node_list is None:
                 return torch.randint(num_nodes, (num_samples, )),torch.randint(num_nodes, (num_samples, ))
@@ -60,10 +65,16 @@ class LocalNegativeSampling(NegativeSampling):
             if self.dst_node_list is None:
                 return torch.randint(num_nodes, (num_samples, ),generator=self.rdm)
             elif self.local_mask is not None:
+                prob = self.ada_param.beta
+                remote_ratio = self.local_dst.shape[0] / self.dst_node_list.shape[0]
+                #train_ratio_pos = (1 - args.probability) + args.probability *  remote_ratio
+                #train_ratio_neg = args.probability * (1-remote_ratio)
+                self.train_ratio_pos = 1.0/(1-prob+ prob * remote_ratio) if ((prob<1) & (prob > 0)) else 1
+                self.train_ratio_neg = 1.0/(prob*remote_ratio) if ((prob <1) & (prob > 0)) else 1
                 p = torch.rand(size=(num_samples,))
                 sr = self.dst_node_list[torch.randint(len(self.dst_node_list), (num_samples, ),generator=self.rdm)]
                 sl = self.local_dst[torch.randint(len(self.local_dst), (num_samples, ),generator=self.rdm)]
-                s=torch.where(p<=self.prob,sr,sl)
+                s=torch.where(p<=prob,sr,sl)
                 return s
             else:
                 s = torch.randint(len(self.dst_node_list), (num_samples, ),generator=self.rdm)

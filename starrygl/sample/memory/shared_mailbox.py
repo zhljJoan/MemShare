@@ -59,8 +59,9 @@ class SharedMailBox():
                  uvm = False,
                  use_pin = False,
                  start_historical = False,
-                 shared_ssim = 2):
+                 ada_param = None):
         ctx = distributed.context._get_default_dist_context()
+        self.ada_param = ada_param
         self.device = device
         self.num_nodes = num_nodes
         self.num_parts = dist.get_world_size()
@@ -106,7 +107,7 @@ class SharedMailBox():
                                                                    device=torch.device('cuda:{}'.format(ctx.local_rank)))
         
         if start_historical:
-            self.historical_cache = historical_cache.HistoricalCache(self.shared_nodes_index,0,self.node_memory.shape[1],self.node_memory.dtype,self.node_memory.device,threshold=shared_ssim)
+            self.historical_cache = historical_cache.HistoricalCache(self.shared_nodes_index,0,self.node_memory.shape[1],self.node_memory.dtype,self.node_memory.device,ada_param)
         else:
             self.historical_cache = None
         self._mem_pin = {}
@@ -294,6 +295,8 @@ class SharedMailBox():
         if self.next_wait_gather_memory_job is not None:
             shared_list,mem,shared_id_list,shared_memory_ind = self.next_wait_gather_memory_job
             self.next_wait_gather_memory_job = None
+            if self.ada_param.training is True:
+                self.ada_param.last_start_event_memory_sync = self.ada_param.start_event()
             handle0 = dist.all_gather(shared_list,mem,group=ctx.memory_nccl_group,async_op=True)
             handle1 = dist.all_gather(shared_id_list,shared_memory_ind,group=ctx.memory_nccl_group,async_op=True)
             self.historical_cache.add_shared_to_queue(handle0,handle1,shared_id_list,shared_list)

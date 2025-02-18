@@ -395,6 +395,9 @@ class AsyncMemeoryUpdater(torch.nn.Module):
     def historical_func(self,index,memory,memory_ts,mail_index,mail,mail_ts,nxt_fetch_func,spread_mail=False):
         self.mailbox.sychronize_shared()
         self.mailbox.handle_last_async()
+        #if self.ada_param.training is True:
+        #    self.ada_param.last_start_event_memory_sync = self.ada_param.start_event()
+        #self.ada_param.update_memory_sync_time(self.ada_param.last_start_event_memory_sync)
         submit_to_queue = False
         if nxt_fetch_func is not None:
             submit_to_queue = True
@@ -406,6 +409,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                                            wait_submit=submit_to_queue,spread_mail=spread_mail,
                                            update_cross_mm=False,
                                            )
+        self.ada_param.update_memory_update_time(self.ada_param.last_start_event_memory_update)
         if nxt_fetch_func is not None:
             nxt_fetch_func()
 
@@ -420,7 +424,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             time_feat = self.time_enc(b.srcdata['ts'] - b.srcdata['mem_ts'])
             b.srcdata['mem_input'] = torch.cat([b.srcdata['mem_input'], time_feat], dim=1)
         return self.ceil_updater(b.srcdata['mem_input'], b.srcdata['mem'])
-    def __init__(self, memory_param, dim_in, dim_hid, dim_time, dim_node_feat,updater,mode = None,mailbox = None,train_param=None):
+    def __init__(self, memory_param, dim_in, dim_hid, dim_time, dim_node_feat,updater,mode = None,mailbox = None,train_param=None, ada_param = None):
         super(AsyncMemeoryUpdater, self).__init__()
         self.dim_hid = dim_hid
         self.dim_node_feat = dim_node_feat
@@ -436,6 +440,7 @@ class AsyncMemeoryUpdater(torch.nn.Module):
         self.last_updated_ts = None
         self.last_updated_nid = None
         self.delta_memory = 0
+        self.ada_param = ada_param
         if dim_time > 0:
             self.time_enc = TimeEncode(dim_time)
         if memory_param['combine_node_feature']:
@@ -523,7 +528,12 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                     self.mailbox.set_memory_local(DistIndex(index[local_mask]).loc,memory[local_mask],memory_ts[local_mask], Reduce_Op = 'max')
                     is_deliver=(self.mailbox.deliver_to == 'neighbors')
                     self.update_hunk(index,memory,memory_ts,index0,mail,mail_ts,nxt_fetch_func,spread_mail= is_deliver)
-            
+
+            if self.training is True:
+                
+                self.ada_param.last_start_event_gnn_aggregate = self.ada_param.start_event()
+                
+
             if self.memory_param['combine_node_feature'] and self.dim_node_feat > 0:
                 if self.dim_node_feat == self.dim_hid:
                     b.srcdata['h'] += updated_memory

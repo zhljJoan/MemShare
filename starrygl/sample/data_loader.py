@@ -101,8 +101,10 @@ class DistributedDataLoader:
             use_local_feature = True,
             probability = 1,
             reversed = False,
+            ada_param = None,
             **kwargs
     ):
+        self.ada_param = ada_param
         self.reversed = reversed
         self.use_local_feature = use_local_feature
         self.local_embedding = local_embedding
@@ -255,6 +257,7 @@ class DistributedDataLoader:
             return
         while(len(self.result_queue)==0):
             pass
+
         batch_data,dist_nid,dist_eid = self.result_queue[0].result()
         b = batch_data[1][0][0]
         self.remote_node += (DistIndex(dist_nid).part != dist.get_rank()).sum().item()
@@ -275,16 +278,21 @@ class DistributedDataLoader:
         #start = torch.cuda.Event(enable_timing=True)
         #end = torch.cuda.Event(enable_timing=True)
         #start.record()
+        
         nind,ndata = get_node_all_to_all_route(self.graph,self.mailbox,dist_nid,out_device=self.device)
         eind,edata = get_edge_all_to_all_route(self.graph,dist_eid,out_device=self.device)
+        
         if nind is not None:
             node_feat = DistributedTensor.all_to_all_get_data(ndata,send_ptr=nind['send_ptr'],recv_ptr=nind['recv_ptr'],is_async=True)
         else:
             node_feat = None
+
         if eind is not None:
             edge_feat = DistributedTensor.all_to_all_get_data(edata,send_ptr=eind['send_ptr'],recv_ptr=eind['recv_ptr'],is_async=True)
         else:
             edge_feat = None
+        if self.ada_param is not None:
+            self.ada_param.last_start_event_fetch = self.ada_param.start_event()
         t3 = time.time()
         self.result_queue.append((batch_data,dist_nid,dist_eid,edge_feat,node_feat))
         self.submit()
@@ -356,10 +364,12 @@ class DistributedDataLoader:
                     #batch_data[1][0][0].srcdata['mem'][mask] = self.mailbox.historical_cache.local_historical_data[DistIndex(id).loc[mask]]
                 self.recv_idxs += 1
             else:
+                
                 if(self.recv_idxs < self.expected_idx):
                     assert len(self.result_queue) > 0
                     #print(len(self.result_queue[0]))
                     if isinstance(self.result_queue[0],tuple) :
+                        
                         t0 = time.time()
                         batch_data,dist_nid,dist_eid,edge_feat,node_feat0 = self.result_queue[0]
                         self.result_queue.popleft()
@@ -382,6 +392,8 @@ class DistributedDataLoader:
                             node_feat0 = node_feat0[0]
                             node_feat = None
                             mem = self.mailbox.unpack(node_feat0,mailbox = True)
+                        if self.ada_param is not None:
+                            self.ada_param.update_fetch_time(self.ada_param.last_start_event_fetch)
                         #print(node_feat.shape,edge_feat.shape,mem[0].shape)
                         #node_feat[1].wait()
                         #node_feat = node_feat[0]
@@ -395,6 +407,8 @@ class DistributedDataLoader:
                         #mem = (mem[0][0],mem[1][0],mem[2][0],mem[3][0])
                         #node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,   dist_nid,is_local,out_device=self.device)
                         t1 = time.time()
+                        #if self.ada_param is not None:
+                        #    self.ada_param.update_fetch_time(self.ada_param.last_start_event_fetch)
                     else:
                         batch_data,dist_nid,dist_eid = self.result_queue[0].result()
                         stream.synchronize()
@@ -410,6 +424,7 @@ class DistributedDataLoader:
                         indx =  self.mailbox.is_shared_mask[DistIndex(batch_data[1][0][0].srcdata['ID']).loc[mask]]
                         batch_data[1][0][0].srcdata['his_mem'][mask] = self.mailbox.historical_cache.local_historical_data[indx]
                         batch_data[1][0][0].srcdata['his_ts'][mask] = self.mailbox.historical_cache.local_ts[indx].reshape(-1,1)
+                    
                     self.recv_idxs += 1
                 else:
                     raise StopIteration

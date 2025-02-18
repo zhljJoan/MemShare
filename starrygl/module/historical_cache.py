@@ -41,7 +41,7 @@ pinn_memory = {}
 class HistoricalCache:
 
 
-    def __init__(self,cache_index,layer,shape,dtype,device,threshold = 3,time_threshold = None, times_threshold = 10, use_rpc = True, num_threshold = 0):
+    def __init__(self,cache_index,layer,shape,dtype,device,ada_param = None,time_threshold = None, times_threshold = 10, use_rpc = True, num_threshold = 0):
         #self.cache_index = cache_index
         self.layer = layer
         print(shape)
@@ -51,7 +51,8 @@ class HistoricalCache:
         #self.ts = torch.zeros(cache_index.historical_num,dtype = torch.float,device = torch.device('cpu'))
         self.local_ts = torch.zeros(cache_index.shape[0],dtype = torch.float,device = device)
         self.loss_count = torch.zeros(cache_index.shape[0],dtype = torch.int,device = device)
-        self.threshold = threshold
+        self.threshold = ada_param.alpha
+        self.ada_param = ada_param
         self.time_threshold = time_threshold
         self.times_threshold = times_threshold
         self.num_threshold = num_threshold
@@ -87,6 +88,7 @@ class HistoricalCache:
         else: 
             return torch.sum((x -y)**2,dim = 1)
     def historical_check(self,index,new_data,ts):
+        self.threshold = self.ada_param.alpha
         if self.time_threshold is not None:
             mask = (self.ssim(new_data,self.local_historical_data[index]) > self.threshold | (ts - self.local_ts[index] > self.time_threshold | self.loss_count[index] > self.times_threshold))
             self.loss_count[index][~mask] += 1
@@ -134,6 +136,8 @@ class HistoricalCache:
         self.last_shared_update_wait = None
         handle0.wait()
         handle1.wait()
+        if self.ada_param.training is True:
+            self.ada_param.update_memory_sync_time(self.ada_param.last_start_event_memory_sync)
         shared_data = torch.cat(shared_data,dim = 0)
         shared_index = torch.cat(shared_index)
         if(shared_data.shape[0] == 0):
