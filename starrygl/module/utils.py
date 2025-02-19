@@ -141,9 +141,9 @@ class AdaParameter:
     if self.end_event_fetch is None or self.end_event_memory_sync is None or self.end_event_memory_update is None or self.end_event_gnn_aggregate is None:
       return
     self.end_event_fetch[1].synchronize()
-    self.end_event_memory_sync[1].synchronize()
-    self.end_event_memory_update[1].synchronize()
-    self.end_event_gnn_aggregate[1].synchronize()
+    #self.end_event_memory_sync[1].synchronize()
+    #self.end_event_memory_update[1].synchronize()
+    #self.end_event_gnn_aggregate[1].synchronize()
     self.average_fetch += self.end_event_fetch[0].elapsed_time(self.end_event_fetch[1])
     self.count_fetch += 1
     self.average_memory_sync += self.end_event_memory_sync[0].elapsed_time(self.end_event_memory_sync[1])

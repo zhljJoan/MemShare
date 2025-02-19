@@ -392,9 +392,7 @@ class DistributedDataLoader:
                             node_feat0 = node_feat0[0]
                             node_feat = None
                             mem = self.mailbox.unpack(node_feat0,mailbox = True)
-                        if self.ada_param is not None:
-                            self.ada_param.update_fetch_time(self.ada_param.last_start_event_fetch)
-                            self.ada_param.update_parameter()
+                        
                         #print(node_feat.shape,edge_feat.shape,mem[0].shape)
                         #node_feat[1].wait()
                         #node_feat = node_feat[0]
