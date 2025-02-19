@@ -39,7 +39,7 @@ class EarlyStopMonitor(object):
     return self.num_round >= self.max_round
   
 class AdaParameter:
-  def __init__(self, wait_threshold=0.1, init_beta = 0.1 ,init_alpha = 0.1, min_beta = 0.01, max_beta = 1, min_alpha = 0.1, max_alpha = 1):
+  def __init__(self, wait_threshold=0.1, init_beta = 0.1 ,init_alpha = 0.1, min_beta = 0.01, max_beta = 0.8, min_alpha = 0.1, max_alpha = 1):
     self.wait_threshold = wait_threshold
     self.beta = init_beta
     self.alpha = init_alpha
@@ -57,6 +57,11 @@ class AdaParameter:
     self.last_start_event_memory_sync = None
     self.last_start_event_memory_update = None
     self.last_start_event_gnn_aggregate = None
+
+    self.end_event_fetch = None
+    self.end_event_memory_sync = None
+    self.end_event_memory_update = None
+    self.end_event_gnn_aggregate = None
 
     self.min_beta = min_beta
     self.max_beta = max_beta
@@ -77,30 +82,35 @@ class AdaParameter:
       return
     end_event = torch.cuda.Event(enable_timing=True)
     end_event.record()
-    end_event.synchronize()
-    elapsed_time_ms = start_event.elapsed_time(end_event)
-    self.average_fetch += elapsed_time_ms
-    self.count_fetch += 1
+    #end_event.synchronize()
+    #elapsed_time_ms = start_event.elapsed_time(end_event)
+    #self.average_fetch += elapsed_time_ms
+    
+    #self.count_fetch += 1
+    self.end_event_fetch = (self.last_start_event_fetch,end_event)
+
 
   def update_memory_sync_time(self,start_event):
     if start_event is None:
       return
     end_event = torch.cuda.Event(enable_timing=True)
     end_event.record()
-    end_event.synchronize()
-    elapsed_time_ms = start_event.elapsed_time(end_event)
-    self.average_memory_sync += elapsed_time_ms
-    self.count_memory_sync += 1
+    #end_event.synchronize()
+    #elapsed_time_ms = start_event.elapsed_time(end_event)
+    #self.average_memory_sync += elapsed_time_ms
+    #self.count_memory_sync += 1
+    self.end_event_memory_sync = (self.last_start_event_memory_sync,end_event)
 
   def update_memory_update_time(self,start_event):
     if start_event is None:
       return
     end_event = torch.cuda.Event(enable_timing=True)
     end_event.record()
-    end_event.synchronize()
-    elapsed_time_ms = start_event.elapsed_time(end_event)
-    self.average_memory_update += elapsed_time_ms
-    self.count_memory_update += 1
+    #end_event.synchronize()
+    #elapsed_time_ms = start_event.elapsed_time(end_event)
+    #self.average_memory_update += elapsed_time_ms
+    #self.count_memory_update += 1
+    self.end_event_memory_update = (self.last_start_event_memory_update,end_event)
   
   def update_gnn_aggregate_time(self,start_event):
 
@@ -108,10 +118,11 @@ class AdaParameter:
       return
     end_event = torch.cuda.Event(enable_timing=True)
     end_event.record()
-    end_event.synchronize()
-    elapsed_time_ms = start_event.elapsed_time(end_event)
-    self.average_gnn_aggregate += elapsed_time_ms
-    self.count_gnn_aggregate += 1
+    #end_event.synchronize()
+    #elapsed_time_ms = start_event.elapsed_time(end_event)
+    #self.average_gnn_aggregate += elapsed_time_ms
+    #self.count_gnn_aggregate += 1
+    self.end_event_gnn_aggregate = (self.last_start_event_gnn_aggregate,end_event)
 
   def reset_time(self):
     self.average_fetch = 0
@@ -125,8 +136,22 @@ class AdaParameter:
     
   def update_parameter(self):
     print('beta is {} alpha is {}\n'.format(self.beta,self.alpha))
-    if self.count_fetch == 0 or self.count_memory_sync == 0 or self.count_memory_update == 0 or self.count_gnn_aggregate == 0:
+    #if self.count_fetch == 0 or self.count_memory_sync == 0 or self.count_memory_update == 0 or self.count_gnn_aggregate == 0:
+    #  return
+    if self.end_event_fetch is None or self.end_event_memory_sync is None or self.end_event_memory_update is None or self.end_event_gnn_aggregate is None:
       return
+    self.end_event_fetch[1].synchronize()
+    self.end_event_memory_sync[1].synchronize()
+    self.end_event_memory_update[1].synchronize()
+    self.end_event_gnn_aggregate[1].synchronize()
+    self.average_fetch += self.end_event_fetch[0].elapsed_time(self.end_event_fetch[1])
+    self.count_fetch += 1
+    self.average_memory_sync += self.end_event_memory_sync[0].elapsed_time(self.end_event_memory_sync[1])
+    self.count_memory_sync += 1
+    self.average_memory_update += self.end_event_memory_update[0].elapsed_time(self.end_event_memory_update[1])
+    self.count_memory_update += 1
+    self.average_gnn_aggregate += self.end_event_gnn_aggregate[0].elapsed_time(self.end_event_gnn_aggregate[1])
+    self.count_gnn_aggregate += 1
     average_gnn_aggregate = self.average_gnn_aggregate/self.count_gnn_aggregate
     average_fetch = self.average_fetch/self.count_fetch
     self.beta = self.beta * average_gnn_aggregate/average_fetch * (1 + self.wait_threshold)
