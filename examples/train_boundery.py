@@ -589,7 +589,7 @@ def main():
             mailbox.update_p2p_mail()
             start = time_count.start_gpu()
             ada_param.update_gnn_aggregate_time(ada_param.last_start_event_gnn_aggregate)
-            ada_param.update_parameter()
+            #ada_param.update_parameter()
             #torch.cuda.empty_cache()
 
             """
