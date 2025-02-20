@@ -159,7 +159,7 @@ class AdaParameter:
     self.beta = self.beta * average_gnn_aggregate/average_fetch * (1 + self.wait_threshold)
     average_memory_sync_time = self.average_memory_sync/self.count_memory_sync
     average_memory_update_time = self.average_memory_update/self.count_memory_update
-    self.alpha = (2-math.pow((2-self.alpha),average_memory_update_time/average_memory_sync_time * (1 + self.wait_threshold)))
+    self.alpha = self.alpha+math.log(average_memory_update_time/average_memory_sync_time * (1 + self.wait_threshold))
     self.beta = max(min(self.beta, self.max_beta),self.min_beta)
     self.alpha = max(min(self.alpha, self.max_alpha),self.min_alpha)
     ctx = DistributedContext.get_default_context()
