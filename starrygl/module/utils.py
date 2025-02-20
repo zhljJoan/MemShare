@@ -159,16 +159,16 @@ class AdaParameter:
     self.beta = self.beta * average_gnn_aggregate/average_fetch * (1 + self.wait_threshold)
     average_memory_sync_time = self.average_memory_sync/self.count_memory_sync
     average_memory_update_time = self.average_memory_update/self.count_memory_update
-    self.alpha = self.alpha+math.log(average_memory_update_time/average_memory_sync_time * (1 + self.wait_threshold))
+    self.alpha = self.alpha-math.log(average_memory_update_time/average_memory_sync_time * (1 + self.wait_threshold))
     self.beta = max(min(self.beta, self.max_beta),self.min_beta)
     self.alpha = max(min(self.alpha, self.max_alpha),self.min_alpha)
     ctx = DistributedContext.get_default_context()
     beta_comm=torch.tensor([self.beta])
     torch.distributed.all_reduce(beta_comm,group=ctx.gloo_group)
-    self.beta = beta_comm[0].item()
+    self.beta = beta_comm[0].item()/ctx.world_size
     alpha_comm=torch.tensor([self.alpha])
     torch.distributed.all_reduce(alpha_comm,group=ctx.gloo_group)
-    self.alpha = alpha_comm[0].item()
+    self.alpha = alpha_comm[0].item()/ctx.world_size
     #print('gnn aggregate {} fetch {} memory sync {} memory update {}'.format(average_gnn_aggregate,average_fetch,average_memory_sync_time,average_memory_update_time))
     #print('beta is {} alpha is {}\n'.format(self.beta,self.alpha))
     #self.reset_time()

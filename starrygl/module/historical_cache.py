@@ -92,14 +92,19 @@ class HistoricalCache:
         if self.time_threshold is not None:
             mask = (self.ssim(new_data,self.local_historical_data[index]) > self.threshold | (ts - self.local_ts[index] > self.time_threshold | self.loss_count[index] > self.times_threshold))
             self.loss_count[index][~mask] += 1
+           
             self.loss_count[index][mask] = 0
         else:
             #print('{} {} {} {}  \n'.format(index,self.ssim(new_data,self.local_historical_data[index]),new_data,self.local_historical_data[index]))
             #print(new_data,self.local_historical_data[index])
             #print(self.ssim(new_data,self.local_historical_data[index]) < self.threshold, (self.loss_count[index] > self.times_threshold))
-            mask = (self.ssim(new_data,self.local_historical_data[index]) > self.threshold) | (self.loss_count[index] > self.times_threshold)
-            self.loss_count[index][~mask] += 1
-            self.loss_count[index][mask] = 0
+            mask = ((self.ssim(new_data,self.local_historical_data[index]) > self.threshold) | (self.loss_count[index] > self.times_threshold))
+            (self.loss_count[index[~mask]]) += 1
+            #print(self.loss_count[index][~mask])
+            #if (~mask).sum() > 0:
+            #    print('loss count {}'.format((self.loss_count[index][~mask]).max()))
+           
+            self.loss_count[index[mask]] = 0
         return mask
     
     def read_synchronize(self):

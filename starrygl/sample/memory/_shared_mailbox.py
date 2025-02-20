@@ -275,8 +275,8 @@ class SharedMailBox():
             shared_index,shared_data,shared_ts = out
             index = self.shared_nodes_index[shared_index]
             mask= (shared_ts > self.node_memory_ts.accessor.data[index])
-            self.node_memory.accessor.data[index][mask] = shared_data[mask]
-            self.node_memory_ts.accessor.data[index][mask] = shared_ts[mask]
+            self.node_memory.accessor.data[index[mask]] = shared_data[mask]
+            self.node_memory_ts.accessor.data[index[mask]] = shared_ts[mask]
 
     def update_shared(self):
         ctx = DistributedContext.get_default_context()
