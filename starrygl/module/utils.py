@@ -2,6 +2,8 @@ import yaml
 import numpy as np
 import torch
 import math
+
+from starrygl.distributed.context import DistributedContext
 def parse_config(f):
     conf = yaml.safe_load(open(f, 'r'))
     sample_param = conf['sampling'][0]
@@ -135,7 +137,7 @@ class AdaParameter:
     self.count_gnn_aggregate = 0
     
   def update_parameter(self):
-    print('beta is {} alpha is {}\n'.format(self.beta,self.alpha))
+    #print('beta is {} alpha is {}\n'.format(self.beta,self.alpha))
     #if self.count_fetch == 0 or self.count_memory_sync == 0 or self.count_memory_update == 0 or self.count_gnn_aggregate == 0:
     #  return
     if self.end_event_fetch is None or self.end_event_memory_sync is None or self.end_event_memory_update is None or self.end_event_gnn_aggregate is None:
@@ -160,8 +162,15 @@ class AdaParameter:
     self.alpha = (2-math.pow((2-self.alpha),average_memory_update_time/average_memory_sync_time * (1 + self.wait_threshold)))
     self.beta = max(min(self.beta, self.max_beta),self.min_beta)
     self.alpha = max(min(self.alpha, self.max_alpha),self.min_alpha)
-    print('gnn aggregate {} fetch {} memory sync {} memory update {}'.format(average_gnn_aggregate,average_fetch,average_memory_sync_time,average_memory_update_time))
-    print('beta is {} alpha is {}\n'.format(self.beta,self.alpha))
+    ctx = DistributedContext.get_default_context()
+    beta_comm=torch.tensor([self.beta])
+    torch.distributed.all_reduce(beta_comm,group=ctx.gloo_group)
+    self.beta = beta_comm[0].item()
+    alpha_comm=torch.tensor([self.alpha])
+    torch.distributed.all_reduce(alpha_comm,group=ctx.gloo_group)
+    self.alpha = alpha_comm[0].item()
+    #print('gnn aggregate {} fetch {} memory sync {} memory update {}'.format(average_gnn_aggregate,average_fetch,average_memory_sync_time,average_memory_update_time))
+    #print('beta is {} alpha is {}\n'.format(self.beta,self.alpha))
     #self.reset_time()
     #log（2-a1 ） = log(2-a2) * t1/t2 * (1 + wait_threshold)
     #2-a1 = 2-a2 ^(t1/t2 * (1 + wait_threshold))

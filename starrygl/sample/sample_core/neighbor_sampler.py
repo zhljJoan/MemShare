@@ -332,6 +332,9 @@ class NeighborSampler(BaseSampler):
         metadata['seed_ts'] = seed_ts
         metadata['src_pos_index']=src_pos_index
         metadata['dst_pos_index']=dst_pos_index
+        if 'train_ratio_pos' in neg_sampling.__dict__:
+            metadata['train_ratio_pos'] = neg_sampling.train_ratio_pos
+            metadata['train_ratio_neg'] = neg_sampling.train_ratio_neg
         if neg_sampling is not None :
             metadata['dst_neg_index'] = dst_neg_index
             if neg_sampling.is_triplet() or neg_sampling.is_tgbtriplet():

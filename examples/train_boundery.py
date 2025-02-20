@@ -563,22 +563,22 @@ def main():
             ones = torch.ones(metadata['dst_neg_index'].shape[0],device = model.device,dtype=torch.float)
             pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
             ada_param.update_gnn_aggregate_time(ada_param.last_start_event_gnn_aggregate)
-            if len(trainloader.result_queue) > 0:
-                batch_data,dist_nid,dist_eid,edge_feat,node_feat0 = trainloader.result_queue[0]
-                edge_feat[1].wait()
-                node_feat0[1].wait()
-                if ada_param is not None:
-                    ada_param.update_fetch_time(ada_param.last_start_event_fetch)
-                    ada_param.update_parameter()
             #print(time_count.elapsed_event(t2))
             loss = creterion(pred_pos, torch.ones_like(pred_pos)) 
             if args.local_neg_sample is False:
-                weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones*train_neg_sampler.train_ratio_pos,ones*train_neg_sampler.train_ratio_neg).reshape(-1,1)
+                weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones*metadata['train_ratio_pos'],ones*metadata['train_ratio_neg']).reshape(-1,1)
                 neg_creterion = torch.nn.BCEWithLogitsLoss(weight)
                 loss += neg_creterion(pred_neg, torch.zeros_like(pred_neg))
             else:
                 loss += creterion(pred_neg, torch.zeros_like(pred_neg))
             total_loss += float(loss.item())
+            if len(trainloader.result_queue) > 0:
+                _,_,_,edge_feat,node_feat0 = trainloader.result_queue[0]
+                edge_feat[1].wait()
+                node_feat0[1].wait()
+                if ada_param is not None:
+                    ada_param.update_fetch_time(ada_param.last_start_event_fetch)
+                    ada_param.update_parameter()
             #mailbox.handle_last_async()
             #trainloader.async_feature()
             #torch.cuda.synchronize()
