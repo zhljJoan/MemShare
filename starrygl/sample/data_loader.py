@@ -259,25 +259,12 @@ class DistributedDataLoader:
             pass
 
         batch_data,dist_nid,dist_eid = self.result_queue[0].result()
-        b = batch_data[1][0][0]
         self.remote_node += (DistIndex(dist_nid).part != dist.get_rank()).sum().item()
         self.local_node += (DistIndex(dist_nid).part == dist.get_rank()).sum().item()
         self.remote_edge += (DistIndex(dist_eid).part != dist.get_rank()).sum().item()
         self.local_edge += (DistIndex(dist_eid).part == dist.get_rank()).sum().item()
-        #self.remote_root += (DistIndex(dist_nid[b.srcdata['__ID'][:self.batch_size*2]]).part != dist.get_rank()).sum()
-        #self.local_root += (DistIndex(dist_nid[b.srcdata['__ID'][:self.batch_size*2]]).part == dist.get_rank()).sum()
-                    #torch.cuda.synchronize(stream)
-        #start = torch.cuda.Event(enable_timing=True)
-        #end = torch.cuda.Event(enable_timing=True)
-        #start.record()
         stream.synchronize()
-        #end.record()
-        #end.synchronize()
-        #print(start.elapsed_time(end))
         self.result_queue.popleft()
-        #start = torch.cuda.Event(enable_timing=True)
-        #end = torch.cuda.Event(enable_timing=True)
-        #start.record()
         
         nind,ndata = get_node_all_to_all_route(self.graph,self.mailbox,dist_nid,out_device=self.device)
         eind,edata = get_edge_all_to_all_route(self.graph,dist_eid,out_device=self.device)
@@ -287,15 +274,14 @@ class DistributedDataLoader:
         else:
             node_feat = None
 
-        if eind is not None:
+        if eind or self.reversed is False:
             edge_feat = DistributedTensor.all_to_all_get_data(edata,send_ptr=eind['send_ptr'],recv_ptr=eind['recv_ptr'],is_async=True)
         else:
             edge_feat = None
-        if self.ada_param is not None:
-            self.ada_param.last_start_event_fetch = self.ada_param.start_event()
-        t3 = time.time()
         self.result_queue.append((batch_data,dist_nid,dist_eid,edge_feat,node_feat))
         self.submit()
+        if self.ada_param is not None:
+            self.ada_param.last_start_event_fetch = self.ada_param.start_event()
 
     @torch.no_grad()
     def __next__(self):
@@ -319,9 +305,6 @@ class DistributedDataLoader:
                                       )
 
                 root,mfgs,metadata = batch_data
-                t_sample = tt.elapsed_event(t0)
-                tt.time_sample_and_build+=t_sample
-                t1 = tt.start_gpu()
                 edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid, is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
@@ -358,10 +341,7 @@ class DistributedDataLoader:
                     batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
                     batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
                 
-                #if(self.mailbox is not None and self.mailbox.historical_cache is not None):
-                #    id = batch_data[1][0][0].srcdata['ID']
-                #    mask = DistIndex(id).is_shared
-                    #batch_data[1][0][0].srcdata['mem'][mask] = self.mailbox.historical_cache.local_historical_data[DistIndex(id).loc[mask]]
+
                 self.recv_idxs += 1
             else:
                 
@@ -392,22 +372,7 @@ class DistributedDataLoader:
                             node_feat0 = node_feat0[0]
                             node_feat = None
                             mem = self.mailbox.unpack(node_feat0,mailbox = True)
-                        
-                        #print(node_feat.shape,edge_feat.shape,mem[0].shape)
-                        #node_feat[1].wait()
-                        #node_feat = node_feat[0]
-                        ##for i in range(len(mem)):
-                        ##    mem[i][1].wait()
-                        #mem[0][1].wait()
-                        #mem[1][1].wait()
-                        #mem[2][1].wait()
-                        #mem[3][1].wait()
-                        t1 = time.time()
-                        #mem = (mem[0][0],mem[1][0],mem[2][0],mem[3][0])
-                        #node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,   dist_nid,is_local,out_device=self.device)
-                        t1 = time.time()
-                        #if self.ada_param is not None:
-                        #    self.ada_param.update_fetch_time(self.ada_param.last_start_event_fetch)
+
                     else:
                         batch_data,dist_nid,dist_eid = self.result_queue[0].result()
                         stream.synchronize()
@@ -429,172 +394,6 @@ class DistributedDataLoader:
                     raise StopIteration
             global executor
             if(len(self.result_queue)==0):
-            #if(self.recv_idxs+1<=self.expected_idx):
                 self.submit()
-                """
-                graph_sample(
-                                        graph=self.graph,
-                                        sampler=self.sampler,
-                                        sample_fn=self.sampler_fn,
-                                        data=data,neg_sampling=self.neg_sampler,
-                                        mailbox=self.mailbox,
-                                        device=torch.cuda.current_device(),
-                                        local_embedding=self.local_embedding,
-                                    async_op=True)
-            """
-            #print('dataloader {} '.format(batch_data[1][0][0].srcdata['h'].shape))  
         return batch_data
                     
-import os
-class PreBatchDataLoader(DistributedDataLoader):
-    def __init__(
-            self,
-            graph,
-            dataname = None,
-            dataset = None,
-            batch_size = None,
-            drop_last = False,
-            device: torch.device  = torch.device('cuda'),
-            mode = 'train',
-            mailbox = None,
-            is_pipeline = False,
-            edge_classification = False,
-            use_local_feature = False,
-            train_neg_samples = 1,
-            neg_sets = 32,
-            pre_batch_path = '/mnt/data/part_data/starrytgl/minibatches/',
-            **kwargs
-    ):
-        super().__init__(graph=graph,dataset=dataset,batch_size=batch_size,drop_last=drop_last,device=device,mailbox=mailbox,use_local_feature=use_local_feature)
-        self.edge_classification = edge_classification
-        if edge_classification:
-            train_neg_samples = 0
-            neg_sets = 0
-        ctx = DistributedContext.get_default_context()
-        if mode == 'train':
-            self.path = '{}/{}/{}/{}_{}/'.format(pre_batch_path,dataname,ctx.memory_group_rank,train_neg_samples, neg_sets)
-        self.neg_sets = neg_sets
-        self.mode = mode
-        #self.tot_length = len([fn for fn in os.listdir(self.path) if fn.startswith('{}_pos'.format(mode))]) 
-        self.idx = 0
-        self.is_pipeline = is_pipeline
-        self.rng = np.random.default_rng()
-        self.train_neg_samples = train_neg_samples
-        self.rng = np.random.default_rng()
-        self.stream = torch.cuda.Stream()
-
-    def __iter__(self):
-        self.idx = 0
-        ctx = DistributedContext.get_default_context()
-        super().__iter__()
-        self.init_prefetch(ctx.memory_group)
-        return self
-
-    def __next__(self):
-        if self.thread_idx == self.expected_idx:
-            raise StopIteration
-        else:
-            self.prefetch_next()
-            ret = self.get_fetched()
-            return ret
-
-
-    def get(self, idx, num_neg=1, offset=0):
-        #used for partial vlaidation
-        idx = idx * self.minibatch_parallelism + offset
-        with open('{}{}_pos_{}.pkl'.format(self.path, self.mode, idx), 'rb') as f:
-            pos_mfg = pickle.load(f)
-        neg_mfgs = list()
-        for _ in range(num_neg):
-            if self.mode == 'train':
-                chosen_set = '_' + str(self.rng.integers(self.neg_sets))
-            else:
-                chosen_set = ''
-            if not self.edge_classification:
-                with open('{}{}_neg_{}{}.pkl'.format(self.path, self.mode, idx, chosen_set), 'rb') as f:
-                    neg_mfgs.append(pickle.load(f))
-        return pos_mfg, neg_mfgs
-
-    def _load_and_slice_mfgs(self, roots,pos_idx, neg_idxs ):
-        # only usable in training set
-        t_s = time.time()
-        with open('{}{}_pos_{}.pkl'.format(self.path, self.mode, pos_idx), 'rb') as f:
-            pos_mfg = pickle.load(f)
-        if not self.edge_classification:
-            with open('{}{}_neg_{}_{}.pkl'.format(self.path, self.mode, pos_idx, neg_idxs), 'rb') as f:
-                neg_mfg = pickle.load(f)
-            with torch.cuda.stream(self.stream):
-                mfg = combine_mfgs(self.graph,pos_mfg, neg_mfg,to_device = self.device)
-                self.prefetched_mfgs[0] = (roots,*mfg)
-            #prepare_input(mfg, self.node_feats, self.edge_feats)
-            #prepare_input_tgl(mfg[0],self.graph,self.mailbox,use_local=((self.mode=='train') & (self.use_local_feature==True)),out_device=self.device)
-            #self.prefetched_mfgs[0] = (roots,*mfg)
-        else:
-            mfg = pos_mfg
-            mfg.combined = False
-            #prepare_input_tgl(mfg[0],self.graph,self.mailbox,use_local=((self.mode=='train') & (self.use_local_feature==True)),out_device=self.device)
-            #self.prefetched_mfgs[0] = (roots,*pos_mfg)
-        return 
-
-    def init_prefetch(self, idx, num_neg=1, offset=0, prefetch_interval=1, rank=None, memory_read_buffer=None, mail_read_buffer=None, read_1idx_buffer=None, read_status=None):
-        # initilize and prefetch the first minibatches with all zero node memory and mails
-
-        self.prefetch_interval = prefetch_interval
-        self.prefetch_offset = offset
-        self.prefetch_num_neg = num_neg
-        self.next_prefetch_idx = idx + prefetch_interval
-
-        self.fetched_mfgs = [None]
-        self.thread_idx = 0
-        self.prefetched_mfgs = [None] * num_neg if not self.edge_classification else [None]
-        self.prefetch_threads = None
-        idx = 0 if idx < 0 else idx
-        if not self.edge_classification:
-            neg_idxs = self.rng.integers(self.neg_sets)
-        else:
-            neg_idxs = None
-        for _ in range(idx+1):
-            data = super()._next_data()
-        self.prefetch_thread = threading.Thread(target=self._load_and_slice_mfgs, args=(data,idx, neg_idxs))
-        self.prefetch_thread.start()
-        return
-
-    def prefetch_next(self):
-        # put current prefetched to fetched and start next prefetch
-        t_s = time.time()
-        self.prefetch_thread.join()
-        mfg = self.prefetched_mfgs[0]
-        prepare_input_tgl(mfg[1],self.graph,self.mailbox,use_local=((self.mode=='train') & (self.use_local_feature==True)),out_device=self.device)
-        self.fetched_mfgs[0] = mfg
-        # print('\twait for previous thread time {}ms'.format((time.time() - t_s) * 1000))
-
-        if self.next_prefetch_idx != -1:
-            if self.next_prefetch_idx >= self.expected_idx:
-                self.next_prefetch_idx = self.expected_idx - 1
-
-            self.prefetched_mfgs = [None] * self.prefetch_num_neg if not self.edge_classification else [None]
-            self.prefetch_threads = None
-            pos_idx = self.next_prefetch_idx
-            if not self.edge_classification:
-                neg_idxs = self.rng.integers(self.neg_sets)
-            else:
-                neg_idxs = None
-            root = super()._next_data()
-            self.prefetch_thread = threading.Thread(target=self._load_and_slice_mfgs, args=(root,pos_idx, neg_idxs))
-            self.prefetch_thread.start()
-
-            if self.next_prefetch_idx != self.expected_idx - 1:
-                self.next_prefetch_idx += self.prefetch_interval
-            else:
-                self.next_prefetch_idx = -1
-
-    def get_fetched(self):
-        ret = self.fetched_mfgs[0]
-        self.thread_idx += 1
-        return ret
-    
-
-
-
-        
-        

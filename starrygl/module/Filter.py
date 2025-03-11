@@ -21,7 +21,7 @@ class Filter(nn.Module):
     """
     # Treat filter as parameter so that it is saved and loaded together with the model
     self.count = torch.zeros((self.n_nodes),1).to(self.device)
-    self.incretment = torch.zeros((self.n_nodes, self.memory_dimension)).to(self.device)
+    self.incretment = torch.zeros((self.n_nodes, self.memory_dimension),dtype=torch.float32).to(self.device)
 
 
   def get_count(self, node_idxs):
@@ -37,7 +37,7 @@ class Filter(nn.Module):
   
   def update(self, node_idxs, incret):
     self.count[node_idxs, :] = self.count[node_idxs, :] + 1
-    self.incretment[node_idxs, :] = self.incretment[node_idxs, :] + incret
+    self.incretment[node_idxs, :] = (self.incretment[node_idxs, :] + incret).to(self.incretment.dtype)
   
   def clear(self):
     self.count.zero_()

@@ -186,26 +186,7 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
         sample_out,metadata = sample_out
     else:
         metadata = None
-    #to_block(metadata['src_pos_index'],metadata['dst_pos_index'],metadata['dst_neg_index'],
-    #         metadata['seed'],metadata['seed_ts'],graph.nids_mapper,graph.eids_mapper,#device.type if "cpu" else str(device.index))
-    #root_len = len(metadata.pop('seed'))
-    #eid_inv = metadata.pop('eid_inv').clone()
-    #print('data {} {}\n'.format(data.edges,data.ts))
-    #first_block_id = metadata.pop('first_block_id').clone()
-    #print('first_block_id {}\n'.format(first_block_id))
-    #block_node_list = metadata.pop('block_node_list').clone()
-    #print('block_node_list {}\n'.format(block_node_list))
-    #unq_id = metadata.pop('unq_id').clone()
-    #print('unq id {}'.format(unq_id))
-    #dist_nid = metadata.pop('dist_nid').clone().to(device) 
-    #dist_eid = metadata.pop('dist_eid').clone().to(device) 
-    #print('dist nid {} dist eid {}\n'.format(dist_nid,dist_eid))
-    #print('block node list edge {} {}'.format(
-    #                                                      graph.ids[DistIndex(dist_nid[block_node_list[0,#unq_id]]).loc.to('cpu')],block_node_list[1,unq_id]
     eid_len = [ret.eid().shape[0] for ret in sample_out ]
-    # print(sample_out)
-    
-    t0 = time.time()
     eid = [ret.eid() for ret in sample_out]
     dst = [ret.sample_nodes() for ret in sample_out]
     dst_ts = [ret.sample_nodes_ts() for ret in sample_out]
@@ -237,13 +218,7 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
                 metadata[k] = metadata[k].to(device)
     nid_tensor = torch.cat([root_node,src_node],dim = 0)
     dist_nid = nid_mapper[nid_tensor].to(device)
-    #print(CountComm.origin_local,CountComm.origin_remote)
-    #for p in range(dist.get_world_size()):
-    #    print((DistIndex(dist_nid).part == p).sum().item())
-    #CountComm.origin_local = (DistIndex(dist_nid).part == dist.get_rank()).sum().item()
-    #CountComm.origin_remote =(DistIndex(dist_nid).part != dist.get_rank()).sum().item()
     dist_nid,nid_inv = dist_nid.unique(return_inverse=True)
-    #print('nid_tensor {} \n nid {}\n'.format(nid_tensor,dist_nid))
 
     """
     对于同id和同时间的节点去重取得index
@@ -258,13 +233,11 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
         first_block_id = torch.empty(first_index.shape[0],device=unq_id.device,dtype=unq_id.dtype)
         first_block_id[first_index] = torch.arange(first_index.shape[0],device=first_index.device,dtype=first_index.dtype)
         first_block_id = first_block_id[unq_id].contiguous()
-        block_node_list = block_node_list[:,first_index]
+        block_node_list = block_node_list[:,first_index].contiguous()
         #print('first block id {}\n unq id {} \n block_node_list {}\n'.format(first_block_id,unq_id,block_node_list))
         for k in metadata:
             if isinstance(metadata[k],torch.Tensor):
-                #print('{}:{}\n'.format(k,metadata[k]))
                 metadata[k] = first_block_id[metadata[k]]
-                #print('{}:{}\n'.format(k,metadata[k]))
         t2 = time.time()
     
         def build_block():
@@ -290,9 +263,6 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
                 if sample_out[r].delta_ts().shape[0] > 0:
                     b.edata['dt'] = sample_out[r].delta_ts().to(device)
                 b.srcdata['ts'] = block_node_list[1,b.srcnodes()].to(torch.float)
-                #weight =  sample_out[r].sample_weight()
-                #if(weight.shape[0] > 0):
-                #    b.edata['weight'] = 1/torch.clamp(sample_out[r].sample_weight(),0.0001).to(b.device)
                 b.edata['__ID'] = e_idx
                 col = row
                 col_len += eid_len[r]
@@ -348,9 +318,6 @@ def to_reversed_block(graph,data, sample_out,device = torch.device('cuda'),uniqu
     if identity is False:
         assert len(sample_out) == 1
         ret = sample_out[0]
-        eid_len = ret.eid().shape[0]
-        t0 = time.time()
-        dst_ts = ret.sample_nodes_ts().to(device)
         dst = nid_mapper[ret.sample_nodes()].to(device)
         dist_eid = torch.tensor([],dtype=torch.long,device=device)
         src_index = ret.src_index().to(device)
