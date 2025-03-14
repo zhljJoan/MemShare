@@ -496,7 +496,6 @@ def main():
             ones = torch.ones(metadata['dst_neg_index'].shape[0],device = model.device,dtype=torch.float)
             #with autocast():
             pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
-            ada_param.update_gnn_aggregate_time(ada_param.last_start_event_gnn_aggregate)
             #print(time_count.elapsed_event(t2))
             loss = creterion(pred_pos, torch.ones_like(pred_pos)) 
             if args.local_neg_sample is False:

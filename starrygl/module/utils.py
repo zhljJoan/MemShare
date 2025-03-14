@@ -80,7 +80,7 @@ class AdaParameter:
     start_event.record()
     return start_event
   def update_fetch_time(self,start_event):
-    if start_event is None:
+    if start_event is None or self.training:
       return
     end_event = torch.cuda.Event(enable_timing=True)
     end_event.record()
@@ -93,7 +93,7 @@ class AdaParameter:
 
 
   def update_memory_sync_time(self,start_event):
-    if start_event is None:
+    if start_event is None or self.training == False:
       return
     end_event = torch.cuda.Event(enable_timing=True)
     end_event.record()
@@ -104,7 +104,7 @@ class AdaParameter:
     self.end_event_memory_sync = (self.last_start_event_memory_sync,end_event)
 
   def update_memory_update_time(self,start_event):
-    if start_event is None:
+    if start_event is None or self.training == False:
       return
     end_event = torch.cuda.Event(enable_timing=True)
     end_event.record()
@@ -116,7 +116,7 @@ class AdaParameter:
   
   def update_gnn_aggregate_time(self,start_event):
 
-    if start_event is None:
+    if start_event is None or self.training == False:
       return
     end_event = torch.cuda.Event(enable_timing=True)
     end_event.record()
@@ -140,6 +140,8 @@ class AdaParameter:
     #print('beta is {} alpha is {}\n'.format(self.beta,self.alpha))
     #if self.count_fetch == 0 or self.count_memory_sync == 0 or self.count_memory_update == 0 or self.count_gnn_aggregate == 0:
     #  return
+    if self.training == False:
+      return
     if self.end_event_fetch is None or self.end_event_memory_sync is None or self.end_event_memory_update is None or self.end_event_gnn_aggregate is None:
       return
     self.end_event_fetch[1].synchronize()
@@ -160,7 +162,7 @@ class AdaParameter:
     average_memory_sync_time = self.average_memory_sync/self.count_memory_sync
     average_memory_update_time = self.average_memory_update/self.count_memory_update
     self.alpha = self.alpha - math.log(average_memory_update_time*(1+self.wait_threshold)) + math.log(average_memory_sync_time)
-    print(self.alpha)                                                                               
+    #print(self.alpha)                                                                               
     self.beta = max(min(self.beta, self.max_beta),self.min_beta)
     self.alpha = max(min(self.alpha, self.max_alpha),self.min_alpha)
     
