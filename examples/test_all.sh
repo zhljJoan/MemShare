@@ -2,14 +2,14 @@
 #跑了4卡的TaoBao
 # 定义数组变量
 seed=$1
-addr="192.168.1.105"
+addr="192.168.1.107"
 partition_params=("ours")
 #"metis" "ldg" "random")
 #("ours" "metis" "ldg" "random")
-partitions="4"
+partitions="16"
 node_per="4"
-nnodes="1"
-node_rank="0"
+nnodes="4"
+node_rank="1"
 probability_params=("0.1")
 sample_type_params=("boundery_recent_decay")
 #sample_type_params=("recent" "boundery_recent_decay") #"boundery_recent_uniform")
@@ -19,7 +19,8 @@ memory_type=("historical")
 #memory_type=("local" "all_update" "historical" "all_reduce")
 shared_memory_ssim=("0.3")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk")
-data_param=("WikiTalk" "StackOverflow" "GDELT") 
+data_param=("LASTFM" "WikiTalk")
+# "StackOverflow" "GDELT") 
 #"GDELT")
 #data_param=("WIKI" "REDDIT" "LASTFM" "DGraphFin" "WikiTalk" "StackOverflow")
 #data_param=("WIKI" "REDDIT" "LASTFM" "WikiTalk" "StackOverflow")
