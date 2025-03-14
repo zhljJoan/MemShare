@@ -281,6 +281,7 @@ class DistributedDataLoader:
         self.result_queue.append((batch_data,dist_nid,dist_eid,edge_feat,node_feat))
         self.submit()
         if self.ada_param is not None:
+           
             self.ada_param.last_start_event_fetch = self.ada_param.start_event()
 
     @torch.no_grad()
