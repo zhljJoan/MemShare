@@ -471,9 +471,6 @@ def main():
         for roots,mfgs,metadata in trainloader:
             end = time_count.elapsed_event(start)
             total += end
-            print('batch {} time {} {}\n'.format(b_cnt,end,total))
-            
-
             b_cnt = b_cnt + 1
 
             t1 = time_count.start_gpu()
@@ -511,7 +508,9 @@ def main():
                     ada_param.update_gnn_aggregate_time(ada_param.last_start_event_gnn_aggregate)
                 edge_feat[1].wait()
                 node_feat0[1].wait()
+               
                 if ada_param is not None:
+                    
                     ada_param.update_fetch_time(ada_param.last_start_event_fetch)
                     ada_param.update_parameter()
             loss.backward()
