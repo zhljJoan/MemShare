@@ -6,9 +6,9 @@ addr="192.168.1.107"
 partition_params=("ours")
 #"metis" "ldg" "random")
 #("ours" "metis" "ldg" "random")
-partitions="4"
+partitions="16"
 node_per="4"
-nnodes="1"
+nnodes="4"
 node_rank="0"
 probability_params=("0.1")
 sample_type_params=("boundery_recent_decay")
