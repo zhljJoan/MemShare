@@ -483,11 +483,13 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                         transition_dense -= transition_dense.min()
                         transition_dense /= transition_dense.max() 
                         transition_dense = 2*transition_dense - 1
-                    upd0[mask] = transition_dense.to(upd0.dtype)#b.srcdata['his_mem'][mask] + transition_dense
-                    updated_memory = torch.where(mask.unsqueeze(1),torch.sigmoid(self.gamma)*updated_memory0 + (1-torch.sigmoid(self.gamma))*(upd0),updated_memory0)
+                    upd0[mask] = transition_dense#b.srcdata['his_mem'][mask] + transition_dense
+                    #updated_memory = torch.where(mask.unsqueeze(1),torch.sigmoid(self.gamma)*updated_memory0 + (1-torch.sigmoid(self.gamma))*(upd0),updated_memory0)
+                    #updated_memory = torch.where(mask.unsqueeze(1),self.gamma*updated_memory0 + (1-self.gamma)*(upd0),updated_memory0)
                 else:
-                    #upd0[mask] = updated_memory0[mask]
-                    updated_memory = updated_memory0
+                    upd0[mask] = updated_memory0[mask]
+                    #updated_memory = updated_memory0
+            updated_memory = torch.where(mask.unsqueeze(1),torch.sigmoid(self.gamma)*updated_memory0 + (1-torch.sigmoid(self.gamma))*(upd0),updated_memory0)
             with torch.no_grad():
                 if self.mode == 'historical':
                     change = updated_memory[mask] - b.srcdata['his_mem'][mask]

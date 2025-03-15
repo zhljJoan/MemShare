@@ -72,6 +72,7 @@ class LocalNegativeSampling(NegativeSampling):
                 self.train_ratio_pos = 1.0/(1-prob+ prob * remote_ratio) if ((prob<1) & (prob > 0)) else 1
                 self.train_ratio_neg = 1.0/(prob*remote_ratio) if ((prob <1) & (prob > 0)) else 1
                 p = torch.rand(size=(num_samples,))
+                #print(prob,remote_ratio,self.train_ratio_pos,self.train_ratio_neg)
                 sr = self.dst_node_list[torch.randint(len(self.dst_node_list), (num_samples, ),generator=self.rdm)]
                 sl = self.local_dst[torch.randint(len(self.local_dst), (num_samples, ),generator=self.rdm)]
                 s=torch.where(p<=prob,sr,sl)

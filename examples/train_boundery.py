@@ -190,7 +190,7 @@ def query():
     "total_update_memory":total_update_memory,
     "total_remote_update":total_remote_update,}
 def main():   
-    torch.backends.cudnn.benchmark = True
+    #torch.backends.cudnn.benchmark = True
     #torch.autograd.set_detect_anomaly(True)
     print('LOCAL RANK {}, RANK{}'.format(os.environ["LOCAL_RANK"],os.environ["RANK"]))
     use_cuda = True
@@ -434,7 +434,7 @@ def main():
         cos = torch.nn.CosineSimilarity(dim=0)
         return cos(normalize(x1),normalize(x2)).sum()/x1.size(dim=0)
     creterion = torch.nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'])#,weight_decay=1e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'],weight_decay=1e-4)
     scaler = torch.cuda.amp.GradScaler()
     early_stopper = EarlyStopMonitor(max_round=args.patience)
     MODEL_SAVE_PATH = f'../saved_models/{args.model}-{args.dataname}-{dist.get_world_size()}.pth'
@@ -476,7 +476,7 @@ def main():
             t1 = time_count.start_gpu()
             if mailbox is not None:
                 if(graph.efeat.device.type != 'cpu'):
-                    edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')]).to('cuda',non_blocking=True)
+                    edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')]).to('cuda')#,non_blocking=True)
                 else:
                     edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')])
                 src = metadata['src_pos_index']
@@ -509,7 +509,7 @@ def main():
                 edge_feat[1].wait()
                 node_feat0[1].wait()
                
-                if ada_param is not None:
+                if ada_param is not None and e < 3:
                     
                     ada_param.update_fetch_time(ada_param.last_start_event_fetch)
                     ada_param.update_parameter()
@@ -597,6 +597,7 @@ def main():
         else:
             print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f} test ap {:4f} test auc{:4f}\n'.format(total_loss,train_ap, ap, auc,test_ap,test_auc))
             print('\ttotal time:{:.2f}s  prep time:{:.2f}s\n test time {:.2f}'.format(time.time()-epoch_start_time, time_prep,t_test))    
+            print('alpha is {} beta is {}'.format(ada_param.alpha,ada_param.beta))
             torch.save(model.module.state_dict(), get_checkpoint_path(e))
         if args.model == 'TGN':
             pass
