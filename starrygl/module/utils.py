@@ -167,12 +167,13 @@ class AdaParameter:
     #print(self.alpha)                                                                               
     self.beta = max(min(self.beta, self.max_beta),self.min_beta)
     self.alpha = max(min(self.alpha, self.max_alpha),self.min_alpha)
+    #print(self.count_fetch,self.count_memory_update,self.count_gnn_aggregate,self.count_memory_sync)
     #print(self.beta,self.alpha)
     ctx = DistributedContext.get_default_context()
-    beta_comm=torch.tensor([self.beta])
+    beta_comm=torch.tensor([self.beta],dtype=torch.float)
     torch.distributed.all_reduce(beta_comm,group=ctx.gloo_group)
     self.beta = beta_comm[0].item()/ctx.world_size
-    alpha_comm=torch.tensor([self.alpha])
+    alpha_comm=torch.tensor([self.alpha],dtype=torch.float)
     torch.distributed.all_reduce(alpha_comm,group=ctx.gloo_group)
     self.alpha = alpha_comm[0].item()/ctx.world_size
     #print('gnn aggregate {} fetch {} memory sync {} memory update {}'.format(average_gnn_aggregate,average_fetch,average_memory_sync_time,average_memory_update_time))
