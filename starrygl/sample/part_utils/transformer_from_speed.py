@@ -285,10 +285,10 @@ def load_from_speed(data,seed,top,sampler_graph_add_rev,device=torch.device('cud
     if ctx.memory_group_size == 1:
         return load_from_shared_node_partition(data,None,None,sample_add_rev=sampler_graph_add_rev,device=device,feature_device=feature_device)
     else:
-        node_i = '{}/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-        fnode_share = '{}/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
-        edge_i = '{}/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-        shared_node =  '{}/{}/reorder.txt'.format(data)
+        node_i = '{}/{}/{}/{}_{}parts_top{}/output{}.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+        shared_node = '{}/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top)
+        edge_i = '{}/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+      
         return load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev=sampler_graph_add_rev,edge_i=edge_i,reid=None,device=device,feature_device=feature_device)
 
 

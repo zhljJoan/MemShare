@@ -1,213 +1,0 @@
-[2024-04-06 20:46:53,051] torch.distributed.run: [WARNING] 
-[2024-04-06 20:46:53,051] torch.distributed.run: [WARNING] *****************************************
-[2024-04-06 20:46:53,051] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
-[2024-04-06 20:46:53,051] torch.distributed.run: [WARNING] *****************************************
-WARNING: CPU IP/backtrace sampling not supported, disabling.
-WARNING: CPU IP/backtrace sampling not supported, disabling.
-WARNING: CPU IP/backtrace sampling not supported, disabling.
-WARNING: CPU IP/backtrace sampling not supported, disabling.
-Try the 'nsys status --environment' command to learn more.
-
-Try the 'nsys status --environment' command to learn more.
-
-Try the 'nsys status --environment' command to learn more.
-
-Try the 'nsys status --environment' command to learn more.
-
-WARNING: CPU context switch tracing not supported, disabling.
-WARNING: CPU context switch tracing not supported, disabling.
-WARNING: CPU context switch tracing not supported, disabling.
-WARNING: CPU context switch tracing not supported, disabling.
-Try the 'nsys status --environment' command to learn more.
-
-Try the 'nsys status --environment' command to learn more.
-
-Try the 'nsys status --environment' command to learn more.
-
-Try the 'nsys status --environment' command to learn more.
-
-libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': dlopen hook: 'libsiw-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': dlopen hook: 'libbnxt_re-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': dlopen hook: 'libhns-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': dlopen hook: 'libqedr-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': dlopen hook: 'libmthca-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': dlopen hook: 'libcxgb4-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': dlopen hook: 'libhfi1verbs-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': dlopen hook: 'libmlx4-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': dlopen hook: 'libefa-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': dlopen hook: 'libipathverbs-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': dlopen hook: 'libocrdma-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': dlopen hook: 'libvmw_pvrdma-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': dlopen hook: 'librxe-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': dlopen hook: 'libsiw-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': dlopen hook: 'libbnxt_re-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': dlopen hook: 'libhns-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': dlopen hook: 'libqedr-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': dlopen hook: 'libmthca-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': dlopen hook: 'libcxgb4-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': dlopen hook: 'libhfi1verbs-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': dlopen hook: 'libmlx4-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': dlopen hook: 'libefa-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': dlopen hook: 'libipathverbs-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': dlopen hook: 'libocrdma-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': dlopen hook: 'libvmw_pvrdma-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': dlopen hook: 'librxe-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': dlopen hook: 'libsiw-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': dlopen hook: 'libbnxt_re-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': dlopen hook: 'libhns-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': dlopen hook: 'libsiw-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': dlopen hook: 'libqedr-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': dlopen hook: 'libbnxt_re-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': dlopen hook: 'libmthca-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': dlopen hook: 'libhns-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': dlopen hook: 'libcxgb4-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': dlopen hook: 'libqedr-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': dlopen hook: 'libhfi1verbs-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': dlopen hook: 'libmthca-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': dlopen hook: 'libmlx4-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': dlopen hook: 'libcxgb4-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': dlopen hook: 'libefa-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': dlopen hook: 'libhfi1verbs-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': dlopen hook: 'libipathverbs-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': dlopen hook: 'libmlx4-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': dlopen hook: 'libocrdma-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': dlopen hook: 'libefa-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': dlopen hook: 'libvmw_pvrdma-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': dlopen hook: 'libipathverbs-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': dlopen hook: 'librxe-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': dlopen hook: 'libocrdma-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': dlopen hook: 'libvmw_pvrdma-rdmav34.so': cannot open shared object file: No such file or directory
-libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': dlopen hook: 'librxe-rdmav34.so': cannot open shared object file: No such file or directory
-get_neighbors consume: 13.7136s
-get_neighbors consume: 14.0445s
-get_neighbors consume: 13.9983s
-get_neighbors consume: 14.1126s
-LOCAL RANK 0, RANK0
-use cuda on 0
-tensor([        0,         0,         1,  ..., 191290880, 191290881,
-        191290881])
-16682
-num_batchs: tensor([16513], device='cuda:0')
-num_batchs: tensor([3767], device='cuda:0')
-num_batchs: tensor([4666], device='cuda:0')
-Epoch 0:
-Traceback (most recent call last):
-  File "/home/zlj/starrygl-historical/starrygl/examples/train_tgnn.py", line 429, in <module>
-    main()
-  File "/home/zlj/starrygl-historical/starrygl/examples/train_tgnn.py", line 378, in main
-    mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
-  File "/home/zlj/starrygl-historical/starrygl/starrygl/sample/memory/shared_mailbox.py", line 282, in set_mailbox_all_to_all
-    torch.distributed.all_to_all_single(
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/c10d_logger.py", line 47, in wrapper
-    return func(*args, **kwargs)
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py", line 3528, in all_to_all_single
-LOCAL RANK 2, RANK2
-use cuda on 2
-tensor([        0,         0,         1,  ..., 191290880, 191290881,
-        191290881])
-16682
-num_batchs: tensor([17891], device='cuda:2')
-num_batchs: tensor([4235], device='cuda:2')
-num_batchs: tensor([5167], device='cuda:2')
-Epoch 0:
-Traceback (most recent call last):
-  File "/home/zlj/starrygl-historical/starrygl/examples/train_tgnn.py", line 429, in <module>
-LOCAL RANK 1, RANK1
-use cuda on 1
-tensor([        0,         0,         1,  ..., 191290880, 191290881,
-        191290881])
-16682
-num_batchs: tensor([16241], device='cuda:1')
-num_batchs: tensor([3498], device='cuda:1')
-num_batchs: tensor([4388], device='cuda:1')
-Epoch 0:
-Traceback (most recent call last):
-  File "/home/zlj/starrygl-historical/starrygl/examples/train_tgnn.py", line 429, in <module>
-    main()
-  File "/home/zlj/starrygl-historical/starrygl/examples/train_tgnn.py", line 378, in main
-    work = default_pg.alltoall_base(
-RuntimeError: Split sizes doesn't match total dim 0 size
-    mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
-  File "/home/zlj/starrygl-historical/starrygl/starrygl/sample/memory/shared_mailbox.py", line 282, in set_mailbox_all_to_all
-    torch.distributed.all_to_all_single(
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/c10d_logger.py", line 47, in wrapper
-    return func(*args, **kwargs)
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py", line 3528, in all_to_all_single
-    main()
-  File "/home/zlj/starrygl-historical/starrygl/examples/train_tgnn.py", line 378, in main
-    mailbox.set_mailbox_all_to_all(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max')
-  File "/home/zlj/starrygl-historical/starrygl/starrygl/sample/memory/shared_mailbox.py", line 282, in set_mailbox_all_to_all
-    torch.distributed.all_to_all_single(
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/c10d_logger.py", line 47, in wrapper
-    return func(*args, **kwargs)
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py", line 3528, in all_to_all_single
-    work = default_pg.alltoall_base(
-RuntimeError: Split sizes doesn't match total dim 0 size
-    work = default_pg.alltoall_base(
-RuntimeError: Split sizes doesn't match total dim 0 size
-Generating '/tmp/nsys-report-e3cf.qdstrm'
-[1/1] [0%                          ] profile.nsys-rep[1/1] [0%                          ] profile.nsys-rep[1/1] [=17%                        ] profile.nsys-rep[1/1] [======34%                   ] profile.nsys-rep[1/1] [9%                          ] profile.nsys-rep[1/1] [5%                          ] profile.nsys-rep[1/1] [6%                          ] profile.nsys-rep[1/1] [7%                          ] profile.nsys-rep[1/1] [8%                          ] profile.nsys-rep[1/1] [9%                          ] profile.nsys-rep[1/1] [10%                         ] profile.nsys-rep[1/1] [11%                         ] profile.nsys-rep[1/1] [12%                         ] profile.nsys-rep[1/1] [13%                         ] profile.nsys-rep[1/1] [14%                         ] profile.nsys-rep[1/1] [10%                         ] profile.nsys-rep[1/1] [7%                          ] profile.nsys-rep[1/1] [6%                          ] profile.nsys-rep[1/1] [5%                          ] profile.nsys-repFailed to create '/home/zlj/starrygl-historical/starrygl/examples/profile.nsys-rep': File exists.
-Use `--force-overwrite true` to overwrite existing files.
-Generating '/tmp/nsys-report-f816.qdstrm'
-[1/1] [0%                          ] nsys-report-ebe0.nsys-repFailed to create '/home/zlj/starrygl-historical/starrygl/examples/profile.nsys-rep': File exists.
-Use `--force-overwrite true` to overwrite existing files.
-Generating '/tmp/nsys-report-0aea.qdstrm'
-[1/1] [0%                          ] nsys-report-6e84.nsys-rep[1/1] [0%                          ] nsys-report-ebe0.nsys-rep[1/1] [=17%                        ] nsys-report-ebe0.nsys-rep[1/1] [======34%                   ] nsys-report-ebe0.nsys-rep[1/1] [9%                          ] nsys-report-ebe0.nsys-rep[1/1] [10%                         ] nsys-report-ebe0.nsys-rep[1/1] [11%                         ] nsys-report-ebe0.nsys-rep[1/1] [12%                         ] nsys-report-ebe0.nsys-rep[1/1] [13%                         ] nsys-report-ebe0.nsys-rep[1/1] [14%                         ] nsys-report-ebe0.nsys-rep[1/1] [=15%                        ] nsys-report-ebe0.nsys-rep[1/1] [=16%                        ] nsys-report-ebe0.nsys-rep[1/1] [=17%                        ] nsys-report-ebe0.nsys-rep[1/1] [==18%                       ] nsys-report-ebe0.nsys-rep[1/1] [==19%                       ] nsys-report-ebe0.nsys-rep[1/1] [==20%                       ] nsys-report-ebe0.nsys-rep[1/1] [==21%                       ] nsys-report-ebe0.nsys-rep[1/1] [===22%                      ] nsys-report-ebe0.nsys-rep[1/1] [===23%                      ] nsys-report-ebe0.nsys-rep[1/1] [===24%                      ] nsys-report-ebe0.nsys-rep[1/1] [===23%                      ] nsys-report-ebe0.nsys-rep[1/1] [13%                         ] nsys-report-ebe0.nsys-rep[1/1] [14%                         ] nsys-report-ebe0.nsys-rep[1/1] [10%                         ] nsys-report-ebe0.nsys-rep[1/1] [7%                          ] nsys-report-ebe0.nsys-rep[1/1] [6%                          ] nsys-report-ebe0.nsys-rep[1/1] [5%                          ] nsys-report-ebe0.nsys-rep[1/1] [0%                          ] nsys-report-6e84.nsys-rep[1/1] [=17%                        ] nsys-report-6e84.nsys-rep[1/1] [======35%                   ] nsys-report-6e84.nsys-rep[1/1] [9%                          ] nsys-report-6e84.nsys-rep[1/1] [10%                         ] nsys-report-6e84.nsys-rep[1/1] [11%                         ] nsys-report-6e84.nsys-rep[1/1] [12%                         ] nsys-report-6e84.nsys-rep[1/1] [13%                         ] nsys-report-6e84.nsys-rep[1/1] [14%                         ] nsys-report-6e84.nsys-rep[1/1] [=15%                        ] nsys-report-6e84.nsys-rep[1/1] [=16%                        ] nsys-report-6e84.nsys-rep[1/1] [=17%                        ] nsys-report-6e84.nsys-rep[1/1] [==18%                       ] nsys-report-6e84.nsys-rep[1/1] [10%                         ] nsys-report-6e84.nsys-rep[1/1] [11%                         ] nsys-report-6e84.nsys-rep[1/1] [12%                         ] nsys-report-6e84.nsys-rep[1/1] [13%                         ] nsys-report-6e84.nsys-rep[1/1] [14%                         ] nsys-report-6e84.nsys-rep[1/1] [10%                         ] nsys-report-6e84.nsys-rep[1/1] [7%                          ] nsys-report-6e84.nsys-rep[1/1] [6%                          ] nsys-report-6e84.nsys-rep[1/1] [5%                          ] nsys-report-6e84.nsys-rep[1/1] [7%                          ] profile.nsys-rep[1/1] [11%                         ] profile.nsys-rep[1/1] [14%                         ] profile.nsys-rep[1/1] [==18%                       ] profile.nsys-rep[1/1] [==21%                       ] profile.nsys-rep[1/1] [====25%                     ] profile.nsys-rep[1/1] [====28%                     ] profile.nsys-rep[1/1] [=====32%                    ] profile.nsys-rep[1/1] [======35%                   ] profile.nsys-rep[1/1] [=======39%                  ] profile.nsys-rep[1/1] [========42%                 ] profile.nsys-rep[1/1] [=========46%                ] profile.nsys-rep[1/1] [==========49%               ] profile.nsys-rep[1/1] [===========53%              ] profile.nsys-rep[1/1] [============56%             ] profile.nsys-rep[1/1] [=============60%            ] profile.nsys-rep[1/1] [==============63%           ] profile.nsys-rep[1/1] [===============67%          ] profile.nsys-rep[1/1] [================70%         ] profile.nsys-rep[1/1] [=================74%        ] profile.nsys-rep[1/1] [==================77%       ] profile.nsys-rep[1/1] [===================81%      ] profile.nsys-rep[1/1] [====================84%     ] profile.nsys-rep[1/1] [=====================88%    ] profile.nsys-rep[1/1] [======================91%   ] profile.nsys-rep[1/1] [=======================94%  ] profile.nsys-rep[1/1] [========================98% ] profile.nsys-rep[1/1] [6%                          ] nsys-report-ebe0.nsys-rep[1/1] [9%                          ] nsys-report-ebe0.nsys-rep[1/1] [13%                         ] nsys-report-ebe0.nsys-rep[1/1] [=16%                        ] nsys-report-ebe0.nsys-rep[1/1] [==19%                       ] nsys-report-ebe0.nsys-rep[1/1] [===22%                      ] nsys-report-ebe0.nsys-rep[1/1] [====25%                     ] nsys-report-ebe0.nsys-rep[1/1] [7%                          ] nsys-report-6e84.nsys-rep[1/1] [====28%                     ] nsys-report-ebe0.nsys-rep[1/1] [11%                         ] nsys-report-6e84.nsys-rep[1/1] [=====31%                    ] nsys-report-ebe0.nsys-rep[1/1] [14%                         ] nsys-report-6e84.nsys-rep[1/1] [======34%                   ] nsys-report-ebe0.nsys-rep[1/1] [========================99% ] profile.nsys-rep[1/1] [========================100%] profile.nsys-rep[1/1] [==18%                       ] nsys-report-6e84.nsys-rep[1/1] [=======37%                  ] nsys-report-ebe0.nsys-rep[1/1] [==21%                       ] nsys-report-6e84.nsys-rep[1/1] [========40%                 ] nsys-report-ebe0.nsys-rep[1/1] [====25%                     ] nsys-report-6e84.nsys-rep[1/1] [=========43%                ] nsys-report-ebe0.nsys-rep[1/1] [====28%                     ] nsys-report-6e84.nsys-rep[1/1] [=========46%                ] nsys-report-ebe0.nsys-rep[1/1] [=====32%                    ] nsys-report-6e84.nsys-rep[1/1] [==========49%               ] nsys-report-ebe0.nsys-rep[1/1] [===========52%              ] nsys-report-ebe0.nsys-rep[1/1] [======35%                   ] nsys-report-6e84.nsys-rep[1/1] [============55%             ] nsys-report-ebe0.nsys-rep[1/1] [=======39%                  ] nsys-report-6e84.nsys-rep[1/1] [=============58%            ] nsys-report-ebe0.nsys-rep[1/1] [========42%                 ] nsys-report-6e84.nsys-rep[1/1] [==============62%           ] nsys-report-ebe0.nsys-rep[1/1] [=========46%                ] nsys-report-6e84.nsys-rep[1/1] [===============65%          ] nsys-report-ebe0.nsys-rep[1/1] [==========49%               ] nsys-report-6e84.nsys-rep[1/1] [================68%         ] nsys-report-ebe0.nsys-rep[1/1] [===========53%              ] nsys-report-6e84.nsys-rep[1/1] [================71%         ] nsys-report-ebe0.nsys-rep[1/1] [============57%             ] nsys-report-6e84.nsys-rep[1/1] [=================74%        ] nsys-report-ebe0.nsys-rep[1/1] [=============60%            ] nsys-report-6e84.nsys-rep[1/1] [==================77%       ] nsys-report-ebe0.nsys-rep[1/1] [==============64%           ] nsys-report-6e84.nsys-rep[1/1] [===================80%      ] nsys-report-ebe0.nsys-rep[1/1] [========================100%] profile.nsys-rep
-Generated:
-    /home/zlj/starrygl-historical/starrygl/examples/profile.nsys-rep
-[1/1] [===============67%          ] nsys-report-6e84.nsys-rep[1/1] [====================83%     ] nsys-report-ebe0.nsys-rep[1/1] [================71%         ] nsys-report-6e84.nsys-rep[1/1] [=====================86%    ] nsys-report-ebe0.nsys-rep[1/1] [=================74%        ] nsys-report-6e84.nsys-rep[1/1] [=====================89%    ] nsys-report-ebe0.nsys-rep[1/1] [==================78%       ] nsys-report-6e84.nsys-rep[1/1] [======================92%   ] nsys-report-ebe0.nsys-rep[1/1] [===================81%      ] nsys-report-6e84.nsys-rep[1/1] [=======================95%  ] nsys-report-ebe0.nsys-rep[1/1] [====================85%     ] nsys-report-6e84.nsys-rep[1/1] [========================98% ] nsys-report-ebe0.nsys-rep[1/1] [=====================88%    ] nsys-report-6e84.nsys-rep[1/1] [======================92%   ] nsys-report-6e84.nsys-rep[1/1] [=======================95%  ] nsys-report-6e84.nsys-rep[1/1] [========================98% ] nsys-report-6e84.nsys-rep[1/1] [========================99% ] nsys-report-ebe0.nsys-rep[1/1] [========================100%] nsys-report-ebe0.nsys-rep[1/1] [========================99% ] nsys-report-6e84.nsys-rep[1/1] [========================100%] nsys-report-6e84.nsys-rep[1/1] [========================100%] nsys-report-ebe0.nsys-rep
-Generated:
-    /tmp/nsys-report-ebe0.nsys-rep
-[1/1] [========================100%] nsys-report-6e84.nsys-rep
-Generated:
-    /tmp/nsys-report-6e84.nsys-rep
-[2024-04-06 20:48:28,332] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 2059716 closing signal SIGTERM
-Failed to create '/home/zlj/starrygl-historical/starrygl/examples/profile.nsys-rep': File exists.
-Use `--force-overwrite true` to overwrite existing files.
-Generating '/tmp/nsys-report-2607.qdstrm'
-[1/1] [0%                          ] nsys-report-fa69.nsys-rep[1/1] [0%                          ] nsys-report-fa69.nsys-rep[1/1] [14%                         ] nsys-report-fa69.nsys-rep[1/1] [====28%                     ] nsys-report-fa69.nsys-rep[1/1] [8%                          ] nsys-report-fa69.nsys-rep[1/1] [9%                          ] nsys-report-fa69.nsys-rep[1/1] [10%                         ] nsys-report-fa69.nsys-rep[1/1] [11%                         ] nsys-report-fa69.nsys-rep[1/1] [12%                         ] nsys-report-fa69.nsys-rep[1/1] [13%                         ] nsys-report-fa69.nsys-rep[1/1] [14%                         ] nsys-report-fa69.nsys-rep[1/1] [=15%                        ] nsys-report-fa69.nsys-rep[1/1] [=16%                        ] nsys-report-fa69.nsys-rep[1/1] [=17%                        ] nsys-report-fa69.nsys-rep[1/1] [==18%                       ] nsys-report-fa69.nsys-rep[1/1] [==19%                       ] nsys-report-fa69.nsys-rep[1/1] [==20%                       ] nsys-report-fa69.nsys-rep[1/1] [==21%                       ] nsys-report-fa69.nsys-rep[1/1] [===22%                      ] nsys-report-fa69.nsys-rep[1/1] [===23%                      ] nsys-report-fa69.nsys-rep[1/1] [13%                         ] nsys-report-fa69.nsys-rep[1/1] [14%                         ] nsys-report-fa69.nsys-rep[1/1] [=15%                        ] nsys-report-fa69.nsys-rep[1/1] [=16%                        ] nsys-report-fa69.nsys-rep[1/1] [=17%                        ] nsys-report-fa69.nsys-rep[1/1] [12%                         ] nsys-report-fa69.nsys-rep[1/1] [9%                          ] nsys-report-fa69.nsys-rep[1/1] [7%                          ] nsys-report-fa69.nsys-rep[1/1] [6%                          ] nsys-report-fa69.nsys-rep[1/1] [5%                          ] nsys-report-fa69.nsys-rep[1/1] [7%                          ] nsys-report-fa69.nsys-rep[1/1] [10%                         ] nsys-report-fa69.nsys-rep[1/1] [13%                         ] nsys-report-fa69.nsys-rep[1/1] [=16%                        ] nsys-report-fa69.nsys-rep[1/1] [==19%                       ] nsys-report-fa69.nsys-rep[1/1] [===23%                      ] nsys-report-fa69.nsys-rep[1/1] [====26%                     ] nsys-report-fa69.nsys-rep[1/1] [=====29%                    ] nsys-report-fa69.nsys-rep[1/1] [=====32%                    ] nsys-report-fa69.nsys-rep[1/1] [======35%                   ] nsys-report-fa69.nsys-rep[1/1] [=======38%                  ] nsys-report-fa69.nsys-rep[1/1] [========42%                 ] nsys-report-fa69.nsys-rep[1/1] [=========45%                ] nsys-report-fa69.nsys-rep[1/1] [==========48%               ] nsys-report-fa69.nsys-rep[1/1] [===========51%              ] nsys-report-fa69.nsys-rep[1/1] [============54%             ] nsys-report-fa69.nsys-rep[1/1] [============57%             ] nsys-report-fa69.nsys-rep[1/1] [==============61%           ] nsys-report-fa69.nsys-rep[1/1] [==============64%           ] nsys-report-fa69.nsys-rep[1/1] [===============67%          ] nsys-report-fa69.nsys-rep[1/1] [================70%         ] nsys-report-fa69.nsys-rep[1/1] [=================73%        ] nsys-report-fa69.nsys-rep[1/1] [==================76%       ] nsys-report-fa69.nsys-rep[1/1] [===================79%      ] nsys-report-fa69.nsys-rep[1/1] [====================83%     ] nsys-report-fa69.nsys-rep[1/1] [=====================86%    ] nsys-report-fa69.nsys-rep[1/1] [=====================89%    ] nsys-report-fa69.nsys-rep[1/1] [======================92%   ] nsys-report-fa69.nsys-rep[1/1] [=======================95%  ] nsys-report-fa69.nsys-rep[1/1] [========================98% ] nsys-report-fa69.nsys-rep[1/1] [========================99% ] nsys-report-fa69.nsys-rep[1/1] [========================100%] nsys-report-fa69.nsys-rep[1/1] [========================100%] nsys-report-fa69.nsys-rep
-Generated:
-    /tmp/nsys-report-fa69.nsys-rep
-[2024-04-06 20:48:35,854] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 2059713) of binary: nsys
-Traceback (most recent call last):
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 8, in <module>
-    sys.exit(main())
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
-    return f(*args, **kwargs)
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
-    run(args)
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
-    elastic_launch(
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
-    return launch_agent(self._config, self._entrypoint, list(args))
-  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 264, in launch_agent
-    raise ChildFailedError(
-torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
-============================================================
-nsys FAILED
-------------------------------------------------------------
-Failures:
-[1]:
-  time      : 2024-04-06_20:48:28
-  host      : gpu07
-  rank      : 1 (local_rank: 1)
-  exitcode  : 1 (pid: 2059714)
-  error_file: <N/A>
-  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
-[2]:
-  time      : 2024-04-06_20:48:28
-  host      : gpu07
-  rank      : 2 (local_rank: 2)
-  exitcode  : 1 (pid: 2059715)
-  error_file: <N/A>
-  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
-------------------------------------------------------------
-Root Cause (first observed failure):
-[0]:
-  time      : 2024-04-06_20:48:28
-  host      : gpu07
-  rank      : 0 (local_rank: 0)
-  exitcode  : 1 (pid: 2059713)
-  error_file: <N/A>
-  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
-============================================================

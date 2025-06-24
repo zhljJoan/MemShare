@@ -396,8 +396,6 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                         transition_dense /= transition_dense.max() 
                         transition_dense = 2*transition_dense - 1
                     upd0[mask] = transition_dense#b.srcdata['his_mem'][mask] + transition_dense
-                    #updated_memory = torch.where(mask.unsqueeze(1),torch.sigmoid(self.gamma)*updated_memory0 + (1-torch.sigmoid(self.gamma))*(upd0),updated_memory0)
-                    #updated_memory = torch.where(mask.unsqueeze(1),self.gamma*updated_memory0 + (1-self.gamma)*(upd0),updated_memory0)
                 else:
                     upd0[mask] = updated_memory0[mask]
                     #updated_memory = updated_memory0
@@ -425,10 +423,6 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                                                     self.last_updated_memory, 
                                                     None,False,False,block=b
                                                 )
-                    #print(index.shape[0])
-                    #if torch.distributed.get_world_size() == 0:
-                    #    self.mailbox.mon.add(index,self.mailbox.node_memory.accessor.data[index],memory)
-                    ##print(index.shape,memory.shape,memory_ts.shape,mail.shape,mail_ts.shape)
                     local_mask = (DistIndex(index).part==torch.distributed.get_rank())
                     local_mask_mail = (DistIndex(index0).part==torch.distributed.get_rank())
                     self.mailbox.set_mailbox_local(DistIndex(index0[local_mask_mail]).loc,mail[local_mask_mail],mail_ts[local_mask_mail],Reduce_Op = 'max')
