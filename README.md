@@ -1,4 +1,4 @@
-# TGL: A General Framework for Temporal Graph Training on Billion-Scale Graphs
+# Effective and Efficient Distributed Temporal Graph Learning through Hotspot Memory Sharing
 
 ## Overview
 
@@ -37,6 +37,7 @@ The format of configuration files is follow TGL and are located at `/config/`
 
 ### MultiGPU Link Prediction
 >cd examples
+
 >torchrun --nnodes \<NumberOfMachines> --node_rank \<RankOfGPUs> --nproc-per-node \<NumberOfGPUsperMachine> --master-addr \<addr> --master-port \<port>  train_boundery.py --dataname \<NameOfYourDATA> --mode \<Model> --partition \<PartitionFile> --topk \<RatioOfHotNodes> --sample_type \<PartitionMethod(boundary_recent_decayl/recent/local)> --probability \<BoundaryDecaySamplingProbability> --memory_type \<MemoryUpdateType(historical/all_update/local)> --shared_memory_ssim \<MemoryInspectionThreshold> --seed \<RandomSeed>  
 
 \<PartitionFile> contains three files, including:
