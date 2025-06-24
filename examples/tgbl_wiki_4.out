@@ -1,0 +1,38 @@
+LOCAL RANK 0, RANK0
+initlize distributed
+use cuda on 0
+9227
+get_neighbors consume: 0.0121001s
+raw file found, skipping download
+Dataset directory is  /home/zlj/.miniconda3/envs/dgnn-3.10/lib/python3.10/site-packages/tgb/datasets/tgbl_wiki
+loading processed file
+998
+998
+val metric
+
+metric hits@ is 0.5399417177408556
+
+metric mrr is 0.2723149118104061
+
+metric ap is 0.05431445631127528
+
+metric auc is 0.934435814512715
+
+
+
+998
+998
+test metric
+
+metric hits@ is 0.4802390880222562
+
+metric mrr is 0.23669700951704495
+
+metric ap is 0.040643292031104734
+
+metric auc is 0.923300786458167
+
+
+
+test_dataset 23621 avg_time 0.0 
+

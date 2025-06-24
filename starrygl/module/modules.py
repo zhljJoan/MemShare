@@ -69,13 +69,14 @@ class NegFixLayer(torch.autograd.Function):
 
 class GeneralModel(torch.nn.Module):
 
-    def __init__(self, dim_node, dim_edge, sample_param, memory_param, gnn_param, train_param, num_nodes = None,mailbox = None,combined=False,train_ratio = None):
+    def __init__(self, dim_node, dim_edge, sample_param, memory_param, gnn_param, train_param, num_nodes = None,mailbox = None,combined=False,train_ratio = None,ada_param = None):
         super(GeneralModel, self).__init__()
         self.dim_node = dim_node
         self.dim_node_input = dim_node
         self.dim_edge = dim_edge
         self.sample_param = sample_param
         self.memory_param = memory_param
+        self.ada_param = ada_param
         #self.train_pos_ratio,self.train_neg_ratio = train_ratio
         if not 'dim_out' in gnn_param:
             gnn_param['dim_out'] = memory_param['dim_out']
@@ -84,26 +85,14 @@ class GeneralModel(torch.nn.Module):
         #self.neg_fix_layer = NegFixLayer()
         if memory_param['type'] == 'node':
             if memory_param['memory_update'] == 'gru':
-                #if memory_param['async'] == False:
-                #    self.memory_updater = GRUMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node)
-                #else:
                 updater = torch.nn.GRUCell
-                #    if memory_param['historical_fix'] == False:
-                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'])
-                #    else:
-                #        self.memory_updater = HistoricalMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node,updater=updater,learnable=True,num_nodes=num_nodes)
+                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'],ada_param=ada_param)
             elif memory_param['memory_update'] == 'rnn':
-                #if memory_param['async'] == False:
-                #    self.memory_updater = RNNMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node)
-                #else:
                 updater = torch.nn.RNNCell
-                    #if memory_param['historical_fix'] == False:
-                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'])
-                #    else:
-                #        self.memory_updater = HistoricalMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node,updater=updater,learnable=True,num_nodes=num_nodes)
+                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'],ada_param=ada_param)
             elif memory_param['memory_update'] == 'transformer':
                 updater = TransformerMemoryUpdater
-                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'],train_param=train_param)
+                self.memory_updater = AsyncMemeoryUpdater(memory_param, 2 * memory_param['dim_out'] + dim_edge, memory_param['dim_out'], memory_param['dim_time'], dim_node, updater=updater, mailbox=mailbox, mode = memory_param['mode'],train_param=train_param,ada_param=ada_param)
             else:
                 raise NotImplementedError
             self.dim_node_input = memory_param['dim_out']
@@ -154,24 +143,7 @@ class GeneralModel(torch.nn.Module):
         h_pos_src = out[metadata['src_pos_index']]
         h_pos_dst = out[metadata['dst_pos_index']]
         h_neg_dst = out[metadata['dst_neg_index']]
-    
-        #end.record()
-        #end.synchronize()
-        #elapsed_time_ms = start.elapsed_time(end)
-        #print('time {}\n'.format(elapsed_time_ms))
-        #print('pos src {} \n pos dst {} \n neg dst{} \n'.format(h_pos_src, h_pos_dst,h_neg_dst))
-        #print('pre predict {}'.format(mfgs[0][0].srcdata['ID']))
-        #if self.training is True:
-        #    with torch.no_grad():
-        #        ones = torch.ones(h_neg_dst.shape[0],device = h_neg_dst.device,dtype=torch.float)
-        #        weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones/self.train_pos_ratio,ones/self.train_neg_ratio).reshape(-1,1)
-                #weight = torch.clip(weigh)
-                #weight = weight/weight.max().item()
-                #print(weight)
-                #weight = 
-            #h_neg_dst*weight
-        #    pred = self.edge_predictor(h_pos_src, h_pos_dst, None , self.neg_fix_layer.apply(h_neg_dst,weight), neg_samples=neg_samples, mode = mode)
-        #else:
+
         pred = self.edge_predictor(h_pos_src, h_pos_dst, None , h_neg_dst, neg_samples=neg_samples, mode = mode)
         t_embedding = tt.elapsed_event(t1)
         tt.time_embedding+=t_embedding

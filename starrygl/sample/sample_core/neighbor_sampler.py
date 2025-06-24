@@ -96,8 +96,8 @@ class NeighborSampler(BaseSampler):
         local_part = -1,
         node_part = None,
         edge_part = None,
-        probability = 1,
         no_neg = False,
+        ada_param = None
     ) -> None:
         r"""__init__
         Args:
@@ -140,9 +140,9 @@ class NeighborSampler(BaseSampler):
         else:
             assert tnb is not None
             self.tnb = tnb
-
+        self.ada_param = ada_param
         self.p_sampler = starrygl.sampler_ops.ParallelSampler(self.tnb, num_nodes, graph_data.num_edges, workers, 
-                                         fanout, num_layers, policy, local_part,edge_part.to(torch.int),node_part.to(torch.int),probability)
+                                         fanout, num_layers, policy, local_part,edge_part.to(torch.int),node_part.to(torch.int),ada_param.beta)
         
     def _get_sample_info(self):
         return self.num_nodes,self.num_layers,self.fanout,self.workers
@@ -229,7 +229,7 @@ class NeighborSampler(BaseSampler):
             sampled_edge_index_list: the edge sampled
         """
         if self.policy != 'identity':
-            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), ts.contiguous(), None)
+            self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), ts.contiguous(), None, self.ada_param.beta if self.ada_param is not None else None)
             ret = self.p_sampler.get_ret()
         else:
             ret = None
@@ -332,6 +332,9 @@ class NeighborSampler(BaseSampler):
         metadata['seed_ts'] = seed_ts
         metadata['src_pos_index']=src_pos_index
         metadata['dst_pos_index']=dst_pos_index
+        if 'train_ratio_pos' in neg_sampling.__dict__:
+            metadata['train_ratio_pos'] = neg_sampling.train_ratio_pos
+            metadata['train_ratio_neg'] = neg_sampling.train_ratio_neg
         if neg_sampling is not None :
             metadata['dst_neg_index'] = dst_neg_index
             if neg_sampling.is_triplet() or neg_sampling.is_tgbtriplet():

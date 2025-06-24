@@ -33,11 +33,11 @@ class time_count:
     def start_gpu():
         # Uncomment for better breakdown timings
         #torch.cuda.synchronize()
-        #start_event = torch.cuda.Event(enable_timing=True)
-        #end_event = torch.cuda.Event(enable_timing=True)
-        #start_event.record()
-        #return start_event,end_event
-        return 0,0
+        start_event = torch.cuda.Event(enable_timing=True)
+        end_event = torch.cuda.Event(enable_timing=True)
+        start_event.record()
+        return start_event,end_event
+        #return 0,0
     @staticmethod
     def start():
        # return time.perf_counter(),0 

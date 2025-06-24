@@ -1,6 +1,9 @@
 import yaml
 import numpy as np
+import torch
+import math
 
+from starrygl.distributed.context import DistributedContext
 def parse_config(f):
     conf = yaml.safe_load(open(f, 'r'))
     sample_param = conf['sampling'][0]
@@ -36,3 +39,116 @@ class EarlyStopMonitor(object):
     self.epoch_count += 1
 
     return self.num_round >= self.max_round
+  
+class AdaParameter:
+  def __init__(self, wait_threshold=0.1, init_beta = 0.1 ,init_alpha = 0.1, min_beta = 0.01, max_beta = 0.8, min_alpha = 0.1, max_alpha = 1):
+    self.wait_threshold = wait_threshold
+    self.beta = init_beta
+    self.alpha = init_alpha
+    self.average_fetch = 0
+    self.count_fetch = 0
+    self.average_memory_sync = 0
+    self.count_memory_sync = 0
+    self.average_memory_update= 0
+    self.count_memory_update = 0
+    self.average_gnn_aggregate = 0
+    self.count_gnn_aggregate = 0
+    self.counts = 0
+
+    self.last_start_event_fetch = None
+    self.last_start_event_memory_sync = None
+    self.last_start_event_memory_update = None
+    self.last_start_event_gnn_aggregate = None
+
+    self.end_event_fetch = None
+    self.end_event_memory_sync = None
+    self.end_event_memory_update = None
+    self.end_event_gnn_aggregate = None
+
+    self.min_beta = min_beta
+    self.max_beta = max_beta
+    self.max_alpha = max_alpha
+    self.min_alpha = min_alpha
+
+    self.training = False
+  def train(self):
+    self.training = True
+  def eval(self):
+    self.training = False
+  def start_event(self):
+    start_event = torch.cuda.Event(enable_timing=True)
+    start_event.record()
+    return start_event
+  def update_fetch_time(self,start_event):
+    if start_event is None or self.training == False:
+      return
+    end_event = torch.cuda.Event(enable_timing=True)
+    end_event.record()
+    self.end_event_fetch = (self.last_start_event_fetch,end_event)
+
+
+  def update_memory_sync_time(self,start_event):
+    if start_event is None or self.training == False:
+      return
+    end_event = torch.cuda.Event(enable_timing=True)
+    end_event.record()
+    self.end_event_memory_sync = (self.last_start_event_memory_sync,end_event)
+
+  def update_memory_update_time(self,start_event):
+    if start_event is None or self.training == False:
+      return
+    end_event = torch.cuda.Event(enable_timing=True)
+    end_event.record()
+    self.end_event_memory_update = (self.last_start_event_memory_update,end_event)
+  
+  def update_gnn_aggregate_time(self,start_event):
+
+    if start_event is None or self.training == False:
+      return
+    end_event = torch.cuda.Event(enable_timing=True)
+    end_event.record()
+    self.end_event_gnn_aggregate = (self.last_start_event_gnn_aggregate,end_event)
+
+  def reset_time(self):
+    self.average_fetch = 0
+    self.count_fetch = 0
+    self.average_memory_sync = 0
+    self.count_memory_sync = 0
+    self.average_memory_update= 0
+    self.count_memory_update = 0
+    self.average_gnn_aggregate = 0
+    self.count_gnn_aggregate = 0
+    
+  def update_parameter(self):
+
+    if self.training == False:
+      return
+    #print('{} {} {} {} '.format(self.end_event_fetch,self.end_event_memory_sync,self.end_event_memory_update,self.end_event_gnn_aggregate))
+    if self.end_event_fetch is None or self.end_event_memory_sync is None or self.end_event_memory_update is None or self.end_event_gnn_aggregate is None:
+      return
+    self.end_event_fetch[1].synchronize()
+    self.average_fetch += self.end_event_fetch[0].elapsed_time(self.end_event_fetch[1])
+    self.count_fetch += 1
+    self.average_memory_sync += self.end_event_memory_sync[0].elapsed_time(self.end_event_memory_sync[1])
+    self.count_memory_sync += 1
+    self.average_memory_update += self.end_event_memory_update[0].elapsed_time(self.end_event_memory_update[1])
+    self.count_memory_update += 1
+    self.average_gnn_aggregate += self.end_event_gnn_aggregate[0].elapsed_time(self.end_event_gnn_aggregate[1])
+    self.count_gnn_aggregate += 1
+    average_gnn_aggregate = self.average_gnn_aggregate/self.count_gnn_aggregate
+    average_fetch = self.average_fetch/self.count_fetch
+    self.beta = self.beta * average_gnn_aggregate/average_fetch * (1 + self.wait_threshold)
+    average_memory_sync_time = self.average_memory_sync/self.count_memory_sync
+    average_memory_update_time = self.average_memory_update/self.count_memory_update
+    self.alpha = self.alpha - math.log(average_memory_update_time*(1+self.wait_threshold)) + math.log(average_memory_sync_time)                                                                     
+    self.beta = max(min(self.beta, self.max_beta),self.min_beta)
+    self.alpha = max(min(self.alpha, self.max_alpha),self.min_alpha)
+    ctx = DistributedContext.get_default_context()
+    beta_comm=torch.tensor([self.beta],dtype=torch.float)
+    torch.distributed.all_reduce(beta_comm,group=ctx.gloo_group)
+    self.beta = beta_comm[0].item()/ctx.world_size
+    alpha_comm=torch.tensor([self.alpha],dtype=torch.float)
+    torch.distributed.all_reduce(alpha_comm,group=ctx.gloo_group)
+    self.alpha = alpha_comm[0].item()/ctx.world_size
+
+

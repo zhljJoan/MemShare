@@ -4,6 +4,7 @@ import profile
 import sys
 import psutil
 from os.path import abspath, join, dirname
+from torch.cuda.amp import autocast
 current_path = os.path.dirname(os.path.abspath(__file__))
 parent_path = os.path.abspath(os.path.join(current_path, os.pardir))
 sys.path.append(parent_path)
@@ -18,7 +19,7 @@ from pathlib import Path
 from pathlib import Path
 
 
-from starrygl.module.utils import parse_config
+from starrygl.module.utils import AdaParameter, parse_config
 from starrygl.sample.cache.fetch_cache import FetchFeatureCache
 from starrygl.sample.graph_core import DataSet, DistributedGraphStore, TemporalNeighborSampleGraph
 from starrygl.module.utils import parse_config, EarlyStopMonitor
@@ -189,6 +190,7 @@ def query():
     "total_update_memory":total_update_memory,
     "total_remote_update":total_remote_update,}
 def main():   
+    #torch.backends.cudnn.benchmark = True
     #torch.autograd.set_detect_anomaly(True)
     print('LOCAL RANK {}, RANK{}'.format(os.environ["LOCAL_RANK"],os.environ["RANK"]))
     use_cuda = True
@@ -232,18 +234,23 @@ def main():
     print(policy)
     if policy == 'recent':
         policy_train = args.sample_type#'boundery_recent_decay'
+        if policy_train == 'recent':
+            ada_param = AdaParameter(init_alpha=args.shared_memory_ssim, init_beta=args.probability,min_beta=1)
+        else:
+            ada_param = AdaParameter(init_alpha=args.shared_memory_ssim, init_beta=args.probability)
     else:
         policy_train = policy
+        ada_param = AdaParameter(init_alpha=args.shared_memory_ssim, init_beta=args.probability)
     if memory_param['type'] != 'none':
         mailbox = SharedMailBox(graph.ids.shape[0], memory_param, dim_edge_feat = graph.efeat.shape[1] if graph.efeat is not None else 0,
         shared_nodes_index=graph.shared_nids_list[ctx.memory_group_rank],device = torch.device('cuda:{}'.format(local_rank)),
         start_historical=(args.memory_type=='historical'),
-        shared_ssim=args.shared_memory_ssim)
+        ada_param = ada_param)
     else:
         mailbox = None
 
-    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=10,policy = policy_train, graph_name = "train",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability,no_neg=no_neg)
-    eval_sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=eval_sample_graph, workers=10,policy = policy_train, graph_name = "eval",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,probability=args.probability,no_neg=no_neg)
+    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=10,policy = policy_train, graph_name = "train",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,ada_param=ada_param,no_neg=no_neg)
+    eval_sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=eval_sample_graph, workers=10,policy = policy_train, graph_name = "eval",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,ada_param=ada_param,no_neg=no_neg)
 
     train_data = torch.masked_select(graph.edge_index,train_mask.to(graph.edge_index.device)).reshape(2,-1)
     train_ts = torch.masked_select(graph.ts,train_mask.to(graph.edge_index.device))
@@ -276,15 +283,11 @@ def main():
         
     else:
         #train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = full_dst.unique())
-        train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = full_dst.unique(),local_mask=(DistIndex(graph.nids_mapper[full_dst.unique()].to('cpu')).part == dist.get_rank()),prob=args.probability)
-        remote_ratio = train_neg_sampler.local_dst.shape[0] / train_neg_sampler.dst_node_list.shape[0]
-        #train_ratio_pos = (1 - args.probability) + args.probability *  remote_ratio
-        #train_ratio_neg = args.probability * (1-remote_ratio)
-        train_ratio_pos = 1.0/(1-args.probability+ args.probability * remote_ratio) if ((args.probability <1) & (args.probability > 0)) else 1
-        train_ratio_neg = 1.0/(args.probability*remote_ratio) if ((args.probability <1) & (args.probability > 0)) else 1
+        train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = full_dst.unique(),local_mask=(DistIndex(graph.nids_mapper[full_dst.unique()].to('cpu')).part == dist.get_rank()),ada_param=ada_param)
+
     print(train_neg_sampler.dst_node_list)
     neg_sampler = LocalNegativeSampling('triplet',amount= neg_samples,dst_node_list = full_dst.unique(),seed=args.seed)
-
+   
     trainloader = DistributedDataLoader(graph,eval_train_data,sampler = sampler,
                                         sampler_fn = SAMPLE_TYPE.SAMPLE_FROM_TEMPORAL_EDGES,
                                         neg_sampler=train_neg_sampler,
@@ -295,11 +298,12 @@ def main():
                                         mode='train',
                                         queue_size = 200,
                                         mailbox = mailbox,
-                                        is_pipeline=False,
+                                        is_pipeline=True,
                                         use_local_feature = False,
                                         device = torch.device('cuda:{}'.format(local_rank)),
                                         probability=args.probability,
-                                        reversed = (gnn_param['arch'] == 'identity')
+                                        reversed = (gnn_param['arch'] == 'identity'),
+                                        ada_param=ada_param
                                         )
     
     eval_trainloader = DistributedDataLoader(graph,eval_train_data,sampler = eval_sampler,
@@ -350,10 +354,10 @@ def main():
     print('dim_node {} dim_edge {}\n'.format(gnn_dim_node,gnn_dim_edge))
     avg_time  = 0
     if use_cuda:
-        model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param,graph.ids.shape[0],mailbox).cuda()
+        model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param,graph.ids.shape[0],mailbox,ada_param=ada_param).cuda()
         device = torch.device('cuda')
     else:
-        model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param,graph.ids.shape[0],mailbox)
+        model = GeneralModel(gnn_dim_node, gnn_dim_edge, sample_param, memory_param, gnn_param, train_param,graph.ids.shape[0],mailbox,ada_param=ada_param)
         device = torch.device('cpu')
     model = DDP(model,find_unused_parameters=True)
     def count_parameters(model):
@@ -365,6 +369,7 @@ def main():
 
     def eval(mode='val'):
         model.eval()
+        ada_param.eval()
         aps = list()
         aucs_mrrs = list()
         if mode == 'val':
@@ -385,19 +390,9 @@ def main():
             for roots,mfgs,metadata in loader:
                 #print(batch_cnt)
                 batch_cnt = batch_cnt+1
-                """
-                if ctx.memory_group == 0:
-                    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=neg_samples)
-                    #print('check {}\n'.format(model.module.memory_updater.last_updated_nid))
-                    y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
-                    y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
-                    aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
-                    aucs_mrrs.append(roc_auc_score(y_true, y_pred))
-                """
                 if mailbox is not None:
                     if(graph.efeat.device.type != 'cpu'):
                         edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')]).to('cuda')
-                            #edge_feats = graph.get_dist_efeat(graph.eids_mapper[roots.eids.to('cpu')].to('cuda'),is_sorted = False)    #graph.efeat[roots.eids.to('cpu')].to('cuda')
                     else:
                         edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')])
                     src = metadata['src_pos_index']
@@ -415,44 +410,6 @@ def main():
                 mailbox.update_shared()
                 mailbox.update_p2p_mem()
                 mailbox.update_p2p_mail()
-                """
-                if mailbox is not None:
-                    src = metadata['src_pos_index']
-                    dst = metadata['dst_pos_index']
-                    ts = roots.ts
-                    if graph.efeat is None:
-                        edge_feats = None
-                    elif(graph.efeat.device.type != 'cpu'):
-                        edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')]).to('cuda')
-                        #edge_feats = graph.get_dist_efeat(graph.eids_mapper[roots.eids.to('cpu')].to('cuda'),is_sorted = False)#graph.efeat[roots.eids.to('cpu')].to('cuda')
-                    else:
-                        edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')])
-                        #edge_feats = graph.get_dist_efeat(graph.eids_mapper[roots.eids.to('cpu')],is_sorted=False)#graph.efeat[roots.eids] 
-                    #print(mfgs[0][0].srcdata['ID'])
-                    dist_index_mapper = mfgs[0][0].srcdata['ID']
-                    root_index = torch.cat((src,dst))
-                    #print('{} {} {}'.format((~(dist_index_mapper==model.module.memory_updater.last_updated_nid)).nonzero(),model.module.memory_updater.last_updated_nid,dist_index_mapper))
-                    last_updated_nid = model.module.memory_updater.last_updated_nid[root_index]
-                    last_updated_memory = model.module.memory_updater.last_updated_memory[root_index]
-                    last_updated_ts=model.module.memory_updater.last_updated_ts[root_index]
-
-                    #print('root shape {} unique {} {}\n'.format(root_index.shape,dist_index_mapper[root_index].unique().shape,last_updated_nid.unique().shape))
-                    index, memory, memory_ts = mailbox.get_update_memory(last_updated_nid,
-                                                                    last_updated_memory,
-                                                                    last_updated_ts,
-                                                                    model.module.embedding)
-                    #print('index {} {}\n'.format(index.shape,dist_index_mapper[torch.cat((src,dst))].unique().shape))
-                    index, mail, mail_ts = mailbox.get_update_mail(dist_index_mapper,
-                                            src,dst,ts,edge_feats,
-                                            model.module.memory_updater.last_updated_memory, 
-                                            model.module.embedding,use_src_emb,use_dst_emb,
-                                            )
-                    if memory_param['historical_fix'] == True:
-                        mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=model.module.memory_updater.filter,set_remote=True,mode='historical')
-                    else:
-                        mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,set_remote=True,mode='all_reduce',submit=False)
-                        mailbox.sychronize_shared()
-                    """
         ap = torch.empty([1])
         auc_mrr = torch.empty([1])
         #if(ctx.memory_group==0):
@@ -477,7 +434,8 @@ def main():
         cos = torch.nn.CosineSimilarity(dim=0)
         return cos(normalize(x1),normalize(x2)).sum()/x1.size(dim=0)
     creterion = torch.nn.BCEWithLogitsLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'])#,weight_decay=1e-4)
+    optimizer = torch.optim.Adam(model.parameters(), lr=train_param['lr'],weight_decay=1e-4)
+    scaler = torch.cuda.amp.GradScaler()
     early_stopper = EarlyStopMonitor(max_round=args.patience)
     MODEL_SAVE_PATH = f'../saved_models/{args.model}-{args.dataname}-{dist.get_world_size()}.pth'
     total_test_time = 0
@@ -486,6 +444,7 @@ def main():
     val_list = []
     loss_list = []
     for e in range(train_param['epoch']):
+        ada_param.train()
         model.module.memory_updater.empty_cache()
         tt._zero()
         torch.cuda.synchronize()
@@ -505,39 +464,19 @@ def main():
         sum_remote_comm = 0
         sum_local_edge_comm = 0
         sum_remote_edge_comm = 0
-        local_access = []
-        remote_access = []
-        local_comm = []
-        remote_comm = []
-        local_edge_access = []
-        remote_edge_access = []
-        local_edge_comm = []
-        remote_edge_comm = []
+
         b_cnt = 0
         start = time_count.start_gpu()
+        total = 0
         for roots,mfgs,metadata in trainloader:
             end = time_count.elapsed_event(start)
-            #print('time {}'.format(end))
-            #print('rank is {} batch max ts is {} batch min ts is {}'.format(dist.get_rank(),roots.ts.min(),roots.ts.max()))
+            total += end
             b_cnt = b_cnt + 1
-            #local_access.append(trainloader.local_node)
-            #remote_access.append(trainloader.remote_node)
-            #local_edge_access.append(trainloader.local_edge)
-            #remote_edge_access.append(trainloader.remote_edge)
-            #local_comm.append((DistIndex(mfgs[0][0].srcdata['ID']).part == dist.get_rank()).sum().item())
-            #remote_comm.append((DistIndex(mfgs[0][0].srcdata['ID']).part != dist.get_rank()).sum().item())
-            #if 'ID' in mfgs[0][0].edata:
-            #    local_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part == dist.get_rank()).sum().item())
-            #    remote_edge_comm.append((DistIndex(mfgs[0][0].edata['ID']).part != dist.get_rank()).sum().item())
-            #    sum_local_edge_comm +=local_edge_comm[b_cnt-1]
-            #    sum_remote_edge_comm +=remote_edge_comm[b_cnt-1]
-            #sum_local_comm +=local_comm[b_cnt-1]
-            #sum_remote_comm +=remote_comm[b_cnt-1]
+
             t1 = time_count.start_gpu()
             if mailbox is not None:
                 if(graph.efeat.device.type != 'cpu'):
-                    edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')]).to('cuda')
-                        #edge_feats = graph.get_dist_efeat(graph.eids_mapper[roots.eids.to('cpu')].to('cuda'),is_sorted = False)#graph.efeat[roots.eids.to('cpu')].to('cuda')
+                    edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')]).to('cuda')#,non_blocking=True)
                 else:
                     edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')])
                 src = metadata['src_pos_index']
@@ -552,72 +491,38 @@ def main():
             t2 = time_count.start_gpu()
             optimizer.zero_grad()
             ones = torch.ones(metadata['dst_neg_index'].shape[0],device = model.device,dtype=torch.float)
+            #with autocast():
             pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
             #print(time_count.elapsed_event(t2))
             loss = creterion(pred_pos, torch.ones_like(pred_pos)) 
             if args.local_neg_sample is False:
-                weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones*train_ratio_pos,ones*train_ratio_neg).reshape(-1,1)
+                weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones*metadata['train_ratio_pos'],ones*metadata['train_ratio_neg']).reshape(-1,1)
                 neg_creterion = torch.nn.BCEWithLogitsLoss(weight)
                 loss += neg_creterion(pred_neg, torch.zeros_like(pred_neg))
             else:
                 loss += creterion(pred_neg, torch.zeros_like(pred_neg))
             total_loss += float(loss.item())
-            #mailbox.handle_last_async()
-            #trainloader.async_feature()
-            #torch.cuda.synchronize()
+            if len(trainloader.result_queue) > 0:
+                _,_,_,edge_feat,node_feat0 = trainloader.result_queue[0]
+                if ada_param is not None:
+                    ada_param.update_gnn_aggregate_time(ada_param.last_start_event_gnn_aggregate)
+                edge_feat[1].wait()
+                node_feat0[1].wait()
+               
+                if ada_param is not None and e < 3:
+                    
+                    ada_param.update_fetch_time(ada_param.last_start_event_fetch)
+                    ada_param.update_parameter()
             loss.backward()
             optimizer.step()
-            #torch.cuda.synchronize()
-            ## train aps
-            #y_pred = torch.cat([pred_pos, pred_neg], dim=0).sigmoid().cpu()
-            #y_true = torch.cat([torch.ones(pred_pos.size(0)), torch.zeros(pred_neg.size(0))], dim=0)
-            #train_aps.append(average_precision_score(y_true, y_pred.detach().numpy()))
-            #torch.cuda.synchronize()
+            
+            
             mailbox.update_shared()
             mailbox.update_p2p_mem()
             mailbox.update_p2p_mail()
+            ada_param.last_start_event_memory_update = ada_param.start_event()
             start = time_count.start_gpu()
-            #torch.cuda.empty_cache()
-
-            """
-            if mailbox is not None:
-                #src = metadata['src_pos_index']
-                #dst = metadata['dst_pos_index']
-                #ts = roots.ts
-                #if graph.efeat is None:
-                #    edge_feats = None
-                #elif(graph.efeat.device.type != 'cpu'):
-                #    edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')]).to('cuda')
-                    #edge_feats = graph.get_dist_efeat(graph.eids_mapper[roots.eids.to('cpu')].to('cuda'),is_sorted = False)#graph.efeat[roots.eids.to('cpu')].to('cuda')
-                #else:
-                #    edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')])
-                    #edge_feats = graph.get_dist_efeat(graph.eids_mapper[roots.eids.to('cpu')],is_sorted=False)#graph.efeat[roots.eids] 
-                #print(mfgs[0][0].srcdata['ID'])
-                dist_index_mapper = mfgs[0][0].srcdata['ID']
-                root_index = torch.cat((src,dst))
-                #print('{} {} {}'.format((~(dist_index_mapper==model.module.memory_updater.last_updated_nid)).nonzero(),model.module.memory_updater.last_updated_nid,dist_index_mapper))
-                last_updated_nid = model.module.memory_updater.last_updated_nid[root_index]
-                last_updated_memory = model.module.memory_updater.last_updated_memory[root_index]
-                last_updated_ts=model.module.memory_updater.last_updated_ts[root_index]
-
-                #print('root shape {} unique {} {}\n'.format(root_index.shape,dist_index_mapper[root_index].unique().shape,last_updated_nid.unique().shape))
-                index, memory, memory_ts = mailbox.get_update_memory(last_updated_nid,
-                                                                last_updated_memory,
-                                                                last_updated_ts,
-                                                                model.module.embedding)
-                #print('index {} {}\n'.format(index.shape,dist_index_mapper[torch.cat((src,dst))].unique().shape))
-                index, mail, mail_ts = mailbox.get_update_mail(dist_index_mapper,
-                                        src,dst,ts,edge_feats,
-                                        model.module.memory_updater.last_updated_memory, 
-                                        model.module.embedding,use_src_emb,use_dst_emb,
-                                        )
-                t7 = time.time()
-                if memory_param['historical'] == True:
-                    mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=model.module.memory_updater.filter,set_remote=True,mode='historical')
-                else:
-                    mailbox.set_memory_all_reduce(index,memory,memory_ts,mail,mail_ts,reduce_Op = 'max', async_op = False,filter=None,set_remote=True,mode='all_reduce')
-            """
-            
+        
         torch.cuda.synchronize()
         dist.barrier()
         time_prep = time.time() - epoch_start_time
@@ -692,6 +597,7 @@ def main():
         else:
             print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f} test ap {:4f} test auc{:4f}\n'.format(total_loss,train_ap, ap, auc,test_ap,test_auc))
             print('\ttotal time:{:.2f}s  prep time:{:.2f}s\n test time {:.2f}'.format(time.time()-epoch_start_time, time_prep,t_test))    
+            print('alpha is {} beta is {}'.format(ada_param.alpha,ada_param.beta))
             torch.save(model.module.state_dict(), get_checkpoint_path(e))
         if args.model == 'TGN':
             pass

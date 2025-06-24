@@ -1,0 +1,276 @@
+LOCAL RANK 0, RANK0
+LOCAL RANK 2, RANK2LOCAL RANK 1, RANK1
+
+LOCAL RANK 3, RANK3
+use cuda on 0
+use cuda on 1
+use cuda on 2
+use cuda on 3
+994790
+994790
+994790
+994790
+get_neighbors consume: 6.11692s
+get_neighbors consume: 6.12671s
+get_neighbors consume: 6.03983s
+get_neighbors consume: 6.05302s
+num_batchs: tensor([17384], device='cuda:0')
+num_batchs: tensor([3931], device='cuda:2')
+num_batchs: tensor([16139], device='cuda:1')
+num_batchs: tensor([14244], device='cuda:3')
+num_batchs: num_batchs: tensor([1915], device='cuda:3')
+num_batchs: tensor([1395], device='cuda:1')
+num_batchs: tensor([6920], device='cuda:2')
+tensor([850], device='cuda:0')
+num_batchs:num_batchs:  num_batchs: num_batchs: tensor([5545], device='cuda:2')
+tensor([1015], device='cuda:0')tensor([2785], device='cuda:3')
+
+tensor([1736], device='cuda:1')
+Epoch 0:
+Epoch 0:
+Epoch 0:
+Epoch 0:
+	train loss:1331.9399  train ap:0.977517  val ap:0.961959  val auc:0.965566
+	train loss:1162.0666  train ap:0.981900  val ap:0.961959  val auc:0.965566
+
+
+	train loss:1244.0312  train ap:0.978548  val ap:0.961959  val auc:0.965566
+	train loss:1308.8701  train ap:0.979221  val ap:0.961959  val auc:0.965566
+	total time:125.18s  prep time:60.37s
+	total time:125.18s  prep time:60.37s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	total time:125.18s  prep time:60.37s
+
+	total time:125.18s  prep time:60.37s
+
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 1:
+Epoch 1:Epoch 1:
+
+Epoch 1:
+	train loss:1169.3326  train ap:0.981283  val ap:0.965914  val auc:0.968475
+	train loss:1227.6728  train ap:0.981686  val ap:0.965914  val auc:0.968475
+	train loss:1226.7282  train ap:0.980509  val ap:0.965914  val auc:0.968475
+
+	train loss:1078.3342  train ap:0.984551  val ap:0.965914  val auc:0.968475
+
+
+	total time:125.97s  prep time:61.45s
+
+	total time:125.97s  prep time:61.45s
+
+	total time:125.97s  prep time:61.45s
+
+	total time:125.97s  prep time:61.45s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+Epoch 2:
+Epoch 2:
+Epoch 2:Epoch 2:
+
+	train loss:1157.2600  train ap:0.981707  val ap:0.967135  val auc:0.969484
+	train loss:1227.8567  train ap:0.981577  val ap:0.967135  val auc:0.969484
+	train loss:1224.2131  train ap:0.980388  val ap:0.967135  val auc:0.969484
+
+
+
+	total time:125.33s  prep time:60.54s
+	total time:125.33s  prep time:60.54s
+
+	total time:125.33s  prep time:60.54s
+
+	 fetch time:0.00s write back time:0.00s
+	train loss:1071.5106  train ap:0.984690  val ap:0.967135  val auc:0.969484
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	 fetch time:0.00s write back time:0.00s
+
+
+	total time:125.33s  prep time:60.54s
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 3:Epoch 3:
+
+Epoch 3:
+Epoch 3:
+	train loss:1154.4245  train ap:0.981666  val ap:0.939874  val auc:0.947249
+	train loss:1221.6654  train ap:0.981759  val ap:0.939874  val auc:0.947249
+	train loss:1217.4941  train ap:0.980394  val ap:0.939874  val auc:0.947249
+
+
+	train loss:1064.5069  train ap:0.984769  val ap:0.939874  val auc:0.947249
+
+	total time:124.82s  prep time:60.42s
+	total time:124.82s  prep time:60.42s
+
+
+	total time:124.82s  prep time:60.42s
+
+	 fetch time:0.00s write back time:0.00s
+
+	total time:124.82s  prep time:60.42s
+	 fetch time:0.00s write back time:0.00s
+
+	 fetch time:0.00s write back time:0.00s
+
+
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 4:
+Epoch 4:
+Epoch 4:
+Epoch 4:
+	train loss:1206.6170  train ap:0.980821  val ap:0.958336  val auc:0.962538
+	train loss:1058.5493  train ap:0.984994  val ap:0.958336  val auc:0.962538
+	train loss:1153.8455  train ap:0.981657  val ap:0.958336  val auc:0.962538
+
+
+	train loss:1214.2795  train ap:0.981938  val ap:0.958336  val auc:0.962538
+
+	total time:124.91s  prep time:60.22s
+	total time:124.91s  prep time:60.22s
+
+
+	total time:124.91s  prep time:60.22s
+
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+	total time:124.91s  prep time:60.22s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 5:
+Epoch 5:
+Epoch 5:
+Epoch 5:
+	train loss:1211.5216  train ap:0.982009  val ap:0.949435  val auc:0.953953
+	train loss:1140.1948  train ap:0.982149  val ap:0.949435  val auc:0.953953
+
+	train loss:1050.7336  train ap:0.985195  val ap:0.949435  val auc:0.953953
+
+	total time:124.92s  prep time:60.40s
+	train loss:1205.8990  train ap:0.980842  val ap:0.949435  val auc:0.953953
+
+
+	total time:124.92s  prep time:60.40s
+
+	 fetch time:0.00s write back time:0.00s
+	total time:124.92s  prep time:60.40s
+
+
+
+	total time:124.92s  prep time:60.40s
+	 fetch time:0.00s write back time:0.00s
+	 fetch time:0.00s write back time:0.00s
+
+
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 6:Epoch 6:
+
+Epoch 6:
+Epoch 6:
+	train loss:1180.1657  train ap:0.981860  val ap:0.960236  val auc:0.963957
+	train loss:1120.2221  train ap:0.982891  val ap:0.960236  val auc:0.963957
+	train loss:1180.3385  train ap:0.983051  val ap:0.960236  val auc:0.963957
+
+
+
+	total time:124.69s  prep time:60.01s
+
+	total time:124.69s  prep time:60.01s
+	 fetch time:0.00s write back time:0.00s
+
+	total time:124.69s  prep time:60.01s
+
+	 fetch time:0.00s write back time:0.00s
+	train loss:1026.1377  train ap:0.985808  val ap:0.960236  val auc:0.963957
+
+
+
+	 fetch time:0.00s write back time:0.00s
+
+	total time:124.69s  prep time:60.01s
+
+	 fetch time:0.00s write back time:0.00s
+
+Epoch 7:
+Epoch 7:
+Epoch 7:
+Epoch 7:
+Early stopping at epoch 7
+Early stopping at epoch 7
+Early stopping at epoch 7
+Early stopping at epoch 7
+
+
+
+
+Loading the best model at epoch 2
+Loading the best model at epoch 2
+Loading the best model at epoch 2
+Loading the best model at epoch 2
+
+
+
+
+0.9759191870689392 0.977138340473175 
+0.9759191870689392 0.977138340473175 
+0.9759191870689392 0.977138340473175 
+
+
+0.9759191870689392 0.977138340473175 
+
+
+0.9553558826446533 0.9581618309020996 
+
+0.9553558826446533 0.9581618309020996 
+0.9553558826446533 0.9581618309020996 
+
+
+0.9553558826446533 0.9581618309020996 
+
+	test AP:0.940169  test AUC:0.942460
+	test AP:0.940169  test AUC:0.942460
+	test AP:0.940169  test AUC:0.942460
+
+
+	test AP:0.940169  test AUC:0.942460
+
+test_dataset 836763 avg_time 9.689588661193847 
+test_dataset 509738 avg_time 9.689606781005859 
+
+
+
+test_dataset 1148929 avg_time 9.689572229385377 
+test_dataset 4151746 avg_time 9.689626097679138 
+
+

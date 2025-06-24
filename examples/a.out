@@ -1,0 +1,468 @@
+mkdir: cannot create directory ‘all_12347/WIKI’: File exists
+mkdir: cannot create directory ‘all_12347/WIKI/JODIE’: File exists
+mkdir: cannot create directory ‘all_12347/WIKI/JODIE/comm’: File exists
+[2024-11-04 12:37:21,971] torch.distributed.run: [WARNING] 
+[2024-11-04 12:37:21,971] torch.distributed.run: [WARNING] *****************************************
+[2024-11-04 12:37:21,971] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-11-04 12:37:21,971] torch.distributed.run: [WARNING] *****************************************
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 484, in main
+    model.module.memory_updater.empty_cache()
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 533, in empty_cache
+        main()main()
+
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 484, in main
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 484, in main
+    self.filter.clear()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1695, in __getattr__
+        model.module.memory_updater.empty_cache()model.module.memory_updater.empty_cache()
+
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 533, in empty_cache
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 533, in empty_cache
+        self.filter.clear()self.filter.clear()
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1695, in __getattr__
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1695, in __getattr__
+    raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+AttributeError: 'AsyncMemeoryUpdater' object has no attribute 'filter'
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
+AttributeError: AttributeError'AsyncMemeoryUpdater' object has no attribute 'filter': 'AsyncMemeoryUpdater' object has no attribute 'filter'
+
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 484, in main
+    model.module.memory_updater.empty_cache()
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 533, in empty_cache
+    self.filter.clear()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1695, in __getattr__
+    raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+AttributeError: 'AsyncMemeoryUpdater' object has no attribute 'filter'
+[W tensorpipe_agent.cpp:725] RPC agent for worker2 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[2024-11-04 12:37:31,980] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 538187) of binary: /home/zlj/.miniconda3/envs/tgnn_3.10/bin/python
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 33, in <module>
+    sys.exit(load_entry_point('torch==2.1.1+cu118', 'console_scripts', 'torchrun')())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 264, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train_boundery.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2024-11-04_12:37:31
+  host      : gpu05
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 538188)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[2]:
+  time      : 2024-11-04_12:37:31
+  host      : gpu05
+  rank      : 2 (local_rank: 2)
+  exitcode  : 1 (pid: 538189)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[3]:
+  time      : 2024-11-04_12:37:31
+  host      : gpu05
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 538190)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-11-04_12:37:31
+  host      : gpu05
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 538187)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+mkdir: cannot create directory ‘all_12347/LASTFM’: File exists
+mkdir: cannot create directory ‘all_12347/LASTFM/JODIE’: File exists
+mkdir: cannot create directory ‘all_12347/LASTFM/JODIE/comm’: File exists
+[2024-11-04 12:37:33,221] torch.distributed.run: [WARNING] 
+[2024-11-04 12:37:33,221] torch.distributed.run: [WARNING] *****************************************
+[2024-11-04 12:37:33,221] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-11-04 12:37:33,221] torch.distributed.run: [WARNING] *****************************************
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+        main()main()
+
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 484, in main
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 484, in main
+        model.module.memory_updater.empty_cache()model.module.memory_updater.empty_cache()
+
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 533, in empty_cache
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 533, in empty_cache
+        self.filter.clear()self.filter.clear()
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1695, in __getattr__
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1695, in __getattr__
+        raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+
+AttributeErrorAttributeError: : 'AsyncMemeoryUpdater' object has no attribute 'filter''AsyncMemeoryUpdater' object has no attribute 'filter'
+
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 484, in main
+        model.module.memory_updater.empty_cache()main()
+
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 533, in empty_cache
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 484, in main
+    self.filter.clear()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1695, in __getattr__
+    model.module.memory_updater.empty_cache()
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 533, in empty_cache
+    self.filter.clear()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1695, in __getattr__
+    raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+AttributeError: 'AsyncMemeoryUpdater' object has no attribute 'filter'    raise AttributeError(f"'{type(self).__name__}' object has no attribute '{name}'")
+AttributeError: 'AsyncMemeoryUpdater' object has no attribute 'filter'
+
+[W tensorpipe_agent.cpp:725] RPC agent for worker0 encountered error when reading incoming request from worker2: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[W tensorpipe_agent.cpp:725] RPC agent for worker0 encountered error when reading incoming request from worker3: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[2024-11-04 12:37:48,237] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 538841) of binary: /home/zlj/.miniconda3/envs/tgnn_3.10/bin/python
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 33, in <module>
+    sys.exit(load_entry_point('torch==2.1.1+cu118', 'console_scripts', 'torchrun')())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 264, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train_boundery.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2024-11-04_12:37:48
+  host      : gpu05
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 538842)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[2]:
+  time      : 2024-11-04_12:37:48
+  host      : gpu05
+  rank      : 2 (local_rank: 2)
+  exitcode  : 1 (pid: 538843)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[3]:
+  time      : 2024-11-04_12:37:48
+  host      : gpu05
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 538844)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-11-04_12:37:48
+  host      : gpu05
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 538841)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+mkdir: cannot create directory ‘all_12347/WikiTalk’: File exists
+mkdir: cannot create directory ‘all_12347/WikiTalk/JODIE’: File exists
+mkdir: cannot create directory ‘all_12347/WikiTalk/JODIE/comm’: File exists
+[2024-11-04 12:37:49,479] torch.distributed.run: [WARNING] 
+[2024-11-04 12:37:49,479] torch.distributed.run: [WARNING] *****************************************
+[2024-11-04 12:37:49,479] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-11-04 12:37:49,479] torch.distributed.run: [WARNING] *****************************************
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+[2024-11-04 12:38:02,873] torch.distributed.elastic.agent.server.api: [WARNING] Received Signals.SIGINT death signal, shutting down workers
+[2024-11-04 12:38:02,874] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 539474 closing signal SIGINT
+[2024-11-04 12:38:02,874] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 539475 closing signal SIGINT
+[2024-11-04 12:38:02,874] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 539476 closing signal SIGINT
+[2024-11-04 12:38:02,874] torch.distributed.elastic.multiprocessing.api: [WARNING] Sending process 539477 closing signal SIGINT
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 203, in main
+    graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition=args.partition)#torch.device('cpu'))
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/part_utils/transformer_from_speed.py", line 361, in load_from_speed
+    return load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev=sampler_graph_add_rev,edge_i=edge_i,reid=None,device=device,feature_device=feature_device)
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/part_utils/transformer_from_speed.py", line 134, in load_from_shared_node_partition
+    print('tot edge {} circ edge {} same edge {}\n'.format(src.shape[0],torch.stack((src,dst)).unique(dim = 1).shape[1],(src==dst).sum().item()))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_tensor.py", line 881, in unique
+    return torch.unique(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_jit_internal.py", line 488, in fn
+    return if_false(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_jit_internal.py", line 488, in fn
+    return if_false(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/functional.py", line 976, in _return_output
+    output, _, _ = _unique_impl(input, sorted, return_inverse, return_counts, dim)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/functional.py", line 882, in _unique_impl
+    output, inverse_indices, counts = _VF.unique_dim(
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 203, in main
+    graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition=args.partition)#torch.device('cpu'))
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/part_utils/transformer_from_speed.py", line 361, in load_from_speed
+    return load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev=sampler_graph_add_rev,edge_i=edge_i,reid=None,device=device,feature_device=feature_device)
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/part_utils/transformer_from_speed.py", line 134, in load_from_shared_node_partition
+    print('tot edge {} circ edge {} same edge {}\n'.format(src.shape[0],torch.stack((src,dst)).unique(dim = 1).shape[1],(src==dst).sum().item()))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_tensor.py", line 881, in unique
+    return torch.unique(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_jit_internal.py", line 488, in fn
+    return if_false(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_jit_internal.py", line 488, in fn
+    return if_false(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/functional.py", line 976, in _return_output
+    output, _, _ = _unique_impl(input, sorted, return_inverse, return_counts, dim)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/functional.py", line 882, in _unique_impl
+    output, inverse_indices, counts = _VF.unique_dim(
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 203, in main
+    graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition=args.partition)#torch.device('cpu'))
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/part_utils/transformer_from_speed.py", line 361, in load_from_speed
+    return load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev=sampler_graph_add_rev,edge_i=edge_i,reid=None,device=device,feature_device=feature_device)
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/part_utils/transformer_from_speed.py", line 134, in load_from_shared_node_partition
+    print('tot edge {} circ edge {} same edge {}\n'.format(src.shape[0],torch.stack((src,dst)).unique(dim = 1).shape[1],(src==dst).sum().item()))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_tensor.py", line 881, in unique
+    return torch.unique(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_jit_internal.py", line 488, in fn
+    return if_false(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_jit_internal.py", line 488, in fn
+    return if_false(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/functional.py", line 976, in _return_output
+    output, _, _ = _unique_impl(input, sorted, return_inverse, return_counts, dim)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/functional.py", line 882, in _unique_impl
+    output, inverse_indices, counts = _VF.unique_dim(
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 700, in <module>
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 203, in main
+    graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition=args.partition)#torch.device('cpu'))
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/part_utils/transformer_from_speed.py", line 361, in load_from_speed
+    return load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev=sampler_graph_add_rev,edge_i=edge_i,reid=None,device=device,feature_device=feature_device)
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/part_utils/transformer_from_speed.py", line 134, in load_from_shared_node_partition
+    print('tot edge {} circ edge {} same edge {}\n'.format(src.shape[0],torch.stack((src,dst)).unique(dim = 1).shape[1],(src==dst).sum().item()))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_tensor.py", line 881, in unique
+    return torch.unique(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_jit_internal.py", line 488, in fn
+    return if_false(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/_jit_internal.py", line 488, in fn
+    return if_false(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/functional.py", line 976, in _return_output
+    output, _, _ = _unique_impl(input, sorted, return_inverse, return_counts, dim)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/functional.py", line 882, in _unique_impl
+    output, inverse_indices, counts = _VF.unique_dim(
+KeyboardInterrupt
+[W tensorpipe_agent.cpp:725] RPC agent for worker0 encountered error when reading incoming request from worker3: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 33, in <module>
+    sys.exit(load_entry_point('torch==2.1.1+cu118', 'console_scripts', 'torchrun')())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 255, in launch_agent
+    result = agent.run()
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/metrics/api.py", line 124, in wrapper
+    result = f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 736, in run
+    result = self._invoke_run(role)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/agent/server/api.py", line 877, in _invoke_run
+    time.sleep(monitor_interval)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/api.py", line 62, in _terminate_process_handler
+    raise SignalException(f"Process {os.getpid()} got signal: {sigval}", sigval=sigval)
+torch.distributed.elastic.multiprocessing.api.SignalException: Process 539465 got signal: 2

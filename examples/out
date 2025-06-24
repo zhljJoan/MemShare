@@ -1,0 +1,1163 @@
+mkdir: cannot create directory ‘all/WIKI’: File exists
+mkdir: cannot create directory ‘all/WIKI/comm’: File exists
+[2024-09-03 19:19:15,858] torch.distributed.run: [WARNING] 
+[2024-09-03 19:19:15,858] torch.distributed.run: [WARNING] *****************************************
+[2024-09-03 19:19:15,858] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-09-03 19:19:15,858] torch.distributed.run: [WARNING] *****************************************
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+      File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+        self.memory_updater(mfgs[0],async_param)return self._call_impl(*args, **kwargs)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return forward_call(*args, **kwargs)
+      File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+        else self._run_ddp_forward(*inputs, **kwargs)self.mailbox.sychronize_shared()
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+        return self.module(*inputs, **kwargs)  # type: ignore[index]self.mailbox.sychronize_shared()
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+      File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+[W tensorpipe_agent.cpp:725] RPC agent for worker3 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[W tensorpipe_agent.cpp:725] RPC agent for worker1 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[W tensorpipe_agent.cpp:725] RPC agent for worker2 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[2024-09-03 19:19:25,871] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 3683880) of binary: /home/zlj/.miniconda3/envs/tgnn_3.10/bin/python
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 33, in <module>
+    sys.exit(load_entry_point('torch==2.1.1+cu118', 'console_scripts', 'torchrun')())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 264, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train_boundery.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2024-09-03_19:19:25
+  host      : gpu07
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 3683881)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[2]:
+  time      : 2024-09-03_19:19:25
+  host      : gpu07
+  rank      : 2 (local_rank: 2)
+  exitcode  : 1 (pid: 3683882)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[3]:
+  time      : 2024-09-03_19:19:25
+  host      : gpu07
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 3683883)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-09-03_19:19:25
+  host      : gpu07
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 3683880)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+[2024-09-03 19:19:27,123] torch.distributed.run: [WARNING] 
+[2024-09-03 19:19:27,123] torch.distributed.run: [WARNING] *****************************************
+[2024-09-03 19:19:27,123] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-09-03 19:19:27,123] torch.distributed.run: [WARNING] *****************************************
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+        return self._call_impl(*args, **kwargs)return forward_call(*args, **kwargs)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    return forward_call(*args, **kwargs)    
+self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+RuntimeError:     shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+[W tensorpipe_agent.cpp:725] RPC agent for worker2 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[W tensorpipe_agent.cpp:725] RPC agent for worker1 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[2024-09-03 19:19:37,137] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 3684650) of binary: /home/zlj/.miniconda3/envs/tgnn_3.10/bin/python
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 33, in <module>
+    sys.exit(load_entry_point('torch==2.1.1+cu118', 'console_scripts', 'torchrun')())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 264, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train_boundery.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2024-09-03_19:19:37
+  host      : gpu07
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 3684651)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[2]:
+  time      : 2024-09-03_19:19:37
+  host      : gpu07
+  rank      : 2 (local_rank: 2)
+  exitcode  : 1 (pid: 3684652)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[3]:
+  time      : 2024-09-03_19:19:37
+  host      : gpu07
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 3684653)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-09-03_19:19:37
+  host      : gpu07
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 3684650)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+[2024-09-03 19:19:38,388] torch.distributed.run: [WARNING] 
+[2024-09-03 19:19:38,388] torch.distributed.run: [WARNING] *****************************************
+[2024-09-03 19:19:38,388] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-09-03 19:19:38,388] torch.distributed.run: [WARNING] *****************************************
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+        main()main()
+
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+        pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+            main()return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+        else self._run_ddp_forward(*inputs, **kwargs)else self._run_ddp_forward(*inputs, **kwargs)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+        return self.module(*inputs, **kwargs)  # type: ignore[index]return self.module(*inputs, **kwargs)  # type: ignore[index]
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+        self.memory_updater(mfgs[0],async_param)self.memory_updater(mfgs[0],async_param)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+Traceback (most recent call last):
+    return self.module(*inputs, **kwargs)  # type: ignore[index]  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+        return forward_call(*args, **kwargs)return forward_call(*args, **kwargs)
+
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+        self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+        self.mailbox.sychronize_shared()self.mailbox.sychronize_shared()
+
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+        self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mailself.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+
+RuntimeErrorRuntimeError: : shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+[W tensorpipe_agent.cpp:725] RPC agent for worker2 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[W tensorpipe_agent.cpp:725] RPC agent for worker1 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[W tensorpipe_agent.cpp:725] RPC agent for worker3 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[2024-09-03 19:19:48,402] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 3685377) of binary: /home/zlj/.miniconda3/envs/tgnn_3.10/bin/python
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 33, in <module>
+    sys.exit(load_entry_point('torch==2.1.1+cu118', 'console_scripts', 'torchrun')())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 264, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train_boundery.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2024-09-03_19:19:48
+  host      : gpu07
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 3685378)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[2]:
+  time      : 2024-09-03_19:19:48
+  host      : gpu07
+  rank      : 2 (local_rank: 2)
+  exitcode  : 1 (pid: 3685379)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[3]:
+  time      : 2024-09-03_19:19:48
+  host      : gpu07
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 3685380)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-09-03_19:19:48
+  host      : gpu07
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 3685377)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+[2024-09-03 19:19:49,657] torch.distributed.run: [WARNING] 
+[2024-09-03 19:19:49,657] torch.distributed.run: [WARNING] *****************************************
+[2024-09-03 19:19:49,657] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-09-03 19:19:49,657] torch.distributed.run: [WARNING] *****************************************
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+Traceback (most recent call last):
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]    
+return self._call_impl(*args, **kwargs)  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+        return self._call_impl(*args, **kwargs)return self._call_impl(*args, **kwargs)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self.module(*inputs, **kwargs)  # type: ignore[index]    
+else self._run_ddp_forward(*inputs, **kwargs)  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    return forward_call(*args, **kwargs)    
+self.memory_updater(mfgs[0],async_param)  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    return forward_call(*args, **kwargs)
+      File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    self.memory_updater(mfgs[0],async_param)    
+self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+
+      File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+return self._call_impl(*args, **kwargs)    
+self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+[2024-09-03 19:19:59,670] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 3686101) of binary: /home/zlj/.miniconda3/envs/tgnn_3.10/bin/python
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 33, in <module>
+    sys.exit(load_entry_point('torch==2.1.1+cu118', 'console_scripts', 'torchrun')())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 264, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train_boundery.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2024-09-03_19:19:59
+  host      : gpu07
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 3686102)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[2]:
+  time      : 2024-09-03_19:19:59
+  host      : gpu07
+  rank      : 2 (local_rank: 2)
+  exitcode  : 1 (pid: 3686103)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[3]:
+  time      : 2024-09-03_19:19:59
+  host      : gpu07
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 3686104)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-09-03_19:19:59
+  host      : gpu07
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 3686101)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
+[2024-09-03 19:20:00,925] torch.distributed.run: [WARNING] 
+[2024-09-03 19:20:00,925] torch.distributed.run: [WARNING] *****************************************
+[2024-09-03 19:20:00,925] torch.distributed.run: [WARNING] Setting OMP_NUM_THREADS environment variable for each process to be 1 in default, to avoid your system being overloaded, please further tune the variable for optimal performance in your application as needed. 
+[2024-09-03 19:20:00,925] torch.distributed.run: [WARNING] *****************************************
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libsiw-rdmav34.so': libsiw-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libbnxt_re-rdmav34.so': libbnxt_re-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhns-rdmav34.so': libhns-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libqedr-rdmav34.so': libqedr-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmthca-rdmav34.so': libmthca-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libcxgb4-rdmav34.so': libcxgb4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libhfi1verbs-rdmav34.so': libhfi1verbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libmlx4-rdmav34.so': libmlx4-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libefa-rdmav34.so': libefa-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libipathverbs-rdmav34.so': libipathverbs-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libocrdma-rdmav34.so': libocrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'libvmw_pvrdma-rdmav34.so': libvmw_pvrdma-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+libibverbs: Warning: couldn't load driver 'librxe-rdmav34.so': librxe-rdmav34.so: cannot open shared object file: No such file or directory
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[W reducer.cpp:1346] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+        main()return self._call_impl(*args, **kwargs)
+
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+Traceback (most recent call last):
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 631, in <module>
+    else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self.module(*inputs, **kwargs)  # type: ignore[index]
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+        self.memory_updater(mfgs[0],async_param)return self._call_impl(*args, **kwargs)
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    main()
+  File "/home/zlj/BTS-MTGNN/examples/train_boundery.py", line 496, in main
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+      File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1519, in forward
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    self.mailbox.sychronize_shared()
+      File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+else self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1355, in _run_ddp_forward
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+        self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mailreturn self.module(*inputs, **kwargs)  # type: ignore[index]
+
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/modules.py", line 118, in forward
+    self.memory_updater(mfgs[0],async_param)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1518, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1527, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 402, in forward
+    self.update_hunk(index,memory,memory_ts,mail,mail_ts,nxt_fetch_func)
+  File "/home/zlj/BTS-MTGNN/starrygl/module/memorys.py", line 333, in historical_func
+    self.mailbox.sychronize_shared()
+  File "/home/zlj/BTS-MTGNN/starrygl/sample/memory/shared_mailbox.py", line 263, in sychronize_shared
+    self.mailbox.accessor.data[index, torch.max(self.next_mail_pos[index]-1,torch.tensor([0],device=mail.device))] = mail
+RuntimeError: shape mismatch: value tensor of shape [65, 0] cannot be broadcast to indexing result of shape [65, 372]
+[W tensorpipe_agent.cpp:725] RPC agent for worker2 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[W tensorpipe_agent.cpp:725] RPC agent for worker3 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[W tensorpipe_agent.cpp:725] RPC agent for worker1 encountered error when reading incoming request from worker0: eof (this error originated at tensorpipe/transport/shm/connection_impl.cc:259)
+[2024-09-03 19:20:10,935] torch.distributed.elastic.multiprocessing.api: [ERROR] failed (exitcode: 1) local_rank: 0 (pid: 3686824) of binary: /home/zlj/.miniconda3/envs/tgnn_3.10/bin/python
+Traceback (most recent call last):
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/bin/torchrun", line 33, in <module>
+    sys.exit(load_entry_point('torch==2.1.1+cu118', 'console_scripts', 'torchrun')())
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/elastic/multiprocessing/errors/__init__.py", line 346, in wrapper
+    return f(*args, **kwargs)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 806, in main
+    run(args)
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/run.py", line 797, in run
+    elastic_launch(
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/home/zlj/.miniconda3/envs/tgnn_3.10/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 264, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train_boundery.py FAILED
+------------------------------------------------------------
+Failures:
+[1]:
+  time      : 2024-09-03_19:20:10
+  host      : gpu07
+  rank      : 1 (local_rank: 1)
+  exitcode  : 1 (pid: 3686825)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[2]:
+  time      : 2024-09-03_19:20:10
+  host      : gpu07
+  rank      : 2 (local_rank: 2)
+  exitcode  : 1 (pid: 3686826)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+[3]:
+  time      : 2024-09-03_19:20:10
+  host      : gpu07
+  rank      : 3 (local_rank: 3)
+  exitcode  : 1 (pid: 3686827)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2024-09-03_19:20:10
+  host      : gpu07
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 3686824)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================

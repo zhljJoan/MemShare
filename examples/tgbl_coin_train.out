@@ -1,0 +1,6 @@
+LOCAL RANK 0, RANK0
+in
+local rank is 0 world_size is 1 memory group is 0 memory rank is 0 memory group size is 1
+
+[0]
+use cuda on 0

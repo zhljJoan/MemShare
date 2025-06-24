@@ -37,7 +37,7 @@ class Filter(nn.Module):
   
   def update(self, node_idxs, incret):
     self.count[node_idxs, :] = self.count[node_idxs, :] + 1
-    self.incretment[node_idxs, :] = self.incretment[node_idxs, :] + incret
+    self.incretment[node_idxs, :] = (self.incretment[node_idxs, :] + incret).to(self.incretment.dtype)
   
   def clear(self):
     self.count.zero_()

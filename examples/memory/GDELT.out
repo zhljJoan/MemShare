@@ -1,0 +1,156 @@
+LOCAL RANK 0, RANK0
+in
+local rank is 0 world_size is 1 memory group is 0 memory rank is 0 memory group size is 1
+
+[0]
+memory used is torch.Size([16682, 413]) torch.float32 0.0256660059094429
+
+dist rank is 0 after node feats defination:
+dist rank is 0 after node feats defination:
+
+local node num 16682 ,local edge num 191290882
+
+num nodes is tensor([191290882])
+init 0
+cpu
+tensor([        0,         1,         2,  ..., 191290879, 191290880,
+        191290881])
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  4.76837158203125e-07
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  9728
+Max GPU memory reserved during this session:  2097152
+cpu 0
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  4.76837158203125e-07
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  9728
+Max GPU memory reserved during this session:  2097152
+torch.Size([191290882, 182])
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  4.76837158203125e-07
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  9728
+Max GPU memory reserved during this session:  2097152
+init data loader
+Total GPU memory:  44.3516845703125
+Current GPU memory allocated:  4.76837158203125e-07
+Current GPU memory reserved:  0.001953125
+Max GPU memory allocated during this session:  9728
+Max GPU memory reserved during this session:  2097152
+tensor([], device='cuda:0', dtype=torch.int32)
+100
+get_neighbors consume: 19.381s
+0 tensor([0, 0, 0,  ..., 0, 0, 0])
+get_neighbors consume: 18.4277s
+0 tensor([0, 0, 0,  ..., 0, 0, 0])
+part tensor([[0, 0, 0,  ..., 0, 0, 0],
+        [0, 0, 0,  ..., 0, 0, 0]])
+
+ts tensor([     0,      0,      0,  ..., 105203, 105203, 105203], device='cuda:0') tensor([     0,      0,      0,  ..., 105203, 105203, 105203], device='cuda:0') tensor([140244, 140244, 140244,  ..., 175283, 175283, 175283], device='cuda:0') tensor([105204, 105204, 105204,  ..., 140243, 140243, 140243], device='cuda:0')
+seed is 69328
+tensor([    0,     1,     2,  ..., 16679, 16680, 16681])
+seed is 46802
+tensor(42854, device='cuda:0') 128563062
+tensor([[3000., 3000., 3000.,  ..., 3000., 3000., 1062.]])
+average: 1.0
+
+max average: 2999.954833984375
+
+min average: 2999.954833984375
+
+all_cross_edge:tensor([0])  local edges num: 128563062
+
+tensor(42854, device='cuda:0') 128563062
+tensor([[3000., 3000., 3000.,  ..., 3000., 3000., 1062.]])
+average: 1.0
+
+max average: 2999.954833984375
+
+min average: 2999.954833984375
+
+all_cross_edge:tensor([0])  local edges num: 128563062
+
+tensor(9168, device='cuda:0') 27504646
+tensor([[3000., 3000., 3000.,  ..., 3000., 3000.,  646.]])
+average: 1.0
+
+max average: 2999.7431640625
+
+min average: 2999.7431640625
+
+all_cross_edge:tensor([0])  local edges num: 27504646
+
+tensor(11741, device='cuda:0') 35223174
+tensor([[3000., 3000., 3000.,  ..., 3000., 3000.,  174.]])
+average: 1.0
+
+max average: 2999.759521484375
+
+min average: 2999.759521484375
+
+all_cross_edge:tensor([0])  local edges num: 35223174
+
+init dataloader
+The model has 1.3515510559082031 trainable parameters
+Epoch 0:
+	train time:2048.57s
+
+tensor(202286286, device='cuda:0')
+local node number tensor([202286286]) remote node number tensor([0]) local edge tensor([1987287115]) remote edgetensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 656.2948722635629 time_backward =  725.7513507209951 time_sample =  0 pre_batch = 0 pre_input = 666.192436399404 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 56.47688090347219 time_attention = 100.9507446330972
+mode: val tensor([0.9668]) tensor([0.9711])
+mode: test tensor([0.9677]) tensor([0.9718])
+Folder './memory/GDELT/' already exists.
+tensor(454983) tensor(13.0280)
+	train loss:10913.4514  train ap: nan  val ap:0.966760  val auc:0.971113 test ap 0.967715 test auc0.971818
+
+	total time:2803.13s  prep time:2048.57s
+
+Epoch 1:
+	train time:2052.02s
+
+tensor(202285862, device='cuda:0')
+local node number tensor([202285862]) remote node number tensor([0]) local edge tensor([1987349399]) remote edgetensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 664.3388468669727 time_backward =  715.8611591340741 time_sample =  0 pre_batch = 0 pre_input = 671.4916998383123 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 60.64823326293845 time_attention = 117.4600975587964
+mode: val tensor([0.9591]) tensor([0.9658])
+mode: test tensor([0.9599]) tensor([0.9661])
+Folder './memory/GDELT/' already exists.
+tensor(454983) tensor(13.0280)
+	train loss:10650.1615  train ap: nan  val ap:0.959056  val auc:0.965786 test ap 0.959892 test auc0.966125
+
+	total time:2795.10s  prep time:2052.02s
+
+Epoch 2:
+	train time:2060.93s
+
+tensor(202275698, device='cuda:0')
+local node number tensor([202275698]) remote node number tensor([0]) local edge tensor([1987407487]) remote edgetensor([0])
+
+memory comm tensor([0]) shared comm tensor([0])
+
+time_forward = 671.9510305818403 time_backward =  720.5700599912088 time_sample =  0 pre_batch = 0 pre_input = 668.0710405890131 pos_update = 0 mem_update = 0 time_zero = 0 time_nbrs = 66.142796484055 time_attention = 116.45530042296741
+mode: val tensor([0.9727]) tensor([0.9768])
+mode: test tensor([0.9734]) tensor([0.9773])
+Folder './memory/GDELT/' already exists.
+tensor(454983) tensor(13.0280)
+	train loss:10602.0503  train ap: nan  val ap:0.972683  val auc:0.976803 test ap 0.973422 test auc0.977286
+
+	total time:2814.88s  prep time:2060.93s
+
+6161.525733709335
+Loading the best model at epoch 2
+best test AP:0.973422 test auc0.977286
+mode: train tensor([0.9527]) tensor([0.9599])
+mode: val tensor([0.9519]) tensor([0.9587])
+mode: test tensor([0.9535]) tensor([0.9594])
+	val ap:0.951949 val auc:0.958725 test AP:0.953461  test AUC:0.959423
+
+test_dataset 27504646 avg_time 2053.841911236445 
+

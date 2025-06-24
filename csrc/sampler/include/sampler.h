@@ -25,12 +25,12 @@ class ParallelSampler
         th::Tensor eid_inv;
         th::Tensor unq_id;
         th::Tensor first_block_id;
-        double boundery_probility;
+        double init_boundary_probability;
         vector<unsigned int> loc_seeds;
         ParallelSampler(TemporalNeighborBlock& _tnb, NodeIDType _num_nodes, EdgeIDType _num_edges, int _threads, 
                         vector<int>& _fanouts, int _num_layers, string _policy, int _local_part, th::Tensor _part, th::Tensor _node_part,double _p) :
                         tnb(_tnb), num_nodes(_num_nodes), num_edges(_num_edges), threads(_threads), 
-                        fanouts(_fanouts), num_layers(_num_layers), policy(_policy), local_part(_local_part), boundery_probility(_p)
+                        fanouts(_fanouts), num_layers(_num_layers), policy(_policy), local_part(_local_part), init_boundary_probability(_p)
         {
             omp_set_num_threads(_threads);
             ret.clear();
@@ -52,12 +52,12 @@ class ParallelSampler
             ret.resize(num_layers);
         }
 
-        void neighbor_sample_from_nodes(th::Tensor nodes, optional<th::Tensor> root_ts, optional<bool> part_unique);
+        void neighbor_sample_from_nodes(th::Tensor nodes, optional<th::Tensor> root_ts, optional<bool> part_unique,optional<double> boundary_probability);
         void neighbor_sample_from_nodes_static(th::Tensor nodes, bool part_unique);
         void neighbor_sample_from_nodes_static_layer(th::Tensor nodes, int cur_layer, bool part_unique);
-        void neighbor_sample_from_nodes_with_before(th::Tensor nodes, th::Tensor root_ts);
+        void neighbor_sample_from_nodes_with_before(th::Tensor nodes, th::Tensor root_ts,double boundary_probability);
         void neighbor_sample_from_dynamic_nodes(th::Tensor nodes, th::Tensor root_ts);
-        void neighbor_sample_from_nodes_with_before_layer(th::Tensor nodes, th::Tensor root_ts, int cur_layer);
+        void neighbor_sample_from_nodes_with_before_layer(th::Tensor nodes, th::Tensor root_ts, int cur_layer,double boundary_probability);
         template<typename T>
         void union_to_vector(vector<T> *p, vector<T> &to_vec);
         void sample_unique(     th::Tensor seed, th::Tensor seed_ts,
@@ -66,7 +66,7 @@ class ParallelSampler
 
 
 
-void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th::Tensor> root_ts, optional<bool> part_unique)
+void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th::Tensor> root_ts, optional<bool> part_unique,optional<double> boundary_probability)
 {
     omp_set_num_threads(threads);
     if(policy == "weighted")
@@ -81,7 +81,7 @@ void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th
         AT_ASSERTM(tnb.with_timestamp, "Tnb has no timestamp infomation!");
         AT_ASSERTM(root_ts.has_value(), "Parameter mismatch!");
         //neighbor_sample_from_dynamic_nodes(nodes,root_ts.value());
-        neighbor_sample_from_nodes_with_before(nodes, root_ts.value());
+        neighbor_sample_from_nodes_with_before(nodes, root_ts.value(), boundary_probability.has_value()?boundary_probability.value():0);
     }
     else{
         bool flag = part_unique.has_value() ? part_unique.value() : true;
@@ -129,13 +129,13 @@ void ParallelSampler :: neighbor_sample_from_nodes_static_layer(th::Tensor nodes
             // uniform_int_distribution<> u(0, tnb.deg[node]-1);            
             // while(temp_s.size()!=fanout && temp_s.size()<tnb.neighbors_set[node].size()){
             for(int i=0;i<fanout;i++){
-                //Ñ­»·Ñ¡Ôñfanout¸öÁÚ¾Ó
+                //Ñ­ï¿½ï¿½Ñ¡ï¿½ï¿½fanoutï¿½ï¿½ï¿½Ú¾ï¿½
                 NodeIDType indice;
-                if(policy == "weighted"){//¿¼ÂÇ±ßÈ¨ÖØÐÅÏ¢
+                if(policy == "weighted"){//ï¿½ï¿½ï¿½Ç±ï¿½È¨ï¿½ï¿½ï¿½ï¿½Ï¢
                     const vector<WeightType>& ew = tnb.edge_weight[node];
                     indice = sample_multinomial(ew, e);
                 }
-                else if(policy == "uniform"){//¾ùÔÈ²ÉÑù
+                else if(policy == "uniform"){//ï¿½ï¿½ï¿½È²ï¿½ï¿½ï¿½
                     // indice = u(e);
                     indice = rand_r(&loc_seeds[tid]) % (nei.size());
                 }
@@ -143,7 +143,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_static_layer(th::Tensor nodes
                 auto chosen_e_iter = edge.begin() + indice;
                 if(part_unique){
                     auto rst = temp_s.insert(*chosen_n_iter);
-                    if(rst.second){ //²»ÖØ¸´
+                    if(rst.second){ //ï¿½ï¿½ï¿½Ø¸ï¿½
                         eid_threads[tid].emplace_back(*chosen_e_iter);
                         node_s_threads[tid].insert(*chosen_n_iter);
                         if(!tnb.neighbors_set.empty() && temp_s.size()<fanout && temp_s.size()<tnb.neighbors_set[node].size()) fanout++;
@@ -211,7 +211,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_static(th::Tensor nodes, bool
 }
 
 void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
-        th::Tensor nodes, th::Tensor root_ts, int cur_layer){
+        th::Tensor nodes, th::Tensor root_ts, int cur_layer, double boundary_probability){
     py::gil_scoped_release release;
     double tot_start_time = omp_get_wtime();
     ret[cur_layer] = TemporalGraphBlock();
@@ -267,7 +267,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
                 int eid = tnb.eid[node][cid];
                  if(part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part){
                     double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);
-                    if(p0 > boundery_probility)continue;
+                    if(p0 > boundary_probability)continue;
                 }
                 tgb_i[tid].src_index.emplace_back(i);
                 tgb_i[tid].sample_nodes.emplace_back(tnb.neighbors[node][cid]);
@@ -306,7 +306,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
                 if((part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part)){
                     if(cal_cnt<=fanout){
                         double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);
-                        double ep = boundery_probility*pr[cal_cnt-1]/sum_p*sum_1;
+                        double ep = boundary_probability*pr[cal_cnt-1]/sum_p*sum_1;
                         if(p0 > ep)continue;
                         //tgb_i[tid].sample_weight.emplace_back((float)ep);
                     }
@@ -327,7 +327,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
             }
         }
         else{
-            //¿ÉÑ¡ÁÚ¾Ó±ß´óÓÚÉÈ³öµÄ»°ÐèÒªËæ»úÑ¡Ôñfanout¸öÁÚ¾Ó
+            //ï¿½ï¿½Ñ¡ï¿½Ú¾Ó±ß´ï¿½ï¿½ï¿½ï¿½È³ï¿½ï¿½Ä»ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½fanoutï¿½ï¿½ï¿½Ú¾ï¿½
             tgb_i[tid].src_index.insert(tgb_i[tid].src_index.end(), fanout, i);
             uniform_int_distribution<> u(0, end_index-1);
             //cout<<end_index<<endl;
@@ -389,11 +389,11 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
     py::gil_scoped_acquire acquire;
 }
 
-void ParallelSampler :: neighbor_sample_from_nodes_with_before(th::Tensor nodes, th::Tensor root_ts){
+void ParallelSampler :: neighbor_sample_from_nodes_with_before(th::Tensor nodes, th::Tensor root_ts, double boundary_probability){
     for(int i=0;i<num_layers;i++){
-        if(i==0) neighbor_sample_from_nodes_with_before_layer(nodes, root_ts, i);
+        if(i==0) neighbor_sample_from_nodes_with_before_layer(nodes, root_ts, i, boundary_probability);
         else neighbor_sample_from_nodes_with_before_layer(vecToTensor<NodeIDType>(ret[i-1].sample_nodes), 
-                                                          vecToTensor<TimeStampType>(ret[i-1].sample_nodes_ts), i);
+                                                          vecToTensor<TimeStampType>(ret[i-1].sample_nodes_ts), i, boundary_probability);
     }
 }
 

@@ -1,0 +1,132 @@
+LOCAL RANK 2, RANK2
+in
+LOCAL RANK 0, RANK0
+in
+LOCAL RANK 3, RANK3
+LOCAL RANK 1, RANK1
+in
+in
+use cuda on 2
+use cuda on 3
+use cuda on 0
+use cuda on 1
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.6 GB
+init Cached:    0.6 GB
+ids mem is 9.573996067047119e-06 eids mem is 0.20334253460168839 edge_inde mem is 0.40668506920337677
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.6 GB
+init Cached:    0.6 GB
+ids mem is 1.6398727893829346e-05 eids mem is 0.18585889041423798 edge_inde mem is 0.37171778082847595
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.5 GB
+init Cached:    0.5 GB
+ids mem is 1.6398727893829346e-05 eids mem is 0.17975840717554092 edge_inde mem is 0.35951681435108185
+
+Device: NVIDIA A40
+init Memory Usage:
+init Allocated: 0.6 GB
+init Cached:    0.6 GB
+ids mem is 1.640617847442627e-05 eids mem is 0.18971920758485794 edge_inde mem is 0.3794384151697159
+
+edge_index memory is 5.700912535190582
+edge_index memory is 5.700912535190582
+ts memory is 2.850456267595291
+edge_index memory is 5.700912535190582
+ts memory is 2.850456267595291
+eids memory is 2.850456267595291
+ts memory is 2.850456267595291
+train_mask memory is 0.3563070334494114
+test_mask memory is 0.3563070334494114
+val_mask memory is 0.3563070334494114
+eids memory is 2.850456267595291
+edge_index memory is 5.700912535190582
+eids memory is 2.850456267595291
+train_mask memory is 0.3563070334494114
+train_mask memory is 0.3563070334494114
+test_mask memory is 0.3563070334494114
+val_mask memory is 0.3563070334494114
+test_mask memory is 0.3563070334494114
+dist_eid memory is 2.850456267595291
+val_mask memory is 0.3563070334494114
+mapper Memory Usage:
+mapper Allocated: 16.0 GB
+mapper Cached:    16.4 GB
+x Memory Usage:
+x Allocated: 16.0 GB
+x Cached:    16.4 GB
+ts memory is 2.850456267595291
+dist_eid memory is 2.850456267595291
+eids memory is 2.850456267595291
+mapper Memory Usage:
+mapper Allocated: 16.0 GB
+mapper Cached:    16.3 GB
+x Memory Usage:
+x Allocated: 16.0 GB
+x Cached:    16.3 GB
+train_mask memory is 0.3563070334494114
+test_mask memory is 0.3563070334494114
+val_mask memory is 0.3563070334494114
+dist_eid memory is 2.850456267595291
+mapper Memory Usage:
+mapper Allocated: 16.0 GB
+mapper Cached:    16.4 GB
+x Memory Usage:
+x Allocated: 16.0 GB
+x Cached:    16.4 GB
+dist_eid memory is 2.850456267595291
+mapper Memory Usage:
+mapper Allocated: 16.0 GB
+mapper Cached:    16.3 GB
+x Memory Usage:
+x Allocated: 16.0 GB
+x Cached:    16.3 GB
+edge Memory Usage:
+edge Allocated: 24.6 GB
+edge Cached:    25.0 GB
+16682
+edge Memory Usage:
+edge Allocated: 24.1 GB
+edge Cached:    24.5 GB
+16682
+edge Memory Usage:
+edge Allocated: 25.3 GB
+edge Cached:    25.7 GB
+16682
+edge Memory Usage:
+edge Allocated: 24.4 GB
+edge Cached:    24.8 GB
+16682
+get_neighbors consume: 14.4031s
+num_batchs: tensor([5687], device='cuda:3')
+get_neighbors consume: 16.37s
+get_neighbors consume: 16.1287s
+num_batchs: tensor([5413], device='cuda:1')
+num_batchs: tensor([5963], device='cuda:2')
+get_neighbors consume: 16.3033s
+num_batchs: tensor([5504], device='cuda:0')
+num_batchs: num_batchs: num_batchs:num_batchs:  tensor([1256], device='cuda:0')
+tensor([1218], device='cuda:3')
+tensor([1412], device='cuda:2')tensor([1166], device='cuda:1')
+
+num_batchs:num_batchs:num_batchs:num_batchs:    tensor([1556], device='cuda:0')tensor([1463], device='cuda:1')
+
+tensor([1723], device='cuda:2')tensor([1584], device='cuda:3')
+
+init dataloaderinit dataloaderinit dataloaderinit dataloader
+
+
+
+The model has 1.4282264709472656 trainable parameters
+The model has 1.4282264709472656 trainable parameters
+The model has 1.4282264709472656 trainable parameters
+Epoch 0:
+The model has 1.4282264709472656 trainable parameters
+Epoch 0:
+Epoch 0:
+Epoch 0:

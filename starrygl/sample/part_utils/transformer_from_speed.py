@@ -280,84 +280,15 @@ def get_eval_batch(eid,nid_mapper,eid_mapper,batch_size):
     
 
 
-def load_from_speed(data,seed,top,sampler_graph_add_rev,device=torch.device('cuda'),feature_device=torch.device('cuda'),partition='ours'):
+def load_from_speed(data,seed,top,sampler_graph_add_rev,device=torch.device('cuda'),feature_device=torch.device('cuda'),partition_path='ours',):
     ctx = _get_default_dist_context()
     if ctx.memory_group_size == 1:
         return load_from_shared_node_partition(data,None,None,sample_add_rev=sampler_graph_add_rev,device=device,feature_device=feature_device)
     else:
-        if partition == 'ours':
-            fnode_i = '../../SPEED/partition/divided_nodes_seed_starrygl/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-            fnode_share = '../../SPEED/partition/divided_nodes_seed_starrygl/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
-            reorder = '../../SPEED/partition/divided_nodes_seed_starrygl/{}/reorder.txt'.format(data)
-            edge_i = '../../SPEED/partition/divided_nodes_seed_starrygl/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-        elif partition == 'metis':
-            fnode_i = '../../SPEED/partition/divided_nodes_seed_metis_no_balance/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-            fnode_share = '../../SPEED/partition/divided_nodes_seed_metis_no_balance/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
-            reorder = '../../SPEED/partition/divided_nodes_seed_metis_no_balance//{}/reorder.txt'.format(data)
-            edge_i = '../../SPEED/partition/divided_nodes_seed_metis_no_balance/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-        elif partition == 'ldg':
-            fnode_i = '../../SPEED/partition/divided_nodes_ldg/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-            fnode_share = '../../SPEED/partition/divided_nodes_ldg/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
-            reorder = '../../SPEED/partition/divided_nodes_ldg/{}/reorder.txt'.format(data)
-            edge_i = '../../SPEED/partition/divided_nodes_ldg/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-        elif partition == 'dis_tgl':
-            fnode_i = '../../SPEED/partition/divided_nodes_seed_dis/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-            fnode_share = '../../SPEED/partition/divided_nodes_seed_dis/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
-            reorder = '../../SPEED/partition/divided_nodes_seed_dis/{}/reorder.txt'.format(data)
-            edge_i = '../../SPEED/partition/divided_nodes_seed_dis/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-        elif partition == 'random':
-            df = load_graph(data)
-            src = torch.from_numpy(np.array(df.src.values)).long()
-            dst = torch.from_numpy(np.array(df.dst.values)).long() 
-            num_node = max(src.max().item(),dst.max().item())+1 
-            part = torch.randint(0,dist.get_world_size(),size = [num_node])
-            #part = torch.arange(num_node)%dist.get_world_size()
-            #edge_part  = torch.randint(0,dist.get_world_size(),size = [src.shape[0]])
-            node_i = (part == dist.get_rank()).nonzero().reshape(-1)
-            dist.broadcast(part,src=0,group=ctx.gloo_group)
-            #dist.broadcast(edge_part,src=0,group=ctx.gloo_group)
-            print(part)
-            #edge_i = (edge_part == dist.get_rank()).nonzero().reshape(-1)#
-            edge_i = (part[src] == dist.get_rank()).nonzero().reshape(-1)
-            print(node_i,edge_i)
-            shared_node_list = []
-            shared_node = torch.tensor(shared_node_list).reshape(-1).to(torch.long)
-            return load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev=sampler_graph_add_rev,edge_i=edge_i,reid=None,device=device,feature_device=feature_device)
-
-
-        node_list = []
-        shared_node_list = []
-        with open(fnode_i,'r') as file:
-            lines = file.readlines()
-            for line in lines:
-                node_list.append(int(line))
-        if os.path.exists(fnode_share):
-            with open(fnode_share,'r') as file:
-                lines = file.readlines()
-                for line in lines:
-                    shared_node_list.append(int(line))
-        else:
-            shared_node_list = []
-        """
-        reid = []
-        with open(reorder,'r') as file:
-            lines = file.readlines()
-            for line in lines:
-                reid.append(int(line))
-        """
-        eid_list = []
-        with open(edge_i,'r') as file:
-             lines = file.readlines()
-             for line in lines:
-                 eid_list.append(int(line))
-        node_i = torch.tensor(node_list).reshape(-1).to(torch.long)
-        edge_i = torch.tensor(eid_list).reshape(-1).to(torch.long)
-        #reid = torch.arange(len(reid))#torch.tensor(reid).reshape(-1)
-        if partition == 'dis_tgl':
-            shared_node = torch.tensor([],dtype=torch.long)
-        else:
-            shared_node = torch.tensor(shared_node_list).reshape(-1).to(torch.long)
-        #print(reid)
+        node_i = '{}/{}/{}/{}_{}parts_top{}/output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+        fnode_share = '{}/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(data,seed,data,ctx.memory_group_size,top)
+        edge_i = '{}/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+        shared_node =  '{}/{}/reorder.txt'.format(data)
         return load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev=sampler_graph_add_rev,edge_i=edge_i,reid=None,device=device,feature_device=feature_device)
 
 
