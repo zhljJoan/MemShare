@@ -44,7 +44,6 @@ COMMON_ARGUMENTS = (
     "1.0",
     "--core_neg_exploration",
     "0.1",
-    "--core_request_planner",
     "--core_freeze_adaptive_parameters",
 )
 
@@ -74,6 +73,69 @@ VARIANTS = {
         "1",
         "--core_disable_memory_predictor",
     ),
+    "coordinated-decay": (
+        "--sample_type",
+        "boundery_recent_decay_coordinated",
+        "--core_edge_cache_ratio",
+        "0",
+        "--core_neg_pool_factor",
+        "1",
+    ),
+    "core-independent": (
+        "--sample_type",
+        "boundery_recent_core",
+        "--core_edge_cache_ratio",
+        "0",
+        "--core_neg_pool_factor",
+        "1",
+        "--core_disable_memory_predictor",
+        "--core_group_size",
+        "1",
+    ),
+    "core-clipped": (
+        "--sample_type",
+        "boundery_recent_core",
+        "--core_edge_cache_ratio",
+        "0",
+        "--core_neg_pool_factor",
+        "1",
+        "--core_disable_memory_predictor",
+        "--core_attention_probability_floor",
+        "0.1",
+    ),
+    "core-uncorrected": (
+        "--sample_type",
+        "boundery_recent_core",
+        "--core_edge_cache_ratio",
+        "0",
+        "--core_neg_pool_factor",
+        "1",
+        "--core_disable_memory_predictor",
+        "--core_attention_probability_floor",
+        "1",
+    ),
+    "core-p15": (
+        "--sample_type",
+        "boundery_recent_core",
+        "--probability",
+        "0.15",
+        "--core_edge_cache_ratio",
+        "0",
+        "--core_neg_pool_factor",
+        "1",
+        "--core_disable_memory_predictor",
+    ),
+    "core-p20": (
+        "--sample_type",
+        "boundery_recent_core",
+        "--probability",
+        "0.2",
+        "--core_edge_cache_ratio",
+        "0",
+        "--core_neg_pool_factor",
+        "1",
+        "--core_disable_memory_predictor",
+    ),
     "core-top1": (
         "--sample_type",
         "boundery_recent_core",
@@ -93,6 +155,17 @@ VARIANTS = {
         "--core_neg_pool_factor",
         "1",
     ),
+    "edge-cache-frozen": (
+        "--sample_type",
+        "boundery_recent_decay",
+        "--core_edge_cache_ratio",
+        "0.01",
+        "--core_cache_max_replacements",
+        "0",
+        "--core_cache_simple_admission",
+        "--core_neg_pool_factor",
+        "1",
+    ),
     "residual-cache": (
         "--sample_type",
         "boundery_recent_core",
@@ -108,6 +181,18 @@ VARIANTS = {
         "0",
         "--core_neg_pool_factor",
         "4",
+    ),
+    "cost-negative": (
+        "--sample_type",
+        "boundery_recent_decay",
+        "--core_edge_cache_ratio",
+        "0",
+        "--core_neg_pool_factor",
+        "2",
+        "--core_neg_hardness_beta",
+        "0",
+        "--core_neg_embedding_capacity",
+        "0",
     ),
     "full": (
         "--sample_type",
@@ -143,6 +228,16 @@ def _parse_args() -> argparse.Namespace:
         default=0,
         help='run full train/validation/test epochs instead of batch-only smoke',
     )
+    parser.add_argument(
+        "--dataset-epochs",
+        nargs="+",
+        default=(),
+        metavar="DATASET=EPOCHS",
+        help=(
+            "override --screen-epochs per dataset; when supplied, all four "
+            "fixed datasets must be listed"
+        ),
+    )
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--seed", type=int, default=6773)
     parser.add_argument("--nproc-per-node", type=int, default=4)
@@ -175,6 +270,38 @@ def _parse_args() -> argparse.Namespace:
         parser.error("--batches must be positive")
     if args.screen_epochs < 0:
         parser.error("--screen-epochs cannot be negative")
+    dataset_epochs: Dict[str, int] = {}
+    for assignment in args.dataset_epochs:
+        try:
+            dataset, raw_epochs = assignment.split("=", 1)
+            epochs = int(raw_epochs)
+        except ValueError:
+            parser.error(
+                "--dataset-epochs entries must use DATASET=EPOCHS"
+            )
+        if dataset not in DATASETS:
+            parser.error(
+                "unknown dataset in --dataset-epochs: {}".format(dataset)
+            )
+        if dataset in dataset_epochs:
+            parser.error(
+                "duplicate dataset in --dataset-epochs: {}".format(dataset)
+            )
+        if epochs <= 0:
+            parser.error("--dataset-epochs values must be positive")
+        dataset_epochs[dataset] = epochs
+    if dataset_epochs and set(dataset_epochs) != set(DATASETS):
+        missing_datasets = sorted(set(DATASETS) - set(dataset_epochs))
+        parser.error(
+            "--dataset-epochs must cover all four datasets; missing {}".format(
+                ", ".join(missing_datasets)
+            )
+        )
+    if dataset_epochs and args.screen_epochs:
+        parser.error(
+            "--dataset-epochs and --screen-epochs are mutually exclusive"
+        )
+    args.dataset_epochs = dataset_epochs
     if args.repeats <= 0:
         parser.error("--repeats must be positive")
     if args.nproc_per_node != 4:
@@ -242,9 +369,10 @@ def _command(
 ) -> List[str]:
     torchrun = args.python.parent / "torchrun"
     seed = args.seed + repeat
+    epoch_count = args.dataset_epochs.get(dataset, args.screen_epochs)
     run_limit = (
-        ["--core_screen_epochs", str(args.screen_epochs)]
-        if args.screen_epochs > 0
+        ["--core_screen_epochs", str(epoch_count)]
+        if epoch_count > 0
         else ["--core_smoke_batches", str(args.batches)]
     )
     return [
@@ -363,10 +491,18 @@ def _run_one(
             + "\n",
             encoding="utf-8",
         )
+        step_seconds = _nested(
+            report,
+            "run_summary",
+            "mean_seconds_per_batch",
+            default=_nested(
+                report, "result", "mean_seconds_per_batch"
+            ),
+        )
         print(
             f"[done  ] {variant:13s} {dataset:8s} "
             f"elapsed={elapsed:.1f}s "
-            f"step={report['result']['mean_seconds_per_batch']:.4f}s"
+            f"step={step_seconds:.4f}s"
         )
         return report
 
@@ -408,6 +544,25 @@ def _nested(report: Dict[str, Any], *keys: str, default: Any = 0.0) -> Any:
 def _summary_row(
     report: Dict[str, Any], repeat: int
 ) -> Dict[str, Any]:
+    run_summary = report.get("run_summary", {})
+    use_run_summary = bool(
+        isinstance(run_summary, dict)
+        and run_summary.get("completed_epochs", 0)
+    )
+    result_section = run_summary if use_run_summary else report.get(
+        "result", {}
+    )
+    access_section = (
+        run_summary.get("access", {})
+        if use_run_summary
+        else report.get("access", {})
+    )
+    remote_edges = (
+        _nested(report, "edge_cache", "requests")
+        - _nested(report, "edge_cache", "hits")
+        if _nested(report, "edge_cache", "requests") > 0
+        else access_section.get("remote_edges", 0.0)
+    )
     return {
         "variant": report.get("experiment", ""),
         "dataset": report.get("dataset", ""),
@@ -416,21 +571,22 @@ def _summary_row(
         "loss_is_finite": _nested(
             report, "result", "loss_is_finite", default=False
         ),
-        "mean_loss": _nested(report, "result", "mean_loss", default=""),
-        "seconds_per_batch": _nested(
-            report, "result", "mean_seconds_per_batch"
+        "completed_epochs": run_summary.get("completed_epochs", 0),
+        "selected_epoch": _nested(
+            report, "evaluation", "epoch", default=""
         ),
-        "remote_nodes": _nested(
-            report, "request_planner", "remote_node_requests"
+        "mean_loss": result_section.get("mean_loss", ""),
+        "seconds_per_batch": result_section.get(
+            "mean_seconds_per_batch", 0.0
         ),
-        "remote_edges": _nested(
-            report, "request_planner", "remote_edge_requests"
+        "seconds_per_epoch": result_section.get(
+            "mean_seconds_per_epoch", 0.0
         ),
+        "remote_nodes": access_section.get("remote_nodes", 0.0),
+        "remote_edges": remote_edges,
         "remote_edge_bytes": _nested(
-            report,
-            "request_planner",
-            "estimated_remote_edge_feature_bytes",
-        ),
+            report, "result", "edge_feature_bytes_per_object"
+        ) * remote_edges,
         "edge_cache_hit_rate": _nested(
             report, "edge_cache", "object_hit_rate"
         ),
@@ -465,6 +621,18 @@ def _summary_row(
         ),
         "test_ap": _nested(report, "evaluation", "test_ap", default=""),
         "test_auc": _nested(report, "evaluation", "test_auc", default=""),
+        "final_validation_ap": _nested(
+            report, "final_evaluation", "validation_ap", default=""
+        ),
+        "final_validation_auc": _nested(
+            report, "final_evaluation", "validation_auc", default=""
+        ),
+        "final_test_ap": _nested(
+            report, "final_evaluation", "test_ap", default=""
+        ),
+        "final_test_auc": _nested(
+            report, "final_evaluation", "test_auc", default=""
+        ),
         "log": _nested(report, "runner", "log", default=""),
     }
 
@@ -498,6 +666,7 @@ def _write_summary(
         "variants": args.variants,
         "batches": args.batches,
         "screen_epochs": args.screen_epochs,
+        "dataset_epochs": args.dataset_epochs,
         "repeats": args.repeats,
         "complete": completed_cells == expected_cells,
         "completed_cells": len(completed_cells),
@@ -527,6 +696,7 @@ def main() -> int:
         "variants": args.variants,
         "batches": args.batches,
         "screen_epochs": args.screen_epochs,
+        "dataset_epochs": args.dataset_epochs,
         "repeats": args.repeats,
         "seed": args.seed,
         "native_library": str(args.native_lib),

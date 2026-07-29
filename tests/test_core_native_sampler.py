@@ -86,6 +86,30 @@ def test_native_core_sampler_exports_probabilities_and_coordinates_roots():
                 sampled_eids[source_index == 1].tolist()
             )
 
+            coordinated = module.ParallelSampler(
+                neighbors, 5, 4, 1, [4], 1,
+                "boundery_recent_decay_coordinated", 0,
+                torch.ones(4, dtype=torch.int32),
+                torch.tensor([0, 1, 1, 1, 1], dtype=torch.int32),
+                0.5,
+            )
+            coordinated.configure_core_sampling(
+                0.05, 1.0, 0.25, 0.5, 1.0,
+                1.0, 1.0, 0.0, 0.05, 0, 8, 19
+            )
+            coordinated.neighbor_sample_from_nodes(
+                torch.tensor([0, 0]), torch.tensor([10, 10]), None, 0.5
+            )
+            coordinated_result = coordinated.get_ret()[0]
+            coordinated_eids = coordinated_result.eid()
+            coordinated_sources = coordinated_result.src_index()
+            assert set(
+                coordinated_eids[coordinated_sources == 0].tolist()
+            ) == set(
+                coordinated_eids[coordinated_sources == 1].tolist()
+            )
+            assert coordinated_result.sample_weight().numel() == 0
+
             # A rejected recent remote candidate must not be replaced by an
             # older local edge: that replacement would have a random,
             # unreported inclusion probability and invalidate HT correction.
@@ -196,6 +220,36 @@ def test_native_core_sampler_exports_probabilities_and_coordinates_roots():
     assert set(sampled_eids[source_index == 0].tolist()) == set(
         sampled_eids[source_index == 1].tolist()
     )
+
+    coordinated = module.ParallelSampler(
+        neighbors,
+        5,
+        4,
+        1,
+        [4],
+        1,
+        "boundery_recent_decay_coordinated",
+        0,
+        torch.ones(4, dtype=torch.int32),
+        torch.tensor([0, 1, 1, 1, 1], dtype=torch.int32),
+        0.5,
+    )
+    coordinated.configure_core_sampling(
+        0.05, 1.0, 0.25, 0.5, 1.0, 1.0, 1.0, 0.0, 0.05,
+        0, 8, 19
+    )
+    coordinated.neighbor_sample_from_nodes(
+        torch.tensor([0, 0]), torch.tensor([10, 10]), None, 0.5
+    )
+    coordinated_result = coordinated.get_ret()[0]
+    coordinated_eids = coordinated_result.eid()
+    coordinated_sources = coordinated_result.src_index()
+    assert set(
+        coordinated_eids[coordinated_sources == 0].tolist()
+    ) == set(
+        coordinated_eids[coordinated_sources == 1].tolist()
+    )
+    assert coordinated_result.sample_weight().numel() == 0
 
     no_backfill_neighbors = module.get_neighbors(
         "core-native-no-backfill-{}".format(os.getpid()),

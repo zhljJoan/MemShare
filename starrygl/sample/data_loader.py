@@ -116,6 +116,7 @@ class DistributedDataLoader:
             edge_communication_cost = 1.0,
             request_planner = None,
             memory_predictor = None,
+            edge_cache_collect_signals = True,
             **kwargs
     ):
         self.ada_param = ada_param
@@ -125,6 +126,7 @@ class DistributedDataLoader:
         self.edge_communication_cost = float(edge_communication_cost)
         self.request_planner = request_planner
         self.memory_predictor = memory_predictor
+        self.edge_cache_collect_signals = bool(edge_cache_collect_signals)
         self.last_request_plan = None
         self.reversed = reversed
         self.use_local_feature = use_local_feature
@@ -175,6 +177,8 @@ class DistributedDataLoader:
         print('pro {}\n'.format(self.probability))
 
     def _edge_cache_signals(self, batch_data, dist_eid):
+        if not self.edge_cache_collect_signals:
+            return None, None, None
         count = torch.zeros(
             dist_eid.numel(), dtype=torch.float32, device=dist_eid.device
         )

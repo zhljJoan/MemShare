@@ -48,12 +48,15 @@ The format of configuration files is follow TGL and are located at `/config/`
 ## CoRe-MemShare journal-extension MVP
 
 The opt-in fixed-partition extension is documented in
-[docs/core_memshare_mvp.md](docs/core_memshare_mvp.md). It adds residual- and
-communication-aware boundary sampling, probability-corrected attention,
-edge-feature caching, hard negatives, and unified request accounting.
-All variants remain experimental and disabled by default. Four-dataset
-screening results and retain/pause decisions are recorded in
-[docs/core_memshare_experiments.md](docs/core_memshare_experiments.md).
+[docs/core_memshare_mvp.md](docs/core_memshare_mvp.md). The selected extension
+is coordinated boundary-decay sampling, which preserves MemShare's original
+per-occurrence probabilities while correlating requests within small root
+groups. Residual-aware sampling, edge caching, hard negatives, and request
+accounting remain opt-in reproduction paths. Four-dataset screening results
+and retain/pause decisions are recorded in
+[docs/core_memshare_experiments.md](docs/core_memshare_experiments.md). A
+consolidated per-optimization decision table is available in
+[docs/journal_extension_optimization_review.md](docs/journal_extension_optimization_review.md).
 
 ## Security
 

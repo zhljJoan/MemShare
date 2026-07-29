@@ -152,10 +152,13 @@ class NeighborSampler(BaseSampler):
             node_part = torch.zeros(num_nodes, dtype=torch.int)
         self.p_sampler = starrygl.sampler_ops.ParallelSampler(self.tnb, num_nodes, graph_data.num_edges, workers, 
                                          fanout, num_layers, policy, local_part,edge_part.to(torch.int),node_part.to(torch.int),initial_probability)
-        if policy == 'boundery_recent_core':
+        if policy in (
+            'boundery_recent_core',
+            'boundery_recent_decay_coordinated',
+        ):
             if not hasattr(self.p_sampler, 'configure_core_sampling'):
                 raise RuntimeError(
-                    'boundery_recent_core requires rebuilding libstarrygl_sampler'
+                    '{} requires rebuilding libstarrygl_sampler'.format(policy)
                 )
             param = self.core_param
             self.p_sampler.configure_core_sampling(

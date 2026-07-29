@@ -370,6 +370,29 @@ def test_attention_uses_inverse_inclusion_probability():
     )
 
 
+def test_attention_can_use_a_clipped_correction_probability():
+    block = dgl.create_block(
+        (torch.tensor([1, 2]), torch.tensor([0, 0])),
+        num_src_nodes=3,
+        num_dst_nodes=1,
+    )
+    block.edata['sample_prob'] = torch.tensor([0.01, 1.0])
+    block.edata['sample_prob_correction'] = torch.tensor([0.1, 1.0])
+    layer = TransfomerAttentionLayer(
+        dim_node_feat=1,
+        dim_edge_feat=0,
+        dim_time=0,
+        num_head=1,
+        dropout=0.0,
+        att_dropout=0.0,
+        dim_out=1,
+    )
+    attention = layer._edge_attention(block, torch.zeros(2, 1))
+    assert torch.allclose(
+        attention.reshape(-1), torch.tensor([10.0 / 11.0, 1.0 / 11.0])
+    )
+
+
 def test_mfg_builder_only_remaps_index_metadata():
     class FakeRet:
         def eid(self):

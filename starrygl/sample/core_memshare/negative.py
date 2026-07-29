@@ -70,6 +70,7 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
         embedding_capacity: int = 100000,
         max_importance_weight: Optional[float] = None,
         localism_probability: float = 1.0,
+        collect_diagnostics: bool = True,
         validity_filter: Optional[
             Callable[[torch.Tensor, torch.Tensor, Optional[torch.Tensor]], torch.Tensor]
         ] = None,
@@ -117,6 +118,7 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
         self.embedding_capacity = int(embedding_capacity)
         self.max_importance_weight = max_importance_weight
         self.localism_probability = float(localism_probability)
+        self.collect_diagnostics = bool(collect_diagnostics)
         self.validity_filter = validity_filter
         self.generator = torch.Generator(device="cpu")
         self.generator.manual_seed(int(seed) ^ self.local_part)
@@ -183,6 +185,8 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
         ``dist_node_ids`` are encoded distributed IDs, matching ``nids_mapper``.
         """
 
+        if self.embedding_capacity == 0:
+            return
         ids = dist_node_ids.detach().reshape(-1).cpu().long()
         values = embeddings.detach().reshape(ids.numel(), -1).cpu().float()
         if ids.numel() != values.shape[0]:
@@ -370,31 +374,38 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
         self.last_proposal_probability = selected_probability
         self.last_hardness = hardness[row, chosen[:, 0]]
         self.last_communication_cost = cost[row, chosen[:, 0]]
-        self.last_effective_sample_size = effective_sample_size(importance)
-        self.last_clipped_fraction = float(
-            (importance != unclipped).float().mean().item()
+        self.last_effective_sample_size = (
+            effective_sample_size(importance)
+            if self.collect_diagnostics
+            else 0.0
+        )
+        self.last_clipped_fraction = (
+            float((importance != unclipped).float().mean().item())
+            if self.collect_diagnostics
+            else 0.0
         )
         selected_dist = candidate_dist[row, chosen[:, 0]]
         selected_owner = owners[row, chosen[:, 0]]
         selected_reused = reused[row, chosen[:, 0]]
         self.total_samples += num_samples
-        self.total_remote_samples += int(
-            (selected_owner != self.local_part).sum().item()
-        )
-        self.total_reused_samples += int(selected_reused.sum().item())
-        self.total_hardness += float(self.last_hardness.sum().item())
-        self.total_communication_cost += float(
-            self.last_communication_cost.sum().item()
-        )
-        self.total_importance_weight += float(
-            self.last_importance_weight.sum().item()
-        )
-        self.total_squared_importance_weight += float(
-            self.last_importance_weight.square().sum().item()
-        )
-        self.total_clipped_samples += int(
-            (self.last_importance_weight != unclipped).sum().item()
-        )
+        if self.collect_diagnostics:
+            self.total_remote_samples += int(
+                (selected_owner != self.local_part).sum().item()
+            )
+            self.total_reused_samples += int(selected_reused.sum().item())
+            self.total_hardness += float(self.last_hardness.sum().item())
+            self.total_communication_cost += float(
+                self.last_communication_cost.sum().item()
+            )
+            self.total_importance_weight += float(
+                self.last_importance_weight.sum().item()
+            )
+            self.total_squared_importance_weight += float(
+                self.last_importance_weight.square().sum().item()
+            )
+            self.total_clipped_samples += int(
+                (self.last_importance_weight != unclipped).sum().item()
+            )
         # Keep this for callers that want to update the request planner directly.
         self.last_selected_dist_ids = selected_dist
         return selected

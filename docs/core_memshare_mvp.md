@@ -1,13 +1,24 @@
 # CoRe-MemShare MVP 设计与实现说明
 
-> 实验状态：所有模块均保持 opt-in。2026-07-29 的四数据集筛选没有产生可升级
-> 为默认训练方案的 CoRe 变体；当前仍推荐原 MemShare baseline。完整尝试、数据
-> 和保留/暂缓决定见
+> 实验状态：原 MemShare baseline 仍是兼容性默认值；2026-07-29 的最终
+> 四数据集筛选只保留 `boundery_recent_decay_coordinated` 作为继续验证的扩展。
+> residual/cache/hard-negative 等 CoRe 模块保持 opt-in，仅用于复现。完整尝试、
+> 数据和保留/暂缓决定见
 > [core_memshare_experiments.md](core_memshare_experiments.md)。
 
 本分支在固定图划分、固定热点集合和固定 ownership 的前提下，增加一条可逐项启用的实验链路：
 
 ```text
+最终保留路径：
+
+原 boundary-decay 概率
+        + 8-root grouped keyed randomness
+                    |
+                    v
+       原 MFG / attention / fetch 路径
+
+暂停的 CoRe 研究路径：
+
 last-fetched memory residual
         + edge prediction error
         + cache-aware communication cost
@@ -32,7 +43,42 @@ probability-aware edge cache    cost-aware hard negatives
 
 ## 1. 当前已经落地的内容
 
-### 1.1 残差与通信代价感知的边界采样
+### 1.1 最终保留的 coordinated boundary-decay
+
+原生 sampler 新增：
+
+```text
+boundery_recent_decay_coordinated
+```
+
+它调用原 `boundery_recent_decay` 的全部候选生成和概率逻辑，只把远程候选的
+独立 `rand_r` 替换为：
+
+```text
+(remote_node_id, root_group, batch_id, layer, seed) -> uniform(0, 1)
+```
+
+组内相同对象共享 uniform，并仍按各自 baseline 概率 \(p_{r,i}\) 判断
+`uniform < p_{r,i}`。因此每个 occurrence 的边际选择概率保持不变，而唯一远程
+请求数下降。默认实验组大小为 8。
+
+该策略刻意不启用以下路径：
+
+- residual/cost-aware 新概率；
+- `sample_prob` 导出和 attention probability correction；
+- last-fetched predictor；
+- edge cache；
+- hard-negative reranking；
+- metrics-only request planner。
+
+它的运行开销只有 native keyed hash。相关随机数会改变 batch 内联合分布，可能
+增加 gradient covariance，因此不能称为“统计上完全零开销”。完整轮数
+seed 6773 中，WIKI/LASTFM 各训练 50 epochs，WikiTalk/Flight 各 10 epochs；
+test AP 分别变化 -0.00289、+0.00737、-0.00014、-0.00054。当前允许继续推进，
+但必须补完整轮数多 seed，并按通信—精度权衡表述。详细数值和边界见
+[实验记录的第 8、9 节](core_memshare_experiments.md#8-最终保留coordinated-boundary-decay)。
+
+### 1.2 残差与通信代价感知的边界采样（暂停）
 
 原生 sampler 新增策略：
 
@@ -79,7 +125,7 @@ p_{\min},1
 candidate，并仅对 tail 分配剩余预算。该机制的 top-1 版本已经实现和测试，但
 四数据集质量 screen 未通过，因此默认值为 0，当前不推荐启用。
 
-### 1.2 分组协同采样
+### 1.3 CoRe 概率上的分组协同采样（暂停）
 
 相同 group 内的相同远程对象共享由
 
@@ -90,7 +136,7 @@ candidate，并仅对 tail 分配剩余预算。该机制的 top-1 版本已经�
 确定的随机数。每个 occurrence 的边际采样概率仍为 \(p_i\)，而同组内对象的
 唯一请求概率降为 \(\max_i p_i\)。`--core_group_size` 控制 group 大小。
 
-### 1.3 概率校正 attention
+### 1.4 概率校正 attention（暂停）
 
 原生 sampler 会把选中边的 inclusion probability 写入 MFG 的：
 
@@ -112,7 +158,7 @@ CoRe 路径只在固定的 top-fanout candidate set 内做随机选择，不会�
 随机事件，不能再写成 \(p=1\)。原有采样策略不注入 `sample_prob`，因此不开启
 CoRe 时不会改变 attention 行为。
 
-### 1.4 last-fetched memory predictor
+### 1.5 last-fetched memory predictor（暂停）
 
 `LastFetchedMemoryPredictor` 提供分级回退：
 
@@ -123,7 +169,7 @@ CoRe 时不会改变 attention 行为。
 它使用固定容量 LRU，只保存最近获取的 memory，并维护预测 RMS residual EMA。
 DataLoader 在远程 memory 返回后自动观测 residual，并稀疏更新原生 sampler。
 
-### 1.5 概率与方差收益感知的 edge cache
+### 1.6 概率与方差收益感知的 edge cache（暂停）
 
 `ProbabilityAwareEdgeCache` 是固定容量的机会式静态缓存。边被真实拉取后，其
 admission score 为：
@@ -147,7 +193,7 @@ p_e\cdot c_e^{edge}\cdot reuse_e\cdot bytes_e
 pipeline 路径会把本地边、cache hit 和 remote miss 分开，仅对 remote miss
 发起 All-to-All。edge feature 不可变，因此不需要版本一致性协议。
 
-### 1.6 通信感知 hard negative
+### 1.7 通信感知 hard negative（暂停）
 
 每个负样本 slot 先从原 MemShare localism proposal \(q_L\) 独立产生 \(r\)
 个候选，再使用：
@@ -178,7 +224,7 @@ w_j=
 当前 hard score 使用最近缓存的 root/negative embedding cosine score。
 本地、embedding cache hit 和正样本 root 已请求节点使用更低通信成本。
 
-### 1.7 统一请求 planner
+### 1.8 统一请求 planner（暂停）
 
 `UnifiedRequestPlanner` 在 fetch 前按对象类型统计并去重：
 
@@ -221,7 +267,25 @@ tests/test_core_distributed_cache.py
 
 ## 3. MVP 训练示例
 
-从 `examples/` 目录启动，保留原有分区、热点和 All-to-All：
+从 `examples/` 目录启动，最终保留策略的最小命令为：
+
+```bash
+export STARRYGL_SAMPLER_LIBRARY=/tmp/core_memshare_native_build/libstarrygl_sampler.so
+
+torchrun --standalone --nproc_per_node=4 train_boundery.py \
+  --model TGN_large \
+  --dataname WIKI \
+  --partition divided_nodes_seed_starrygl \
+  --topk 0.1 \
+  --sample_type boundery_recent_decay_coordinated \
+  --probability 0.1 \
+  --memory_type historical \
+  --core_group_size 8
+```
+
+该命令保留原有分区、热点和 All-to-All，不需要打开任何其他 `core_*` 模块。
+
+以下完整 CoRe 命令只用于复现已经暂停的组合：
 
 ```bash
 export STARRYGL_SAMPLER_LIBRARY=/tmp/core_memshare_native_build/libstarrygl_sampler.so
@@ -280,11 +344,15 @@ Flight。
 3. 单独打开 hard negative；
 4. 最后运行完整组合。
 
-实际筛选结果表明以上 CoRe 组合当前均应保持关闭；命令只用于复现和继续开发。
+实际筛选结果表明以上完整 CoRe 组合当前均应保持关闭；命令只用于复现和继续开发。
 标准四数据集命令见
-[core_memshare_experiments.md](core_memshare_experiments.md#8-复现实验)。
+[core_memshare_experiments.md](core_memshare_experiments.md#11-复现实验)。
 
 ## 4. 当前边界与下一阶段
+
+当前工程主线应先围绕 coordinated-decay 做 group-size、完整收敛和跨机验证。
+下面的 residual aggregation 是另一个尚未通过现有门槛的研究方向，不能与
+coordinated-decay 捆绑成默认组合。
 
 MVP 已经用 last-fetched residual 调整 \(p_i\)，并把 \(p_i\) 用于 attention
 分子/分母校正；但原生 sampler 仍只返回被选中的远程邻居。因此当前 attention
@@ -300,8 +368,9 @@ MVP 已经用 last-fetched residual 调整 \(p_i\)，并把 \(p_i\) 用于 atten
 5. 使用已经实现并测试的 `residual_ratio_aggregate` 做
    \(\bar A+z(A-\bar A)/p\) 与 \(\bar Z+z(Z-\bar Z)/p\)。
 
-这一步会改变 MFG/fetch 数据布局，适合在当前 MVP 获得残差分布、cache hit
-和端到端收益证据后再做，避免一次性扩大正确性风险。
+这一步会改变 MFG/fetch 数据布局。只有在先完成 vectorized predictor/cache
+重构，并重新获得残差分布、cache hit 和端到端收益证据后，才值得作为独立方向
+恢复，不能直接叠加到当前保留策略。
 
 另外还有三项执行层边界：
 

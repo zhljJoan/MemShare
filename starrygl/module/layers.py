@@ -212,7 +212,12 @@ class TransfomerAttentionLayer(torch.nn.Module):
 
     def _edge_attention(self, block, logits):
         if 'sample_prob' in block.edata:
-            probability = block.edata['sample_prob'].to(
+            probability_key = (
+                'sample_prob_correction'
+                if 'sample_prob_correction' in block.edata
+                else 'sample_prob'
+            )
+            probability = block.edata[probability_key].to(
                 device=logits.device, dtype=logits.dtype
             ).clamp_min(1e-12)
             while probability.ndim < logits.ndim:

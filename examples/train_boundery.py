@@ -112,6 +112,11 @@ parser.add_argument('--core_edge_cache_mb', default=0.0, type=float,
 parser.add_argument('--core_cache_variance_weight', default=1.0, type=float)
 parser.add_argument('--core_cache_min_residency', default=8, type=int)
 parser.add_argument('--core_cache_max_replacements', default=64, type=int)
+parser.add_argument(
+    '--core_cache_simple_admission',
+    action='store_true',
+    help='skip per-occurrence probability/variance/reuse cache signals',
+)
 parser.add_argument('--core_neg_pool_factor', default=1, type=int,
                     help='candidate multiplier; values above one enable hard negatives')
 parser.add_argument('--core_neg_hardness_beta', default=1.0, type=float)
@@ -129,6 +134,17 @@ parser.add_argument('--core_metrics_path', default='', type=str,
                     help='write rank-aggregated experiment metrics as JSON')
 parser.add_argument('--core_experiment_name', default='', type=str,
                     help='stable label included in structured experiment metrics')
+parser.add_argument(
+    '--core_collect_diagnostics',
+    action='store_true',
+    help='collect detailed per-batch probability and negative diagnostics',
+)
+parser.add_argument(
+    '--core_attention_probability_floor',
+    default=0.0,
+    type=float,
+    help='clip attention correction probabilities to this floor; 1 disables correction',
+)
 parser.add_argument(
     '--core_freeze_adaptive_parameters',
     action='store_true',
@@ -479,6 +495,116 @@ def _aggregate_core_metrics(records, *, epoch, edge_feature_bytes):
         else 0.0
     )
 
+    evaluation_history = (
+        list(records[0].get("evaluation_history", [])) if records else []
+    )
+    if evaluation_history:
+        evaluation = dict(
+            max(
+                evaluation_history,
+                key=lambda item: float(item["validation_ap"]),
+            )
+        )
+        evaluation["selection_metric"] = "validation_ap"
+        evaluation["completed_epochs"] = len(evaluation_history)
+        final_evaluation = dict(evaluation_history[-1])
+    else:
+        evaluation = records[0].get("evaluation", {}) if records else {}
+        final_evaluation = dict(evaluation)
+
+    run_total_batches = sum(
+        int(record.get("run_totals", {}).get("batches", 0))
+        for record in records
+    )
+    run_batches_per_rank = [
+        int(record.get("run_totals", {}).get("batches", 0))
+        for record in records
+    ]
+    run_critical_path_seconds = max(
+        (
+            float(record.get("run_totals", {}).get("train_seconds", 0.0))
+            for record in records
+        ),
+        default=0.0,
+    )
+    run_access_keys = (
+        "local_nodes",
+        "remote_nodes",
+        "local_edges",
+        "remote_edges",
+        "memory_sync",
+        "shared_sync",
+    )
+    run_access = {
+        key: sum(
+            float(record.get("run_totals", {}).get(key, 0.0))
+            for record in records
+        )
+        for key in run_access_keys
+    }
+    run_access["remote_node_ratio"] = (
+        run_access["remote_nodes"]
+        / (run_access["local_nodes"] + run_access["remote_nodes"])
+        if run_access["local_nodes"] + run_access["remote_nodes"]
+        else 0.0
+    )
+    run_access["remote_edge_ratio"] = (
+        run_access["remote_edges"]
+        / (run_access["local_edges"] + run_access["remote_edges"])
+        if run_access["local_edges"] + run_access["remote_edges"]
+        else 0.0
+    )
+    run_summary = {
+        "completed_epochs": len(evaluation_history),
+        "batches_per_rank": run_batches_per_rank,
+        "total_rank_batches": run_total_batches,
+        "critical_path_seconds": run_critical_path_seconds,
+        "mean_seconds_per_epoch": (
+            run_critical_path_seconds / len(evaluation_history)
+            if evaluation_history
+            else 0.0
+        ),
+        "mean_seconds_per_batch": (
+            run_critical_path_seconds / min(run_batches_per_rank)
+            if run_batches_per_rank and min(run_batches_per_rank)
+            else 0.0
+        ),
+        "mean_loss": (
+            sum(
+                float(
+                    record.get("run_totals", {}).get("total_loss", 0.0)
+                )
+                for record in records
+            )
+            / run_total_batches
+            if run_total_batches
+            else None
+        ),
+        "loss_is_finite": all(
+            math.isfinite(
+                float(record.get("run_totals", {}).get("total_loss", 0.0))
+            )
+            for record in records
+        ),
+        "positive_examples": sum(
+            int(
+                record.get("run_totals", {}).get(
+                    "positive_examples", 0
+                )
+            )
+            for record in records
+        ),
+        "negative_examples": sum(
+            int(
+                record.get("run_totals", {}).get(
+                    "negative_examples", 0
+                )
+            )
+            for record in records
+        ),
+        "access": run_access,
+    }
+
     critical_path_seconds = max(
         (float(record["train_seconds"]) for record in records), default=0.0
     )
@@ -500,6 +626,9 @@ def _aggregate_core_metrics(records, *, epoch, edge_feature_bytes):
             "smoke_batches": args.core_smoke_batches,
             "edge_cache_ratio": args.core_edge_cache_ratio,
             "edge_cache_mb": args.core_edge_cache_mb,
+            "cache_simple_admission": bool(
+                args.core_cache_simple_admission
+            ),
             "negative_pool_factor": args.core_neg_pool_factor,
             "deterministic_recent": args.core_deterministic_recent,
             "coordinated_group_size": args.core_group_size,
@@ -507,8 +636,13 @@ def _aggregate_core_metrics(records, *, epoch, edge_feature_bytes):
             "freeze_adaptive_parameters": bool(
                 args.core_freeze_adaptive_parameters
             ),
-            "memory_predictor": not bool(
-                args.core_disable_memory_predictor
+            "memory_predictor": any(
+                bool(record.get("memory_predictor"))
+                for record in records
+            ),
+            "collect_diagnostics": bool(args.core_collect_diagnostics),
+            "attention_probability_floor": float(
+                args.core_attention_probability_floor
             ),
             "screen_epochs": int(args.core_screen_epochs),
         },
@@ -553,9 +687,10 @@ def _aggregate_core_metrics(records, *, epoch, edge_feature_bytes):
         "edge_cache": cache,
         "memory_predictor": predictor,
         "negative_sampler": negative,
-        "evaluation": (
-            records[0].get("evaluation", {}) if records else {}
-        ),
+        "evaluation": evaluation,
+        "final_evaluation": final_evaluation,
+        "evaluation_history": evaluation_history,
+        "run_summary": run_summary,
         "ranks": records,
         "notes": [
             "Pipeline counters may include one prefetched request plan beyond consumed batches.",
@@ -587,6 +722,8 @@ def _write_core_metrics(
     edge_feature_bytes,
     ada_param,
     evaluation=None,
+    evaluation_history=None,
+    run_totals=None,
 ):
     if not args.core_metrics_path:
         return
@@ -638,6 +775,8 @@ def _write_core_metrics(
             "beta": float(ada_param.beta),
         },
         "evaluation": dict(evaluation or {}),
+        "evaluation_history": list(evaluation_history or []),
+        "run_totals": dict(run_totals or {}),
     }
     records = [None for _ in range(dist.get_world_size())]
     dist.all_gather_object(records, local_record, group=ctx.gloo_group)
@@ -664,6 +803,10 @@ def main():
     sample_param, memory_param, gnn_param, train_param = parse_config('../config/{}.yml'.format(args.model))
     if args.core_screen_epochs < 0:
         raise ValueError('--core_screen_epochs cannot be negative')
+    if not 0.0 <= args.core_attention_probability_floor <= 1.0:
+        raise ValueError(
+            '--core_attention_probability_floor must be in [0, 1]'
+        )
     if args.core_screen_epochs > 0:
         train_param['epoch'] = args.core_screen_epochs
     memory_param['mode'] = args.memory_type
@@ -773,12 +916,7 @@ def main():
         )
 
     request_planner = None
-    if (
-        args.core_request_planner
-        or core_sampling_enabled
-        or edge_cache is not None
-        or args.core_neg_pool_factor > 1
-    ):
+    if args.core_request_planner:
         request_planner = UnifiedRequestPlanner(local_rank=dist.get_rank())
 
     sampler = NeighborSampler(
@@ -857,6 +995,7 @@ def main():
             reuse_cost=args.core_neg_reuse_cost,
             remote_cost=args.core_neg_remote_cost,
             localism_probability=float(ada_param.beta),
+            collect_diagnostics=args.core_collect_diagnostics,
             seed=args.seed,
         )
     elif args.local_neg_sample:
@@ -890,6 +1029,9 @@ def main():
                                         edge_communication_cost=args.core_edge_cost,
                                         request_planner=request_planner,
                                         memory_predictor=memory_predictor,
+                                        edge_cache_collect_signals=not (
+                                            args.core_cache_simple_admission
+                                        ),
                                         )
     
     eval_trainloader = DistributedDataLoader(graph,eval_train_data,sampler = eval_sampler,
@@ -1029,6 +1171,20 @@ def main():
     test_ap_list = []
     val_list = []
     loss_list = []
+    evaluation_history = []
+    run_totals = {
+        "batches": 0,
+        "total_loss": 0.0,
+        "train_seconds": 0.0,
+        "positive_examples": 0,
+        "negative_examples": 0,
+        "local_nodes": 0.0,
+        "remote_nodes": 0.0,
+        "local_edges": 0.0,
+        "remote_edges": 0.0,
+        "memory_sync": 0.0,
+        "shared_sync": 0.0,
+    }
     smoke_batches_completed = 0
     smoke_total_loss = 0.0
     smoke_train_seconds = 0.0
@@ -1093,24 +1249,43 @@ def main():
             optimizer.zero_grad()
             ones = torch.ones(metadata['dst_neg_index'].shape[0],device = model.device,dtype=torch.float)
             #with autocast():
+            if args.core_attention_probability_floor > 0.0:
+                for layer in mfgs:
+                    for block in layer:
+                        if 'sample_prob' in block.edata:
+                            block.edata['sample_prob_correction'] = (
+                                block.edata['sample_prob']
+                                .detach()
+                                .float()
+                                .clamp_min(
+                                    args.core_attention_probability_floor
+                                )
+                            )
             pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
             positive_examples += int(pred_pos.numel())
             negative_examples += int(pred_neg.numel())
-            for layer in mfgs:
-                for block in layer:
-                    if 'sample_prob' not in block.edata:
-                        continue
-                    probability = block.edata['sample_prob'].detach().float()
-                    if probability.numel() == 0:
-                        continue
-                    sample_probability_sum += float(probability.sum().item())
-                    sample_probability_count += int(probability.numel())
-                    sample_probability_min = min(
-                        sample_probability_min, float(probability.min().item())
-                    )
-                    sample_probability_max = max(
-                        sample_probability_max, float(probability.max().item())
-                    )
+            if args.core_collect_diagnostics:
+                for layer in mfgs:
+                    for block in layer:
+                        if 'sample_prob' not in block.edata:
+                            continue
+                        probability = (
+                            block.edata['sample_prob'].detach().float()
+                        )
+                        if probability.numel() == 0:
+                            continue
+                        sample_probability_sum += float(
+                            probability.sum().item()
+                        )
+                        sample_probability_count += int(probability.numel())
+                        sample_probability_min = min(
+                            sample_probability_min,
+                            float(probability.min().item()),
+                        )
+                        sample_probability_max = max(
+                            sample_probability_max,
+                            float(probability.max().item()),
+                        )
             if hasattr(train_neg_sampler, 'update_embeddings'):
                 root_count = mfgs[0][0].num_dst_nodes()
                 train_neg_sampler.update_embeddings(
@@ -1270,6 +1445,29 @@ def main():
         t_test = time.time() - t_test
         total_test_time += t_test
         test_ap_list.append((test_ap,test_auc))
+        current_evaluation = {
+            'epoch': int(e),
+            'validation_ap': float(ap),
+            'validation_auc': float(auc),
+            'test_ap': float(test_ap),
+            'test_auc': float(test_auc),
+        }
+        evaluation_history.append(current_evaluation)
+        run_totals["batches"] += int(b_cnt)
+        run_totals["total_loss"] += float(total_loss)
+        run_totals["train_seconds"] += float(time_prep)
+        run_totals["positive_examples"] += int(positive_examples)
+        run_totals["negative_examples"] += int(negative_examples)
+        run_totals["local_nodes"] += float(trainloader.local_node)
+        run_totals["remote_nodes"] += float(trainloader.remote_node)
+        run_totals["local_edges"] += float(trainloader.local_edge)
+        run_totals["remote_edges"] += float(trainloader.remote_edge)
+        run_totals["memory_sync"] += float(
+            mailbox.tot_comm_count if mailbox else 0
+        )
+        run_totals["shared_sync"] += float(
+            mailbox.tot_shared_count if mailbox else 0
+        )
         _write_core_metrics(
             ctx=ctx,
             epoch=e,
@@ -1290,12 +1488,9 @@ def main():
             train_neg_sampler=train_neg_sampler,
             edge_feature_bytes=edge_feature_bytes,
             ada_param=ada_param,
-            evaluation={
-                'validation_ap': float(ap),
-                'validation_auc': float(auc),
-                'test_ap': float(test_ap),
-                'test_auc': float(test_auc),
-            },
+            evaluation=current_evaluation,
+            evaluation_history=evaluation_history,
+            run_totals=run_totals,
         )
         early_stopper.early_stop_check(ap)
         early_stop = False

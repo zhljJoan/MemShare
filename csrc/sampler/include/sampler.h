@@ -224,7 +224,7 @@ void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th
         AT_ASSERTM(tnb.weighted, "Tnb has no weight infomation!");
     else if(policy == "recent")
         AT_ASSERTM(tnb.with_timestamp, "Tnb has no timestamp infomation!");
-    else if(policy == "uniform"|| policy =="boundery_recent_decay"||policy=="boundery_recent_uniform"||policy=="boundery_uniform"||policy=="boundery_recent_core");
+    else if(policy == "uniform"|| policy =="boundery_recent_decay"||policy=="boundery_recent_decay_coordinated"||policy=="boundery_recent_uniform"||policy=="boundery_uniform"||policy=="boundery_recent_core");
     else{
         throw runtime_error("The policy \"" + policy + "\" is not exit!");
     }
@@ -232,7 +232,8 @@ void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th
         AT_ASSERTM(tnb.with_timestamp, "Tnb has no timestamp infomation!");
         AT_ASSERTM(root_ts.has_value(), "Parameter mismatch!");
         //neighbor_sample_from_dynamic_nodes(nodes,root_ts.value());
-        if(policy == "boundery_recent_core")
+        if(policy == "boundery_recent_core"
+                || policy == "boundery_recent_decay_coordinated")
             current_core_batch = core_batch_counter.fetch_add(1);
         neighbor_sample_from_nodes_with_before(nodes, root_ts.value(), boundary_probability.has_value()?boundary_probability.value():0);
     }
@@ -438,7 +439,8 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
             }
 
         }
-        else if(policy == "boundery_recent_decay"){
+        else if(policy == "boundery_recent_decay"
+                || policy == "boundery_recent_decay_coordinated"){
             int cnt = 0;
             int cal_cnt = 0;
             double sum_p = 0;
@@ -467,7 +469,22 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
                 double edge_probability = 1.0;
                 if((part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part)){
                     if(cal_cnt<=fanout){
-                        double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);
+                        double p0;
+                        if(policy == "boundery_recent_decay_coordinated"){
+                            uint64_t group_id = static_cast<uint64_t>(
+                                i / max<int64_t>(1, core_group_size));
+                            p0 = core_keyed_uniform(
+                                static_cast<uint64_t>(
+                                    tnb.neighbors[node][cid]),
+                                group_id,
+                                core_seed,
+                                current_core_batch,
+                                static_cast<uint64_t>(cur_layer));
+                        }
+                        else{
+                            p0 = (double)rand_r(
+                                &loc_seeds[tid]) / (RAND_MAX + 1.0);
+                        }
                         edge_probability = min(
                             1.0,
                             max(1e-12,
