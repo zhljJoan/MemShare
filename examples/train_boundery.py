@@ -1,4 +1,5 @@
 import argparse
+import math
 import os
 import profile
 import sys
@@ -21,6 +22,13 @@ from pathlib import Path
 
 from starrygl.module.utils import AdaParameter, parse_config
 from starrygl.sample.cache.fetch_cache import FetchFeatureCache
+from starrygl.sample.core_memshare import (
+    CommunicationAwareNegativeSampling,
+    LastFetchedMemoryPredictor,
+    ProbabilityAwareEdgeCache,
+    UnifiedRequestPlanner,
+    importance_weighted_bce_with_logits,
+)
 from starrygl.sample.graph_core import DataSet, DistributedGraphStore, TemporalNeighborSampleGraph
 from starrygl.module.utils import parse_config, EarlyStopMonitor
 from starrygl.sample.graph_core import DataSet, DistributedGraphStore, TemporalNeighborSampleGraph
@@ -80,6 +88,40 @@ parser.add_argument('--memory_type', default='all_update', type=str, metavar='W'
                     help='name of model')
 parser.add_argument('--seed', default=6773, type=int, metavar='W',
                     help='name of model')
+parser.add_argument('--core_min_probability', default=0.05, type=float,
+                    help='minimum residual-neighbor exploration probability')
+parser.add_argument('--core_group_size', default=8, type=int,
+                    help='roots per coordinated-sampling random-number group')
+parser.add_argument('--core_uncertainty_weight', default=1.0, type=float)
+parser.add_argument('--core_age_weight', default=0.25, type=float)
+parser.add_argument('--core_edge_error_weight', default=0.5, type=float)
+parser.add_argument('--core_age_scale', default=1.0, type=float)
+parser.add_argument('--core_memory_cost', default=1.0, type=float)
+parser.add_argument('--core_edge_cost', default=1.0, type=float)
+parser.add_argument('--core_cached_edge_cost', default=0.0, type=float)
+parser.add_argument('--core_request_cost', default=0.05, type=float)
+parser.add_argument('--core_memory_cache_capacity', default=200000, type=int,
+                    help='number of last-fetched node memories retained')
+parser.add_argument('--core_edge_cache_ratio', default=0.0, type=float,
+                    help='fraction of global edges admitted to the static cache')
+parser.add_argument('--core_edge_cache_mb', default=0.0, type=float,
+                    help='optional hard memory limit for the edge cache')
+parser.add_argument('--core_cache_variance_weight', default=1.0, type=float)
+parser.add_argument('--core_cache_min_residency', default=8, type=int)
+parser.add_argument('--core_cache_max_replacements', default=64, type=int)
+parser.add_argument('--core_neg_pool_factor', default=1, type=int,
+                    help='candidate multiplier; values above one enable hard negatives')
+parser.add_argument('--core_neg_hardness_beta', default=1.0, type=float)
+parser.add_argument('--core_neg_exploration', default=0.1, type=float)
+parser.add_argument('--core_neg_embedding_capacity', default=200000, type=int)
+parser.add_argument('--core_neg_local_cost', default=0.05, type=float)
+parser.add_argument('--core_neg_cached_cost', default=0.02, type=float)
+parser.add_argument('--core_neg_reuse_cost', default=0.01, type=float)
+parser.add_argument('--core_neg_remote_cost', default=1.0, type=float)
+parser.add_argument('--core_request_planner', action='store_true',
+                    help='collect typed, owner-bucketed request-plan statistics')
+parser.add_argument('--core_smoke_batches', default=0, type=int,
+                    help='run only this many training batches and skip evaluation')
 #boundery_recent_uniform boundery_recent_decay
 args = parser.parse_args()
 if args.memory_type == 'all_local' or args.topk != '0':
@@ -200,9 +242,9 @@ def main():
     torch.set_num_threads(10)
     device_id = torch.cuda.current_device()
     if ((args.dataname =='GDELT') & (dist.get_world_size() <=4 )):
-        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cpu'),partition=args.partition)#torch.device('cpu'))
+        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cpu'),partition_path=args.partition)#torch.device('cpu'))
     else:
-        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition=args.partition)#torch.device('cpu'))
+        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition_path=args.partition)#torch.device('cpu'))
     if(args.dataname=='GDELT'):
         train_param['epoch'] = 10
     #torch.autograd.set_detect_anomaly(True)
@@ -241,6 +283,20 @@ def main():
     else:
         policy_train = policy
         ada_param = AdaParameter(init_alpha=args.shared_memory_ssim, init_beta=args.probability)
+    core_sampling_enabled = policy_train == 'boundery_recent_core'
+    core_param = {
+        'min_probability': args.core_min_probability,
+        'uncertainty_weight': args.core_uncertainty_weight,
+        'age_weight': args.core_age_weight,
+        'edge_error_weight': args.core_edge_error_weight,
+        'age_scale': args.core_age_scale,
+        'memory_cost': args.core_memory_cost,
+        'edge_cost': args.core_edge_cost,
+        'cached_edge_cost': args.core_cached_edge_cost,
+        'request_cost': args.core_request_cost,
+        'group_size': args.core_group_size,
+        'seed': args.seed,
+    }
     if memory_param['type'] != 'none':
         mailbox = SharedMailBox(graph.ids.shape[0], memory_param, dim_edge_feat = graph.efeat.shape[1] if graph.efeat is not None else 0,
         shared_nodes_index=graph.shared_nids_list[ctx.memory_group_rank],device = torch.device('cuda:{}'.format(local_rank)),
@@ -249,8 +305,78 @@ def main():
     else:
         mailbox = None
 
-    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=10,policy = policy_train, graph_name = "train",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,ada_param=ada_param,no_neg=no_neg)
-    eval_sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=eval_sample_graph, workers=10,policy = policy_train, graph_name = "eval",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,ada_param=ada_param,no_neg=no_neg)
+    memory_predictor = None
+    if core_sampling_enabled and mailbox is not None:
+        memory_predictor = LastFetchedMemoryPredictor(
+            memory_param['dim_out'],
+            args.core_memory_cache_capacity,
+        )
+
+    edge_cache = None
+    if graph.efeat is not None and (
+        args.core_edge_cache_ratio > 0 or args.core_edge_cache_mb > 0
+    ):
+        feature_bytes = (
+            math.prod(graph.efeat.shape[1:])
+            * graph.efeat.accessor.data.element_size()
+        )
+        capacity = int(graph.num_edges * args.core_edge_cache_ratio)
+        if args.core_edge_cache_mb > 0:
+            byte_capacity = int(
+                args.core_edge_cache_mb * 1024 * 1024 / max(1, feature_bytes)
+            )
+            capacity = (
+                min(capacity, byte_capacity) if capacity > 0 else byte_capacity
+            )
+        edge_cache = ProbabilityAwareEdgeCache(
+            capacity=max(0, capacity),
+            feature_shape=graph.efeat.shape[1:],
+            dtype=graph.efeat.dtype,
+            device=torch.device('cuda:{}'.format(local_rank)),
+            variance_weight=args.core_cache_variance_weight,
+            min_residency=args.core_cache_min_residency,
+            max_replacements_per_batch=args.core_cache_max_replacements,
+        )
+
+    request_planner = None
+    if (
+        args.core_request_planner
+        or core_sampling_enabled
+        or edge_cache is not None
+        or args.core_neg_pool_factor > 1
+    ):
+        request_planner = UnifiedRequestPlanner(local_rank=dist.get_rank())
+
+    sampler = NeighborSampler(
+        num_nodes=graph.num_nodes,
+        num_layers=num_layers,
+        fanout=fanout,
+        graph_data=sample_graph,
+        workers=10,
+        policy=policy_train,
+        graph_name="train",
+        local_part=dist.get_rank(),
+        edge_part=DistIndex(graph.eids_mapper).part,
+        node_part=DistIndex(graph.nids_mapper).part,
+        ada_param=ada_param,
+        no_neg=no_neg,
+        core_param=core_param,
+    )
+    eval_policy = 'recent' if core_sampling_enabled else policy_train
+    eval_sampler = NeighborSampler(
+        num_nodes=graph.num_nodes,
+        num_layers=num_layers,
+        fanout=fanout,
+        graph_data=eval_sample_graph,
+        workers=10,
+        policy=eval_policy,
+        graph_name="eval",
+        local_part=dist.get_rank(),
+        edge_part=DistIndex(graph.eids_mapper).part,
+        node_part=DistIndex(graph.nids_mapper).part,
+        ada_param=ada_param,
+        no_neg=no_neg,
+    )
 
     train_data = torch.masked_select(graph.edge_index,train_mask.to(graph.edge_index.device)).reshape(2,-1)
     train_ts = torch.masked_select(graph.ts,train_mask.to(graph.edge_index.device))
@@ -277,7 +403,24 @@ def main():
     neg_samples = args.eval_neg_samples
     mask = DistIndex(graph.nids_mapper[graph.edge_index[1,:]].to('cpu')).part == dist.get_rank()
     
-    if args.local_neg_sample:
+    if args.core_neg_pool_factor > 1:
+        train_neg_sampler = CommunicationAwareNegativeSampling(
+            'triplet',
+            amount=args.neg_samples,
+            dst_node_list=full_dst.unique(),
+            id_mapper=graph.nids_mapper,
+            local_part=dist.get_rank(),
+            pool_factor=args.core_neg_pool_factor,
+            hardness_beta=args.core_neg_hardness_beta,
+            exploration=args.core_neg_exploration,
+            embedding_capacity=args.core_neg_embedding_capacity,
+            local_cost=args.core_neg_local_cost,
+            cached_cost=args.core_neg_cached_cost,
+            reuse_cost=args.core_neg_reuse_cost,
+            remote_cost=args.core_neg_remote_cost,
+            seed=args.seed,
+        )
+    elif args.local_neg_sample:
         print('dst len {} origin len {}'.format(graph.edge_index[1,mask].unique().shape[0],full_dst.unique().shape[0]))
         train_neg_sampler = LocalNegativeSampling('triplet',amount = args.neg_samples,dst_node_list = graph.edge_index[1,mask].unique())
         
@@ -303,7 +446,11 @@ def main():
                                         device = torch.device('cuda:{}'.format(local_rank)),
                                         probability=args.probability,
                                         reversed = (gnn_param['arch'] == 'identity'),
-                                        ada_param=ada_param
+                                        ada_param=ada_param,
+                                        edge_cache=edge_cache,
+                                        edge_communication_cost=args.core_edge_cost,
+                                        request_planner=request_planner,
+                                        memory_predictor=memory_predictor,
                                         )
     
     eval_trainloader = DistributedDataLoader(graph,eval_train_data,sampler = eval_sampler,
@@ -493,9 +640,21 @@ def main():
             ones = torch.ones(metadata['dst_neg_index'].shape[0],device = model.device,dtype=torch.float)
             #with autocast():
             pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+            if hasattr(train_neg_sampler, 'update_embeddings'):
+                root_count = mfgs[0][0].num_dst_nodes()
+                train_neg_sampler.update_embeddings(
+                    mfgs[0][0].srcdata['ID'][:root_count],
+                    model.module.embedding[:root_count],
+                )
             #print(time_count.elapsed_event(t2))
             loss = creterion(pred_pos, torch.ones_like(pred_pos)) 
-            if args.local_neg_sample is False:
+            if 'neg_importance_weight' in metadata:
+                loss += importance_weighted_bce_with_logits(
+                    pred_neg,
+                    torch.zeros_like(pred_neg),
+                    metadata['neg_importance_weight'],
+                )
+            elif args.local_neg_sample is False:
                 weight = torch.where(DistIndex(mfgs[0][0].srcdata['ID'][metadata['dst_neg_index']]).part == torch.distributed.get_rank(),ones*metadata['train_ratio_pos'],ones*metadata['train_ratio_neg']).reshape(-1,1)
                 neg_creterion = torch.nn.BCEWithLogitsLoss(weight)
                 loss += neg_creterion(pred_neg, torch.zeros_like(pred_neg))
@@ -522,6 +681,8 @@ def main():
             mailbox.update_p2p_mail()
             ada_param.last_start_event_memory_update = ada_param.start_event()
             start = time_count.start_gpu()
+            if args.core_smoke_batches > 0 and b_cnt >= args.core_smoke_batches:
+                break
         
         torch.cuda.synchronize()
         dist.barrier()
@@ -545,6 +706,23 @@ def main():
         print('local node number {} remote node number {} local edge {} remote edge{}\n'.format(local_node,remote_node,local_edge,remote_edge))
         print(' comm local node number {} remote node number {} local edge {} remote edge{}\n'.format(sum_local_comm,sum_remote_comm,sum_local_edge_comm,sum_remote_edge_comm))
         print('memory comm {} shared comm {}\n'.format(tot_comm_count,tot_shared_count))
+        if dist.get_rank() == 0:
+            if edge_cache is not None:
+                print('core edge cache {}'.format(edge_cache.stats()))
+            if request_planner is not None:
+                print('core request planner {}'.format(request_planner.stats()))
+            if memory_predictor is not None:
+                print('core memory predictor {}'.format(memory_predictor.stats()))
+            if hasattr(train_neg_sampler, 'diagnostics'):
+                print('core negative sampler {}'.format(
+                    train_neg_sampler.diagnostics()
+                ))
+        if args.core_smoke_batches > 0:
+            dist.barrier()
+            if dist.get_rank() == 0:
+                print('Training smoke run completed after {} batches'.format(b_cnt))
+            ctx.shutdown()
+            return
         #if(e==0):
         #    torch.save((local_access,remote_access,local_edge_access,remote_edge_access,local_comm,remote_comm,local_edge_comm,remote_edge_comm),'all_args.seed/{}/{}/comm/comm_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
         ap = 0
@@ -623,4 +801,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

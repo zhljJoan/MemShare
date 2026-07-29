@@ -49,7 +49,7 @@ class EdgePredictor(torch.nn.Module):
         h_neg_dst = self.dst_fc(h_neg_dst)
         if mode == 'triplet':
             h_pos_edge = torch.nn.functional.relu(h_pos_src + h_pos_dst)
-            
+
             h_neg_edge = torch.nn.functional.relu(h_pos_src.tile(neg_samples, 1) + h_neg_dst)
         else:
             h_neg_src = self.src_fc(h_neg_src)
@@ -210,6 +210,18 @@ class TransfomerAttentionLayer(torch.nn.Module):
         self.w_out = torch.nn.Linear(dim_node_feat + dim_out, dim_out)
         self.layer_norm = torch.nn.LayerNorm(dim_out)
 
+    def _edge_attention(self, block, logits):
+        if 'sample_prob' in block.edata:
+            probability = block.edata['sample_prob'].to(
+                device=logits.device, dtype=logits.dtype
+            ).clamp_min(1e-12)
+            while probability.ndim < logits.ndim:
+                probability = probability.unsqueeze(-1)
+            # Equivalent to separately applying Horvitz--Thompson correction
+            # to the softmax numerator and denominator with a zero baseline.
+            logits = logits - torch.log(probability)
+        return dgl.ops.edge_softmax(block, logits)
+
     def forward(self, b):
         assert(self.dim_time + self.dim_node_feat + self.dim_edge_feat > 0)
         self.device = b.device
@@ -236,7 +248,9 @@ class TransfomerAttentionLayer(torch.nn.Module):
             Q = torch.reshape(Q, (Q.shape[0], self.num_head, -1))
             K = torch.reshape(K, (K.shape[0], self.num_head, -1))
             V = torch.reshape(V, (V.shape[0], self.num_head, -1))
-            att = dgl.ops.edge_softmax(b, self.att_act(torch.sum(Q*K, dim=2)))
+            att = self._edge_attention(
+                b, self.att_act(torch.sum(Q*K, dim=2))
+            )
             att = self.att_dropout(att)
             V = torch.reshape(V*att[:, :, None], (V.shape[0], -1))
             b.edata['v'] = V
@@ -286,7 +300,9 @@ class TransfomerAttentionLayer(torch.nn.Module):
             #att_v_max = dgl.ops.copy_e_max(b,att_sum)
             #att_e_sub_max = torch.exp(dgl.ops.e_sub_v(b,att_sum,att_v_max))
             #att = dgl.ops.e_div_v(b,att_e_sub_max,torch.clamp_min(dgl.ops.copy_e_sum(b,att_e_sub_max),1))
-            att = dgl.ops.edge_softmax(b, self.att_act(torch.sum(Q*K, dim=2)))
+            att = self._edge_attention(
+                b, self.att_act(torch.sum(Q*K, dim=2))
+            )
             att = self.att_dropout(att)
             #tt.weight_count_remote+=torch.sum(att[DistIndex(b.srcdata['ID']).part[b.edges()[0]]!=torch.distributed.get_rank()]**2)
             #tt.weight_count_local+=torch.sum(att[DistIndex(b.srcdata['ID']).part[b.edges()[0]]==torch.distributed.get_rank()]**2)
@@ -353,4 +369,3 @@ class JODIETimeEmbedding(torch.nn.Module):
         time_diff = (ts - mem_ts) / (ts + 1)
         rst = h * (1 + self.time_emb(time_diff.unsqueeze(1)))
         return rst
-            

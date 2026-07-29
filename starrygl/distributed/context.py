@@ -134,7 +134,7 @@ class DistributedContext:
                 rank=rank, world_size=world_size,
                 #rpc_backend_options=rpc_backend_options,
             )
-        self._use_rpc = use_rpc
+        self._use_rpc = bool(use_rpc or cache_use_rpc)
 
         self._local_rank = local_rank
         self._compute_device = device

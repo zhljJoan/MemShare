@@ -97,7 +97,8 @@ class NeighborSampler(BaseSampler):
         node_part = None,
         edge_part = None,
         no_neg = False,
-        ada_param = None
+        ada_param = None,
+        core_param = None,
     ) -> None:
         r"""__init__
         Args:
@@ -141,8 +142,53 @@ class NeighborSampler(BaseSampler):
             assert tnb is not None
             self.tnb = tnb
         self.ada_param = ada_param
+        self.core_param = core_param or {}
+        initial_probability = (
+            float(ada_param.beta) if ada_param is not None else 1.0
+        )
+        if edge_part is None:
+            edge_part = torch.zeros(graph_data.num_edges, dtype=torch.int)
+        if node_part is None:
+            node_part = torch.zeros(num_nodes, dtype=torch.int)
         self.p_sampler = starrygl.sampler_ops.ParallelSampler(self.tnb, num_nodes, graph_data.num_edges, workers, 
-                                         fanout, num_layers, policy, local_part,edge_part.to(torch.int),node_part.to(torch.int),ada_param.beta)
+                                         fanout, num_layers, policy, local_part,edge_part.to(torch.int),node_part.to(torch.int),initial_probability)
+        if policy == 'boundery_recent_core':
+            if not hasattr(self.p_sampler, 'configure_core_sampling'):
+                raise RuntimeError(
+                    'boundery_recent_core requires rebuilding libstarrygl_sampler'
+                )
+            param = self.core_param
+            self.p_sampler.configure_core_sampling(
+                float(param.get('min_probability', 0.05)),
+                float(param.get('uncertainty_weight', 1.0)),
+                float(param.get('age_weight', 0.25)),
+                float(param.get('edge_error_weight', 0.5)),
+                float(param.get('age_scale', 1.0)),
+                float(param.get('memory_cost', 1.0)),
+                float(param.get('edge_cost', 1.0)),
+                float(param.get('cached_edge_cost', 0.0)),
+                float(param.get('request_cost', 0.05)),
+                int(param.get('group_size', 8)),
+                int(param.get('seed', 6773)),
+            )
+
+    def observe_core_fetch(self, node_ids, residual, fetch_ts):
+        if self.policy != 'boundery_recent_core':
+            return
+        self.p_sampler.update_core_node_state(
+            node_ids.detach().reshape(-1).cpu().long().contiguous(),
+            residual.detach().reshape(-1).cpu().float().contiguous(),
+            fetch_ts.detach().reshape(-1).cpu().float().contiguous(),
+        )
+
+    def update_core_edge_state(self, edge_ids, edge_error, cached):
+        if self.policy != 'boundery_recent_core':
+            return
+        self.p_sampler.update_core_edge_state(
+            edge_ids.detach().reshape(-1).cpu().long().contiguous(),
+            edge_error.detach().reshape(-1).cpu().float().contiguous(),
+            cached.detach().reshape(-1).cpu().bool().contiguous(),
+        )
         
     def _get_sample_info(self):
         return self.num_nodes,self.num_layers,self.fanout,self.workers
@@ -280,7 +326,17 @@ class NeighborSampler(BaseSampler):
                                          ets.repeat(neg_sampling.amount)], dim=0)
                     #seed_ts = torch.cat([ets, ets, ets, ets], dim=0)
             elif neg_sampling.is_triplet():
-                dst_neg = neg_sampling.sample(num_neg, self.num_nodes)
+                if hasattr(neg_sampling, "sample_for_batch"):
+                    dst_neg = neg_sampling.sample_for_batch(
+                        src,
+                        dst,
+                        ets,
+                        num_neg,
+                        self.num_nodes,
+                        already_requested=torch.cat([src, dst]),
+                    )
+                else:
+                    dst_neg = neg_sampling.sample(num_neg, self.num_nodes)
                 seed = torch.cat([src, dst, dst_neg], dim=0)
                 if with_timestap: # ts操作
                     seed_ts = torch.cat([ets, ets, ets.repeat(neg_sampling.amount)], dim=0)
@@ -335,6 +391,22 @@ class NeighborSampler(BaseSampler):
         if 'train_ratio_pos' in neg_sampling.__dict__:
             metadata['train_ratio_pos'] = neg_sampling.train_ratio_pos
             metadata['train_ratio_neg'] = neg_sampling.train_ratio_neg
+        if hasattr(neg_sampling, "last_importance_weight"):
+            importance_weight = neg_sampling.last_importance_weight
+            if importance_weight.numel() == num_neg:
+                metadata['neg_importance_weight'] = importance_weight
+        if hasattr(neg_sampling, "last_proposal_probability"):
+            proposal_probability = neg_sampling.last_proposal_probability
+            if proposal_probability.numel() == num_neg:
+                metadata['neg_proposal_probability'] = proposal_probability
+        if hasattr(neg_sampling, "last_hardness"):
+            negative_hardness = neg_sampling.last_hardness
+            if negative_hardness.numel() == num_neg:
+                metadata['neg_hardness'] = negative_hardness
+        if hasattr(neg_sampling, "last_communication_cost"):
+            negative_cost = neg_sampling.last_communication_cost
+            if negative_cost.numel() == num_neg:
+                metadata['neg_communication_cost'] = negative_cost
         if neg_sampling is not None :
             metadata['dst_neg_index'] = dst_neg_index
             if neg_sampling.is_triplet() or neg_sampling.is_tgbtriplet():

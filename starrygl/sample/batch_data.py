@@ -8,6 +8,7 @@ from starrygl.distributed.context import DistributedContext
 from starrygl.distributed.utils import DistIndex, DistributedTensor
 from starrygl.sample import count_static
 from starrygl.sample.cache.fetch_cache import FetchFeatureCache
+from starrygl.sample.core_memshare.cache import ProbabilityAwareEdgeCache
 from starrygl.sample.count_static import time_count
 from starrygl.sample.graph_core import DataSet
 from starrygl.sample.graph_core import DistributedGraphStore
@@ -16,6 +17,13 @@ from starrygl.sample.sample_core.base import BaseSampler, NegativeSampling
 import dgl
 from starrygl.sample.count_static import time_count as tt
 from starrygl.sample.stream_manager import PipelineManager, getPipelineManger
+
+_ROOT_INDEX_METADATA = {
+    'src_pos_index',
+    'dst_pos_index',
+    'src_neg_index',
+    'dst_neg_index',
+}
 """
 入参不变，出参变为：
 sample_from_nodes
@@ -97,15 +105,193 @@ def get_node_feature_by_dist(graph:DistributedGraphStore,mailbox:SharedMailBox,q
     else:
         mem = None
     return node_feat,mem
-def get_edge_feature_by_dist(graph:DistributedGraphStore,query_eid_feature,is_local = True,out_device = torch.device('cuda'),async_op = False):
+def get_edge_feature_by_dist(
+    graph:DistributedGraphStore,
+    query_eid_feature,
+    is_local = True,
+    out_device = torch.device('cuda'),
+    async_op = False,
+    cache:ProbabilityAwareEdgeCache = None,
+    access_probability:torch.Tensor = None,
+    communication_cost:torch.Tensor = None,
+    variance_reduction:torch.Tensor = None,
+    reuse_count:torch.Tensor = None,
+):
+    if cache is not None and is_local is False and graph.efeat is not None:
+        query = query_eid_feature.reshape(-1)
+        feature_shape = tuple(graph.efeat.shape[1:])
+        output = torch.zeros(
+            (query.numel(),) + feature_shape,
+            dtype=graph.efeat.dtype,
+            device=out_device,
+        )
+        owner = DistIndex(query).part
+        local_mask = owner == torch.distributed.get_rank()
+        if local_mask.any():
+            output[local_mask] = graph.get_local_efeat(
+                query[local_mask], out_device=out_device
+            )
+        remote_positions = (~local_mask).nonzero().reshape(-1)
+        remote_query = query[remote_positions]
+        lookup = cache.lookup(remote_query)
+        if lookup.hit_mask.any():
+            hit_positions = remote_positions[lookup.hit_mask]
+            output[hit_positions] = lookup.values[lookup.hit_mask].to(out_device)
+        miss_in_remote = (~lookup.hit_mask).nonzero().reshape(-1)
+        miss_positions = remote_positions[miss_in_remote]
+        miss_query = query[miss_positions]
+        # Every rank must enter the collective, including ranks with zero misses.
+        fetched = graph.get_dist_efeat(
+            idx=miss_query,
+            group=_feature_group(graph),
+            out_device=out_device,
+            is_async=False,
+        )
+        if miss_query.numel():
+            output[miss_positions] = fetched
+            cache.admit(
+                miss_query,
+                fetched,
+                access_probability=_select_signal(access_probability, miss_positions),
+                communication_cost=_select_signal(
+                    communication_cost, miss_positions
+                ),
+                variance_reduction=_select_signal(variance_reduction, miss_positions),
+                reuse_count=_select_signal(reuse_count, miss_positions),
+            )
+        return output.reshape(tuple(query_eid_feature.shape) + feature_shape)
     if is_local == False:
-        ctx = distributed.context._get_default_dist_context()
-        if graph.feature_device.type == 'cuda' or graph.use_pin is True:
-            group = ctx.memory_nccl_group
-        else:
-            group = ctx.memory_gloo_group
+        group = _feature_group(graph)
         return graph.get_dist_efeat(idx = query_eid_feature,group=group,out_device=out_device,is_async=async_op) 
     return graph.get_local_efeat(query_eid_feature,out_device=out_device)
+
+
+def _feature_group(graph):
+    ctx = distributed.context._get_default_dist_context()
+    if graph.feature_device.type == 'cuda' or graph.use_pin is True:
+        return ctx.memory_nccl_group
+    return ctx.memory_gloo_group
+
+
+def _select_signal(signal, positions):
+    if signal is None:
+        return None
+    if not isinstance(signal, torch.Tensor):
+        return torch.tensor(float(signal), dtype=torch.float32)
+    flattened = signal.reshape(-1)
+    if flattened.numel() == 1:
+        return flattened
+    return flattened[positions.to(flattened.device)]
+
+
+class _CachedEdgeFetchWork:
+    def __init__(
+        self,
+        work,
+        fetched,
+        output,
+        miss_positions,
+        miss_query,
+        cache,
+        access_probability,
+        communication_cost,
+        variance_reduction,
+        reuse_count,
+    ):
+        self.work = work
+        self.fetched = fetched
+        self.output = output
+        self.miss_positions = miss_positions
+        self.miss_query = miss_query
+        self.cache = cache
+        self.access_probability = access_probability
+        self.communication_cost = communication_cost
+        self.variance_reduction = variance_reduction
+        self.reuse_count = reuse_count
+        self._completed = False
+
+    def wait(self):
+        if self._completed:
+            return True
+        self.work.wait()
+        if self.miss_query.numel():
+            self.output[self.miss_positions] = self.fetched
+            self.cache.admit(
+                self.miss_query,
+                self.fetched,
+                access_probability=_select_signal(
+                    self.access_probability, self.miss_positions
+                ),
+                communication_cost=_select_signal(
+                    self.communication_cost, self.miss_positions
+                ),
+                variance_reduction=_select_signal(
+                    self.variance_reduction, self.miss_positions
+                ),
+                reuse_count=_select_signal(self.reuse_count, self.miss_positions),
+            )
+        self._completed = True
+        return True
+
+
+def get_edge_feature_by_dist_async_cached(
+    graph:DistributedGraphStore,
+    query_eid_feature:torch.Tensor,
+    cache:ProbabilityAwareEdgeCache,
+    out_device:torch.device = torch.device('cuda'),
+    access_probability:torch.Tensor = None,
+    communication_cost:torch.Tensor = None,
+    variance_reduction:torch.Tensor = None,
+    reuse_count:torch.Tensor = None,
+):
+    """Start an asynchronous miss-only edge fetch and return ``(data, work)``."""
+
+    query = query_eid_feature.reshape(-1)
+    feature_shape = tuple(graph.efeat.shape[1:])
+    output = torch.zeros(
+        (query.numel(),) + feature_shape,
+        dtype=graph.efeat.dtype,
+        device=out_device,
+    )
+    owner = DistIndex(query).part
+    local_mask = owner == torch.distributed.get_rank()
+    if local_mask.any():
+        output[local_mask] = graph.get_local_efeat(
+            query[local_mask], out_device=out_device
+        )
+    remote_positions = (~local_mask).nonzero().reshape(-1)
+    lookup = cache.lookup(query[remote_positions])
+    if lookup.hit_mask.any():
+        output[remote_positions[lookup.hit_mask]] = lookup.values[
+            lookup.hit_mask
+        ].to(out_device)
+    miss_positions = remote_positions[(~lookup.hit_mask).nonzero().reshape(-1)]
+    miss_query = query[miss_positions]
+    ind_dict = graph.efeat.all_to_all_ind2ptr(
+        miss_query, group=_feature_group(graph)
+    )
+    send_data = graph.get_local_efeat(
+        ind_dict['recv_ind'], out_device=out_device
+    )
+    fetched, work = DistributedTensor.all_to_all_get_data(
+        send_data,
+        send_ptr=ind_dict['send_ptr'],
+        recv_ptr=ind_dict['recv_ptr'],
+        is_async=True,
+        group=_feature_group(graph),
+    )
+    return output, _CachedEdgeFetchWork(
+        work,
+        fetched,
+        output,
+        miss_positions,
+        miss_query,
+        cache,
+        access_probability,
+        communication_cost,
+        variance_reduction,
+        reuse_count,
+    )
 
 def get_node_all_to_all_route(graph:DistributedGraphStore,mailbox:SharedMailBox,query_nid_feature,out_device = torch.device('cuda')):
     data = []
@@ -120,7 +306,9 @@ def get_node_all_to_all_route(graph:DistributedGraphStore,mailbox:SharedMailBox,
         data.append(graph.get_local_nfeat(ind_dict['recv_ind'],out_device=out_device))
     if mailbox is not None:
         if ind_dict is None:
-            ind_dict = graph.nfeat.all_to_all_ind2ptr(query_nid_feature,group = group)
+            ind_dict = mailbox.node_memory.all_to_all_ind2ptr(
+                query_nid_feature, group=group
+            )
         memory,memory_ts,mail,mail_ts = mailbox.gather_local_memory(ind_dict['recv_ind'],compute_device=out_device)
         memory_ts = memory_ts.reshape(-1,1)
         mail_ts = mail_ts.reshape(mail_ts.shape[0],-1)
@@ -137,7 +325,7 @@ def get_edge_all_to_all_route(graph:DistributedGraphStore,query_eid_feature,out_
     else:
         group = ctx.memory_gloo_group
     if graph.efeat is not None:
-        ind_dict = graph.nfeat.all_to_all_ind2ptr(query_eid_feature,group = group)
+        ind_dict = graph.efeat.all_to_all_ind2ptr(query_eid_feature,group = group)
         return ind_dict,graph.get_local_efeat(ind_dict['recv_ind'],out_device=out_device)
     else:
         return None,None
@@ -165,7 +353,7 @@ def prepare_input(node_feat, edge_feat, mem_embedding,mfgs,dist_nid=None,dist_ei
                     #print(idx.shape[0],b.srcdata['mem_ts'].shape)
     return mfgs
 
-    
+
 def prepare_mailbox(mfgs,mailbox):
     for b in mfgs[0]:
         device = b.device
@@ -198,6 +386,13 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
     eid_tensor = torch.cat(eid,dim = 0).to(eid_mapper.device)
     dist_eid = eid_mapper[eid_tensor].to(device)
     dist_eid,eid_inv = dist_eid.unique(return_inverse=True)
+    eid_first,_ = torch_scatter.scatter_min(
+        torch.arange(eid_inv.numel(), device=eid_inv.device),
+        eid_inv,
+        dim=0,
+        dim_size=dist_eid.numel(),
+    )
+    global_eid = eid_tensor[eid_first.to(eid_tensor.device)].to(device)
     src_node = dst.to(graph.nids_mapper.device)
     #print(src_node)
     src_ts = None  
@@ -219,6 +414,13 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
     nid_tensor = torch.cat([root_node,src_node],dim = 0)
     dist_nid = nid_mapper[nid_tensor].to(device)
     dist_nid,nid_inv = dist_nid.unique(return_inverse=True)
+    nid_first,_ = torch_scatter.scatter_min(
+        torch.arange(nid_inv.numel(), device=nid_inv.device),
+        nid_inv,
+        dim=0,
+        dim_size=dist_nid.numel(),
+    )
+    global_nid = nid_tensor[nid_first.to(nid_tensor.device)].to(device)
 
     """
     对于同id和同时间的节点去重取得index
@@ -235,8 +437,8 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
         first_block_id = first_block_id[unq_id].contiguous()
         block_node_list = block_node_list[:,first_index].contiguous()
         #print('first block id {}\n unq id {} \n block_node_list {}\n'.format(first_block_id,unq_id,block_node_list))
-        for k in metadata:
-            if isinstance(metadata[k],torch.Tensor):
+        for k in _ROOT_INDEX_METADATA:
+            if k in metadata and isinstance(metadata[k],torch.Tensor):
                 metadata[k] = first_block_id[metadata[k]]
         t2 = time.time()
     
@@ -259,11 +461,16 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
                 idx = block_node_list[0,b.srcnodes()].to(torch.long)
                 e_idx = eid_inv[col_len:col_len+elen]
                 b.srcdata['__ID'] = idx
+                b.srcdata['NID'] = global_nid[idx]
                 
                 if sample_out[r].delta_ts().shape[0] > 0:
                     b.edata['dt'] = sample_out[r].delta_ts().to(device)
+                sample_probability = sample_out[r].sample_weight()
+                if sample_probability.numel() == elen:
+                    b.edata['sample_prob'] = sample_probability.to(device)
                 b.srcdata['ts'] = block_node_list[1,b.srcnodes()].to(torch.float)
                 b.edata['__ID'] = e_idx
+                b.edata['EID'] = global_eid[e_idx]
                 col = row
                 col_len += eid_len[r]
                 row_len += eid_len[r]
@@ -272,6 +479,10 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
             mfgs.reverse()
             return data,mfgs,metadata
         data,mfgs,metadata = build_block()
+        metadata['core_global_nids'] = global_nid
+        metadata['core_global_eids'] = global_eid
+        metadata['core_raw_node_requests'] = int(nid_tensor.numel())
+        metadata['core_raw_edge_requests'] = int(eid_tensor.numel())
         return (data,mfgs,metadata),dist_nid,dist_eid
     
     
@@ -293,6 +504,9 @@ def to_block(graph,data, sample_out,device = torch.device('cuda'),unique = True)
                 b.srcdata['__ID'] = idx
                 if sample_out[r].delta_ts().shape[0] > 0:
                     b.edata['dt'] = sample_out[r].delta_ts().to(device)
+                sample_probability = sample_out[r].sample_weight()
+                if sample_probability.numel() == elen:
+                    b.edata['sample_prob'] = sample_probability.to(device)
                 if src_ts is not None:
                     b.srcdata['ts'] = src_ts[0:row_len + eid_len[r]]
                 b.edata['__ID'] = e_idx
@@ -347,6 +561,13 @@ def to_reversed_block(graph,data, sample_out,device = torch.device('cuda'),uniqu
     CountComm.origin_local = (DistIndex(dist_nid).part == dist.get_rank()).sum().item()
     CountComm.origin_remote =(DistIndex(dist_nid).part != dist.get_rank()).sum().item()
     dist_nid,nid_inv = dist_nid.unique(return_inverse=True)
+    nid_first,_ = torch_scatter.scatter_min(
+        torch.arange(nid_inv.numel(), device=nid_inv.device),
+        nid_inv,
+        dim=0,
+        dim_size=dist_nid.numel(),
+    )
+    global_nid = nid_tensor[nid_first.to(nid_tensor.device)].to(device)
 
     """
     对于同id和同时间的节点去重取得index
@@ -360,8 +581,8 @@ def to_reversed_block(graph,data, sample_out,device = torch.device('cuda'),uniqu
     first_block_id[first_index] = torch.arange(first_index.shape[0],device=first_index.device,dtype=first_index.dtype)
     first_block_id = first_block_id[unq_id].contiguous()
     block_node_list = block_node_list[:,first_index]
-    for k in metadata:
-        if isinstance(metadata[k],torch.Tensor):
+    for k in _ROOT_INDEX_METADATA:
+        if k in metadata and isinstance(metadata[k],torch.Tensor):
             metadata[k] = first_block_id[metadata[k]]
     t2 = time.time()
     
@@ -377,6 +598,7 @@ def to_reversed_block(graph,data, sample_out,device = torch.device('cuda'),uniqu
                                 num_dst_nodes=dst.shape[0])
         idx = block_node_list[0,b.srcnodes()].to(torch.long)
         b.srcdata['__ID'] = idx
+        b.srcdata['NID'] = global_nid[idx]
         b.srcdata['ts'] = block_node_list[1,b.srcnodes()].to(torch.float)
         b.dstdata['ID'] = dst
         mfgs.append(b)
@@ -384,6 +606,12 @@ def to_reversed_block(graph,data, sample_out,device = torch.device('cuda'),uniqu
         mfgs.reverse()
         return data,mfgs,metadata
     data,mfgs,metadata = build_block()
+    metadata['core_global_nids'] = global_nid
+    metadata['core_global_eids'] = torch.empty(
+        0, dtype=torch.long, device=device
+    )
+    metadata['core_raw_node_requests'] = int(nid_tensor.numel())
+    metadata['core_raw_edge_requests'] = 0
     return (data,mfgs,metadata),dist_nid,dist_eid
 
 
@@ -452,4 +680,3 @@ class SAMPLE_TYPE:
     SAMPLE_FROM_TEMPORAL_NODES = sample_from_temporal_nodes
     SAMPLE_FROM_TEMPORAL_EDGES = sample_from_temporal_edges
     SAMPLE_FROM_LOCAL_TEMPORAL_EDGES = sample_from_local_temporal_edges
-    

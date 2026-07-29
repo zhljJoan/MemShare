@@ -27,6 +27,23 @@ class ParallelSampler
         th::Tensor first_block_id;
         double init_boundary_probability;
         vector<unsigned int> loc_seeds;
+        vector<float> core_node_residual;
+        vector<float> core_node_last_fetch_ts;
+        vector<float> core_edge_error;
+        vector<uint8_t> core_edge_cached;
+        double core_min_probability = 0.05;
+        double core_uncertainty_weight = 1.0;
+        double core_age_weight = 0.25;
+        double core_edge_error_weight = 0.5;
+        double core_age_scale = 1.0;
+        double core_memory_cost = 1.0;
+        double core_edge_cost = 1.0;
+        double core_cached_edge_cost = 0.0;
+        double core_request_cost = 0.05;
+        int64_t core_group_size = 8;
+        uint64_t core_seed = 6773;
+        atomic<uint64_t> core_batch_counter{0};
+        uint64_t current_core_batch = 0;
         ParallelSampler(TemporalNeighborBlock& _tnb, NodeIDType _num_nodes, EdgeIDType _num_edges, int _threads, 
                         vector<int>& _fanouts, int _num_layers, string _policy, int _local_part, th::Tensor _part, th::Tensor _node_part,double _p) :
                         tnb(_tnb), num_nodes(_num_nodes), num_edges(_num_edges), threads(_threads), 
@@ -44,6 +61,12 @@ class ParallelSampler
             for(int i = 0; i < threads; i++){
                 loc_seeds.push_back(i);
             }
+            if(policy == "boundery_recent_core"){
+                core_node_residual.assign(num_nodes, 1.0f);
+                core_node_last_fetch_ts.assign(num_nodes, -1.0f);
+                core_edge_error.assign(num_edges, 1.0f);
+                core_edge_cached.assign(num_edges, 0);
+            }
         }
 
         void reset()
@@ -58,11 +81,133 @@ class ParallelSampler
         void neighbor_sample_from_nodes_with_before(th::Tensor nodes, th::Tensor root_ts,double boundary_probability);
         void neighbor_sample_from_dynamic_nodes(th::Tensor nodes, th::Tensor root_ts);
         void neighbor_sample_from_nodes_with_before_layer(th::Tensor nodes, th::Tensor root_ts, int cur_layer,double boundary_probability);
+        void configure_core_sampling(
+            double min_probability,
+            double uncertainty_weight,
+            double age_weight,
+            double edge_error_weight,
+            double age_scale,
+            double memory_cost,
+            double edge_cost,
+            double cached_edge_cost,
+            double request_cost,
+            int64_t group_size,
+            int64_t seed);
+        void update_core_node_state(
+            th::Tensor node_ids,
+            th::Tensor residual,
+            th::Tensor fetch_ts);
+        void update_core_edge_state(
+            th::Tensor edge_ids,
+            th::Tensor edge_error,
+            th::Tensor cached);
         template<typename T>
         void union_to_vector(vector<T> *p, vector<T> &to_vec);
         void sample_unique(     th::Tensor seed, th::Tensor seed_ts,
                                 th::Tensor nid_mapper, th::Tensor eid_mapper,string out_device);
 };
+
+inline uint64_t core_splitmix64(uint64_t value){
+    value += 0x9E3779B97F4A7C15ULL;
+    value = (value ^ (value >> 30)) * 0xBF58476D1CE4E5B9ULL;
+    value = (value ^ (value >> 27)) * 0x94D049BB133111EBULL;
+    return value ^ (value >> 31);
+}
+
+inline double core_keyed_uniform(
+        uint64_t object_id,
+        uint64_t group_id,
+        uint64_t seed,
+        uint64_t batch_id,
+        uint64_t layer){
+    uint64_t key = seed;
+    key ^= core_splitmix64(object_id);
+    key ^= core_splitmix64(group_id + 0xD1B54A32D192ED03ULL);
+    key ^= core_splitmix64(batch_id + 0x94D049BB133111EBULL);
+    key ^= core_splitmix64(layer + 0xBF58476D1CE4E5B9ULL);
+    return static_cast<double>(core_splitmix64(key) >> 11)
+        / static_cast<double>(1ULL << 53);
+}
+
+void ParallelSampler :: configure_core_sampling(
+        double min_probability,
+        double uncertainty_weight,
+        double age_weight,
+        double edge_error_weight,
+        double age_scale,
+        double memory_cost,
+        double edge_cost,
+        double cached_edge_cost,
+        double request_cost,
+        int64_t group_size,
+        int64_t seed){
+    AT_ASSERTM(min_probability > 0.0 && min_probability <= 1.0,
+               "core min probability must be in (0, 1]");
+    AT_ASSERTM(age_scale > 0.0, "core age scale must be positive");
+    AT_ASSERTM(memory_cost >= 0.0 && edge_cost >= 0.0
+               && cached_edge_cost >= 0.0 && request_cost >= 0.0,
+               "core communication costs cannot be negative");
+    AT_ASSERTM(group_size > 0, "core coordinated group size must be positive");
+    core_min_probability = min_probability;
+    core_uncertainty_weight = uncertainty_weight;
+    core_age_weight = age_weight;
+    core_edge_error_weight = edge_error_weight;
+    core_age_scale = age_scale;
+    core_memory_cost = memory_cost;
+    core_edge_cost = edge_cost;
+    core_cached_edge_cost = cached_edge_cost;
+    core_request_cost = request_cost;
+    core_group_size = group_size;
+    core_seed = static_cast<uint64_t>(seed);
+}
+
+void ParallelSampler :: update_core_node_state(
+        th::Tensor node_ids,
+        th::Tensor residual,
+        th::Tensor fetch_ts){
+    node_ids = node_ids.contiguous().cpu();
+    residual = residual.contiguous().cpu().to(torch::kFloat32);
+    fetch_ts = fetch_ts.contiguous().cpu().to(torch::kFloat32);
+    AT_ASSERTM(node_ids.scalar_type() == torch::kInt64,
+               "core node ids must be int64");
+    AT_ASSERTM(node_ids.numel() == residual.numel()
+               && node_ids.numel() == fetch_ts.numel(),
+               "core node state tensors must align");
+    auto ids = node_ids.data_ptr<int64_t>();
+    auto residual_ptr = residual.data_ptr<float>();
+    auto ts_ptr = fetch_ts.data_ptr<float>();
+    for(int64_t index = 0; index < node_ids.numel(); ++index){
+        auto node_id = ids[index];
+        if(node_id < 0 || node_id >= static_cast<int64_t>(core_node_residual.size()))
+            continue;
+        core_node_residual[node_id] = max(0.0f, residual_ptr[index]);
+        core_node_last_fetch_ts[node_id] = ts_ptr[index];
+    }
+}
+
+void ParallelSampler :: update_core_edge_state(
+        th::Tensor edge_ids,
+        th::Tensor edge_error,
+        th::Tensor cached){
+    edge_ids = edge_ids.contiguous().cpu();
+    edge_error = edge_error.contiguous().cpu().to(torch::kFloat32);
+    cached = cached.contiguous().cpu().to(torch::kBool);
+    AT_ASSERTM(edge_ids.scalar_type() == torch::kInt64,
+               "core edge ids must be int64");
+    AT_ASSERTM(edge_ids.numel() == edge_error.numel()
+               && edge_ids.numel() == cached.numel(),
+               "core edge state tensors must align");
+    auto ids = edge_ids.data_ptr<int64_t>();
+    auto error_ptr = edge_error.data_ptr<float>();
+    auto cached_ptr = cached.data_ptr<bool>();
+    for(int64_t index = 0; index < edge_ids.numel(); ++index){
+        auto edge_id = ids[index];
+        if(edge_id < 0 || edge_id >= static_cast<int64_t>(core_edge_error.size()))
+            continue;
+        core_edge_error[edge_id] = max(0.0f, error_ptr[index]);
+        core_edge_cached[edge_id] = cached_ptr[index] ? 1 : 0;
+    }
+}
 
 
 
@@ -73,7 +218,7 @@ void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th
         AT_ASSERTM(tnb.weighted, "Tnb has no weight infomation!");
     else if(policy == "recent")
         AT_ASSERTM(tnb.with_timestamp, "Tnb has no timestamp infomation!");
-    else if(policy == "uniform"|| policy =="boundery_recent_decay"||policy=="boundery_recent_uniform"||policy=="boundery_uniform");
+    else if(policy == "uniform"|| policy =="boundery_recent_decay"||policy=="boundery_recent_uniform"||policy=="boundery_uniform"||policy=="boundery_recent_core");
     else{
         throw runtime_error("The policy \"" + policy + "\" is not exit!");
     }
@@ -81,6 +226,8 @@ void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th
         AT_ASSERTM(tnb.with_timestamp, "Tnb has no timestamp infomation!");
         AT_ASSERTM(root_ts.has_value(), "Parameter mismatch!");
         //neighbor_sample_from_dynamic_nodes(nodes,root_ts.value());
+        if(policy == "boundery_recent_core")
+            current_core_batch = core_batch_counter.fetch_add(1);
         neighbor_sample_from_nodes_with_before(nodes, root_ts.value(), boundary_probability.has_value()?boundary_probability.value():0);
     }
     else{
@@ -234,6 +381,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
     tgb_i[tid].eid.reserve(reserve_capacity);
     tgb_i[tid].src_index.reserve(reserve_capacity);
     tgb_i[tid].col.reserve(reserve_capacity);
+    tgb_i[tid].sample_weight.reserve(reserve_capacity);
 #pragma omp for schedule(static, int(ceil((static_cast<float>(nodes.size(0)) / threads))))
     for(int64_t i=0; i<nodes.size(0); i++){
         // int tid = omp_get_thread_num();
@@ -265,17 +413,21 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
                 cal_cnt++;
                 if(cal_cnt > fanout)break;
                 int eid = tnb.eid[node][cid];
+                double edge_probability = 1.0;
                  if(part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part){
                     double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);
-                    if(p0 > boundary_probability)continue;
+                    edge_probability = min(1.0, max(0.0, boundary_probability));
+                    if(p0 > edge_probability)continue;
                 }
                 tgb_i[tid].src_index.emplace_back(i);
                 tgb_i[tid].sample_nodes.emplace_back(tnb.neighbors[node][cid]);
                 tgb_i[tid].sample_nodes_ts.emplace_back(tnb.timestamp[node][cid]);
                 tgb_i[tid].delta_ts.emplace_back(rtts-tnb.timestamp[node][cid]);
                 tgb_i[tid].eid.emplace_back(tnb.eid[node][cid]);
+                tgb_i[tid].sample_weight.emplace_back(
+                    static_cast<float>(edge_probability));
                 cnt++;
-                if(cnt > fanout)break;
+                if(cnt >= fanout)break;
             
             }
 
@@ -286,7 +438,11 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
             double sum_p = 0;
             int sum_1 = 0;
             vector<double>pr(2*fanout);
-            TimeStampType delta = end_index-1>=0?(rtts - tnb.timestamp[node][end_index-1])*fanout:0; 
+            double delta = end_index-1>=0
+                ? static_cast<double>(rtts - tnb.timestamp[node][end_index-1])
+                    * max(1, fanout)
+                : 1.0;
+            delta = max(1.0, delta);
             for(int cid = end_index-1;cid>=0;cid--){
                 cal_cnt++;
                 if(cal_cnt>fanout)break;
@@ -302,28 +458,147 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
                 cal_cnt++;
                 //if(cal_cnt > fanout)break;
                 int eid = tnb.eid[node][cid];
-                
+                double edge_probability = 1.0;
                 if((part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part)){
                     if(cal_cnt<=fanout){
                         double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);
-                        double ep = boundary_probability*pr[cal_cnt-1]/sum_p*sum_1;
-                        if(p0 > ep)continue;
-                        //tgb_i[tid].sample_weight.emplace_back((float)ep);
+                        edge_probability = min(
+                            1.0,
+                            max(1e-12,
+                                boundary_probability*pr[cal_cnt-1]/sum_p*sum_1));
+                        if(p0 > edge_probability)continue;
                     }
                     else continue;
-                    //cout<<"in"<<endl;
-                    
-                }
-                else{
-                    //tgb_i[tid].sample_weight.emplace_back((float)1.0);
                 }
                 tgb_i[tid].src_index.emplace_back(i);
                 tgb_i[tid].sample_nodes.emplace_back(tnb.neighbors[node][cid]);
                 tgb_i[tid].sample_nodes_ts.emplace_back(tnb.timestamp[node][cid]);
                 tgb_i[tid].delta_ts.emplace_back(rtts-tnb.timestamp[node][cid]);
                 tgb_i[tid].eid.emplace_back(tnb.eid[node][cid]);
+                tgb_i[tid].sample_weight.emplace_back(
+                    static_cast<float>(edge_probability));
                 cnt++;
-                if(cnt > fanout)break;
+                if(cnt >= fanout)break;
+            }
+        }
+        else if(policy == "boundery_recent_core"){
+            int candidate_count = min(fanout, end_index);
+            vector<double> probability(candidate_count, 1.0);
+            vector<double> utility(candidate_count, 0.0);
+            vector<double> communication_cost(candidate_count, 0.0);
+            double full_remote_cost = 0.0;
+            double temporal_scale = end_index > 0
+                ? static_cast<double>(rtts - tnb.timestamp[node][end_index-1])
+                    * max(1, fanout)
+                : 1.0;
+            temporal_scale = max(1.0, temporal_scale);
+
+            for(int offset = 0; offset < candidate_count; ++offset){
+                int cid = end_index - 1 - offset;
+                auto neighbor = tnb.neighbors[node][cid];
+                auto edge_id = tnb.eid[node][cid];
+                bool remote = part[edge_id] != local_part
+                    || node_part[neighbor] != local_part;
+                if(!remote)
+                    continue;
+                double temporal = exp(
+                    static_cast<double>(tnb.timestamp[node][cid] - rtts)
+                    / temporal_scale);
+                double uncertainty = neighbor >= 0
+                    && neighbor < static_cast<int64_t>(core_node_residual.size())
+                    ? core_node_residual[neighbor]
+                    : 1.0;
+                double last_fetch = neighbor >= 0
+                    && neighbor < static_cast<int64_t>(core_node_last_fetch_ts.size())
+                    ? core_node_last_fetch_ts[neighbor]
+                    : -1.0;
+                double age = last_fetch >= 0.0
+                    ? max(0.0, static_cast<double>(rtts) - last_fetch)
+                        / core_age_scale
+                    : 1.0;
+                age = min(age, 10.0);
+                double edge_error = edge_id >= 0
+                    && edge_id < static_cast<int64_t>(core_edge_error.size())
+                    ? core_edge_error[edge_id]
+                    : 1.0;
+                bool cached = edge_id >= 0
+                    && edge_id < static_cast<int64_t>(core_edge_cached.size())
+                    && core_edge_cached[edge_id] != 0;
+                double residual = temporal * (
+                    core_uncertainty_weight * uncertainty
+                    + core_age_weight * age
+                    + core_edge_error_weight * edge_error);
+                double cost = core_memory_cost + core_request_cost
+                    + (cached ? core_cached_edge_cost : core_edge_cost);
+                cost = max(cost, 1e-12);
+                utility[offset] = max(residual / sqrt(cost), 1e-12);
+                communication_cost[offset] = cost;
+                full_remote_cost += cost;
+            }
+
+            if(full_remote_cost > 0.0){
+                double target_probability = min(
+                    1.0, max(core_min_probability, boundary_probability));
+                double target_budget = target_probability * full_remote_cost;
+                auto expected_cost = [&](double scale){
+                    double value = 0.0;
+                    for(int offset = 0; offset < candidate_count; ++offset){
+                        if(communication_cost[offset] <= 0.0)
+                            continue;
+                        double p = min(
+                            1.0,
+                            max(core_min_probability, scale * utility[offset]));
+                        value += p * communication_cost[offset];
+                    }
+                    return value;
+                };
+                double low = 0.0;
+                double high = 1.0;
+                while(expected_cost(high) < target_budget && high < 1e30)
+                    high *= 2.0;
+                for(int iteration = 0; iteration < 48; ++iteration){
+                    double middle = (low + high) * 0.5;
+                    if(expected_cost(middle) < target_budget)
+                        low = middle;
+                    else
+                        high = middle;
+                }
+                double scale = (low + high) * 0.5;
+                for(int offset = 0; offset < candidate_count; ++offset){
+                    if(communication_cost[offset] > 0.0)
+                        probability[offset] = min(
+                            1.0,
+                            max(core_min_probability, scale * utility[offset]));
+                }
+            }
+
+            for(int offset = 0; offset < candidate_count; ++offset){
+                int cid = end_index - 1 - offset;
+                auto neighbor = tnb.neighbors[node][cid];
+                auto edge_id = tnb.eid[node][cid];
+                bool remote = part[edge_id] != local_part
+                    || node_part[neighbor] != local_part;
+                double edge_probability = 1.0;
+                if(remote){
+                    edge_probability = probability[offset];
+                    uint64_t group_id = static_cast<uint64_t>(
+                        i / max<int64_t>(1, core_group_size));
+                    double uniform = core_keyed_uniform(
+                        static_cast<uint64_t>(neighbor),
+                        group_id,
+                        core_seed,
+                        current_core_batch,
+                        static_cast<uint64_t>(cur_layer));
+                    if(uniform >= edge_probability)
+                        continue;
+                }
+                tgb_i[tid].src_index.emplace_back(i);
+                tgb_i[tid].sample_nodes.emplace_back(neighbor);
+                tgb_i[tid].sample_nodes_ts.emplace_back(tnb.timestamp[node][cid]);
+                tgb_i[tid].delta_ts.emplace_back(rtts-tnb.timestamp[node][cid]);
+                tgb_i[tid].eid.emplace_back(edge_id);
+                tgb_i[tid].sample_weight.emplace_back(
+                    static_cast<float>(edge_probability));
             }
         }
         else{
@@ -363,7 +638,7 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
         each_begin[i]=size;
         size += s;
     }
-    if(policy == "boundery_recent_decay")
+    if(policy == "boundery_recent_core")
         ret[cur_layer].sample_weight.resize(size);
     ret[cur_layer].eid.resize(size);
     ret[cur_layer].src_index.resize(size);
@@ -373,8 +648,8 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
 
 #pragma omp parallel for schedule(static, 1)
     for(int i = 0; i<threads; i++){
-        //if(policy == "boundery_recent_decay")
-        //    copy(tgb_i[i].sample_weight.begin(), tgb_i[i].sample_weight.end(), ret[cur_layer].sample_weight.begin()+each_begin[i]);
+        if(policy == "boundery_recent_core")
+            copy(tgb_i[i].sample_weight.begin(), tgb_i[i].sample_weight.end(), ret[cur_layer].sample_weight.begin()+each_begin[i]);
         copy(tgb_i[i].eid.begin(), tgb_i[i].eid.end(), ret[cur_layer].eid.begin()+each_begin[i]);
         copy(tgb_i[i].src_index.begin(), tgb_i[i].src_index.end(), ret[cur_layer].src_index.begin()+each_begin[i]);
         copy(tgb_i[i].delta_ts.begin(), tgb_i[i].delta_ts.end(), ret[cur_layer].delta_ts.begin()+each_begin[i]);

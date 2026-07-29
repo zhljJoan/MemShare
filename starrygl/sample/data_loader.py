@@ -7,11 +7,21 @@ import time
 from starrygl.distributed.context import DistributedContext
 from starrygl.distributed.utils import DistIndex, DistributedTensor
 import torch
+import torch_scatter
 import sys
 from os.path import abspath, join, dirname
 import numpy as np
 from starrygl.sample import count_static
-from starrygl.sample.batch_data import get_edge_all_to_all_route, get_edge_feature_by_dist, get_node_all_to_all_route, get_node_feature_by_dist, graph_sample, prepare_input,prepare_mailbox
+from starrygl.sample.batch_data import (
+    get_edge_all_to_all_route,
+    get_edge_feature_by_dist,
+    get_edge_feature_by_dist_async_cached,
+    get_node_all_to_all_route,
+    get_node_feature_by_dist,
+    graph_sample,
+    prepare_input,
+    prepare_mailbox,
+)
 
 from starrygl.sample.count_static import time_count
 from starrygl.sample.part_utils.transformer_from_speed import get_eval_batch
@@ -102,9 +112,20 @@ class DistributedDataLoader:
             probability = 1,
             reversed = False,
             ada_param = None,
+            edge_cache = None,
+            edge_communication_cost = 1.0,
+            request_planner = None,
+            memory_predictor = None,
             **kwargs
     ):
         self.ada_param = ada_param
+        self.edge_cache = edge_cache
+        if edge_communication_cost <= 0:
+            raise ValueError("edge_communication_cost must be positive")
+        self.edge_communication_cost = float(edge_communication_cost)
+        self.request_planner = request_planner
+        self.memory_predictor = memory_predictor
+        self.last_request_plan = None
         self.reversed = reversed
         self.use_local_feature = use_local_feature
         self.local_embedding = local_embedding
@@ -152,6 +173,108 @@ class DistributedDataLoader:
         self.local_root = 0
         self.probability = probability
         print('pro {}\n'.format(self.probability))
+
+    def _edge_cache_signals(self, batch_data, dist_eid):
+        count = torch.zeros(
+            dist_eid.numel(), dtype=torch.float32, device=dist_eid.device
+        )
+        probability = torch.zeros_like(count)
+        variance = torch.zeros_like(count)
+        for layer in batch_data[1]:
+            for block in layer:
+                if '__ID' not in block.edata:
+                    continue
+                index = block.edata['__ID'].long()
+                count += torch.bincount(index, minlength=dist_eid.numel()).float()
+                if 'sample_prob' in block.edata:
+                    current_probability = block.edata['sample_prob'].reshape(-1).float()
+                else:
+                    current_probability = torch.ones(
+                        index.numel(), dtype=torch.float32, device=index.device
+                    )
+                layer_probability, _ = torch_scatter.scatter_max(
+                    current_probability,
+                    index,
+                    dim=0,
+                    dim_size=dist_eid.numel(),
+                )
+                probability = torch.maximum(probability, layer_probability)
+                if 'residual_variance_gain' in block.edata:
+                    variance.index_add_(
+                        0,
+                        index,
+                        block.edata['residual_variance_gain'].reshape(-1).float(),
+                    )
+        return probability, variance, count
+
+    def _record_request_plan(self, batch_data, dist_nid, dist_eid):
+        if self.request_planner is None:
+            return
+        metadata = batch_data[2]
+        cached = (
+            self.edge_cache.contains(dist_eid)
+            if self.edge_cache is not None
+            else torch.zeros(
+                dist_eid.numel(), dtype=torch.bool, device=dist_eid.device
+            )
+        )
+        self.last_request_plan = self.request_planner.plan(
+            dist_nid,
+            dist_eid,
+            raw_node_count=metadata.get(
+                'core_raw_node_requests', int(dist_nid.numel())
+            ),
+            raw_edge_count=metadata.get(
+                'core_raw_edge_requests', int(dist_eid.numel())
+            ),
+            edge_cached=cached,
+        )
+
+    def _observe_fetched_memory(self, batch_data, dist_nid, memory):
+        if self.memory_predictor is None or memory is None:
+            return
+        metadata = batch_data[2]
+        global_nids = metadata.get('core_global_nids')
+        if global_nids is None or global_nids.numel() != dist_nid.numel():
+            return
+        node_memory, memory_ts = memory[0], memory[1]
+        residual = self.memory_predictor.observe(
+            global_nids,
+            node_memory,
+            memory_ts,
+            owner_ids=DistIndex(dist_nid).part,
+        )
+        if hasattr(self.sampler, 'observe_core_fetch'):
+            self.sampler.observe_core_fetch(
+                global_nids,
+                residual,
+                memory_ts,
+            )
+
+    def _observe_edge_state(self, batch_data, dist_eid, edge_feature):
+        if (
+            edge_feature is None
+            or not hasattr(self.sampler, 'update_core_edge_state')
+        ):
+            return
+        global_eids = batch_data[2].get('core_global_eids')
+        if global_eids is None or global_eids.numel() != dist_eid.numel():
+            return
+        flattened = edge_feature.detach().reshape(dist_eid.numel(), -1).float()
+        edge_error = torch.sqrt(torch.mean(torch.square(flattened), dim=1))
+        cached = (
+            self.edge_cache.contains(dist_eid)
+            if self.edge_cache is not None
+            else torch.zeros(
+                dist_eid.numel(), dtype=torch.bool, device=dist_eid.device
+            )
+        )
+        edge_error[cached.to(edge_error.device)] = 0.0
+        self.sampler.update_core_edge_state(
+            global_eids,
+            edge_error,
+            cached,
+        )
               
     def __iter__(self):
         if self.chunk_size is None:
@@ -238,6 +361,7 @@ class DistributedDataLoader:
             pass
 
         batch_data,dist_nid,dist_eid = self.result_queue[0].result()
+        self._record_request_plan(batch_data, dist_nid, dist_eid)
         self.remote_node += (DistIndex(dist_nid).part != dist.get_rank()).sum().item()
         self.local_node += (DistIndex(dist_nid).part == dist.get_rank()).sum().item()
         self.remote_edge += (DistIndex(dist_eid).part != dist.get_rank()).sum().item()
@@ -246,14 +370,35 @@ class DistributedDataLoader:
         self.result_queue.popleft()
         
         nind,ndata = get_node_all_to_all_route(self.graph,self.mailbox,dist_nid,out_device=self.device)
-        eind,edata = get_edge_all_to_all_route(self.graph,dist_eid,out_device=self.device)
+        if self.edge_cache is not None and self.graph.efeat is not None:
+            edge_probability, edge_variance, edge_reuse = self._edge_cache_signals(
+                batch_data, dist_eid
+            )
+            edge_feat = get_edge_feature_by_dist_async_cached(
+                self.graph,
+                dist_eid,
+                self.edge_cache,
+                out_device=self.device,
+                access_probability=edge_probability,
+                communication_cost=self.edge_communication_cost,
+                variance_reduction=edge_variance,
+                reuse_count=edge_reuse,
+            )
+            eind = None
+            edata = None
+        else:
+            eind,edata = get_edge_all_to_all_route(
+                self.graph,dist_eid,out_device=self.device
+            )
         
         if nind is not None:
             node_feat = DistributedTensor.all_to_all_get_data(ndata,send_ptr=nind['send_ptr'],recv_ptr=nind['recv_ptr'],is_async=True)
         else:
             node_feat = None
 
-        if eind or self.reversed is False:
+        if self.edge_cache is not None and self.graph.efeat is not None:
+            pass
+        elif eind is not None:
             edge_feat = DistributedTensor.all_to_all_get_data(edata,send_ptr=eind['send_ptr'],recv_ptr=eind['recv_ptr'],is_async=True)
         else:
             edge_feat = None
@@ -283,11 +428,27 @@ class DistributedDataLoader:
                                       eid_mapper = self.graph.eids_mapper,
                                       reversed = self.reversed
                                       )
+                self._record_request_plan(batch_data, dist_nid, dist_eid)
 
                 root,mfgs,metadata = batch_data
-                edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
+                edge_probability, edge_variance, edge_reuse = self._edge_cache_signals(
+                    batch_data, dist_eid
+                )
+                edge_feat = get_edge_feature_by_dist(
+                    self.graph,
+                    dist_eid,
+                    is_local,
+                    out_device=self.device,
+                    cache=self.edge_cache,
+                    access_probability=edge_probability,
+                    communication_cost=self.edge_communication_cost,
+                    variance_reduction=edge_variance,
+                    reuse_count=edge_reuse,
+                )
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid, is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
+                self._observe_fetched_memory(batch_data, dist_nid, mem)
+                self._observe_edge_state(batch_data, dist_eid, edge_feat)
                 if(self.mailbox is not None and self.mailbox.historical_cache is not None):
                         id = batch_data[1][0][0].srcdata['ID']
                         mask = DistIndex(id).is_shared
@@ -314,9 +475,25 @@ class DistributedDataLoader:
                                       eid_mapper = self.graph.eids_mapper,
                                       reversed = self.reversed
                                     )
-                edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
+                self._record_request_plan(batch_data, dist_nid, dist_eid)
+                edge_probability, edge_variance, edge_reuse = self._edge_cache_signals(
+                    batch_data, dist_eid
+                )
+                edge_feat = get_edge_feature_by_dist(
+                    self.graph,
+                    dist_eid,
+                    is_local,
+                    out_device=self.device,
+                    cache=self.edge_cache,
+                    access_probability=edge_probability,
+                    communication_cost=self.edge_communication_cost,
+                    variance_reduction=edge_variance,
+                    reuse_count=edge_reuse,
+                )
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid,  is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,batch_data[1],dist_nid,dist_eid)
+                self._observe_fetched_memory(batch_data, dist_nid, mem)
+                self._observe_edge_state(batch_data, dist_eid, edge_feat)
                 if(self.mailbox is not None and self.mailbox.historical_cache is not None):
                     batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
                     batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
@@ -354,11 +531,27 @@ class DistributedDataLoader:
                             mem = self.mailbox.unpack(node_feat0,mailbox = True)
                     else:
                         batch_data,dist_nid,dist_eid = self.result_queue[0].result()
+                        self._record_request_plan(batch_data, dist_nid, dist_eid)
                         stream.synchronize()
                         self.result_queue.popleft()
-                        edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
+                        edge_probability, edge_variance, edge_reuse = self._edge_cache_signals(
+                            batch_data, dist_eid
+                        )
+                        edge_feat = get_edge_feature_by_dist(
+                            self.graph,
+                            dist_eid,
+                            is_local,
+                            out_device=self.device,
+                            cache=self.edge_cache,
+                            access_probability=edge_probability,
+                            communication_cost=self.edge_communication_cost,
+                            variance_reduction=edge_variance,
+                            reuse_count=edge_reuse,
+                        )
                         node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,   dist_nid,is_local,out_device=self.device)
                     prepare_input(node_feat,edge_feat,mem,batch_data[1],dist_nid,dist_eid)
+                    self._observe_fetched_memory(batch_data, dist_nid, mem)
+                    self._observe_edge_state(batch_data, dist_eid, edge_feat)
                     if(self.mailbox is not None and self.mailbox.historical_cache is not None):
                         id = batch_data[1][0][0].srcdata['ID']
                         mask = DistIndex(id).is_shared

@@ -188,3 +188,10 @@ saved_checkpoints/
 .processed_data/
 .DG_data/
 .examples/
+
+# Local experiment outputs, generated partitions, and machine-specific links.
+/outputs/
+/divided_nodes_seed_starrygl/
+/starrygl-partition/
+/examples/aligned_partition
+/starrygl/lib

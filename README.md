@@ -45,6 +45,13 @@ The format of configuration files is follow TGL and are located at `/config/`
 > shared_node = '{data}/{seed}/{data}_{NumOfGPUs}parts_top{RatioOfHotNOdes}/outputshared.txt'.
 > edge_i = '{data}/{seed}/{data}_{NumOfGPUs}parts_top{RatioOfHotNOdes}/edge_output{RANK}.txt', which is the edge ID stored in each GPU.
 
+## CoRe-MemShare journal-extension MVP
+
+The opt-in fixed-partition extension is documented in
+[docs/core_memshare_mvp.md](docs/core_memshare_mvp.md). It adds residual- and
+communication-aware boundary sampling, probability-corrected attention,
+edge-feature caching, hard negatives, and unified request accounting.
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.

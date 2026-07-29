@@ -280,17 +280,39 @@ def get_eval_batch(eid,nid_mapper,eid_mapper,batch_size):
     
 
 
+def _load_partition_ids(path, *, optional=False):
+    if not os.path.exists(path):
+        if optional:
+            return torch.empty(0, dtype=torch.long)
+        raise FileNotFoundError("partition ID file does not exist: {}".format(path))
+    values = []
+    with open(path, "r") as source:
+        for line_number, line in enumerate(source, start=1):
+            value = line.strip()
+            if not value:
+                continue
+            try:
+                values.append(int(value))
+            except ValueError as error:
+                raise ValueError(
+                    "invalid ID at {}:{}".format(path, line_number)
+                ) from error
+    return torch.tensor(values, dtype=torch.long)
+
+
 def load_from_speed(data,seed,top,sampler_graph_add_rev,device=torch.device('cuda'),feature_device=torch.device('cuda'),partition_path='ours',):
     ctx = _get_default_dist_context()
     if ctx.memory_group_size == 1:
         return load_from_shared_node_partition(data,None,None,sample_add_rev=sampler_graph_add_rev,device=device,feature_device=feature_device)
     else:
-        node_i = '{}/{}/{}/{}_{}parts_top{}/output{}.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
-        shared_node = '{}/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top)
-        edge_i = '{}/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+        node_path = '{}/{}/{}/{}_{}parts_top{}/output{}.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+        shared_path = '{}/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top)
+        edge_path = '{}/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+        node_i = _load_partition_ids(node_path)
+        shared_node = _load_partition_ids(shared_path, optional=True)
+        edge_i = _load_partition_ids(edge_path)
       
         return load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev=sampler_graph_add_rev,edge_i=edge_i,reid=None,device=device,feature_device=feature_device)
-
 
 
 
