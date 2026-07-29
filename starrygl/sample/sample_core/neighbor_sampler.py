@@ -168,6 +168,7 @@ class NeighborSampler(BaseSampler):
                 float(param.get('edge_cost', 1.0)),
                 float(param.get('cached_edge_cost', 0.0)),
                 float(param.get('request_cost', 0.05)),
+                int(param.get('deterministic_recent', 0)),
                 int(param.get('group_size', 8)),
                 int(param.get('seed', 6773)),
             )

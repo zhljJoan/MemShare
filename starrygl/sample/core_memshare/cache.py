@@ -72,6 +72,7 @@ class ProbabilityAwareEdgeCache:
         self.last_access = torch.full((self.capacity,), -1, dtype=torch.long)
         self.valid = torch.zeros(self.capacity, dtype=torch.bool)
         self._id_to_slot: Dict[int, int] = {}
+        self._free_slots = list(range(self.capacity - 1, -1, -1))
         self._step = 0
         self._lock = threading.RLock()
 
@@ -162,8 +163,7 @@ class ProbabilityAwareEdgeCache:
         ) / self.feature_bytes
 
     def _free_slot(self) -> Optional[int]:
-        free = (~self.valid).nonzero().reshape(-1)
-        return int(free[0].item()) if free.numel() else None
+        return self._free_slots.pop() if self._free_slots else None
 
     def _victim(self) -> Optional[int]:
         if self.capacity == 0:
@@ -202,6 +202,7 @@ class ProbabilityAwareEdgeCache:
         with self._lock:
             self._step += 1
             replacements = 0
+            copy_by_slot = {}
             for index, (edge_id, candidate_score) in enumerate(
                 zip(ids.tolist(), candidate_scores.tolist())
             ):
@@ -240,7 +241,7 @@ class ProbabilityAwareEdgeCache:
                     del self._id_to_slot[victim_id]
                     self.evictions += 1
                     replacements += 1
-                self.values[slot].copy_(feature[index].to(self.device))
+                copy_by_slot[slot] = index
                 self.ids[slot] = edge_id
                 self.scores[slot] = float(candidate_score)
                 self.inserted_at[slot] = self._step
@@ -249,6 +250,16 @@ class ProbabilityAwareEdgeCache:
                 self._id_to_slot[edge_id] = slot
                 self.insertions += 1
                 admitted[index] = True
+            if copy_by_slot:
+                slot_index = torch.tensor(
+                    list(copy_by_slot), dtype=torch.long, device=self.device
+                )
+                feature_index = torch.tensor(
+                    list(copy_by_slot.values()),
+                    dtype=torch.long,
+                    device=feature.device,
+                )
+                self.values[slot_index] = feature[feature_index].to(self.device)
         return admitted.to(edge_ids.device).reshape(edge_ids.shape)
 
     def stats(self) -> Dict[str, float]:

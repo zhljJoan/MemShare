@@ -6,6 +6,7 @@ import torch
 
 from starrygl.module.layers import TransfomerAttentionLayer
 from starrygl.sample.batch_data import to_block
+from starrygl.sample.data_loader import DistributedDataLoader
 from starrygl.sample.core_memshare import (
     CommunicationAwareNegativeSampling,
     LastFetchedMemoryPredictor,
@@ -192,6 +193,56 @@ def test_two_stage_negative_importance_correction_recovers_target_mean():
     assert sampler.last_effective_sample_size > 0
 
 
+def test_localism_and_reranking_corrections_recover_global_target():
+    mapper = torch.tensor(
+        [
+            _dist_id(0, 0),
+            _dist_id(0, 1),
+            _dist_id(0, 2),
+            _dist_id(1, 0),
+            _dist_id(1, 1),
+        ]
+    )
+    sampler = CommunicationAwareNegativeSampling(
+        amount=1,
+        dst_node_list=torch.tensor([1, 2, 3, 4]),
+        id_mapper=mapper,
+        local_part=0,
+        pool_factor=4,
+        localism_probability=0.2,
+        local_cost=1.0,
+        cached_cost=1.0,
+        reuse_cost=1.0,
+        remote_cost=1.0,
+        exploration=0.1,
+        hardness_beta=4.0,
+        seed=321,
+    )
+    sampler.update_embeddings(
+        mapper,
+        torch.tensor(
+            [
+                [1.0, 0.0],
+                [1.0, 0.0],
+                [0.0, 1.0],
+                [-1.0, 0.0],
+                [0.5, 0.5],
+            ]
+        ),
+    )
+    draws = 60000
+    selected = sampler.sample_for_batch(
+        torch.tensor([0]),
+        torch.tensor([0]),
+        None,
+        num_samples=draws,
+    )
+    value = torch.tensor([0.0, 1.0, 3.0, 7.0, 9.0])
+    estimate = (value[selected] * sampler.last_importance_weight).mean()
+    assert abs(float(estimate) - 5.0) < 0.15
+    assert sampler.diagnostics()["target_localism_probability"] == 0.2
+
+
 def test_hard_negative_rejects_pool_when_validity_filter_cannot_be_satisfied():
     sampler = CommunicationAwareNegativeSampling(
         amount=1,
@@ -234,6 +285,67 @@ def test_request_planner_deduplicates_and_splits_cached_edges():
     stats = planner.stats()
     assert stats["node_dedup_ratio"] == 0.25
     assert math.isclose(stats["edge_dedup_ratio"], 1.0 / 3.0)
+
+
+def test_empty_edge_observation_is_a_noop():
+    class Sampler:
+        policy = "boundery_recent_core"
+
+        def update_core_edge_state(self, *args):
+            raise AssertionError("empty edge state must not reach the sampler")
+
+    loader = object.__new__(DistributedDataLoader)
+    loader.sampler = Sampler()
+    batch_data = (None, None, {"core_global_eids": torch.empty(0, dtype=torch.long)})
+    loader._observe_edge_state(
+        batch_data,
+        torch.empty(0, dtype=torch.long),
+        torch.empty((0, 172)),
+    )
+
+
+def test_memory_predictor_only_observes_remote_fetches(monkeypatch):
+    class Predictor:
+        def observe(self, node_ids, memory, timestamps, *, owner_ids):
+            self.observed = (
+                node_ids.clone(),
+                memory.clone(),
+                timestamps.clone(),
+                owner_ids.clone(),
+            )
+            return torch.ones(node_ids.numel())
+
+    class Sampler:
+        def observe_core_fetch(self, node_ids, residual, timestamps):
+            self.observed = (
+                node_ids.clone(),
+                residual.clone(),
+                timestamps.clone(),
+            )
+
+    monkeypatch.setattr(torch.distributed, "get_rank", lambda: 0)
+    loader = object.__new__(DistributedDataLoader)
+    loader.memory_predictor = Predictor()
+    loader.sampler = Sampler()
+    dist_nids = torch.tensor(
+        [_dist_id(0, 1), _dist_id(1, 2), _dist_id(2, 3)]
+    )
+    batch_data = (
+        None,
+        None,
+        {"core_global_nids": torch.tensor([10, 11, 12])},
+    )
+    memory = (
+        torch.tensor([[1.0], [2.0], [3.0]]),
+        torch.tensor([4.0, 5.0, 6.0]),
+    )
+    loader._observe_fetched_memory(batch_data, dist_nids, memory)
+    observed = loader.memory_predictor.observed
+    assert observed[0].tolist() == [11, 12]
+    assert observed[1].reshape(-1).tolist() == [2.0, 3.0]
+    assert observed[2].tolist() == [5.0, 6.0]
+    assert observed[3].tolist() == [1, 2]
+    assert loader.sampler.observed[0].tolist() == [11, 12]
 
 
 def test_attention_uses_inverse_inclusion_probability():

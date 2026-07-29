@@ -43,11 +43,11 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
     r"""Two-stage hard-negative proposal with conditional importance weights.
 
     For every negative slot, ``pool_factor`` candidates are drawn independently
-    from the original target distribution :math:`q_0`.  One candidate occurrence
-    is selected using the hardness/cost proposal ``q``.  The returned weight is
-    ``(1 / pool_factor) / q``.  Conditioned on the candidate pool this estimates
-    the uniform pool average; averaging over pools therefore recovers the
-    original :math:`q_0` objective exactly.
+    from a localism proposal.  One candidate occurrence is selected using the
+    hardness/cost proposal ``q``.  The returned weight combines the exact
+    target/localism density ratio with ``(1 / pool_factor) / q``.  With the
+    default ``localism_probability=1`` this reduces to global-uniform candidate
+    generation and the second-stage correction alone.
     """
 
     def __init__(
@@ -69,6 +69,7 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
         cost_floor: float = 1e-6,
         embedding_capacity: int = 100000,
         max_importance_weight: Optional[float] = None,
+        localism_probability: float = 1.0,
         validity_filter: Optional[
             Callable[[torch.Tensor, torch.Tensor, Optional[torch.Tensor]], torch.Tensor]
         ] = None,
@@ -93,6 +94,8 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
             raise ValueError("embedding_capacity cannot be negative")
         if max_importance_weight is not None and max_importance_weight <= 0:
             raise ValueError("max_importance_weight must be positive")
+        if not 0.0 < localism_probability <= 1.0:
+            raise ValueError("localism_probability must be in (0, 1]")
 
         self.dst_node_list = torch.unique(dst_node_list.detach().cpu().long())
         self.id_mapper = id_mapper.detach().cpu().long() if id_mapper is not None else None
@@ -113,9 +116,23 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
         self.cost_floor = float(cost_floor)
         self.embedding_capacity = int(embedding_capacity)
         self.max_importance_weight = max_importance_weight
+        self.localism_probability = float(localism_probability)
         self.validity_filter = validity_filter
         self.generator = torch.Generator(device="cpu")
         self.generator.manual_seed(int(seed) ^ self.local_part)
+        destination_dist = self._map_ids(self.dst_node_list)
+        local_mask = _owner(destination_dist) == self.local_part
+        self.local_dst_node_list = self.dst_node_list[local_mask]
+        if (
+            self.localism_probability < 1.0
+            and self.local_dst_node_list.numel() == 0
+        ):
+            raise ValueError(
+                "localism_probability below one requires local destinations"
+            )
+        self.local_destination_fraction = (
+            self.local_dst_node_list.numel() / self.dst_node_list.numel()
+        )
 
         self._embeddings: "OrderedDict[int, torch.Tensor]" = OrderedDict()
         self._embedding_dimension = 0
@@ -129,6 +146,28 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
         self.total_samples = 0
         self.total_remote_samples = 0
         self.total_reused_samples = 0
+        self.total_hardness = 0.0
+        self.total_communication_cost = 0.0
+        self.total_importance_weight = 0.0
+        self.total_squared_importance_weight = 0.0
+        self.total_clipped_samples = 0
+
+    def _draw_target(self, shape: Tuple[int, ...]) -> torch.Tensor:
+        global_index = torch.randint(
+            self.dst_node_list.numel(), shape, generator=self.generator
+        )
+        global_candidate = self.dst_node_list[global_index]
+        if self.localism_probability >= 1.0:
+            return global_candidate
+        local_index = torch.randint(
+            self.local_dst_node_list.numel(), shape, generator=self.generator
+        )
+        local_candidate = self.local_dst_node_list[local_index]
+        choose_global = (
+            torch.rand(shape, generator=self.generator)
+            < self.localism_probability
+        )
+        return torch.where(choose_global, global_candidate, local_candidate)
 
     def _map_ids(self, node_ids: torch.Tensor) -> torch.Tensor:
         ids = node_ids.detach().cpu().long()
@@ -181,10 +220,7 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
         timestamp_slots: Optional[torch.Tensor],
     ) -> torch.Tensor:
         shape = (source_slots.numel(), self.pool_factor)
-        candidate_index = torch.randint(
-            self.dst_node_list.numel(), shape, generator=self.generator
-        )
-        candidates = self.dst_node_list[candidate_index]
+        candidates = self._draw_target(shape)
 
         source_matrix = source_slots[:, None].expand_as(candidates)
         positive_matrix = positive_slots[:, None].expand_as(candidates)
@@ -204,12 +240,9 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
                 invalid |= custom_invalid
             if not bool(invalid.any()):
                 return candidates
-            replacement = torch.randint(
-                self.dst_node_list.numel(),
-                (int(invalid.sum().item()),),
-                generator=self.generator,
+            candidates[invalid] = self._draw_target(
+                (int(invalid.sum().item()),)
             )
-            candidates[invalid] = self.dst_node_list[replacement]
         invalid = candidates == positive_matrix
         if self.validity_filter is not None:
             custom_invalid = ~self.validity_filter(
@@ -308,7 +341,27 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
         row = torch.arange(num_samples)
         selected = candidates[row, chosen[:, 0]]
         selected_probability = proposal[row, chosen[:, 0]]
-        importance = (1.0 / self.pool_factor) / selected_probability
+        if self.localism_probability < 1.0:
+            local_fraction = self.local_destination_fraction
+            local_target_weight = local_fraction / (
+                1.0
+                - self.localism_probability
+                + self.localism_probability * local_fraction
+            )
+            target_weight = torch.where(
+                owners == self.local_part,
+                torch.full_like(proposal, local_target_weight),
+                torch.full_like(
+                    proposal, 1.0 / self.localism_probability
+                ),
+            )
+        else:
+            target_weight = torch.ones_like(proposal)
+        importance = (
+            target_weight[row, chosen[:, 0]]
+            / self.pool_factor
+            / selected_probability
+        )
         unclipped = importance.clone()
         if self.max_importance_weight is not None:
             importance.clamp_(max=float(self.max_importance_weight))
@@ -329,6 +382,19 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
             (selected_owner != self.local_part).sum().item()
         )
         self.total_reused_samples += int(selected_reused.sum().item())
+        self.total_hardness += float(self.last_hardness.sum().item())
+        self.total_communication_cost += float(
+            self.last_communication_cost.sum().item()
+        )
+        self.total_importance_weight += float(
+            self.last_importance_weight.sum().item()
+        )
+        self.total_squared_importance_weight += float(
+            self.last_importance_weight.square().sum().item()
+        )
+        self.total_clipped_samples += int(
+            (self.last_importance_weight != unclipped).sum().item()
+        )
         # Keep this for callers that want to update the request planner directly.
         self.last_selected_dist_ids = selected_dist
         return selected
@@ -346,6 +412,12 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
     def diagnostics(self) -> Dict[str, float]:
         return {
             "pool_factor": float(self.pool_factor),
+            "target_localism_probability": float(
+                self.localism_probability
+            ),
+            "local_destination_fraction": float(
+                self.local_destination_fraction
+            ),
             "embedding_entries": float(len(self._embeddings)),
             "last_ess": float(self.last_effective_sample_size),
             "last_mean_hardness": (
@@ -360,6 +432,41 @@ class CommunicationAwareNegativeSampling(NegativeSampling):
             ),
             "last_clipped_fraction": float(self.last_clipped_fraction),
             "total_samples": float(self.total_samples),
+            "total_remote_samples": float(self.total_remote_samples),
+            "total_reused_samples": float(self.total_reused_samples),
+            "total_hardness": float(self.total_hardness),
+            "total_communication_cost": float(self.total_communication_cost),
+            "total_importance_weight": float(self.total_importance_weight),
+            "total_squared_importance_weight": float(
+                self.total_squared_importance_weight
+            ),
+            "total_clipped_samples": float(self.total_clipped_samples),
+            "cumulative_mean_hardness": (
+                self.total_hardness / self.total_samples
+                if self.total_samples
+                else 0.0
+            ),
+            "cumulative_mean_cost": (
+                self.total_communication_cost / self.total_samples
+                if self.total_samples
+                else 0.0
+            ),
+            "cumulative_mean_importance_weight": (
+                self.total_importance_weight / self.total_samples
+                if self.total_samples
+                else 0.0
+            ),
+            "cumulative_ess": (
+                self.total_importance_weight**2
+                / self.total_squared_importance_weight
+                if self.total_squared_importance_weight
+                else 0.0
+            ),
+            "cumulative_clipped_fraction": (
+                self.total_clipped_samples / self.total_samples
+                if self.total_samples
+                else 0.0
+            ),
             "remote_sample_ratio": (
                 self.total_remote_samples / self.total_samples
                 if self.total_samples

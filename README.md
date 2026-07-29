@@ -51,6 +51,9 @@ The opt-in fixed-partition extension is documented in
 [docs/core_memshare_mvp.md](docs/core_memshare_mvp.md). It adds residual- and
 communication-aware boundary sampling, probability-corrected attention,
 edge-feature caching, hard negatives, and unified request accounting.
+All variants remain experimental and disabled by default. Four-dataset
+screening results and retain/pause decisions are recorded in
+[docs/core_memshare_experiments.md](docs/core_memshare_experiments.md).
 
 ## Security
 

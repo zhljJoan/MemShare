@@ -40,6 +40,7 @@ class ParallelSampler
         double core_edge_cost = 1.0;
         double core_cached_edge_cost = 0.0;
         double core_request_cost = 0.05;
+        int64_t core_deterministic_recent = 0;
         int64_t core_group_size = 8;
         uint64_t core_seed = 6773;
         atomic<uint64_t> core_batch_counter{0};
@@ -91,6 +92,7 @@ class ParallelSampler
             double edge_cost,
             double cached_edge_cost,
             double request_cost,
+            int64_t deterministic_recent,
             int64_t group_size,
             int64_t seed);
         void update_core_node_state(
@@ -139,6 +141,7 @@ void ParallelSampler :: configure_core_sampling(
         double edge_cost,
         double cached_edge_cost,
         double request_cost,
+        int64_t deterministic_recent,
         int64_t group_size,
         int64_t seed){
     AT_ASSERTM(min_probability > 0.0 && min_probability <= 1.0,
@@ -147,6 +150,8 @@ void ParallelSampler :: configure_core_sampling(
     AT_ASSERTM(memory_cost >= 0.0 && edge_cost >= 0.0
                && cached_edge_cost >= 0.0 && request_cost >= 0.0,
                "core communication costs cannot be negative");
+    AT_ASSERTM(deterministic_recent >= 0,
+               "core deterministic recent count cannot be negative");
     AT_ASSERTM(group_size > 0, "core coordinated group size must be positive");
     core_min_probability = min_probability;
     core_uncertainty_weight = uncertainty_weight;
@@ -157,6 +162,7 @@ void ParallelSampler :: configure_core_sampling(
     core_edge_cost = edge_cost;
     core_cached_edge_cost = cached_edge_cost;
     core_request_cost = request_cost;
+    core_deterministic_recent = deterministic_recent;
     core_group_size = group_size;
     core_seed = static_cast<uint64_t>(seed);
 }
@@ -486,7 +492,9 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
             vector<double> probability(candidate_count, 1.0);
             vector<double> utility(candidate_count, 0.0);
             vector<double> communication_cost(candidate_count, 0.0);
+            vector<uint8_t> deterministic(candidate_count, 0);
             double full_remote_cost = 0.0;
+            double deterministic_remote_cost = 0.0;
             double temporal_scale = end_index > 0
                 ? static_cast<double>(rtts - tnb.timestamp[node][end_index-1])
                     * max(1, fanout)
@@ -531,19 +539,29 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
                 double cost = core_memory_cost + core_request_cost
                     + (cached ? core_cached_edge_cost : core_edge_cost);
                 cost = max(cost, 1e-12);
-                utility[offset] = max(residual / sqrt(cost), 1e-12);
                 communication_cost[offset] = cost;
                 full_remote_cost += cost;
+                if(offset < core_deterministic_recent){
+                    deterministic[offset] = 1;
+                    deterministic_remote_cost += cost;
+                }
+                else{
+                    utility[offset] = max(residual / sqrt(cost), 1e-12);
+                }
             }
 
             if(full_remote_cost > 0.0){
                 double target_probability = min(
                     1.0, max(core_min_probability, boundary_probability));
-                double target_budget = target_probability * full_remote_cost;
+                double target_budget = max(
+                    0.0,
+                    target_probability * full_remote_cost
+                        - deterministic_remote_cost);
                 auto expected_cost = [&](double scale){
                     double value = 0.0;
                     for(int offset = 0; offset < candidate_count; ++offset){
-                        if(communication_cost[offset] <= 0.0)
+                        if(communication_cost[offset] <= 0.0
+                                || deterministic[offset])
                             continue;
                         double p = min(
                             1.0,
@@ -565,7 +583,8 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
                 }
                 double scale = (low + high) * 0.5;
                 for(int offset = 0; offset < candidate_count; ++offset){
-                    if(communication_cost[offset] > 0.0)
+                    if(communication_cost[offset] > 0.0
+                            && !deterministic[offset])
                         probability[offset] = min(
                             1.0,
                             max(core_min_probability, scale * utility[offset]));

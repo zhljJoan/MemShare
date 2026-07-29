@@ -60,7 +60,8 @@ def test_native_core_sampler_exports_probabilities_and_coordinates_roots():
                 0.5,
             )
             sampler.configure_core_sampling(
-                0.05, 1.0, 0.25, 0.5, 1.0, 1.0, 1.0, 0.0, 0.05, 8, 19
+                0.05, 1.0, 0.25, 0.5, 1.0, 1.0, 1.0, 0.0, 0.05,
+                0, 8, 19
             )
             sampler.update_core_node_state(
                 torch.tensor([1, 2, 3, 4]),
@@ -108,12 +109,33 @@ def test_native_core_sampler_exports_probabilities_and_coordinates_roots():
             )
             no_backfill.configure_core_sampling(
                 1e-9, 1.0, 0.25, 0.5, 1.0,
-                1.0, 1.0, 0.0, 0.05, 8, 19
+                1.0, 1.0, 0.0, 0.05, 0, 8, 19
             )
             no_backfill.neighbor_sample_from_nodes(
                 torch.tensor([0]), torch.tensor([3]), None, 1e-9
             )
             assert 0 not in no_backfill.get_ret()[0].eid().tolist()
+
+            # The deterministic prefix protects the newest candidate even
+            # when the residual tail budget is effectively zero.
+            top_one = module.ParallelSampler(
+                no_backfill_neighbors, 3, 2, 1, [2], 1,
+                "boundery_recent_core", 0,
+                torch.tensor([0, 1], dtype=torch.int32),
+                torch.tensor([0, 0, 1], dtype=torch.int32),
+                1e-9,
+            )
+            top_one.configure_core_sampling(
+                1e-9, 1.0, 0.25, 0.5, 1.0,
+                1.0, 1.0, 0.0, 0.05, 1, 8, 19
+            )
+            top_one.neighbor_sample_from_nodes(
+                torch.tensor([0]), torch.tensor([3]), None, 1e-9
+            )
+            top_one_result = top_one.get_ret()[0]
+            newest = top_one_result.eid() == 1
+            assert newest.sum().item() == 1
+            assert top_one_result.sample_weight()[newest].item() == 1.0
             """
         )
         completed = subprocess.run(
@@ -148,7 +170,8 @@ def test_native_core_sampler_exports_probabilities_and_coordinates_roots():
         0.5,
     )
     sampler.configure_core_sampling(
-        0.05, 1.0, 0.25, 0.5, 1.0, 1.0, 1.0, 0.0, 0.05, 8, 19
+        0.05, 1.0, 0.25, 0.5, 1.0, 1.0, 1.0, 0.0, 0.05,
+        0, 8, 19
     )
     sampler.update_core_node_state(
         torch.tensor([1, 2, 3, 4]),
@@ -199,9 +222,35 @@ def test_native_core_sampler_exports_probabilities_and_coordinates_roots():
         1e-9,
     )
     no_backfill.configure_core_sampling(
-        1e-9, 1.0, 0.25, 0.5, 1.0, 1.0, 1.0, 0.0, 0.05, 8, 19
+        1e-9, 1.0, 0.25, 0.5, 1.0, 1.0, 1.0, 0.0, 0.05,
+        0, 8, 19
     )
     no_backfill.neighbor_sample_from_nodes(
         torch.tensor([0]), torch.tensor([3]), None, 1e-9
     )
     assert 0 not in no_backfill.get_ret()[0].eid().tolist()
+
+    top_one = module.ParallelSampler(
+        no_backfill_neighbors,
+        3,
+        2,
+        1,
+        [2],
+        1,
+        "boundery_recent_core",
+        0,
+        torch.tensor([0, 1], dtype=torch.int32),
+        torch.tensor([0, 0, 1], dtype=torch.int32),
+        1e-9,
+    )
+    top_one.configure_core_sampling(
+        1e-9, 1.0, 0.25, 0.5, 1.0, 1.0, 1.0, 0.0, 0.05,
+        1, 8, 19
+    )
+    top_one.neighbor_sample_from_nodes(
+        torch.tensor([0]), torch.tensor([3]), None, 1e-9
+    )
+    top_one_result = top_one.get_ret()[0]
+    newest = top_one_result.eid() == 1
+    assert newest.sum().item() == 1
+    assert top_one_result.sample_weight()[newest].item() == 1.0

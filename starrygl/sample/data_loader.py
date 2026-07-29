@@ -238,22 +238,29 @@ class DistributedDataLoader:
         if global_nids is None or global_nids.numel() != dist_nid.numel():
             return
         node_memory, memory_ts = memory[0], memory[1]
+        owners = DistIndex(dist_nid).part
+        remote = owners != dist.get_rank()
+        if not bool(remote.any()):
+            return
         residual = self.memory_predictor.observe(
-            global_nids,
-            node_memory,
-            memory_ts,
-            owner_ids=DistIndex(dist_nid).part,
+            global_nids[remote],
+            node_memory[remote],
+            memory_ts[remote],
+            owner_ids=owners[remote],
         )
         if hasattr(self.sampler, 'observe_core_fetch'):
             self.sampler.observe_core_fetch(
-                global_nids,
+                global_nids[remote],
                 residual,
-                memory_ts,
+                memory_ts[remote],
             )
 
     def _observe_edge_state(self, batch_data, dist_eid, edge_feature):
         if (
             edge_feature is None
+            or dist_eid.numel() == 0
+            or edge_feature.numel() == 0
+            or getattr(self.sampler, 'policy', None) != 'boundery_recent_core'
             or not hasattr(self.sampler, 'update_core_edge_state')
         ):
             return

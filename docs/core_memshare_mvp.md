@@ -1,5 +1,10 @@
 # CoRe-MemShare MVP 设计与实现说明
 
+> 实验状态：所有模块均保持 opt-in。2026-07-29 的四数据集筛选没有产生可升级
+> 为默认训练方案的 CoRe 变体；当前仍推荐原 MemShare baseline。完整尝试、数据
+> 和保留/暂缓决定见
+> [core_memshare_experiments.md](core_memshare_experiments.md)。
+
 本分支在固定图划分、固定热点集合和固定 ownership 的前提下，增加一条可逐项启用的实验链路：
 
 ```text
@@ -69,6 +74,10 @@ p_{\min},1
 - `update_core_edge_state`：更新边预测误差与 cache 命中状态。
 
 未观测节点和边使用保守默认值，因此自然退化到时间衰减采样。
+
+可以通过 `--core_deterministic_recent L` 确定性保留 top-\(L\) 个最新
+candidate，并仅对 tail 分配剩余预算。该机制的 top-1 版本已经实现和测试，但
+四数据集质量 screen 未通过，因此默认值为 0，当前不推荐启用。
 
 ### 1.2 分组协同采样
 
@@ -140,7 +149,8 @@ pipeline 路径会把本地边、cache hit 和 remote miss 分开，仅对 remot
 
 ### 1.6 通信感知 hard negative
 
-每个负样本 slot 先从原目标分布 \(q_0\) 独立产生 \(r\) 个候选，再使用：
+每个负样本 slot 先从原 MemShare localism proposal \(q_L\) 独立产生 \(r\)
+个候选，再使用：
 
 \[
 q(j\mid C)
@@ -151,15 +161,19 @@ q(j\mid C)
 进行候选 occurrence 重采样，并与 uniform proposal 做
 \(\epsilon\)-mixture。
 
-最终权重为：
+当前目标 \(q_0\) 为全局均匀负样本目标。最终两阶段权重为：
 
 \[
-w_j=\frac{1/r}{q(j\mid C)}.
+w_j=
+\frac{q_0(j)}{q_L(j)}
+\cdot
+\frac{1/r}{q(j\mid C)}.
 \]
 
-给定候选池 \(C\)，它无偏估计候选池均值；再对候选池取期望后，严格恢复
-原 \(q_0\) 负样本目标。该结果不依赖全局 ANN，也不把有限候选池近似误写成
-全局 proposal 概率。
+在不发生 validity rejection 的有限候选设置中，Monte Carlo test 验证该权重
+恢复 \(q_0\) 目标。当前正目标 rejection 会改变 proposal 的归一化常数，而训练
+脚本也尚未接入完整历史 temporal validity filter，因此该模块仍按实验功能处理，
+不宣称当前训练路径严格恢复完整历史协议下的 \(q_0\)。
 
 当前 hard score 使用最近缓存的 root/negative embedding cosine score。
 本地、embedding cache hit 和正样本 root 已请求节点使用更低通信成本。
@@ -255,12 +269,20 @@ forward/backward 和 optimizer step 均正常完成，进程返回 0。rank 0 �
 planner/cache 的通信统计包含 2 个 request plan，而模型只消费了 1 个 batch；
 首次 cache 仍处于冷启动状态。
 
+该 WIKI-only smoke 发生在四数据集强制矩阵建立之前，只证明执行链可运行，不用于
+保留或淘汰任何方法。当前所有方法判断都必须覆盖 WIKI、LASTFM、WikiTalk 和
+Flight。
+
 建议第一次实验只打开一个模块：
 
 1. `boundery_recent_core`，cache ratio 为 0，negative pool factor 为 1；
 2. 在 1 的基础上打开 edge cache；
 3. 单独打开 hard negative；
 4. 最后运行完整组合。
+
+实际筛选结果表明以上 CoRe 组合当前均应保持关闭；命令只用于复现和继续开发。
+标准四数据集命令见
+[core_memshare_experiments.md](core_memshare_experiments.md#8-复现实验)。
 
 ## 4. 当前边界与下一阶段
 

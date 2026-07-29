@@ -1,4 +1,5 @@
 import argparse
+import json
 import math
 import os
 import profile
@@ -90,6 +91,8 @@ parser.add_argument('--seed', default=6773, type=int, metavar='W',
                     help='name of model')
 parser.add_argument('--core_min_probability', default=0.05, type=float,
                     help='minimum residual-neighbor exploration probability')
+parser.add_argument('--core_deterministic_recent', default=0, type=int,
+                    help='always retain this many newest candidate neighbors')
 parser.add_argument('--core_group_size', default=8, type=int,
                     help='roots per coordinated-sampling random-number group')
 parser.add_argument('--core_uncertainty_weight', default=1.0, type=float)
@@ -122,6 +125,26 @@ parser.add_argument('--core_request_planner', action='store_true',
                     help='collect typed, owner-bucketed request-plan statistics')
 parser.add_argument('--core_smoke_batches', default=0, type=int,
                     help='run only this many training batches and skip evaluation')
+parser.add_argument('--core_metrics_path', default='', type=str,
+                    help='write rank-aggregated experiment metrics as JSON')
+parser.add_argument('--core_experiment_name', default='', type=str,
+                    help='stable label included in structured experiment metrics')
+parser.add_argument(
+    '--core_freeze_adaptive_parameters',
+    action='store_true',
+    help='hold sampling probability and smooth-sync threshold fixed for comparisons',
+)
+parser.add_argument(
+    '--core_disable_memory_predictor',
+    action='store_true',
+    help='run the native communication-aware sampler with conservative static state',
+)
+parser.add_argument(
+    '--core_screen_epochs',
+    default=0,
+    type=int,
+    help='run this many train/validation/test epochs without writing checkpoints',
+)
 #boundery_recent_uniform boundery_recent_decay
 args = parser.parse_args()
 if args.memory_type == 'all_local' or args.topk != '0':
@@ -230,13 +253,419 @@ def query():
     "total_prepare_mail" :total_prepare_mail ,
     "total_update_mail" :total_update_mail ,
     "total_update_memory":total_update_memory,
-    "total_remote_update":total_remote_update,}
+        "total_remote_update":total_remote_update,}
+
+
+def _sum_metric(records, section, key):
+    return sum(float(record.get(section, {}).get(key, 0.0)) for record in records)
+
+
+def _aggregate_core_metrics(records, *, epoch, edge_feature_bytes):
+    total_batches = sum(int(record["batches"]) for record in records)
+    total_loss = sum(float(record["total_loss"]) for record in records)
+    planner_keys = (
+        "batches",
+        "raw_node_requests",
+        "raw_edge_requests",
+        "unique_node_requests",
+        "unique_edge_requests",
+        "remote_node_requests",
+        "remote_edge_requests",
+        "cached_edge_requests",
+    )
+    planner = {
+        key: _sum_metric(records, "request_planner", key)
+        for key in planner_keys
+    }
+    planner["node_dedup_ratio"] = (
+        1.0 - planner["unique_node_requests"] / planner["raw_node_requests"]
+        if planner["raw_node_requests"]
+        else 0.0
+    )
+    planner["edge_dedup_ratio"] = (
+        1.0 - planner["unique_edge_requests"] / planner["raw_edge_requests"]
+        if planner["raw_edge_requests"]
+        else 0.0
+    )
+    planner["estimated_remote_edge_feature_bytes"] = (
+        planner["remote_edge_requests"] * edge_feature_bytes
+    )
+
+    cache_keys = (
+        "capacity",
+        "size",
+        "requests",
+        "hits",
+        "bytes_saved",
+        "insertions",
+        "evictions",
+        "rejected",
+        "memory_bytes",
+    )
+    cache = {
+        key: _sum_metric(records, "edge_cache", key)
+        for key in cache_keys
+    }
+    cache["object_hit_rate"] = (
+        cache["hits"] / cache["requests"] if cache["requests"] else 0.0
+    )
+
+    predictor_keys = (
+        "entries",
+        "owners",
+        "observations",
+        "last_hit_count",
+        "centroid_hit_count",
+        "zero_fallback_count",
+    )
+    predictor = {
+        key: _sum_metric(records, "memory_predictor", key)
+        for key in predictor_keys
+    }
+    predictor["mean_observed_residual"] = (
+        sum(
+            float(record.get("memory_predictor", {}).get("observations", 0.0))
+            * float(
+                record.get("memory_predictor", {}).get(
+                    "mean_observed_residual", 0.0
+                )
+            )
+            for record in records
+        )
+        / predictor["observations"]
+        if predictor["observations"]
+        else 0.0
+    )
+
+    negative_sum_keys = (
+        "total_samples",
+        "total_remote_samples",
+        "total_reused_samples",
+        "total_hardness",
+        "total_communication_cost",
+        "total_importance_weight",
+        "total_squared_importance_weight",
+        "total_clipped_samples",
+    )
+    negative = {
+        key: _sum_metric(records, "negative_sampler", key)
+        for key in negative_sum_keys
+    }
+    negative["pool_factor"] = max(
+        (
+            float(record.get("negative_sampler", {}).get("pool_factor", 1.0))
+            for record in records
+        ),
+        default=1.0,
+    )
+    negative["target_localism_probability"] = max(
+        (
+            float(
+                record.get("negative_sampler", {}).get(
+                    "target_localism_probability", 1.0
+                )
+            )
+            for record in records
+        ),
+        default=1.0,
+    )
+    negative["mean_local_destination_fraction"] = (
+        sum(
+            float(
+                record.get("negative_sampler", {}).get(
+                    "local_destination_fraction", 0.0
+                )
+            )
+            for record in records
+        )
+        / len(records)
+        if records
+        else 0.0
+    )
+    negative["embedding_entries"] = _sum_metric(
+        records, "negative_sampler", "embedding_entries"
+    )
+    negative["mean_hardness"] = (
+        negative["total_hardness"] / negative["total_samples"]
+        if negative["total_samples"]
+        else 0.0
+    )
+    negative["mean_communication_cost"] = (
+        negative["total_communication_cost"] / negative["total_samples"]
+        if negative["total_samples"]
+        else 0.0
+    )
+    negative["mean_importance_weight"] = (
+        negative["total_importance_weight"] / negative["total_samples"]
+        if negative["total_samples"]
+        else 0.0
+    )
+    negative["effective_sample_size"] = (
+        negative["total_importance_weight"] ** 2
+        / negative["total_squared_importance_weight"]
+        if negative["total_squared_importance_weight"]
+        else 0.0
+    )
+    negative["effective_sample_size_ratio"] = (
+        negative["effective_sample_size"] / negative["total_samples"]
+        if negative["total_samples"]
+        else 0.0
+    )
+    negative["remote_sample_ratio"] = (
+        negative["total_remote_samples"] / negative["total_samples"]
+        if negative["total_samples"]
+        else 0.0
+    )
+    negative["reuse_sample_ratio"] = (
+        negative["total_reused_samples"] / negative["total_samples"]
+        if negative["total_samples"]
+        else 0.0
+    )
+    negative["clipped_fraction"] = (
+        negative["total_clipped_samples"] / negative["total_samples"]
+        if negative["total_samples"]
+        else 0.0
+    )
+
+    probability_count = _sum_metric(records, "sample_probability", "count")
+    sample_probability = {
+        "count": probability_count,
+        "mean": (
+            _sum_metric(records, "sample_probability", "sum")
+            / probability_count
+            if probability_count
+            else 0.0
+        ),
+        "min": min(
+            (
+                float(record["sample_probability"]["min"])
+                for record in records
+                if record.get("sample_probability", {}).get("count", 0.0)
+            ),
+            default=0.0,
+        ),
+        "max": max(
+            (
+                float(record["sample_probability"]["max"])
+                for record in records
+                if record.get("sample_probability", {}).get("count", 0.0)
+            ),
+            default=0.0,
+        ),
+    }
+
+    access_keys = (
+        "local_nodes",
+        "remote_nodes",
+        "local_edges",
+        "remote_edges",
+        "memory_sync",
+        "shared_sync",
+    )
+    access = {
+        key: _sum_metric(records, "access", key)
+        for key in access_keys
+    }
+    access["remote_node_ratio"] = (
+        access["remote_nodes"]
+        / (access["local_nodes"] + access["remote_nodes"])
+        if access["local_nodes"] + access["remote_nodes"]
+        else 0.0
+    )
+    access["remote_edge_ratio"] = (
+        access["remote_edges"]
+        / (access["local_edges"] + access["remote_edges"])
+        if access["local_edges"] + access["remote_edges"]
+        else 0.0
+    )
+
+    critical_path_seconds = max(
+        (float(record["train_seconds"]) for record in records), default=0.0
+    )
+    report = {
+        "schema_version": 1,
+        "experiment": args.core_experiment_name,
+        "dataset": args.dataname,
+        "epoch": int(epoch),
+        "world_size": len(records),
+        "configuration": {
+            "model": args.model,
+            "partition": args.partition,
+            "topk": args.topk,
+            "sample_type": args.sample_type,
+            "probability": args.probability,
+            "memory_type": args.memory_type,
+            "shared_memory_ssim": args.shared_memory_ssim,
+            "seed": args.seed,
+            "smoke_batches": args.core_smoke_batches,
+            "edge_cache_ratio": args.core_edge_cache_ratio,
+            "edge_cache_mb": args.core_edge_cache_mb,
+            "negative_pool_factor": args.core_neg_pool_factor,
+            "deterministic_recent": args.core_deterministic_recent,
+            "coordinated_group_size": args.core_group_size,
+            "request_planner": bool(args.core_request_planner),
+            "freeze_adaptive_parameters": bool(
+                args.core_freeze_adaptive_parameters
+            ),
+            "memory_predictor": not bool(
+                args.core_disable_memory_predictor
+            ),
+            "screen_epochs": int(args.core_screen_epochs),
+        },
+        "result": {
+            "status": "completed",
+            "batches_per_rank": [int(record["batches"]) for record in records],
+            "total_rank_batches": total_batches,
+            "critical_path_seconds": critical_path_seconds,
+            "mean_seconds_per_batch": (
+                critical_path_seconds
+                / min(int(record["batches"]) for record in records)
+                if records and min(int(record["batches"]) for record in records)
+                else 0.0
+            ),
+            "mean_loss": total_loss / total_batches if total_batches else None,
+            "loss_is_finite": all(
+                bool(record["loss_is_finite"]) for record in records
+            ),
+            "positive_examples": sum(
+                int(record["positive_examples"]) for record in records
+            ),
+            "negative_examples": sum(
+                int(record["negative_examples"]) for record in records
+            ),
+            "peak_gpu_memory_bytes": max(
+                (int(record["peak_gpu_memory_bytes"]) for record in records),
+                default=0,
+            ),
+            "edge_feature_bytes_per_object": int(edge_feature_bytes),
+            "final_sampling_probabilities": [
+                float(record["adaptive_parameter"]["beta"])
+                for record in records
+            ],
+            "final_smoothing_thresholds": [
+                float(record["adaptive_parameter"]["alpha"])
+                for record in records
+            ],
+        },
+        "access": access,
+        "sample_probability": sample_probability,
+        "request_planner": planner,
+        "edge_cache": cache,
+        "memory_predictor": predictor,
+        "negative_sampler": negative,
+        "evaluation": (
+            records[0].get("evaluation", {}) if records else {}
+        ),
+        "ranks": records,
+        "notes": [
+            "Pipeline counters may include one prefetched request plan beyond consumed batches.",
+            "Short-run metrics screen systems behavior and numerical stability; they do not establish AP/AUC quality.",
+        ],
+    }
+    return report
+
+
+def _write_core_metrics(
+    *,
+    ctx,
+    epoch,
+    batches,
+    total_loss,
+    train_seconds,
+    positive_examples,
+    negative_examples,
+    sample_probability_sum,
+    sample_probability_count,
+    sample_probability_min,
+    sample_probability_max,
+    trainloader,
+    mailbox,
+    edge_cache,
+    request_planner,
+    memory_predictor,
+    train_neg_sampler,
+    edge_feature_bytes,
+    ada_param,
+    evaluation=None,
+):
+    if not args.core_metrics_path:
+        return
+    local_record = {
+        "rank": int(dist.get_rank()),
+        "batches": int(batches),
+        "total_loss": float(total_loss),
+        "loss_is_finite": math.isfinite(float(total_loss)),
+        "train_seconds": float(train_seconds),
+        "positive_examples": int(positive_examples),
+        "negative_examples": int(negative_examples),
+        "peak_gpu_memory_bytes": int(torch.cuda.max_memory_allocated()),
+        "access": {
+            "local_nodes": float(trainloader.local_node),
+            "remote_nodes": float(trainloader.remote_node),
+            "local_edges": float(trainloader.local_edge),
+            "remote_edges": float(trainloader.remote_edge),
+            "memory_sync": float(mailbox.tot_comm_count if mailbox else 0),
+            "shared_sync": float(mailbox.tot_shared_count if mailbox else 0),
+        },
+        "sample_probability": {
+            "sum": float(sample_probability_sum),
+            "count": float(sample_probability_count),
+            "min": (
+                float(sample_probability_min)
+                if sample_probability_count
+                else 0.0
+            ),
+            "max": (
+                float(sample_probability_max)
+                if sample_probability_count
+                else 0.0
+            ),
+        },
+        "edge_cache": edge_cache.stats() if edge_cache is not None else {},
+        "request_planner": (
+            request_planner.stats() if request_planner is not None else {}
+        ),
+        "memory_predictor": (
+            memory_predictor.stats() if memory_predictor is not None else {}
+        ),
+        "negative_sampler": (
+            train_neg_sampler.diagnostics()
+            if hasattr(train_neg_sampler, "diagnostics")
+            else {}
+        ),
+        "adaptive_parameter": {
+            "alpha": float(ada_param.alpha),
+            "beta": float(ada_param.beta),
+        },
+        "evaluation": dict(evaluation or {}),
+    }
+    records = [None for _ in range(dist.get_world_size())]
+    dist.all_gather_object(records, local_record, group=ctx.gloo_group)
+    if dist.get_rank() != 0:
+        return
+    report = _aggregate_core_metrics(
+        records,
+        epoch=epoch,
+        edge_feature_bytes=edge_feature_bytes,
+    )
+    metrics_path = Path(args.core_metrics_path)
+    metrics_path.parent.mkdir(parents=True, exist_ok=True)
+    with metrics_path.open("w", encoding="utf-8") as output:
+        json.dump(report, output, ensure_ascii=False, indent=2, sort_keys=True)
+        output.write("\n")
+    print("CORE_METRICS_JSON {}".format(json.dumps(report, sort_keys=True)))
+
+
 def main():   
     #torch.backends.cudnn.benchmark = True
     #torch.autograd.set_detect_anomaly(True)
     print('LOCAL RANK {}, RANK{}'.format(os.environ["LOCAL_RANK"],os.environ["RANK"]))
     use_cuda = True
     sample_param, memory_param, gnn_param, train_param = parse_config('../config/{}.yml'.format(args.model))
+    if args.core_screen_epochs < 0:
+        raise ValueError('--core_screen_epochs cannot be negative')
+    if args.core_screen_epochs > 0:
+        train_param['epoch'] = args.core_screen_epochs
     memory_param['mode'] = args.memory_type
     ctx = DistributedContext.init(backend="nccl", use_gpu=True,memory_group_num=1,cache_use_rpc=True)
     torch.set_num_threads(10)
@@ -294,6 +723,7 @@ def main():
         'edge_cost': args.core_edge_cost,
         'cached_edge_cost': args.core_cached_edge_cost,
         'request_cost': args.core_request_cost,
+        'deterministic_recent': args.core_deterministic_recent,
         'group_size': args.core_group_size,
         'seed': args.seed,
     }
@@ -306,7 +736,11 @@ def main():
         mailbox = None
 
     memory_predictor = None
-    if core_sampling_enabled and mailbox is not None:
+    if (
+        core_sampling_enabled
+        and mailbox is not None
+        and not args.core_disable_memory_predictor
+    ):
         memory_predictor = LastFetchedMemoryPredictor(
             memory_param['dim_out'],
             args.core_memory_cache_capacity,
@@ -362,7 +796,11 @@ def main():
         no_neg=no_neg,
         core_param=core_param,
     )
-    eval_policy = 'recent' if core_sampling_enabled else policy_train
+    eval_policy = (
+        'recent'
+        if core_sampling_enabled or args.core_screen_epochs > 0
+        else policy_train
+    )
     eval_sampler = NeighborSampler(
         num_nodes=graph.num_nodes,
         num_layers=num_layers,
@@ -418,6 +856,7 @@ def main():
             cached_cost=args.core_neg_cached_cost,
             reuse_cost=args.core_neg_reuse_cost,
             remote_cost=args.core_neg_remote_cost,
+            localism_probability=float(ada_param.beta),
             seed=args.seed,
         )
     elif args.local_neg_sample:
@@ -590,6 +1029,15 @@ def main():
     test_ap_list = []
     val_list = []
     loss_list = []
+    smoke_batches_completed = 0
+    smoke_total_loss = 0.0
+    smoke_train_seconds = 0.0
+    smoke_positive_examples = 0
+    smoke_negative_examples = 0
+    smoke_sample_probability_sum = 0.0
+    smoke_sample_probability_count = 0
+    smoke_sample_probability_min = float("inf")
+    smoke_sample_probability_max = 0.0
     for e in range(train_param['epoch']):
         ada_param.train()
         model.module.memory_updater.empty_cache()
@@ -613,6 +1061,12 @@ def main():
         sum_remote_edge_comm = 0
 
         b_cnt = 0
+        positive_examples = 0
+        negative_examples = 0
+        sample_probability_sum = 0.0
+        sample_probability_count = 0
+        sample_probability_min = float("inf")
+        sample_probability_max = 0.0
         start = time_count.start_gpu()
         total = 0
         for roots,mfgs,metadata in trainloader:
@@ -640,6 +1094,23 @@ def main():
             ones = torch.ones(metadata['dst_neg_index'].shape[0],device = model.device,dtype=torch.float)
             #with autocast():
             pred_pos, pred_neg = model(mfgs,metadata,neg_samples=args.neg_samples,async_param = param)
+            positive_examples += int(pred_pos.numel())
+            negative_examples += int(pred_neg.numel())
+            for layer in mfgs:
+                for block in layer:
+                    if 'sample_prob' not in block.edata:
+                        continue
+                    probability = block.edata['sample_prob'].detach().float()
+                    if probability.numel() == 0:
+                        continue
+                    sample_probability_sum += float(probability.sum().item())
+                    sample_probability_count += int(probability.numel())
+                    sample_probability_min = min(
+                        sample_probability_min, float(probability.min().item())
+                    )
+                    sample_probability_max = max(
+                        sample_probability_max, float(probability.max().item())
+                    )
             if hasattr(train_neg_sampler, 'update_embeddings'):
                 root_count = mfgs[0][0].num_dst_nodes()
                 train_neg_sampler.update_embeddings(
@@ -668,7 +1139,11 @@ def main():
                 edge_feat[1].wait()
                 node_feat0[1].wait()
                
-                if ada_param is not None and e < 3:
+                if (
+                    ada_param is not None
+                    and e < 3
+                    and not args.core_freeze_adaptive_parameters
+                ):
                     
                     ada_param.update_fetch_time(ada_param.last_start_event_fetch)
                     ada_param.update_parameter()
@@ -681,7 +1156,11 @@ def main():
             mailbox.update_p2p_mail()
             ada_param.last_start_event_memory_update = ada_param.start_event()
             start = time_count.start_gpu()
-            if args.core_smoke_batches > 0 and b_cnt >= args.core_smoke_batches:
+            if (
+                args.core_smoke_batches > 0
+                and smoke_batches_completed + b_cnt
+                >= args.core_smoke_batches
+            ):
                 break
         
         torch.cuda.synchronize()
@@ -717,10 +1196,57 @@ def main():
                 print('core negative sampler {}'.format(
                     train_neg_sampler.diagnostics()
                 ))
+        edge_feature_bytes = (
+            math.prod(graph.efeat.shape[1:])
+            * graph.efeat.accessor.data.element_size()
+            if graph.efeat is not None
+            else 0
+        )
         if args.core_smoke_batches > 0:
+            smoke_batches_completed += b_cnt
+            smoke_total_loss += total_loss
+            smoke_train_seconds += time_prep
+            smoke_positive_examples += positive_examples
+            smoke_negative_examples += negative_examples
+            smoke_sample_probability_sum += sample_probability_sum
+            smoke_sample_probability_count += sample_probability_count
+            if sample_probability_count:
+                smoke_sample_probability_min = min(
+                    smoke_sample_probability_min, sample_probability_min
+                )
+                smoke_sample_probability_max = max(
+                    smoke_sample_probability_max, sample_probability_max
+                )
+            if smoke_batches_completed < args.core_smoke_batches:
+                continue
+            _write_core_metrics(
+                ctx=ctx,
+                epoch=e,
+                batches=smoke_batches_completed,
+                total_loss=smoke_total_loss,
+                train_seconds=smoke_train_seconds,
+                positive_examples=smoke_positive_examples,
+                negative_examples=smoke_negative_examples,
+                sample_probability_sum=smoke_sample_probability_sum,
+                sample_probability_count=smoke_sample_probability_count,
+                sample_probability_min=smoke_sample_probability_min,
+                sample_probability_max=smoke_sample_probability_max,
+                trainloader=trainloader,
+                mailbox=mailbox,
+                edge_cache=edge_cache,
+                request_planner=request_planner,
+                memory_predictor=memory_predictor,
+                train_neg_sampler=train_neg_sampler,
+                edge_feature_bytes=edge_feature_bytes,
+                ada_param=ada_param,
+            )
             dist.barrier()
             if dist.get_rank() == 0:
-                print('Training smoke run completed after {} batches'.format(b_cnt))
+                print(
+                    'Training smoke run completed after {} batches'.format(
+                        smoke_batches_completed
+                    )
+                )
             ctx.shutdown()
             return
         #if(e==0):
@@ -744,6 +1270,33 @@ def main():
         t_test = time.time() - t_test
         total_test_time += t_test
         test_ap_list.append((test_ap,test_auc))
+        _write_core_metrics(
+            ctx=ctx,
+            epoch=e,
+            batches=b_cnt,
+            total_loss=total_loss,
+            train_seconds=time_prep,
+            positive_examples=positive_examples,
+            negative_examples=negative_examples,
+            sample_probability_sum=sample_probability_sum,
+            sample_probability_count=sample_probability_count,
+            sample_probability_min=sample_probability_min,
+            sample_probability_max=sample_probability_max,
+            trainloader=trainloader,
+            mailbox=mailbox,
+            edge_cache=edge_cache,
+            request_planner=request_planner,
+            memory_predictor=memory_predictor,
+            train_neg_sampler=train_neg_sampler,
+            edge_feature_bytes=edge_feature_bytes,
+            ada_param=ada_param,
+            evaluation={
+                'validation_ap': float(ap),
+                'validation_auc': float(auc),
+                'test_ap': float(test_ap),
+                'test_auc': float(test_auc),
+            },
+        )
         early_stopper.early_stop_check(ap)
         early_stop = False
         trainloader.local_node = 0
@@ -776,11 +1329,22 @@ def main():
             print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f} test ap {:4f} test auc{:4f}\n'.format(total_loss,train_ap, ap, auc,test_ap,test_auc))
             print('\ttotal time:{:.2f}s  prep time:{:.2f}s\n test time {:.2f}'.format(time.time()-epoch_start_time, time_prep,t_test))    
             print('alpha is {} beta is {}'.format(ada_param.alpha,ada_param.beta))
-            torch.save(model.module.state_dict(), get_checkpoint_path(e))
+            if args.core_screen_epochs == 0:
+                torch.save(model.module.state_dict(), get_checkpoint_path(e))
         if args.model == 'TGN':
             pass
 #            print('weight {} {}\n'.format(tt.weight_count_local,tt.weight_count_remote))
 #            print('ssim {} {}\n'.format(tt.ssim_local/tt.ssim_cnt,tt.ssim_remote/tt.ssim_cnt))
+    if args.core_screen_epochs > 0:
+        dist.barrier()
+        if dist.get_rank() == 0:
+            print(
+                'Training quality screen completed after {} epochs'.format(
+                    args.core_screen_epochs
+                )
+            )
+        ctx.shutdown()
+        return
     torch.save(val_list,'all_{}/{}/{}/val_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.seed,args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
     torch.save(loss_list,'all_{}/{}/{}/loss_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.seed,args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
     torch.save(test_ap_list,'all_{}/{}/{}/test_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.seed,args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
