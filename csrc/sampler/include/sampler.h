@@ -27,6 +27,10 @@ class ParallelSampler
         th::Tensor first_block_id;
         double init_boundary_probability;
         vector<unsigned int> loc_seeds;
+        int64_t coordinated_group_size = 8;
+        uint64_t coordinated_seed = 6773;
+        atomic<uint64_t> coordinated_batch_counter{0};
+        uint64_t current_coordinated_batch = 0;
         ParallelSampler(TemporalNeighborBlock& _tnb, NodeIDType _num_nodes, EdgeIDType _num_edges, int _threads, 
                         vector<int>& _fanouts, int _num_layers, string _policy, int _local_part, th::Tensor _part, th::Tensor _node_part,double _p) :
                         tnb(_tnb), num_nodes(_num_nodes), num_edges(_num_edges), threads(_threads), 
@@ -58,11 +62,42 @@ class ParallelSampler
         void neighbor_sample_from_nodes_with_before(th::Tensor nodes, th::Tensor root_ts,double boundary_probability);
         void neighbor_sample_from_dynamic_nodes(th::Tensor nodes, th::Tensor root_ts);
         void neighbor_sample_from_nodes_with_before_layer(th::Tensor nodes, th::Tensor root_ts, int cur_layer,double boundary_probability);
+        void configure_coordinated_sampling(int64_t group_size, int64_t seed);
         template<typename T>
         void union_to_vector(vector<T> *p, vector<T> &to_vec);
         void sample_unique(     th::Tensor seed, th::Tensor seed_ts,
                                 th::Tensor nid_mapper, th::Tensor eid_mapper,string out_device);
 };
+
+inline uint64_t coordinated_splitmix64(uint64_t value){
+    value += 0x9E3779B97F4A7C15ULL;
+    value = (value ^ (value >> 30)) * 0xBF58476D1CE4E5B9ULL;
+    value = (value ^ (value >> 27)) * 0x94D049BB133111EBULL;
+    return value ^ (value >> 31);
+}
+
+inline double coordinated_keyed_uniform(
+        uint64_t object_id,
+        uint64_t group_id,
+        uint64_t seed,
+        uint64_t batch_id,
+        uint64_t layer){
+    uint64_t key = seed;
+    key ^= coordinated_splitmix64(object_id);
+    key ^= coordinated_splitmix64(group_id + 0xD1B54A32D192ED03ULL);
+    key ^= coordinated_splitmix64(batch_id + 0x94D049BB133111EBULL);
+    key ^= coordinated_splitmix64(layer + 0xBF58476D1CE4E5B9ULL);
+    return static_cast<double>(coordinated_splitmix64(key) >> 11)
+        / static_cast<double>(1ULL << 53);
+}
+
+void ParallelSampler :: configure_coordinated_sampling(
+        int64_t group_size, int64_t seed){
+    AT_ASSERTM(group_size > 0,
+               "coordinated sampling group size must be positive");
+    coordinated_group_size = group_size;
+    coordinated_seed = static_cast<uint64_t>(seed);
+}
 
 
 
@@ -73,7 +108,7 @@ void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th
         AT_ASSERTM(tnb.weighted, "Tnb has no weight infomation!");
     else if(policy == "recent")
         AT_ASSERTM(tnb.with_timestamp, "Tnb has no timestamp infomation!");
-    else if(policy == "uniform"|| policy =="boundery_recent_decay"||policy=="boundery_recent_uniform"||policy=="boundery_uniform");
+    else if(policy == "uniform"|| policy =="boundery_recent_decay"||policy=="boundery_recent_decay_coordinated"||policy=="boundery_recent_uniform"||policy=="boundery_uniform");
     else{
         throw runtime_error("The policy \"" + policy + "\" is not exit!");
     }
@@ -81,6 +116,8 @@ void ParallelSampler :: neighbor_sample_from_nodes(th::Tensor nodes, optional<th
         AT_ASSERTM(tnb.with_timestamp, "Tnb has no timestamp infomation!");
         AT_ASSERTM(root_ts.has_value(), "Parameter mismatch!");
         //neighbor_sample_from_dynamic_nodes(nodes,root_ts.value());
+        if(policy == "boundery_recent_decay_coordinated")
+            current_coordinated_batch = coordinated_batch_counter.fetch_add(1);
         neighbor_sample_from_nodes_with_before(nodes, root_ts.value(), boundary_probability.has_value()?boundary_probability.value():0);
     }
     else{
@@ -280,7 +317,8 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
             }
 
         }
-        else if(policy == "boundery_recent_decay"){
+        else if(policy == "boundery_recent_decay"
+                || policy == "boundery_recent_decay_coordinated"){
             int cnt = 0;
             int cal_cnt = 0;
             double sum_p = 0;
@@ -305,7 +343,22 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
                 
                 if((part[tnb.eid[node][cid]] != local_part|| node_part[tnb.neighbors[node][cid]]!= local_part)){
                     if(cal_cnt<=fanout){
-                        double p0 = (double)rand_r(&loc_seeds[tid]) / (RAND_MAX + 1.0);
+                        double p0;
+                        if(policy == "boundery_recent_decay_coordinated"){
+                            uint64_t group_id = static_cast<uint64_t>(
+                                i / max<int64_t>(1, coordinated_group_size));
+                            p0 = coordinated_keyed_uniform(
+                                static_cast<uint64_t>(
+                                    tnb.neighbors[node][cid]),
+                                group_id,
+                                coordinated_seed,
+                                current_coordinated_batch,
+                                static_cast<uint64_t>(cur_layer));
+                        }
+                        else{
+                            p0 = (double)rand_r(&loc_seeds[tid])
+                                / (RAND_MAX + 1.0);
+                        }
                         double ep = boundary_probability*pr[cal_cnt-1]/sum_p*sum_1;
                         if(p0 > ep)continue;
                         //tgb_i[tid].sample_weight.emplace_back((float)ep);

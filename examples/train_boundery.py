@@ -80,6 +80,12 @@ parser.add_argument('--memory_type', default='all_update', type=str, metavar='W'
                     help='name of model')
 parser.add_argument('--seed', default=6773, type=int, metavar='W',
                     help='name of model')
+parser.add_argument(
+    '--coordinated_group_size',
+    default=8,
+    type=int,
+    help='number of root occurrences sharing a keyed random number',
+)
 #boundery_recent_uniform boundery_recent_decay
 args = parser.parse_args()
 if args.memory_type == 'all_local' or args.topk != '0':
@@ -249,8 +255,38 @@ def main():
     else:
         mailbox = None
 
-    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=10,policy = policy_train, graph_name = "train",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,ada_param=ada_param,no_neg=no_neg)
-    eval_sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=eval_sample_graph, workers=10,policy = policy_train, graph_name = "eval",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,ada_param=ada_param,no_neg=no_neg)
+    sampler = NeighborSampler(
+        num_nodes=graph.num_nodes,
+        num_layers=num_layers,
+        fanout=fanout,
+        graph_data=sample_graph,
+        workers=10,
+        policy=policy_train,
+        graph_name="train",
+        local_part=dist.get_rank(),
+        edge_part=DistIndex(graph.eids_mapper).part,
+        node_part=DistIndex(graph.nids_mapper).part,
+        ada_param=ada_param,
+        no_neg=no_neg,
+        coordinated_group_size=args.coordinated_group_size,
+        coordinated_seed=args.seed,
+    )
+    eval_sampler = NeighborSampler(
+        num_nodes=graph.num_nodes,
+        num_layers=num_layers,
+        fanout=fanout,
+        graph_data=eval_sample_graph,
+        workers=10,
+        policy=policy_train,
+        graph_name="eval",
+        local_part=dist.get_rank(),
+        edge_part=DistIndex(graph.eids_mapper).part,
+        node_part=DistIndex(graph.nids_mapper).part,
+        ada_param=ada_param,
+        no_neg=no_neg,
+        coordinated_group_size=args.coordinated_group_size,
+        coordinated_seed=args.seed,
+    )
 
     train_data = torch.masked_select(graph.edge_index,train_mask.to(graph.edge_index.device)).reshape(2,-1)
     train_ts = torch.masked_select(graph.ts,train_mask.to(graph.edge_index.device))
@@ -623,4 +659,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

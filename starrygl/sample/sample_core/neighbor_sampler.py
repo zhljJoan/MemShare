@@ -97,7 +97,9 @@ class NeighborSampler(BaseSampler):
         node_part = None,
         edge_part = None,
         no_neg = False,
-        ada_param = None
+        ada_param = None,
+        coordinated_group_size = 8,
+        coordinated_seed = 6773,
     ) -> None:
         r"""__init__
         Args:
@@ -143,6 +145,17 @@ class NeighborSampler(BaseSampler):
         self.ada_param = ada_param
         self.p_sampler = starrygl.sampler_ops.ParallelSampler(self.tnb, num_nodes, graph_data.num_edges, workers, 
                                          fanout, num_layers, policy, local_part,edge_part.to(torch.int),node_part.to(torch.int),ada_param.beta)
+        if policy == 'boundery_recent_decay_coordinated':
+            if not hasattr(
+                self.p_sampler, 'configure_coordinated_sampling'
+            ):
+                raise RuntimeError(
+                    'boundery_recent_decay_coordinated requires rebuilding '
+                    'libstarrygl_sampler'
+                )
+            self.p_sampler.configure_coordinated_sampling(
+                int(coordinated_group_size), int(coordinated_seed)
+            )
         
     def _get_sample_info(self):
         return self.num_nodes,self.num_layers,self.fanout,self.workers
