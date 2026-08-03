@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import profile
 import sys
@@ -85,6 +86,33 @@ parser.add_argument(
     default=8,
     type=int,
     help='number of root occurrences sharing a keyed random number',
+)
+parser.add_argument(
+    '--max_epoch',
+    default=0,
+    type=int,
+    help='positive value overrides the epoch count in the model config',
+)
+parser.add_argument(
+    '--freeze_adaptive_parameters',
+    action='store_true',
+    help='hold sampling probability and smooth threshold fixed for pairing',
+)
+parser.add_argument(
+    '--collect_phase_timing',
+    action='store_true',
+    help='record sampler, AllToAll route/launch, and exposed wait timings',
+)
+parser.add_argument(
+    '--skip_eval',
+    action='store_true',
+    help='run training epochs without validation and test passes',
+)
+parser.add_argument(
+    '--metrics_path',
+    default='',
+    type=str,
+    help='append rank-aggregated epoch metrics as JSON lines',
 )
 #boundery_recent_uniform boundery_recent_decay
 args = parser.parse_args()
@@ -195,6 +223,124 @@ def query():
     "total_update_mail" :total_update_mail ,
     "total_update_memory":total_update_memory,
     "total_remote_update":total_remote_update,}
+
+
+def emit_epoch_metrics(
+    ctx,
+    epoch,
+    train_seconds,
+    batch_count,
+    batch_latency_samples,
+    trainloader,
+    local_node,
+    remote_node,
+    local_edge,
+    remote_edge,
+    test_ap=None,
+    test_auc=None,
+    val_ap=None,
+    val_auc=None,
+):
+    """Emit timing records without changing the training execution path."""
+
+    latency = np.asarray(batch_latency_samples, dtype=np.float64)
+    local_record = {
+        'rank': int(dist.get_rank()),
+        'train_seconds': float(train_seconds),
+        'batch_count': int(batch_count),
+        'batch_latency': {
+            'count': int(latency.size),
+            'mean_seconds': float(latency.mean()) if latency.size else 0.0,
+            'p95_seconds': (
+                float(np.percentile(latency, 95)) if latency.size else 0.0
+            ),
+            'max_seconds': float(latency.max()) if latency.size else 0.0,
+        },
+        'phase_timing': trainloader.phase_timing_stats(),
+    }
+    records = [None for _ in range(dist.get_world_size())]
+    dist.all_gather_object(records, local_record, group=ctx.gloo_group)
+    if dist.get_rank() != 0:
+        return
+
+    phase_names = sorted(
+        {
+            key[:-8]
+            for record in records
+            for key in record['phase_timing']
+            if key.endswith('_seconds')
+        }
+    )
+    phases = {}
+    for phase in phase_names:
+        rank_seconds = [
+            float(
+                record['phase_timing'].get(
+                    '{}_seconds'.format(phase), 0.0
+                )
+            )
+            for record in records
+        ]
+        calls = sum(
+            int(
+                record['phase_timing'].get(
+                    '{}_calls'.format(phase), 0
+                )
+            )
+            for record in records
+        )
+        phases[phase] = {
+            'calls': calls,
+            'critical_rank_seconds': max(rank_seconds, default=0.0),
+            'rank_seconds': rank_seconds,
+            'total_rank_seconds': sum(rank_seconds),
+        }
+
+    report = {
+        'dataset': args.dataname,
+        'sample_type': args.sample_type,
+        'seed': int(args.seed),
+        'coordinated_group_size': int(args.coordinated_group_size),
+        'world_size': int(dist.get_world_size()),
+        'epoch': int(epoch),
+        'batch_count_per_rank': int(batch_count),
+        'critical_train_seconds': max(
+            record['train_seconds'] for record in records
+        ),
+        'rank_train_seconds': [
+            record['train_seconds'] for record in records
+        ],
+        'max_rank_batch_p95_seconds': max(
+            record['batch_latency']['p95_seconds'] for record in records
+        ),
+        'rank_batch_latency': [
+            record['batch_latency'] for record in records
+        ],
+        'local_nodes': int(local_node.item()),
+        'remote_nodes': int(remote_node.item()),
+        'local_edges': int(local_edge.item()),
+        'remote_edges': int(remote_edge.item()),
+        'phase_timing': phases,
+        'quality': {
+            'val_ap': None if val_ap is None else float(val_ap),
+            'val_auc': None if val_auc is None else float(val_auc),
+            'test_ap': None if test_ap is None else float(test_ap),
+            'test_auc': None if test_auc is None else float(test_auc),
+        },
+        'instrumentation_note': (
+            'phase timers are host-wall measurements of overlapping phases '
+            'and must not be summed into epoch latency'
+        ),
+    }
+    encoded = json.dumps(report, sort_keys=True)
+    print('COORDINATED_EPOCH_METRICS {}'.format(encoded), flush=True)
+    if args.metrics_path:
+        metrics_path = Path(args.metrics_path)
+        metrics_path.parent.mkdir(parents=True, exist_ok=True)
+        with metrics_path.open('a', encoding='utf-8') as output:
+            output.write(encoded + '\n')
+
+
 def main():   
     #torch.backends.cudnn.benchmark = True
     #torch.autograd.set_detect_anomaly(True)
@@ -206,10 +352,12 @@ def main():
     torch.set_num_threads(10)
     device_id = torch.cuda.current_device()
     if ((args.dataname =='GDELT') & (dist.get_world_size() <=4 )):
-        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cpu'),partition=args.partition)#torch.device('cpu'))
+        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cpu'),partition_path=args.partition)#torch.device('cpu'))
     else:
-        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition=args.partition)#torch.device('cpu'))
-    if(args.dataname=='GDELT'):
+        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition_path=args.partition)#torch.device('cpu'))
+    if args.max_epoch > 0:
+        train_param['epoch'] = args.max_epoch
+    elif(args.dataname=='GDELT'):
         train_param['epoch'] = 10
     #torch.autograd.set_detect_anomaly(True)
 # 确保 CUDA 可用
@@ -339,7 +487,8 @@ def main():
                                         device = torch.device('cuda:{}'.format(local_rank)),
                                         probability=args.probability,
                                         reversed = (gnn_param['arch'] == 'identity'),
-                                        ada_param=ada_param
+                                        ada_param=ada_param,
+                                        collect_phase_timing=args.collect_phase_timing,
                                         )
     
     eval_trainloader = DistributedDataLoader(graph,eval_train_data,sampler = eval_sampler,
@@ -482,6 +631,7 @@ def main():
     for e in range(train_param['epoch']):
         ada_param.train()
         model.module.memory_updater.empty_cache()
+        trainloader.reset_phase_timing()
         tt._zero()
         torch.cuda.synchronize()
         epoch_start_time = time.time()
@@ -502,6 +652,8 @@ def main():
         sum_remote_edge_comm = 0
 
         b_cnt = 0
+        batch_latency_samples = []
+        batch_wall_started = time.perf_counter()
         start = time_count.start_gpu()
         total = 0
         for roots,mfgs,metadata in trainloader:
@@ -545,7 +697,11 @@ def main():
                 edge_feat[1].wait()
                 node_feat0[1].wait()
                
-                if ada_param is not None and e < 3:
+                if (
+                    ada_param is not None
+                    and e < 3
+                    and not args.freeze_adaptive_parameters
+                ):
                     
                     ada_param.update_fetch_time(ada_param.last_start_event_fetch)
                     ada_param.update_parameter()
@@ -558,6 +714,11 @@ def main():
             mailbox.update_p2p_mail()
             ada_param.last_start_event_memory_update = ada_param.start_event()
             start = time_count.start_gpu()
+            batch_wall_finished = time.perf_counter()
+            batch_latency_samples.append(
+                batch_wall_finished - batch_wall_started
+            )
+            batch_wall_started = batch_wall_finished
         
         torch.cuda.synchronize()
         dist.barrier()
@@ -581,6 +742,29 @@ def main():
         print('local node number {} remote node number {} local edge {} remote edge{}\n'.format(local_node,remote_node,local_edge,remote_edge))
         print(' comm local node number {} remote node number {} local edge {} remote edge{}\n'.format(sum_local_comm,sum_remote_comm,sum_local_edge_comm,sum_remote_edge_comm))
         print('memory comm {} shared comm {}\n'.format(tot_comm_count,tot_shared_count))
+        if args.skip_eval:
+            emit_epoch_metrics(
+                ctx=ctx,
+                epoch=e,
+                train_seconds=time_prep,
+                batch_count=b_cnt,
+                batch_latency_samples=batch_latency_samples,
+                trainloader=trainloader,
+                local_node=local_node,
+                remote_node=remote_node,
+                local_edge=local_edge,
+                remote_edge=remote_edge,
+            )
+            trainloader.local_node = 0
+            trainloader.remote_node = 0
+            trainloader.local_edge = 0
+            trainloader.remote_edge = 0
+            mailbox.tot_comm_count = 0
+            mailbox.tot_shared_count = 0
+            if e + 1 == train_param['epoch']:
+                ctx.shutdown()
+                return
+            continue
         #if(e==0):
         #    torch.save((local_access,remote_access,local_edge_access,remote_edge_access,local_comm,remote_comm,local_edge_comm,remote_edge_comm),'all_args.seed/{}/{}/comm/comm_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
         ap = 0
@@ -602,6 +786,22 @@ def main():
         t_test = time.time() - t_test
         total_test_time += t_test
         test_ap_list.append((test_ap,test_auc))
+        emit_epoch_metrics(
+            ctx=ctx,
+            epoch=e,
+            train_seconds=time_prep,
+            batch_count=b_cnt,
+            batch_latency_samples=batch_latency_samples,
+            trainloader=trainloader,
+            local_node=local_node,
+            remote_node=remote_node,
+            local_edge=local_edge,
+            remote_edge=remote_edge,
+            test_ap=test_ap,
+            test_auc=test_auc,
+            val_ap=ap,
+            val_auc=auc,
+        )
         early_stopper.early_stop_check(ap)
         early_stop = False
         trainloader.local_node = 0
