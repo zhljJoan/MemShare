@@ -93,17 +93,20 @@ NCCL_SOCKET_IFNAME=ens4f1np1
 GLOO_SOCKET_IFNAME=ens4f1np1
 ```
 
-完整训练轮数：
+当前已完成的 group-size 8 训练矩阵：
 
-| 数据集 | Epoch |
-| --- | ---: |
-| WIKI | 50 |
-| LASTFM | 50 |
-| WikiTalk | 10 |
-| Flight | 10 |
+| 数据集 | Epoch | 配对 seed 数 | 状态 |
+| --- | ---: | ---: | --- |
+| WIKI | 50 | 3 | 完成 |
+| LASTFM | 50 | 3 | 完成 |
+| WikiTalk | 10 | 3 | 完成 |
+| Flight | 10 | 3 | 完成 |
+| GDELT | 10 | 1 | 完成初筛，待补 2 seed |
+| StackOverflow | 10 | 1 | 完成初筛，待补 2 seed |
 
-baseline/coordinated 必须使用相同 seed 配对，至少执行三个 seed。group size 测试
-`1/4/8/16`；其中 group size 1 是 keyed-random 控制组，不提供组内复用。
+baseline/coordinated 使用相同 seed 配对。升级为稳定结论前仍要求每个数据集至少三个
+seed；当前 GDELT 和 StackOverflow 尚未满足。group size 1/4/16 仍待测试，其中
+group size 1 是 keyed-random 控制组，不提供组内复用。
 
 效率指标包括：
 
@@ -117,5 +120,7 @@ baseline/coordinated 必须使用相同 seed 配对，至少执行三个 seed。
 - 最终 AP、AUC 的百分点变化；
 - 三 seed 均值、标准差和收敛轨迹。
 
-在双机八卡完整训练完成前，本分支只证明概率语义和实现隔离正确，不把该方法定为
-最终期刊方法。
+group-size 8 的双机八卡结果见
+[coordinated_sampling_isolated_results.md](coordinated_sampling_isolated_results.md)。
+当前结果表明远程对象和训练关键路径有真实收益，但 WIKI/LASTFM 存在轻微精度下降，
+且大图只有单 seed；因此仍不把该方法定为最终期刊方法。
