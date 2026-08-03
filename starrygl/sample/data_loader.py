@@ -38,6 +38,33 @@ import data_loader as data_loader
 import concurrent.futures
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=1) 
 stream = torch.cuda.Stream()
+
+
+class _TimedWait:
+    """Record only the first, potentially blocking wait on an async work item."""
+
+    def __init__(self, work, recorder, phase):
+        self._work = work
+        self._recorder = recorder
+        self._phase = phase
+        self._waited = False
+
+    def wait(self, *args, **kwargs):
+        if self._waited:
+            return self._work.wait(*args, **kwargs)
+        started = time.perf_counter()
+        try:
+            return self._work.wait(*args, **kwargs)
+        finally:
+            elapsed = time.perf_counter() - started
+            self._recorder("fetch_wait", elapsed)
+            self._recorder(self._phase, elapsed)
+            self._waited = True
+
+    def __getattr__(self, name):
+        return getattr(self._work, name)
+
+
 class DistributedDataLoader:
     ''' 
     We will perform feature fetch in the data loader.
@@ -117,6 +144,7 @@ class DistributedDataLoader:
             request_planner = None,
             memory_predictor = None,
             edge_cache_collect_signals = True,
+            collect_phase_timing = False,
             **kwargs
     ):
         self.ada_param = ada_param
@@ -127,6 +155,9 @@ class DistributedDataLoader:
         self.request_planner = request_planner
         self.memory_predictor = memory_predictor
         self.edge_cache_collect_signals = bool(edge_cache_collect_signals)
+        self.collect_phase_timing = bool(collect_phase_timing)
+        self._phase_timing = {}
+        self._phase_timing_lock = threading.Lock()
         self.last_request_plan = None
         self.reversed = reversed
         self.use_local_feature = use_local_feature
@@ -175,6 +206,41 @@ class DistributedDataLoader:
         self.local_root = 0
         self.probability = probability
         print('pro {}\n'.format(self.probability))
+
+    def _record_phase_timing(self, phase, seconds):
+        if not self.collect_phase_timing:
+            return
+        with self._phase_timing_lock:
+            seconds_key = '{}_seconds'.format(phase)
+            calls_key = '{}_calls'.format(phase)
+            self._phase_timing[seconds_key] = (
+                self._phase_timing.get(seconds_key, 0.0) + float(seconds)
+            )
+            self._phase_timing[calls_key] = (
+                self._phase_timing.get(calls_key, 0) + 1
+            )
+
+    def phase_timing_stats(self):
+        if not self.collect_phase_timing:
+            return {}
+        with self._phase_timing_lock:
+            return dict(self._phase_timing)
+
+    def _timed_graph_sample(self, *args, **kwargs):
+        if not self.collect_phase_timing:
+            return graph_sample(*args, **kwargs)
+        started = time.perf_counter()
+        try:
+            return graph_sample(*args, **kwargs)
+        finally:
+            self._record_phase_timing(
+                'sampler', time.perf_counter() - started
+            )
+
+    def _timed_wait(self, work, phase):
+        if not self.collect_phase_timing or work is None:
+            return work
+        return _TimedWait(work, self._record_phase_timing, phase)
 
     def _edge_cache_signals(self, batch_data, dist_eid):
         if not self.edge_cache_collect_signals:
@@ -350,7 +416,7 @@ class DistributedDataLoader:
             data = self._next_data()  
             with torch.cuda.stream(stream):
                 fut = executor.submit(
-                graph_sample,self.graph,self.sampler,
+                self._timed_graph_sample,self.graph,self.sampler,
                             self.sampler_fn,
                             data,self.neg_sampler,
                             self.device,
@@ -371,15 +437,24 @@ class DistributedDataLoader:
         while(len(self.result_queue)==0):
             pass
 
+        wait_started = time.perf_counter()
         batch_data,dist_nid,dist_eid = self.result_queue[0].result()
+        self._record_phase_timing(
+            'sampler_future_wait', time.perf_counter() - wait_started
+        )
         self._record_request_plan(batch_data, dist_nid, dist_eid)
         self.remote_node += (DistIndex(dist_nid).part != dist.get_rank()).sum().item()
         self.local_node += (DistIndex(dist_nid).part == dist.get_rank()).sum().item()
         self.remote_edge += (DistIndex(dist_eid).part != dist.get_rank()).sum().item()
         self.local_edge += (DistIndex(dist_eid).part == dist.get_rank()).sum().item()
+        sync_started = time.perf_counter()
         stream.synchronize()
+        self._record_phase_timing(
+            'sampler_stream_sync', time.perf_counter() - sync_started
+        )
         self.result_queue.popleft()
-        
+
+        route_started = time.perf_counter()
         nind,ndata = get_node_all_to_all_route(self.graph,self.mailbox,dist_nid,out_device=self.device)
         if self.edge_cache is not None and self.graph.efeat is not None:
             edge_probability, edge_variance, edge_reuse = self._edge_cache_signals(
@@ -401,9 +476,17 @@ class DistributedDataLoader:
             eind,edata = get_edge_all_to_all_route(
                 self.graph,dist_eid,out_device=self.device
             )
-        
+
+        self._record_phase_timing(
+            'all_to_all_route', time.perf_counter() - route_started
+        )
+        launch_started = time.perf_counter()
         if nind is not None:
             node_feat = DistributedTensor.all_to_all_get_data(ndata,send_ptr=nind['send_ptr'],recv_ptr=nind['recv_ptr'],is_async=True)
+            node_feat = (
+                node_feat[0],
+                self._timed_wait(node_feat[1], 'node_fetch_wait'),
+            )
         else:
             node_feat = None
 
@@ -411,8 +494,15 @@ class DistributedDataLoader:
             pass
         elif eind is not None:
             edge_feat = DistributedTensor.all_to_all_get_data(edata,send_ptr=eind['send_ptr'],recv_ptr=eind['recv_ptr'],is_async=True)
+            edge_feat = (
+                edge_feat[0],
+                self._timed_wait(edge_feat[1], 'edge_fetch_wait'),
+            )
         else:
             edge_feat = None
+        self._record_phase_timing(
+            'all_to_all_launch', time.perf_counter() - launch_started
+        )
         self.result_queue.append((batch_data,dist_nid,dist_eid,edge_feat,node_feat))
         self.submit()
         if self.ada_param is not None:
@@ -429,7 +519,7 @@ class DistributedDataLoader:
             if self.recv_idxs < self.expected_idx:
                 t0 = tt.start_gpu()
                 data = self._next_data()
-                batch_data,dist_nid,dist_eid = graph_sample(
+                batch_data,dist_nid,dist_eid = self._timed_graph_sample(
                     self.graph,
                                       self.sampler,
                                       self.sampler_fn,
@@ -445,6 +535,7 @@ class DistributedDataLoader:
                 edge_probability, edge_variance, edge_reuse = self._edge_cache_signals(
                     batch_data, dist_eid
                 )
+                fetch_started = time.perf_counter()
                 edge_feat = get_edge_feature_by_dist(
                     self.graph,
                     dist_eid,
@@ -457,6 +548,9 @@ class DistributedDataLoader:
                     reuse_count=edge_reuse,
                 )
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid, is_local,out_device=self.device)
+                self._record_phase_timing(
+                    'bootstrap_fetch', time.perf_counter() - fetch_started
+                )
                 prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
                 self._observe_fetched_memory(batch_data, dist_nid, mem)
                 self._observe_edge_state(batch_data, dist_eid, edge_feat)
@@ -476,7 +570,7 @@ class DistributedDataLoader:
         else:
             if self.recv_idxs == 0:
                 data = self._next_data()
-                batch_data,dist_nid,dist_eid = graph_sample(
+                batch_data,dist_nid,dist_eid = self._timed_graph_sample(
                     self.graph,
                                       self.sampler,
                                       self.sampler_fn,
@@ -490,6 +584,7 @@ class DistributedDataLoader:
                 edge_probability, edge_variance, edge_reuse = self._edge_cache_signals(
                     batch_data, dist_eid
                 )
+                fetch_started = time.perf_counter()
                 edge_feat = get_edge_feature_by_dist(
                     self.graph,
                     dist_eid,
@@ -502,6 +597,9 @@ class DistributedDataLoader:
                     reuse_count=edge_reuse,
                 )
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid,  is_local,out_device=self.device)
+                self._record_phase_timing(
+                    'bootstrap_fetch', time.perf_counter() - fetch_started
+                )
                 prepare_input(node_feat,edge_feat,mem,batch_data[1],dist_nid,dist_eid)
                 self._observe_fetched_memory(batch_data, dist_nid, mem)
                 self._observe_edge_state(batch_data, dist_eid, edge_feat)

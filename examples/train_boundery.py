@@ -89,6 +89,17 @@ parser.add_argument('--memory_type', default='all_update', type=str, metavar='W'
                     help='name of model')
 parser.add_argument('--seed', default=6773, type=int, metavar='W',
                     help='name of model')
+parser.add_argument(
+    '--skip_eval',
+    action='store_true',
+    help='write timing metrics after training and skip validation/test',
+)
+parser.add_argument(
+    '--core_feature_device',
+    choices=('auto', 'cpu', 'cuda'),
+    default='auto',
+    help='feature placement override for large-dataset timing runs',
+)
 parser.add_argument('--core_min_probability', default=0.05, type=float,
                     help='minimum residual-neighbor exploration probability')
 parser.add_argument('--core_deterministic_recent', default=0, type=int,
@@ -138,6 +149,17 @@ parser.add_argument(
     '--core_collect_diagnostics',
     action='store_true',
     help='collect detailed per-batch probability and negative diagnostics',
+)
+parser.add_argument(
+    '--core_collect_phase_timing',
+    action='store_true',
+    help='collect sampler, AllToAll launch/route, and exposed-wait timings',
+)
+parser.add_argument(
+    '--core_nic_ifname',
+    default='',
+    type=str,
+    help='record training-window RX/TX bytes on this interface (one rank per host)',
 )
 parser.add_argument(
     '--core_attention_probability_floor',
@@ -209,6 +231,35 @@ def seed_everything(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 seed_everything(args.seed)
+
+
+def _read_nic_bytes(interface):
+    if not interface:
+        return {}
+    statistics = Path('/sys/class/net') / interface / 'statistics'
+    try:
+        return {
+            'rx_bytes': int((statistics / 'rx_bytes').read_text().strip()),
+            'tx_bytes': int((statistics / 'tx_bytes').read_text().strip()),
+        }
+    except (OSError, ValueError) as error:
+        raise RuntimeError(
+            'failed to read counters for network interface {}'.format(interface)
+        ) from error
+
+
+def _nic_byte_delta(interface, start):
+    if not start:
+        return {}
+    current = _read_nic_bytes(interface)
+    return {
+        'enabled': True,
+        'interface': interface,
+        'rx_bytes': max(0, current['rx_bytes'] - start['rx_bytes']),
+        'tx_bytes': max(0, current['tx_bytes'] - start['tx_bytes']),
+    }
+
+
 total_next_batch = 0
 total_forward = 0
 total_count_score = 0
@@ -495,6 +546,99 @@ def _aggregate_core_metrics(records, *, epoch, edge_feature_bytes):
         else 0.0
     )
 
+    phase_names = sorted(
+        {
+            key[:-8]
+            for record in records
+            for key in record.get("phase_timing", {})
+            if key.endswith("_seconds")
+        }
+    )
+    phase_timing = {}
+    for phase in phase_names:
+        rank_seconds = [
+            float(
+                record.get("phase_timing", {}).get(
+                    "{}_seconds".format(phase), 0.0
+                )
+            )
+            for record in records
+        ]
+        calls = sum(
+            int(
+                record.get("phase_timing", {}).get(
+                    "{}_calls".format(phase), 0
+                )
+            )
+            for record in records
+        )
+        total_rank_seconds = sum(rank_seconds)
+        phase_timing[phase] = {
+            "calls": calls,
+            "critical_rank_seconds": max(rank_seconds, default=0.0),
+            "mean_milliseconds_per_call": (
+                1000.0 * total_rank_seconds / calls if calls else 0.0
+            ),
+            "rank_seconds": rank_seconds,
+            "total_rank_seconds": total_rank_seconds,
+        }
+
+    rank_batch_latency = [
+        record.get("batch_latency", {}) for record in records
+    ]
+    batch_latency = {
+        "total_samples": sum(
+            int(item.get("count", 0)) for item in rank_batch_latency
+        ),
+        "rank_mean_seconds": [
+            float(item.get("mean_seconds", 0.0))
+            for item in rank_batch_latency
+        ],
+        "rank_p50_seconds": [
+            float(item.get("p50_seconds", 0.0))
+            for item in rank_batch_latency
+        ],
+        "rank_p95_seconds": [
+            float(item.get("p95_seconds", 0.0))
+            for item in rank_batch_latency
+        ],
+        "rank_max_seconds": [
+            float(item.get("max_seconds", 0.0))
+            for item in rank_batch_latency
+        ],
+    }
+    batch_latency["max_rank_p95_seconds"] = max(
+        batch_latency["rank_p95_seconds"], default=0.0
+    )
+
+    host_network_records = [
+        record.get("network_bytes", {})
+        for record in records
+        if record.get("network_bytes", {}).get("enabled", False)
+    ]
+    network_endpoint_rx_bytes = sum(
+        int(item.get("rx_bytes", 0)) for item in host_network_records
+    )
+    network_endpoint_tx_bytes = sum(
+        int(item.get("tx_bytes", 0)) for item in host_network_records
+    )
+    network_endpoint_bytes = (
+        network_endpoint_rx_bytes + network_endpoint_tx_bytes
+    )
+    network_bytes = {
+        "enabled": bool(host_network_records),
+        "interface": args.core_nic_ifname,
+        "host_count": len(host_network_records),
+        "endpoint_rx_bytes": network_endpoint_rx_bytes,
+        "endpoint_tx_bytes": network_endpoint_tx_bytes,
+        "endpoint_bytes": network_endpoint_bytes,
+        "estimated_wire_bytes": network_endpoint_bytes / 2.0,
+        "scope": (
+            "training-window whole-interface counters; includes protocol "
+            "overhead and any unrelated interface traffic"
+        ),
+    }
+
     evaluation_history = (
         list(records[0].get("evaluation_history", [])) if records else []
     )
@@ -554,14 +698,26 @@ def _aggregate_core_metrics(records, *, epoch, edge_feature_bytes):
         if run_access["local_edges"] + run_access["remote_edges"]
         else 0.0
     )
+    completed_training_epochs = max(
+        (
+            int(
+                record.get("run_totals", {}).get(
+                    "training_epochs", 0
+                )
+            )
+            for record in records
+        ),
+        default=0,
+    )
     run_summary = {
         "completed_epochs": len(evaluation_history),
+        "completed_training_epochs": completed_training_epochs,
         "batches_per_rank": run_batches_per_rank,
         "total_rank_batches": run_total_batches,
         "critical_path_seconds": run_critical_path_seconds,
         "mean_seconds_per_epoch": (
-            run_critical_path_seconds / len(evaluation_history)
-            if evaluation_history
+            run_critical_path_seconds / completed_training_epochs
+            if completed_training_epochs
             else 0.0
         ),
         "mean_seconds_per_batch": (
@@ -641,6 +797,10 @@ def _aggregate_core_metrics(records, *, epoch, edge_feature_bytes):
                 for record in records
             ),
             "collect_diagnostics": bool(args.core_collect_diagnostics),
+            "collect_phase_timing": bool(args.core_collect_phase_timing),
+            "nic_ifname": args.core_nic_ifname,
+            "feature_device": args.core_feature_device,
+            "skip_eval": bool(args.skip_eval),
             "attention_probability_floor": float(
                 args.core_attention_probability_floor
             ),
@@ -682,6 +842,9 @@ def _aggregate_core_metrics(records, *, epoch, edge_feature_bytes):
             ],
         },
         "access": access,
+        "phase_timing": phase_timing,
+        "batch_latency": batch_latency,
+        "network_bytes": network_bytes,
         "sample_probability": sample_probability,
         "request_planner": planner,
         "edge_cache": cache,
@@ -694,6 +857,8 @@ def _aggregate_core_metrics(records, *, epoch, edge_feature_bytes):
         "ranks": records,
         "notes": [
             "Pipeline counters may include one prefetched request plan beyond consumed batches.",
+            "Phase timers use host wall time; pipelined phases overlap and must not be summed into batch latency.",
+            "Network byte counters cover the training window on one rank per host and count both endpoints.",
             "Short-run metrics screen systems behavior and numerical stability; they do not establish AP/AUC quality.",
         ],
     }
@@ -707,6 +872,8 @@ def _write_core_metrics(
     batches,
     total_loss,
     train_seconds,
+    batch_latency_samples,
+    nic_bytes_start,
     positive_examples,
     negative_examples,
     sample_probability_sum,
@@ -727,12 +894,39 @@ def _write_core_metrics(
 ):
     if not args.core_metrics_path:
         return
+    batch_latency_array = np.asarray(batch_latency_samples, dtype=np.float64)
     local_record = {
         "rank": int(dist.get_rank()),
         "batches": int(batches),
         "total_loss": float(total_loss),
         "loss_is_finite": math.isfinite(float(total_loss)),
         "train_seconds": float(train_seconds),
+        "batch_latency": {
+            "count": int(batch_latency_array.size),
+            "mean_seconds": (
+                float(batch_latency_array.mean())
+                if batch_latency_array.size
+                else 0.0
+            ),
+            "p50_seconds": (
+                float(np.percentile(batch_latency_array, 50))
+                if batch_latency_array.size
+                else 0.0
+            ),
+            "p95_seconds": (
+                float(np.percentile(batch_latency_array, 95))
+                if batch_latency_array.size
+                else 0.0
+            ),
+            "max_seconds": (
+                float(batch_latency_array.max())
+                if batch_latency_array.size
+                else 0.0
+            ),
+        },
+        "network_bytes": _nic_byte_delta(
+            args.core_nic_ifname, nic_bytes_start
+        ),
         "positive_examples": int(positive_examples),
         "negative_examples": int(negative_examples),
         "peak_gpu_memory_bytes": int(torch.cuda.max_memory_allocated()),
@@ -758,6 +952,7 @@ def _write_core_metrics(
                 else 0.0
             ),
         },
+        "phase_timing": trainloader.phase_timing_stats(),
         "edge_cache": edge_cache.stats() if edge_cache is not None else {},
         "request_planner": (
             request_planner.stats() if request_planner is not None else {}
@@ -813,11 +1008,23 @@ def main():
     ctx = DistributedContext.init(backend="nccl", use_gpu=True,memory_group_num=1,cache_use_rpc=True)
     torch.set_num_threads(10)
     device_id = torch.cuda.current_device()
-    if ((args.dataname =='GDELT') & (dist.get_world_size() <=4 )):
-        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cpu'),partition_path=args.partition)#torch.device('cpu'))
+    if args.core_feature_device == 'cpu':
+        feature_device = torch.device('cpu')
+    elif args.core_feature_device == 'cuda':
+        feature_device = torch.device('cuda:{}'.format(ctx.local_rank))
+    elif args.dataname == 'GDELT' and dist.get_world_size() <= 4:
+        feature_device = torch.device('cpu')
     else:
-        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition_path=args.partition)#torch.device('cpu'))
-    if(args.dataname=='GDELT'):
+        feature_device = torch.device('cuda:{}'.format(ctx.local_rank))
+    graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(
+        args.dataname,
+        seed=123457,
+        top=args.topk,
+        sampler_graph_add_rev=True,
+        feature_device=feature_device,
+        partition_path=args.partition,
+    )
+    if args.dataname == 'GDELT' and args.core_screen_epochs == 0:
         train_param['epoch'] = 10
     #torch.autograd.set_detect_anomaly(True)
 # 确保 CUDA 可用
@@ -1032,6 +1239,9 @@ def main():
                                         edge_cache_collect_signals=not (
                                             args.core_cache_simple_admission
                                         ),
+                                        collect_phase_timing=(
+                                            args.core_collect_phase_timing
+                                        ),
                                         )
     
     eval_trainloader = DistributedDataLoader(graph,eval_train_data,sampler = eval_sampler,
@@ -1173,6 +1383,7 @@ def main():
     loss_list = []
     evaluation_history = []
     run_totals = {
+        "training_epochs": 0,
         "batches": 0,
         "total_loss": 0.0,
         "train_seconds": 0.0,
@@ -1194,6 +1405,21 @@ def main():
     smoke_sample_probability_count = 0
     smoke_sample_probability_min = float("inf")
     smoke_sample_probability_max = 0.0
+    batch_latency_samples = []
+    if args.core_nic_ifname:
+        dist.barrier(group=ctx.gloo_group)
+        if args.core_smoke_batches > 0:
+            # bnxt_en counters can lag behind recently completed setup traffic.
+            # This delay is outside the measured training interval and gives
+            # the pre-training snapshot a quiescent boundary.
+            time.sleep(1.0)
+    nic_bytes_start = (
+        _read_nic_bytes(args.core_nic_ifname)
+        if args.core_nic_ifname and ctx.local_rank == 0
+        else {}
+    )
+    if args.core_nic_ifname:
+        dist.barrier(group=ctx.gloo_group)
     for e in range(train_param['epoch']):
         ada_param.train()
         model.module.memory_updater.empty_cache()
@@ -1225,6 +1451,7 @@ def main():
         sample_probability_max = 0.0
         start = time_count.start_gpu()
         total = 0
+        batch_wall_started = time.perf_counter()
         for roots,mfgs,metadata in trainloader:
             end = time_count.elapsed_event(start)
             total += end
@@ -1331,6 +1558,12 @@ def main():
             mailbox.update_p2p_mail()
             ada_param.last_start_event_memory_update = ada_param.start_event()
             start = time_count.start_gpu()
+            if args.core_collect_phase_timing:
+                batch_wall_finished = time.perf_counter()
+                batch_latency_samples.append(
+                    batch_wall_finished - batch_wall_started
+                )
+                batch_wall_started = batch_wall_finished
             if (
                 args.core_smoke_batches > 0
                 and smoke_batches_completed + b_cnt
@@ -1394,12 +1627,19 @@ def main():
                 )
             if smoke_batches_completed < args.core_smoke_batches:
                 continue
+            if args.core_nic_ifname:
+                dist.barrier(group=ctx.gloo_group)
+                # Let driver counters absorb completed asynchronous traffic.
+                # time_prep and batch latency have already stopped above.
+                time.sleep(1.0)
             _write_core_metrics(
                 ctx=ctx,
                 epoch=e,
                 batches=smoke_batches_completed,
                 total_loss=smoke_total_loss,
                 train_seconds=smoke_train_seconds,
+                batch_latency_samples=batch_latency_samples,
+                nic_bytes_start=nic_bytes_start,
                 positive_examples=smoke_positive_examples,
                 negative_examples=smoke_negative_examples,
                 sample_probability_sum=smoke_sample_probability_sum,
@@ -1421,6 +1661,55 @@ def main():
                     'Training smoke run completed after {} batches'.format(
                         smoke_batches_completed
                     )
+                )
+            ctx.shutdown()
+            return
+        if args.skip_eval:
+            run_totals["training_epochs"] += 1
+            run_totals["batches"] += int(b_cnt)
+            run_totals["total_loss"] += float(total_loss)
+            run_totals["train_seconds"] += float(time_prep)
+            run_totals["positive_examples"] += int(positive_examples)
+            run_totals["negative_examples"] += int(negative_examples)
+            run_totals["local_nodes"] += float(trainloader.local_node)
+            run_totals["remote_nodes"] += float(trainloader.remote_node)
+            run_totals["local_edges"] += float(trainloader.local_edge)
+            run_totals["remote_edges"] += float(trainloader.remote_edge)
+            run_totals["memory_sync"] += float(
+                mailbox.tot_comm_count if mailbox else 0
+            )
+            run_totals["shared_sync"] += float(
+                mailbox.tot_shared_count if mailbox else 0
+            )
+            _write_core_metrics(
+                ctx=ctx,
+                epoch=e,
+                batches=b_cnt,
+                total_loss=total_loss,
+                train_seconds=time_prep,
+                batch_latency_samples=batch_latency_samples,
+                nic_bytes_start=nic_bytes_start,
+                positive_examples=positive_examples,
+                negative_examples=negative_examples,
+                sample_probability_sum=sample_probability_sum,
+                sample_probability_count=sample_probability_count,
+                sample_probability_min=sample_probability_min,
+                sample_probability_max=sample_probability_max,
+                trainloader=trainloader,
+                mailbox=mailbox,
+                edge_cache=edge_cache,
+                request_planner=request_planner,
+                memory_predictor=memory_predictor,
+                train_neg_sampler=train_neg_sampler,
+                edge_feature_bytes=edge_feature_bytes,
+                ada_param=ada_param,
+                run_totals=run_totals,
+            )
+            dist.barrier()
+            if dist.get_rank() == 0:
+                print(
+                    'Training timing screen completed after {} epoch; '
+                    'validation/test skipped'.format(e + 1)
                 )
             ctx.shutdown()
             return
@@ -1453,6 +1742,7 @@ def main():
             'test_auc': float(test_auc),
         }
         evaluation_history.append(current_evaluation)
+        run_totals["training_epochs"] += 1
         run_totals["batches"] += int(b_cnt)
         run_totals["total_loss"] += float(total_loss)
         run_totals["train_seconds"] += float(time_prep)
@@ -1474,6 +1764,8 @@ def main():
             batches=b_cnt,
             total_loss=total_loss,
             train_seconds=time_prep,
+            batch_latency_samples=batch_latency_samples,
+            nic_bytes_start=nic_bytes_start,
             positive_examples=positive_examples,
             negative_examples=negative_examples,
             sample_probability_sum=sample_probability_sum,

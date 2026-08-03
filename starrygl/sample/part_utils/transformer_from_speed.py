@@ -51,6 +51,43 @@ def load_graph(d):
     
     return df
 
+
+def load_edge_tensors(d):
+    """Load immutable edge columns without reparsing the CSV on every rank."""
+
+    cache_dir = '/mnt/nfs/fzz/TGL-DATA/{}/edges_cache'.format(d)
+    cache_files = {
+        'src': os.path.join(cache_dir, 'src.npy'),
+        'dst': os.path.join(cache_dir, 'dst.npy'),
+        'time': os.path.join(cache_dir, 'time.npy'),
+        'ext_roll': os.path.join(cache_dir, 'ext_roll.npy'),
+    }
+    if all(os.path.exists(path) for path in cache_files.values()):
+        src = torch.from_numpy(np.load(cache_files['src'], mmap_mode='c')).long()
+        dst = torch.from_numpy(np.load(cache_files['dst'], mmap_mode='c')).long()
+        ts = torch.from_numpy(np.load(cache_files['time'], mmap_mode='c')).long()
+        ext_roll = torch.from_numpy(
+            np.load(cache_files['ext_roll'], mmap_mode='c')
+        ).long()
+        return src, dst, ts, ext_roll
+
+    cache_path = '/mnt/nfs/fzz/TGL-DATA/{}/edges_cache.pt'.format(d)
+    if os.path.exists(cache_path):
+        obj = torch.load(cache_path, map_location='cpu')
+        return (
+            obj['src'].long(),
+            obj['dst'].long(),
+            obj['time'].long(),
+            obj['ext_roll'].long(),
+        )
+
+    df = load_graph(d)
+    src = torch.from_numpy(np.array(df.src.values)).long()
+    dst = torch.from_numpy(np.array(df.dst.values)).long()
+    ts = torch.from_numpy(np.array(df.time.values)).long()
+    ext_roll = torch.from_numpy(np.array(df.ext_roll.values)).long()
+    return src, dst, ts, ext_roll
+
 def build_shared_index(ids,shared_ids,to_shared_idexs):
     ctx = _get_default_dist_context()
     rank = ctx.memory_group_rank
@@ -128,14 +165,13 @@ def build_index(ids):
 from dgl.utils.shared_mem import create_shared_mem_array, get_shared_mem_array
 def load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev = True,edge_i = None, reid = None,device = torch.device('cuda'),feature_device = torch.device('cuda'),cached_full_feature=False):
     ctx = _get_default_dist_context()
-    df = load_graph(data)
-    src = torch.from_numpy(np.array(df.src.values)).long()
-    dst = torch.from_numpy(np.array(df.dst.values)).long()  
-    print('tot edge {} circ edge {} same edge {}\n'.format(src.shape[0],torch.stack((src,dst)).unique(dim = 1).shape[1],(src==dst).sum().item()))
-    ts = torch.from_numpy(np.array(df.time.values)).long()
-    train_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 0)
-    val_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 1)
-    test_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 2)   
+    src, dst, ts, ext_roll = load_edge_tensors(data)
+    print('tot edge {} same edge {}\n'.format(
+        src.shape[0], (src == dst).sum().item()
+    ))
+    train_mask = (ext_roll == 0)
+    val_mask = (ext_roll == 1)
+    test_mask = (ext_roll == 2)
     num_node = max(src.max().item(),dst.max().item())+1 
     dim_feats = [0, 0, 0, 0, 0, 0, 0, 0]
     if ctx.local_rank == 0:
@@ -313,6 +349,5 @@ def load_from_speed(data,seed,top,sampler_graph_add_rev,device=torch.device('cud
         edge_i = _load_partition_ids(edge_path)
       
         return load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev=sampler_graph_add_rev,edge_i=edge_i,reid=None,device=device,feature_device=feature_device)
-
 
 
