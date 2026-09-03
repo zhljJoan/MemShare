@@ -1,0 +1,13 @@
+{
+  "protocol": "OFF1-ON1-ON2-OFF2, WikiTalk, TGN_large, 4x NVIDIA A40, 2 epochs",
+  "metric": "epoch_1_critical_rank_train_time_seconds",
+  "off_runs": [11.409464, 11.324838],
+  "on_runs": [11.170204, 11.206106],
+  "off_mean": 11.367151,
+  "on_mean": 11.188155,
+  "reduction_pct": 1.5746777710615414,
+  "speedup": 1.0159987057740976,
+  "paired_reduction_pct": [2.0970310261726564, 1.0484211782985295],
+  "local_kernel_reduction_pct": 15.925674921843655,
+  "correctness_tests": "11 passed"
+}

@@ -1,0 +1,34 @@
+{
+  "baseline_median_ms": 1.0232832336425781,
+  "fused_median_ms": 0.8017715454101563,
+  "fused_reduction_pct": 21.647153099920086,
+  "speedup": 1.276277811928465,
+  "baseline_rounds_ms": [
+    1.023650894165039,
+    1.0234880065917968,
+    1.0232832336425781,
+    1.0223206329345702,
+    1.0220665740966797
+  ],
+  "fused_rounds_ms": [
+    0.8015564727783203,
+    0.8018313598632812,
+    0.8017715454101563,
+    0.8019455718994141,
+    0.8006861114501953
+  ],
+  "kernel": "compact_gru",
+  "shape": {
+    "states": 13865,
+    "objects": 1579,
+    "mail_dim": 372,
+    "time_dim": 100,
+    "hidden_dim": 100
+  },
+  "gpu": "NVIDIA A40",
+  "dtype": "float32",
+  "warmup": 25,
+  "repeat": 100,
+  "rounds": 5,
+  "correctness": true
+}

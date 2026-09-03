@@ -1,0 +1,35 @@
+{
+  "baseline_median_ms": 1.8619584655761718,
+  "fused_median_ms": 0.525209617614746,
+  "fused_reduction_pct": 71.79262441537743,
+  "speedup": 3.545172066787938,
+  "baseline_rounds_ms": [
+    1.8588262939453124,
+    1.8648857116699218,
+    1.8613043212890625,
+    1.868574676513672,
+    1.8619584655761718
+  ],
+  "fused_rounds_ms": [
+    0.5249331283569336,
+    0.5296438217163086,
+    0.5238784027099609,
+    0.5308617782592774,
+    0.525209617614746
+  ],
+  "kernel": "segment_attention",
+  "shape": {
+    "destinations": 6000,
+    "edges": 108000,
+    "heads": 2,
+    "head_dim": 50,
+    "degree": 18,
+    "edge_order": "identity"
+  },
+  "gpu": "NVIDIA A40",
+  "dtype": "float32",
+  "warmup": 25,
+  "repeat": 100,
+  "rounds": 5,
+  "correctness": true
+}

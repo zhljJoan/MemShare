@@ -1,0 +1,68 @@
+{
+  "kernel": "compact_projected_segment_attention",
+  "host": "gpu07",
+  "gpu": "4x NVIDIA A40",
+  "dtype": "float32",
+  "model": "TGN_large",
+  "baseline_variant": "new_structure_materialized_occurrence_kv",
+  "fused_variant": "compact_projection_without_occurrence_kv_materialization",
+  "timing": "epoch_0_max_rank_train_time_seconds_including_first_kernel_jit",
+  "common_parameters": {
+    "batch_size_per_rank": 3000,
+    "fanout": 20,
+    "topk": 0.1,
+    "seed": 6773,
+    "sample_type": "boundery_recent_decay",
+    "sample_probability": 0.1,
+    "memory_type": "historical",
+    "shared_memory_ssim": 0.3,
+    "hierarchical_compaction": true,
+    "fused_segment_attention": true,
+    "compact_gru_update": true,
+    "compact_kv_projection": true
+  },
+  "baseline_date": "2026-09-02",
+  "fused_date": "2026-09-03",
+  "correctness": true,
+  "correctness_tests": "16 passed",
+  "workload_counts_match_baseline": true,
+  "status": "completed",
+  "results": [
+    {
+      "dataset": "LASTFM",
+      "rank_times_s": [3.083731, 3.083434, 3.084244, 3.084212],
+      "critical_s": 3.084244,
+      "baseline_critical_s": 3.821801,
+      "change_vs_new_structure_pct": -19.30,
+      "ordinary_dedup_critical_s": 3.113864,
+      "change_vs_ordinary_dedup_pct": -0.95
+    },
+    {
+      "dataset": "WikiTalk",
+      "rank_times_s": [11.907899, 11.908007, 11.907988, 11.908712],
+      "critical_s": 11.908712,
+      "baseline_critical_s": 12.361320,
+      "change_vs_new_structure_pct": -3.66,
+      "ordinary_dedup_critical_s": 13.514850,
+      "change_vs_ordinary_dedup_pct": -11.88
+    },
+    {
+      "dataset": "StackOverflow",
+      "rank_times_s": [114.158666, 114.158099, 114.158329, 114.157845],
+      "critical_s": 114.158666,
+      "baseline_critical_s": 113.054028,
+      "change_vs_new_structure_pct": 0.98,
+      "ordinary_dedup_critical_s": 126.503458,
+      "change_vs_ordinary_dedup_pct": -9.76
+    },
+    {
+      "dataset": "GDELT",
+      "rank_times_s": [412.962353, 412.962421, 412.961599, 412.960972],
+      "critical_s": 412.962421,
+      "baseline_critical_s": 443.632504,
+      "change_vs_new_structure_pct": -6.91,
+      "ordinary_dedup_critical_s": 519.938158,
+      "change_vs_ordinary_dedup_pct": -20.57
+    }
+  ]
+}

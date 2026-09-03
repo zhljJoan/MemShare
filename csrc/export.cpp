@@ -1,6 +1,7 @@
 #include "extension.h"
 #include "uvm.h"
 #include "partition.h"
+#include "fused_edge_projection.h"
 
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
@@ -18,6 +19,9 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
         .value("cudaMemAdviseUnsetPreferredLocation", cudaMemoryAdvise::cudaMemAdviseUnsetPreferredLocation)
         .value("cudaMemAdviseSetReadMostly", cudaMemoryAdvise::cudaMemAdviseSetReadMostly)
         .value("cudaMemAdviseUnsetReadMostly", cudaMemoryAdvise::cudaMemAdviseUnsetReadMostly);
+    m.def("fused_edge_temporal_linear_forward",
+          &fused_edge_temporal_linear_forward,
+          "fused edge temporal linear forward");
     #endif
 
     #ifdef WITH_METIS

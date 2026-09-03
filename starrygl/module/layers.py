@@ -10,6 +10,11 @@ import dgl
 import math
 import numpy as np
 from starrygl.sample.count_static import time_count as tt
+from starrygl.module import (
+    triton_edge_projection,
+    triton_projected_segment_attention,
+    triton_segment_attention,
+)
 
 class TimeEncode(torch.nn.Module):
 
@@ -210,6 +215,34 @@ class TransfomerAttentionLayer(torch.nn.Module):
         self.w_out = torch.nn.Linear(dim_node_feat + dim_out, dim_out)
         self.layer_norm = torch.nn.LayerNorm(dim_out)
 
+    def _compact_kv(self, state, edge, time_feat, edge_src, edge_to_eid):
+        node_end = self.dim_node_feat
+        edge_end = node_end + self.dim_edge_feat
+        weights = (
+            torch.cat((self.w_k.weight[:, :node_end], self.w_v.weight[:, :node_end])),
+            torch.cat((self.w_k.weight[:, node_end:edge_end], self.w_v.weight[:, node_end:edge_end])),
+            torch.cat((self.w_k.weight[:, edge_end:], self.w_v.weight[:, edge_end:])),
+        )
+        state_kv = torch.nn.functional.linear(state, weights[0])
+        edge_kv = torch.nn.functional.linear(edge, weights[1])
+        time_kv = torch.nn.functional.linear(
+            time_feat, weights[2], torch.cat((self.w_k.bias, self.w_v.bias)))
+        kv = state_kv[edge_src] + edge_kv[edge_to_eid] + time_kv
+        return kv.split(self.dim_out, dim=1)
+
+    def _compact_kv_components(self, state, edge, time_feat):
+        """Project compact objects once; the segment kernel gathers them."""
+        node_end = self.dim_node_feat
+        edge_end = node_end + self.dim_edge_feat
+        weight = torch.cat((self.w_k.weight, self.w_v.weight), dim=0)
+        state_kv = torch.nn.functional.linear(state, weight[:, :node_end])
+        edge_kv = torch.nn.functional.linear(edge, weight[:, node_end:edge_end])
+        time_kv = torch.nn.functional.linear(
+            time_feat, weight[:, edge_end:],
+            torch.cat((self.w_k.bias, self.w_v.bias)),
+        )
+        return state_kv, edge_kv, time_kv
+
     def forward(self, b):
         assert(self.dim_time + self.dim_node_feat + self.dim_edge_feat > 0)
         self.device = b.device
@@ -218,6 +251,8 @@ class TransfomerAttentionLayer(torch.nn.Module):
         if self.dim_time > 0:
             time_feat = self.time_enc(b.edata['dt'])
             zero_time_feat = self.time_enc(torch.zeros(b.num_dst_nodes(), dtype=torch.float32, device=self.device))
+        fused_segment = False
+        projected_kv = None
         if self.combined:
             Q = torch.zeros((b.num_edges(), self.dim_out), device=self.device)
             K = torch.zeros((b.num_edges(), self.dim_out), device=self.device)
@@ -271,26 +306,95 @@ class TransfomerAttentionLayer(torch.nn.Module):
                 #K = self.w_k(torch.cat([b.srcdata['h'][b.num_dst_nodes():], time_feat], dim=1))
                 #V = self.w_v(torch.cat([b.srcdata['h'][b.num_dst_nodes():], time_feat], dim=1))
             else:
-                Q = self.w_q(torch.cat([b.srcdata['h'][:b.num_dst_nodes()], zero_time_feat], dim=1))[b.edges()[1]]
-                K = self.w_k(torch.cat([b.srcdata['h'][b.edges()[0]], b.edata['f'], time_feat], dim=1))
-                V = self.w_v(torch.cat([b.srcdata['h'][b.edges()[0]], b.edata['f'], time_feat], dim=1))
+                fused_segment = triton_segment_attention.enabled()
+                edge_src = (b._memshare_edge_src if fused_segment and hasattr(
+                    b, '_memshare_edge_src') else b.edges()[0])
+                Q = self.w_q(torch.cat([b.srcdata['h'][:b.num_dst_nodes()], zero_time_feat], dim=1))
+                if not fused_segment:
+                    Q = Q[b.edges()[1]]
+                if (os.environ.get('MEMSHARE_COMPACT_KV_PROJECTION') == 'on'
+                        and fused_segment
+                        and hasattr(b, '_memshare_edge_feat_object')
+                        and hasattr(b, '_memshare_segment_plan')):
+                    projected_kv = self._compact_kv_components(
+                        b.srcdata['h'], b._memshare_edge_feat_object, time_feat)
+                    K = V = None
+                elif os.environ.get('MEMSHARE_COMPACT_KV_PROJECTION') == 'on':
+                    K, V = self._compact_kv(
+                        b.srcdata['h'], b._memshare_edge_feat_object, time_feat,
+                        edge_src, b.edata['_edge_to_eid'])
+                elif triton_edge_projection.enabled():
+                    edge_object = getattr(b, '_memshare_edge_feat_object', None)
+                    edge_to_eid = b.edata.get('_edge_to_eid', None)
+                    if edge_object is not None and edge_to_eid is not None:
+                        K = triton_edge_projection.object_linear(
+                            b.srcdata['h'], edge_object, time_feat,
+                            self.w_k.weight, self.w_k.bias, edge_src, edge_to_eid)
+                        V = triton_edge_projection.object_linear(
+                            b.srcdata['h'], edge_object, time_feat,
+                            self.w_v.weight, self.w_v.bias, edge_src, edge_to_eid)
+                    else:
+                        K = triton_edge_projection.linear(
+                            b.srcdata['h'], b.edata['f'], time_feat,
+                            self.w_k.weight, self.w_k.bias, edge_src)
+                        V = triton_edge_projection.linear(
+                            b.srcdata['h'], b.edata['f'], time_feat,
+                            self.w_v.weight, self.w_v.bias, edge_src)
+                else:
+                    K = self.w_k(torch.cat([b.srcdata['h'][edge_src], b.edata['f'], time_feat], dim=1))
+                    V = self.w_v(torch.cat([b.srcdata['h'][edge_src], b.edata['f'], time_feat], dim=1))
                 #Q = self.w_q(torch.cat([b.srcdata['h'][:b.num_dst_nodes()], zero_time_feat], dim=1))[b.edges()[1]]
                 #K = self.w_k(torch.cat([b.srcdata['h'][b.num_dst_nodes():], b.edata['f'], time_feat], dim=1))
                 #V = self.w_v(torch.cat([b.srcdata['h'][b.num_dst_nodes():], b.edata['f'], time_feat], dim=1))
                 
             Q = torch.reshape(Q, (Q.shape[0], self.num_head, -1))
-            K = torch.reshape(K, (K.shape[0], self.num_head, -1))
-            V = torch.reshape(V, (V.shape[0], self.num_head, -1))
+            if projected_kv is None:
+                K = torch.reshape(K, (K.shape[0], self.num_head, -1))
+                V = torch.reshape(V, (V.shape[0], self.num_head, -1))
+            if (fused_segment and projected_kv is None
+                    and not triton_segment_attention.supported(Q, K, V)):
+                fused_segment = False
+                Q = Q[b.edges()[1]]
+            if (fused_segment and projected_kv is not None
+                    and not triton_projected_segment_attention.supported(Q, *projected_kv)):
+                K, V = self._compact_kv(
+                    b.srcdata['h'], b._memshare_edge_feat_object, time_feat,
+                    edge_src, b.edata['_edge_to_eid'])
+                K = K.reshape(K.shape[0], self.num_head, -1)
+                V = V.reshape(V.shape[0], self.num_head, -1)
+                projected_kv = None
             #print('Q {} \n K {} \n V {} \n'.format(Q,K,V))
             #att_sum = torch.sum(Q*K,dim=2)
             #att_v_max = dgl.ops.copy_e_max(b,att_sum)
             #att_e_sub_max = torch.exp(dgl.ops.e_sub_v(b,att_sum,att_v_max))
             #att = dgl.ops.e_div_v(b,att_e_sub_max,torch.clamp_min(dgl.ops.copy_e_sum(b,att_e_sub_max),1))
-            att = dgl.ops.edge_softmax(b, self.att_act(torch.sum(Q*K, dim=2)))
-            att = self.att_dropout(att)
+            if fused_segment:
+                segment_plan = getattr(b, '_memshare_segment_plan', None)
+                if segment_plan is None:
+                    dst_ptr, _, edge_ids = b.adj_tensors('csc')
+                else:
+                    dst_ptr, edge_ids = segment_plan
+                if projected_kv is not None:
+                    projected_state, projected_edge, projected_time = projected_kv
+                    b.dstdata['h'] = triton_projected_segment_attention.attention(
+                        Q, projected_state, projected_edge, projected_time,
+                        edge_src, dst_ptr,
+                        dropout_p=self.att_dropout.p, training=self.training,
+                        edge_obj=b.edata['_edge_to_eid'], edge_ids=edge_ids,
+                        validate=False,
+                    ).reshape(b.num_dst_nodes(), -1)
+                else:
+                    b.dstdata['h'] = triton_segment_attention.attention(
+                        Q, K, V, dst_ptr, dropout_p=self.att_dropout.p,
+                        training=self.training, edge_ids=edge_ids, validate=False,
+                    ).reshape(b.num_dst_nodes(), -1)
+            else:
+                att = dgl.ops.edge_softmax(b, self.att_act(torch.sum(Q*K, dim=2)))
+                att = self.att_dropout(att)
             #tt.weight_count_remote+=torch.sum(att[DistIndex(b.srcdata['ID']).part[b.edges()[0]]!=torch.distributed.get_rank()]**2)
             #tt.weight_count_local+=torch.sum(att[DistIndex(b.srcdata['ID']).part[b.edges()[0]]==torch.distributed.get_rank()]**2)
-            V = torch.reshape(V*att[:, :, None], (V.shape[0], -1))
+            if not fused_segment:
+                V = torch.reshape(V*att[:, :, None], (V.shape[0], -1))
             #V_local = V.clone()
             #V_remote = V.clone()
             #V_local[DistIndex(b.srcdata['ID']).part[b.edges()[0]]!=torch.distributed.get_rank()] = 0
@@ -307,9 +411,10 @@ class TransfomerAttentionLayer(torch.nn.Module):
             #    b.edata['v'] = V*weight
             #else:
             #    weight = b.edata['weight'].reshape(-1,1)
-            b.edata['v'] = V
+            if not fused_segment:
+                b.edata['v'] = V
             #print(torch.sum(torch.sum(((V-V*weight)**2))))
-            b.update_all(dgl.function.copy_e('v', 'm'), dgl.function.sum('m', 'h'))
+                b.update_all(dgl.function.copy_e('v', 'm'), dgl.function.sum('m', 'h'))
             #tt.ssim_local+=torch.sum(torch.cosine_similarity(b.dstdata['h'],b.dstdata['h0']))
             #tt.ssim_remote+=torch.sum(torch.cosine_similarity(b.dstdata['h'],b.dstdata['h1']))
             #tt.ssim_cnt += b.num_dst_nodes()
@@ -353,4 +458,3 @@ class JODIETimeEmbedding(torch.nn.Module):
         time_diff = (ts - mem_ts) / (ts + 1)
         rst = h * (1 + self.time_emb(time_diff.unsqueeze(1)))
         return rst
-            

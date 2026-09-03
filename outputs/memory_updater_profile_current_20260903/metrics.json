@@ -1,0 +1,43 @@
+{
+  "workload": {
+    "dataset": "WikiTalk",
+    "model": "TGN_large",
+    "gpus": "4x NVIDIA A40",
+    "epochs": 1,
+    "updater_calls": 457,
+    "critical_epoch_ms": 12380.52
+  },
+  "phase_max_across_ranks_ms_per_call": {
+    "next_batch_fetch_launch": {"host": 2.335, "cuda": 2.340},
+    "shared_update_submit": {"host": 1.818, "cuda": 1.790},
+    "raw_memory_update": {"host": 1.766, "cuda": 1.268},
+    "smooth_prediction": {"host": 1.327, "cuda": 0.738},
+    "mail_memory_prepare": {"host": 1.052, "cuda": 1.013},
+    "previous_shared_sync": {"host": 0.640, "cuda": 0.664},
+    "smooth_filter_update": {"host": 0.449, "cuda": 0.402},
+    "feature_attach": {"host": 0.169, "cuda": 0.434},
+    "smooth_blend": {"host": 0.129, "cuda": 0.305},
+    "local_mail_memory_write": {"host": 0.244, "cuda": 0.268},
+    "shared_mask_prepare": {"host": 0.072, "cuda": 0.011},
+    "state_snapshot": {"host": 0.072, "cuda": 0.062}
+  },
+  "compact_gru_ncu": {
+    "kernel_duration_sum_us": 930.464,
+    "forward_three_gemms_us": 289.024,
+    "forward_pointwise_us": 74.432,
+    "forward_pointwise_dram_pct": 91.180,
+    "backward_pointwise_us": 192.704,
+    "backward_pointwise_dram_pct": 88.873,
+    "other_backward_us": 367.264
+  },
+  "classification": "mixed latency/synchronization and communication; compact GRU pointwise kernels are memory-bandwidth-bound",
+  "notes": [
+    "Per-phase maxima come from potentially different ranks and must not be added as a strict critical path.",
+    "next_batch_fetch_launch is next-batch pipeline work attributed inside memory_updater, not purely updater arithmetic.",
+    "smooth_prediction host-CUDA gap is consistent with the per-call Tensor.item synchronization in memorys.py."
+  ],
+  "artifacts": {
+    "distributed_profile": "wikitalk_all_on_1epoch.log",
+    "ncu_report": "compact_gru_ncu.ncu-rep"
+  }
+}

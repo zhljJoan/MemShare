@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CUDA_STANDARD 14)
+set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
 find_package(OpenMP REQUIRED)
@@ -125,7 +125,11 @@ if (WITH_LDG)
 endif ()
 
 include_directories("csrc/include")
-add_library(${PROJECT_NAME} SHARED csrc/export.cpp)
+set(STARRYGL_SRCS csrc/export.cpp)
+if(WITH_CUDA)
+    list(APPEND STARRYGL_SRCS csrc/fused_edge_projection.cu)
+endif()
+add_library(${PROJECT_NAME} SHARED ${STARRYGL_SRCS})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${TORCH_LIBRARIES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE -DTORCH_EXTENSION_NAME=lib${PROJECT_NAME})

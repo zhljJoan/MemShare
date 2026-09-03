@@ -75,6 +75,8 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
                       vector<int>&, int, string, int, th::Tensor &,th::Tensor &,double>())
         .def_readonly("ret", &ParallelSampler::ret, py::return_value_policy::reference)
         .def("neighbor_sample_from_nodes", &ParallelSampler::neighbor_sample_from_nodes)
+        .def("sample_and_compact_hierarchical",
+             &ParallelSampler::sample_and_compact_hierarchical)
         .def("reset", &ParallelSampler::reset)
         .def("get_ret", [](const ParallelSampler &ps) { return ps.ret; })
         .def("sample_unique", &ParallelSampler::sample_unique)

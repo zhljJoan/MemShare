@@ -40,7 +40,7 @@ from starrygl.sample.count_static import time_count as tt
 import os
 
 from starrygl.sample.data_loader import DistributedDataLoader
-from starrygl.sample.batch_data import SAMPLE_TYPE
+from starrygl.sample.batch_data import SAMPLE_TYPE, get_count
 from starrygl.sample.stream_manager import getPipelineManger
 from torch.profiler import profile, record_function, ProfilerActivity
 parser = argparse.ArgumentParser(
@@ -80,8 +80,60 @@ parser.add_argument('--memory_type', default='all_update', type=str, metavar='W'
                     help='name of model')
 parser.add_argument('--seed', default=6773, type=int, metavar='W',
                     help='name of model')
+parser.add_argument('--dual_dedup_view', default='off',
+                    choices=('off', 'on'),
+                    help='record object/state/edge reuse statistics')
+parser.add_argument('--max_epoch', default=0, type=int,
+                    help='positive value overrides configured epochs')
+parser.add_argument('--skip_eval', action='store_true',
+                    help='skip val/test and checkpoint writes')
+parser.add_argument('--triton_edge_projection', default='off',
+                    choices=('off', 'on'),
+                    help='use Triton fused edge projection in attention')
+parser.add_argument('--fused_segment_attention', default='off',
+                    choices=('off', 'on'),
+                    help='use fused destination-segment attention')
+parser.add_argument('--compact_kv_projection', default='off',
+                    choices=('off', 'on'),
+                    help='project compact states/edges before attention expansion')
+parser.add_argument('--epoch_breakdown', default='off',
+                    choices=('off', 'on'),
+                    help='print synchronized host timing breakdown per epoch')
+parser.add_argument('--memory_updater_profile', action='store_true',
+                    help='record memory-updater host and sampled CUDA phase timings')
+parser.add_argument('--memory_updater_profile_warmup', default=32, type=int,
+                    help='calls skipped before CUDA-event sampling')
+parser.add_argument('--memory_updater_profile_stride', default=8, type=int,
+                    help='sample one memory-updater call every N calls')
+parser.add_argument('--compact_gru_update', default='off',
+                    choices=('off', 'on'),
+                    help='reuse UID-level GRU affine projections')
+parser.add_argument('--compact_memory_ops', default='off',
+                    choices=('off', 'on'),
+                    help='reuse object/state mappings in remaining memory stages')
+parser.add_argument('--hierarchical_compaction', default='off',
+                    choices=('off', 'on'),
+                    help='compact sampled objects and temporal states in C++')
+parser.add_argument('--block_dedup', default='on',
+                    choices=('off', 'on'),
+                    help='deduplicate fetched node/eid objects')
+parser.add_argument('--state_dedup', default='inherit',
+                    choices=('inherit', 'off', 'on'),
+                    help='deduplicate temporal node states; inherit follows --block_dedup')
+parser.add_argument('--freeze_adaptive_parameters', action='store_true',
+                    help='keep sampling alpha/beta fixed during profiling')
 #boundery_recent_uniform boundery_recent_decay
 args = parser.parse_args()
+if args.triton_edge_projection == 'on' and args.compact_kv_projection == 'on':
+    parser.error('--triton_edge_projection and --compact_kv_projection are mutually exclusive')
+if args.memory_updater_profile_warmup < 0:
+    parser.error('--memory_updater_profile_warmup must be non-negative')
+if args.memory_updater_profile_stride <= 0:
+    parser.error('--memory_updater_profile_stride must be positive')
+if args.block_dedup == 'off' and args.hierarchical_compaction == 'on':
+    parser.error('--hierarchical_compaction requires --block_dedup on')
+if args.state_dedup == 'off' and args.hierarchical_compaction == 'on':
+    parser.error('--hierarchical_compaction requires --state_dedup on')
 if args.memory_type == 'all_local' or args.topk != '0':
     train_cross_probability = 0
 else:
@@ -189,6 +241,41 @@ def query():
     "total_update_mail" :total_update_mail ,
     "total_update_memory":total_update_memory,
     "total_remote_update":total_remote_update,}
+
+def _profile_sync(enabled):
+    if enabled:
+        torch.cuda.synchronize()
+
+def _profile_add(stats, key, start, enabled):
+    if enabled:
+        torch.cuda.synchronize()
+        stats[key] += time.perf_counter() - start
+
+def _print_epoch_breakdown(stats, epoch_time):
+    keys = [
+        'next_batch',
+        'prepare_mail',
+        'forward_loss',
+        'fetch_wait',
+        'backward_step',
+        'mailbox_update',
+    ]
+    values = torch.tensor([stats[k] for k in keys] + [epoch_time],
+                          dtype=torch.float64, device='cuda')
+    avg = values.clone()
+    max_values = values.clone()
+    dist.all_reduce(avg, op=dist.ReduceOp.SUM)
+    dist.all_reduce(max_values, op=dist.ReduceOp.MAX)
+    avg /= dist.get_world_size()
+    if dist.get_rank() == 0:
+        payload = {
+            key: {'avg_s': float(avg[i].item()), 'max_s': float(max_values[i].item())}
+            for i, key in enumerate(keys)
+        }
+        payload['epoch'] = {'avg_s': float(avg[-1].item()), 'max_s': float(max_values[-1].item())}
+        covered = sum(payload[key]['avg_s'] for key in keys)
+        payload['uncovered'] = {'avg_s': float(payload['epoch']['avg_s'] - covered)}
+        print('epoch_breakdown {}\n'.format(payload))
 def main():   
     #torch.backends.cudnn.benchmark = True
     #torch.autograd.set_detect_anomaly(True)
@@ -196,14 +283,34 @@ def main():
     use_cuda = True
     sample_param, memory_param, gnn_param, train_param = parse_config('../config/{}.yml'.format(args.model))
     memory_param['mode'] = args.memory_type
-    ctx = DistributedContext.init(backend="nccl", use_gpu=True,memory_group_num=1,cache_use_rpc=True)
+    memory_param['profile_memory_updater'] = args.memory_updater_profile
+    memory_param['memory_updater_profile_warmup'] = args.memory_updater_profile_warmup
+    memory_param['memory_updater_profile_stride'] = args.memory_updater_profile_stride
+    memory_param['compact_gru_update'] = args.compact_gru_update == 'on'
+    memory_param['compact_memory_ops'] = args.compact_memory_ops == 'on'
+    if args.max_epoch > 0:
+        train_param['epoch'] = args.max_epoch
+    os.environ['MEMSHARE_DUAL_DEDUP_VIEW'] = (
+        'on' if args.dual_dedup_view == 'on' else 'off'
+    )
+    os.environ['MEMSHARE_TRITON_EDGE_PROJECTION'] = (
+        'on' if args.triton_edge_projection == 'on' else 'off'
+    )
+    os.environ['MEMSHARE_FUSED_SEGMENT_ATTENTION'] = args.fused_segment_attention
+    os.environ['MEMSHARE_COMPACT_KV_PROJECTION'] = args.compact_kv_projection
+    os.environ['MEMSHARE_COMPACT_GRU_UPDATE'] = args.compact_gru_update
+    os.environ['MEMSHARE_COMPACT_MEMORY_OPS'] = args.compact_memory_ops
+    os.environ['MEMSHARE_HIERARCHICAL_COMPACTION'] = args.hierarchical_compaction
+    os.environ['MEMSHARE_BLOCK_DEDUP'] = args.block_dedup
+    os.environ['MEMSHARE_STATE_DEDUP'] = args.state_dedup
+    ctx = DistributedContext.init(backend="nccl", use_gpu=True,memory_group_num=1)
     torch.set_num_threads(10)
     device_id = torch.cuda.current_device()
     if ((args.dataname =='GDELT') & (dist.get_world_size() <=4 )):
-        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cpu'),partition=args.partition)#torch.device('cpu'))
+        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cpu'),partition_path=args.partition)#torch.device('cpu'))
     else:
-        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition=args.partition)#torch.device('cpu'))
-    if(args.dataname=='GDELT'):
+        graph,full_sampler_graph,train_mask,val_mask,test_mask,full_train_mask,cache_route = load_from_speed(args.dataname,seed=123457,top=args.topk,sampler_graph_add_rev=True, feature_device=torch.device('cuda:{}'.format(ctx.local_rank)),partition_path=args.partition)#torch.device('cpu'))
+    if args.dataname == 'GDELT' and args.max_epoch <= 0:
         train_param['epoch'] = 10
     #torch.autograd.set_detect_anomaly(True)
 # 确保 CUDA 可用
@@ -219,8 +326,12 @@ def main():
     full_dst = full_sampler_graph['edge_index'][1,torch.arange(0,full_sampler_graph['edge_index'].shape[1],2)]   
     sample_graph = TemporalNeighborSampleGraph(full_sampler_graph,mode = 'full',dist_eid_mapper=graph.eids_mapper)
     eval_sample_graph = TemporalNeighborSampleGraph(full_sampler_graph,mode = 'full',dist_eid_mapper=graph.eids_mapper)
-    Path("../saved_models/").mkdir(parents=True, exist_ok=True)
-    Path("../saved_checkpoints/").mkdir(parents=True, exist_ok=True)
+    if not args.skip_eval:
+        Path("../saved_models/").mkdir(parents=True, exist_ok=True)
+        Path("../saved_checkpoints/").mkdir(parents=True, exist_ok=True)
+    result_dir = Path(f"all_{args.seed}/{args.dataname}/{args.model}")
+    result_dir.mkdir(parents=True, exist_ok=True)
+    partition_tag = Path(args.partition).name
     get_checkpoint_path = lambda \
     epoch: f'../saved_checkpoints/{args.model}-{args.dataname}-{epoch}.pth'
     gnn_param['dyrep'] = True if args.model == 'DyRep' else False
@@ -249,8 +360,8 @@ def main():
     else:
         mailbox = None
 
-    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=10,policy = policy_train, graph_name = "train",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,ada_param=ada_param,no_neg=no_neg)
-    eval_sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=eval_sample_graph, workers=10,policy = policy_train, graph_name = "eval",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,ada_param=ada_param,no_neg=no_neg)
+    sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=sample_graph, workers=10,policy = policy_train, graph_name = "train",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,ada_param=ada_param,no_neg=no_neg,hierarchical_compaction=args.hierarchical_compaction == 'on')
+    eval_sampler = NeighborSampler(num_nodes=graph.num_nodes, num_layers=num_layers, fanout=fanout,graph_data=eval_sample_graph, workers=10,policy = policy_train, graph_name = "eval",local_part=dist.get_rank(),edge_part=DistIndex(graph.eids_mapper).part,node_part=DistIndex(graph.nids_mapper).part,ada_param=ada_param,no_neg=no_neg,hierarchical_compaction=False)
 
     train_data = torch.masked_select(graph.edge_index,train_mask.to(graph.edge_index.device)).reshape(2,-1)
     train_ts = torch.masked_select(graph.ts,train_mask.to(graph.edge_index.device))
@@ -444,8 +555,10 @@ def main():
     val_list = []
     loss_list = []
     for e in range(train_param['epoch']):
-        ada_param.train()
+        if not args.freeze_adaptive_parameters:
+            ada_param.train()
         model.module.memory_updater.empty_cache()
+        model.module.memory_updater.reset_phase_timing()
         tt._zero()
         torch.cuda.synchronize()
         epoch_start_time = time.time()
@@ -454,6 +567,15 @@ def main():
         print('Epoch {:d}:'.format(e))
         time_prep = 0
         total_loss = 0
+        profile_enabled = args.epoch_breakdown == 'on'
+        epoch_profile = {
+            'next_batch': 0.0,
+            'prepare_mail': 0.0,
+            'forward_loss': 0.0,
+            'fetch_wait': 0.0,
+            'backward_step': 0.0,
+            'mailbox_update': 0.0,
+        }
         model.train()
         if mailbox is not None:
             mailbox.reset()
@@ -468,12 +590,17 @@ def main():
         b_cnt = 0
         start = time_count.start_gpu()
         total = 0
+        prev_iter_end = time.perf_counter()
         for roots,mfgs,metadata in trainloader:
+            _profile_sync(profile_enabled)
+            iter_ready = time.perf_counter()
+            epoch_profile['next_batch'] += iter_ready - prev_iter_end
             end = time_count.elapsed_event(start)
             total += end
             b_cnt = b_cnt + 1
 
             t1 = time_count.start_gpu()
+            phase_start = time.perf_counter()
             if mailbox is not None:
                 if(graph.efeat.device.type != 'cpu'):
                     edge_feats = graph.get_local_efeat(graph.eids_mapper[roots.eids.to('cpu')]).to('cuda')#,non_blocking=True)
@@ -486,9 +613,11 @@ def main():
                 param = (update_mail,src,dst,ts,edge_feats,trainloader.async_feature)
             else:
                 param = None
+            _profile_add(epoch_profile, 'prepare_mail', phase_start, profile_enabled)
             #print(time_count.elapsed_event(t1))
             model.train()
             t2 = time_count.start_gpu()
+            phase_start = time.perf_counter()
             optimizer.zero_grad()
             ones = torch.ones(metadata['dst_neg_index'].shape[0],device = model.device,dtype=torch.float)
             #with autocast():
@@ -502,6 +631,8 @@ def main():
             else:
                 loss += creterion(pred_neg, torch.zeros_like(pred_neg))
             total_loss += float(loss.item())
+            _profile_add(epoch_profile, 'forward_loss', phase_start, profile_enabled)
+            phase_start = time.perf_counter()
             if len(trainloader.result_queue) > 0:
                 _,_,_,edge_feat,node_feat0 = trainloader.result_queue[0]
                 if ada_param is not None:
@@ -513,22 +644,33 @@ def main():
                     
                     ada_param.update_fetch_time(ada_param.last_start_event_fetch)
                     ada_param.update_parameter()
+            _profile_add(epoch_profile, 'fetch_wait', phase_start, profile_enabled)
+            phase_start = time.perf_counter()
             loss.backward()
             optimizer.step()
-            
-            
+            _profile_add(epoch_profile, 'backward_step', phase_start, profile_enabled)
+            phase_start = time.perf_counter()
             mailbox.update_shared()
             mailbox.update_p2p_mem()
             mailbox.update_p2p_mail()
+            _profile_add(epoch_profile, 'mailbox_update', phase_start, profile_enabled)
             ada_param.last_start_event_memory_update = ada_param.start_event()
             start = time_count.start_gpu()
+            prev_iter_end = time.perf_counter()
         
         torch.cuda.synchronize()
         dist.barrier()
         time_prep = time.time() - epoch_start_time
         avg_time += time.time() - epoch_start_time
+        if profile_enabled:
+            _print_epoch_breakdown(epoch_profile, time_prep)
+        if args.memory_updater_profile:
+            print('memory_updater_profile rank {} {}\n'.format(
+                dist.get_rank(),
+                model.module.memory_updater.phase_timing_stats(),
+            ))
         train_ap = float(torch.tensor(train_aps).mean())  
-        print('\ttrain time:{:.2f}s\n'.format(time_prep))    
+        print('\ttrain time:{:.6f}s\n'.format(time_prep))
         print(trainloader.local_node)
         local_node=torch.tensor([trainloader.local_node])
         remote_node=torch.tensor([trainloader.remote_node])
@@ -545,6 +687,9 @@ def main():
         print('local node number {} remote node number {} local edge {} remote edge{}\n'.format(local_node,remote_node,local_edge,remote_edge))
         print(' comm local node number {} remote node number {} local edge {} remote edge{}\n'.format(sum_local_comm,sum_remote_comm,sum_local_edge_comm,sum_remote_edge_comm))
         print('memory comm {} shared comm {}\n'.format(tot_comm_count,tot_shared_count))
+        if args.dual_dedup_view == 'on':
+            print('dual dedup view rank {} {}\n'.format(
+                dist.get_rank(), get_count()['dual_dedup_view']))
         #if(e==0):
         #    torch.save((local_access,remote_access,local_edge_access,remote_edge_access,local_comm,remote_comm,local_edge_comm,remote_edge_comm),'all_args.seed/{}/{}/comm/comm_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
         ap = 0
@@ -554,19 +699,23 @@ def main():
         tt.weight_count_local=0
         tt.weight_count_remote=0
         tt.ssim_cnt=0
-        ap, auc = eval('val')
-        print('finish val')
-        torch.cuda.synchronize()
-        dist.barrier()
-        t_test = time.time()
-        print('test')
-        test_ap,test_auc = eval('test')
-        torch.cuda.synchronize()
-        dist.barrier()
-        t_test = time.time() - t_test
-        total_test_time += t_test
-        test_ap_list.append((test_ap,test_auc))
-        early_stopper.early_stop_check(ap)
+        t_test = 0
+        test_ap = 0
+        test_auc = 0
+        if not args.skip_eval:
+            ap, auc = eval('val')
+            print('finish val')
+            torch.cuda.synchronize()
+            dist.barrier()
+            t_test = time.time()
+            print('test')
+            test_ap,test_auc = eval('test')
+            torch.cuda.synchronize()
+            dist.barrier()
+            t_test = time.time() - t_test
+            total_test_time += t_test
+            test_ap_list.append((test_ap,test_auc))
+            early_stopper.early_stop_check(ap)
         early_stop = False
         trainloader.local_node = 0
         trainloader.remote_node = 0
@@ -598,29 +747,32 @@ def main():
             print('\ttrain loss:{:.4f}  train ap:{:4f}  val ap:{:4f}  val auc:{:4f} test ap {:4f} test auc{:4f}\n'.format(total_loss,train_ap, ap, auc,test_ap,test_auc))
             print('\ttotal time:{:.2f}s  prep time:{:.2f}s\n test time {:.2f}'.format(time.time()-epoch_start_time, time_prep,t_test))    
             print('alpha is {} beta is {}'.format(ada_param.alpha,ada_param.beta))
-            torch.save(model.module.state_dict(), get_checkpoint_path(e))
+            if not args.skip_eval:
+                torch.save(model.module.state_dict(), get_checkpoint_path(e))
         if args.model == 'TGN':
             pass
 #            print('weight {} {}\n'.format(tt.weight_count_local,tt.weight_count_remote))
 #            print('ssim {} {}\n'.format(tt.ssim_local/tt.ssim_cnt,tt.ssim_remote/tt.ssim_cnt))
-    torch.save(val_list,'all_{}/{}/{}/val_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.seed,args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
-    torch.save(loss_list,'all_{}/{}/{}/loss_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.seed,args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
-    torch.save(test_ap_list,'all_{}/{}/{}/test_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(args.seed,args.dataname,args.model,args.partition,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
+    if not args.skip_eval:
+        torch.save(val_list, result_dir/'val_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(partition_tag,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
+        torch.save(loss_list, result_dir/'loss_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(partition_tag,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
+        torch.save(test_ap_list, result_dir/'test_{}_{}_{}_{}_{}_{}_{}_{}.pt'.format(partition_tag,args.topk,dist.get_world_size(),dist.get_rank(),args.sample_type,args.probability,args.memory_type,args.shared_memory_ssim))
     
     print(avg_time)
-    if not early_stop:        
+    if (not args.skip_eval) and (not early_stop):
         dist.barrier()
         print(f"Loading the best model at epoch {early_stopper.best_epoch}")
         best_model_path = get_checkpoint_path(early_stopper.best_epoch)
         model.module.load_state_dict(torch.load(best_model_path)) 
-    print('best test AP:{:4f} test auc{:4f}'.format(*test_ap_list[early_stopper.best_epoch]))
+    if not args.skip_eval:
+        print('best test AP:{:4f} test auc{:4f}'.format(*test_ap_list[early_stopper.best_epoch]))
     val_list = torch.tensor(val_list)
     loss_list = torch.tensor(loss_list)
     print('test_dataset {} avg_time {} test time {}\n'.format(test_data.edges.shape[1],avg_time/epoch_cnt,total_test_time/epoch_cnt))
-    torch.save(model.module.state_dict(), MODEL_SAVE_PATH)
+    if not args.skip_eval:
+        torch.save(model.module.state_dict(), MODEL_SAVE_PATH)
     ctx.shutdown()
 
 
 if __name__ == "__main__":
     main()
-

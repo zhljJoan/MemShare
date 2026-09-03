@@ -1,4 +1,5 @@
 from ctypes import Union
+import os
 import starrygl
 import sys
 from os.path import abspath, join, dirname
@@ -97,7 +98,8 @@ class NeighborSampler(BaseSampler):
         node_part = None,
         edge_part = None,
         no_neg = False,
-        ada_param = None
+        ada_param = None,
+        hierarchical_compaction: Optional[bool] = None,
     ) -> None:
         r"""__init__
         Args:
@@ -124,6 +126,10 @@ class NeighborSampler(BaseSampler):
         assert graph_name is not None
         self.graph_name = graph_name
         self.no_neg = no_neg
+        self.hierarchical_compaction = (
+            os.environ.get('MEMSHARE_HIERARCHICAL_COMPACTION') == 'on'
+            if hierarchical_compaction is None else hierarchical_compaction
+        )
         if(tnb is None):
             if(graph_data.edge_ts is not None):
                 timestamp,ind = graph_data.edge_ts.sort()
@@ -228,6 +234,27 @@ class NeighborSampler(BaseSampler):
             sampled_nodes: the node sampled
             sampled_edge_index_list: the edge sampled
         """
+        if self.hierarchical_compaction:
+            if self.no_neg or self.num_layers != 1 or self.policy == 'identity':
+                raise RuntimeError(
+                    'hierarchical compaction requires one temporal layer '
+                    'with sampled negatives'
+                )
+            if nid_mapper is None or eid_mapper is None:
+                raise RuntimeError(
+                    'hierarchical compaction requires node and edge mappers'
+                )
+            if nid_mapper.device.type != 'cpu' or eid_mapper.device.type != 'cpu':
+                raise RuntimeError(
+                    'hierarchical compaction requires CPU ID mappers'
+                )
+            compact = self.p_sampler.sample_and_compact_hierarchical(
+                nodes.contiguous(), ts.contiguous(),
+                self.ada_param.beta if self.ada_param is not None else 0.0,
+                nid_mapper.contiguous(), eid_mapper.contiguous(),
+                dist.get_world_size(), False,
+            )
+            return None, {'_hierarchical_compaction': compact}
         if self.policy != 'identity':
             self.p_sampler.neighbor_sample_from_nodes(nodes.contiguous(), ts.contiguous(), None, self.ada_param.beta if self.ada_param is not None else None)
             ret = self.p_sampler.get_ret()
@@ -316,10 +343,15 @@ class NeighborSampler(BaseSampler):
                 seed, inverse_seed = seed.unique(return_inverse=True)
         """
         if self.no_neg:
-            out,metadata = self.sample_from_nodes(seed[:seed.shape[0]//3*2], seed_ts[:seed.shape[0]//3*2], is_unique=False)
+            out,metadata = self.sample_from_nodes(
+                seed[:seed.shape[0]//3*2], seed_ts[:seed.shape[0]//3*2],
+                is_unique=False, nid_mapper=nid_mapper,
+                eid_mapper=eid_mapper, out_device=out_device)
 
         else:
-            out,metadata = self.sample_from_nodes(seed, seed_ts, is_unique=False)
+            out,metadata = self.sample_from_nodes(
+                seed, seed_ts, is_unique=False, nid_mapper=nid_mapper,
+                eid_mapper=eid_mapper, out_device=out_device)
         src_pos_index = torch.arange(0,num_pos,dtype= torch.long,device=out_device)
         dst_pos_index = torch.arange(num_pos,2*num_pos,dtype= torch.long,device=out_device)
         if neg_sampling.is_triplet() or neg_sampling.is_tgbtriplet():

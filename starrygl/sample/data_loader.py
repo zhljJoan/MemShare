@@ -1,5 +1,6 @@
 from collections import deque
 from enum import Enum
+import os
 import pickle
 import queue
 import threading
@@ -28,6 +29,37 @@ import data_loader as data_loader
 import concurrent.futures
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=1) 
 stream = torch.cuda.Stream()
+
+
+def _prepare_historical_input(block, mailbox, refresh_shared):
+    if (
+        os.environ.get('MEMSHARE_COMPACT_MEMORY_OPS') == 'on'
+        and hasattr(block, '_memshare_memory_object')
+        and hasattr(block, '_memshare_dist_nid_object')
+    ):
+        historical_memory = block._memshare_memory_object.clone()
+        if refresh_shared:
+            object_ids = block._memshare_dist_nid_object
+            shared_mask = DistIndex(object_ids).is_shared
+            shared_index = mailbox.is_shared_mask[
+                DistIndex(object_ids[shared_mask]).loc]
+            historical_memory[shared_mask] = (
+                mailbox.historical_cache.local_historical_data[shared_index])
+        block._memshare_historical_memory_object = historical_memory
+        return
+
+    block.srcdata['his_mem'] = block.srcdata['mem'].clone()
+    block.srcdata['his_ts'] = block.srcdata['mail_ts'].clone()
+    if refresh_shared:
+        shared_mask = DistIndex(block.srcdata['ID']).is_shared
+        shared_index = mailbox.is_shared_mask[
+            DistIndex(block.srcdata['ID']).loc[shared_mask]]
+        block.srcdata['his_mem'][shared_mask] = (
+            mailbox.historical_cache.local_historical_data[shared_index])
+        block.srcdata['his_ts'][shared_mask] = (
+            mailbox.historical_cache.local_ts[shared_index].reshape(-1, 1))
+
+
 class DistributedDataLoader:
     ''' 
     We will perform feature fetch in the data loader.
@@ -289,13 +321,8 @@ class DistributedDataLoader:
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid, is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,mfgs,dist_nid,dist_eid)
                 if(self.mailbox is not None and self.mailbox.historical_cache is not None):
-                        id = batch_data[1][0][0].srcdata['ID']
-                        mask = DistIndex(id).is_shared
-                        batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
-                        batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
-                        indx =  self.mailbox.is_shared_mask[DistIndex(batch_data[1][0][0].srcdata['ID']).loc[mask]]
-                        batch_data[1][0][0].srcdata['his_mem'][mask] = self.mailbox.historical_cache.local_historical_data[indx]
-                        batch_data[1][0][0].srcdata['his_ts'][mask] = self.mailbox.historical_cache.local_ts[indx].reshape(-1,1)
+                        _prepare_historical_input(
+                            batch_data[1][0][0], self.mailbox, True)
                 self.recv_idxs += 1
                 assert batch_data is not None
                 return root,mfgs,metadata
@@ -318,8 +345,8 @@ class DistributedDataLoader:
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid,  is_local,out_device=self.device)
                 prepare_input(node_feat,edge_feat,mem,batch_data[1],dist_nid,dist_eid)
                 if(self.mailbox is not None and self.mailbox.historical_cache is not None):
-                    batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
-                    batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
+                    _prepare_historical_input(
+                        batch_data[1][0][0], self.mailbox, False)
                 
 
                 self.recv_idxs += 1
@@ -360,13 +387,8 @@ class DistributedDataLoader:
                         node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,   dist_nid,is_local,out_device=self.device)
                     prepare_input(node_feat,edge_feat,mem,batch_data[1],dist_nid,dist_eid)
                     if(self.mailbox is not None and self.mailbox.historical_cache is not None):
-                        id = batch_data[1][0][0].srcdata['ID']
-                        mask = DistIndex(id).is_shared
-                        batch_data[1][0][0].srcdata['his_mem']  = batch_data[1][0][0].srcdata['mem'].clone()
-                        batch_data[1][0][0].srcdata['his_ts']  = batch_data[1][0][0].srcdata['mail_ts'].clone()
-                        indx =  self.mailbox.is_shared_mask[DistIndex(batch_data[1][0][0].srcdata['ID']).loc[mask]]
-                        batch_data[1][0][0].srcdata['his_mem'][mask] = self.mailbox.historical_cache.local_historical_data[indx]
-                        batch_data[1][0][0].srcdata['his_ts'][mask] = self.mailbox.historical_cache.local_ts[indx].reshape(-1,1)
+                        _prepare_historical_input(
+                            batch_data[1][0][0], self.mailbox, True)
                     
                     self.recv_idxs += 1
                 else:

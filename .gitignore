@@ -169,6 +169,7 @@ cython_debug/
 
 *.pt
 *.out
+*.ncu-rep
 /*.out
 /a.out
 

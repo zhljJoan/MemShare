@@ -160,7 +160,7 @@ class SharedMailBox():
     def get_update_mail(self,dist_indx_mapper,
                  src,dst,ts,edge_feats,
                  memory,embedding=None,use_src_emb=False,use_dst_emb=False,
-                 block = None,Reduce_score=None,):
+                 block = None,Reduce_score=None,selection=None):
         if edge_feats is not None:
             edge_feats = edge_feats.to(self.device).to(self.mailbox.dtype)
         src = src.to(self.device)
@@ -179,6 +179,16 @@ class SharedMailBox():
             dst_mail = torch.cat([dst_mail, edge_feats], dim=1)
         mail = torch.cat([src_mail, dst_mail], dim=0)
         mail_ts = torch.cat((ts,ts),-1).to(self.device).to(self.mailbox_ts.dtype)
+        if selection is not None:
+            if self.deliver_to != 'self' or Reduce_score is not None:
+                raise ValueError(
+                    'compact latest selection requires self delivery without score reduction')
+            index, selected = selection
+            return (
+                index,
+                mail.index_select(0, selected),
+                mail_ts.index_select(0, selected),
+            )
             #print(mail_ts)
         #print(self.deliver_to)
         if self.deliver_to == 'neighbors':
@@ -591,4 +601,3 @@ class SharedMailBox():
         return _get_pin(self._mem_pins, layer, rows, self.node_memory.shape[1:])
     def  _get_mail_pin(self, layer: int, rows: int) -> torch.Tensor:
         return _get_pin(self._mail_pins, layer, rows, self.mailbox.shape[1:])
- 

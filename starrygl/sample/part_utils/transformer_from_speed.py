@@ -12,6 +12,12 @@ from starrygl.module.historical_cache import CachePushRoute, HistoricalCache
 from starrygl.sample.graph_core import DistributedGraphStore
 from starrygl.sample.part_utils.partition_tgnn import partition_load
 
+def _load_index_file(value):
+    if not isinstance(value, str):
+        return value
+    data = np.loadtxt(value, dtype=np.int64)
+    return torch.from_numpy(np.atleast_1d(data)).long()
+
 def load_feat(d, node_num = 0, edge_num = 0, rand_de=0, rand_dn=0):
     node_feats = None
     if os.path.exists('/mnt/nfs/fzz/TGL-DATA/{}/node_features.pt'.format(d)):
@@ -133,10 +139,10 @@ def load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev = Tru
     dst = torch.from_numpy(np.array(df.dst.values)).long()  
     print('tot edge {} circ edge {} same edge {}\n'.format(src.shape[0],torch.stack((src,dst)).unique(dim = 1).shape[1],(src==dst).sum().item()))
     ts = torch.from_numpy(np.array(df.time.values)).long()
+    num_node = max(src.max().item(),dst.max().item())+1
     train_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 0)
     val_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 1)
     test_mask = (torch.from_numpy(np.array(df.ext_roll.values)) == 2)   
-    num_node = max(src.max().item(),dst.max().item())+1 
     dim_feats = [0, 0, 0, 0, 0, 0, 0, 0]
     if ctx.local_rank == 0:
         _node_feats, _edge_feats = load_feat(data, num_node, src.shape[0], 172, 172)
@@ -182,6 +188,9 @@ def load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev = Tru
         val_mask = val_mask[reid]
         test_mask = test_mask[reid]
         edge_feats = None if edge_feats is None else edge_feats[reid]
+    node_i = _load_index_file(node_i)
+    shared_node = _load_index_file(shared_node)
+    edge_i = _load_index_file(edge_i)
     if sample_add_rev:
         sampler_full_graph = {'edge_index': torch.cat((torch.cat((src.reshape(-1,1),dst.reshape(-1,1)),dim=1).reshape(1,-1),
                                                    torch.cat((dst.reshape(-1,1),src.reshape(-1,1)),dim=1).reshape(1,-1)),dim=0),'ts':ts.reshape(-1,1).repeat(1,2).reshape(-1),
@@ -288,9 +297,7 @@ def load_from_speed(data,seed,top,sampler_graph_add_rev,device=torch.device('cud
         node_i = '{}/{}/{}/{}_{}parts_top{}/output{}.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
         shared_node = '{}/{}/{}/{}_{}parts_top{}/outputshared.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top)
         edge_i = '{}/{}/{}/{}_{}parts_top{}/edge_output{}.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top,ctx.memory_group_rank)
+        if not os.path.exists(shared_node):
+            shared_node = '{}/{}/{}/{}_{}parts_top{}/outputputshared.txt'.format(partition_path,data,seed,data,ctx.memory_group_size,top)
       
         return load_from_shared_node_partition(data,node_i,shared_node,sample_add_rev=sampler_graph_add_rev,edge_i=edge_i,reid=None,device=device,feature_device=feature_device)
-
-
-
-

@@ -25,6 +25,10 @@ class ParallelSampler
         th::Tensor eid_inv;
         th::Tensor unq_id;
         th::Tensor first_block_id;
+        bool capture_hierarchical_compaction = false;
+        vector<TemporalGraphBlock> hierarchical_thread_blocks;
+        double hierarchical_sampling_time = 0;
+        double hierarchical_compaction_time = 0;
         double init_boundary_probability;
         vector<unsigned int> loc_seeds;
         ParallelSampler(TemporalNeighborBlock& _tnb, NodeIDType _num_nodes, EdgeIDType _num_edges, int _threads, 
@@ -62,6 +66,14 @@ class ParallelSampler
         void union_to_vector(vector<T> *p, vector<T> &to_vec);
         void sample_unique(     th::Tensor seed, th::Tensor seed_ts,
                                 th::Tensor nid_mapper, th::Tensor eid_mapper,string out_device);
+        vector<th::Tensor> sample_and_compact_hierarchical(
+                                th::Tensor seed,
+                                th::Tensor seed_ts,
+                                double boundary_probability,
+                                th::Tensor nid_mapper,
+                                th::Tensor eid_mapper,
+                                int64_t num_parts,
+                                bool pin_memory);
 };
 
 
@@ -363,6 +375,17 @@ void ParallelSampler :: neighbor_sample_from_nodes_with_before_layer(
         each_begin[i]=size;
         size += s;
     }
+    if(capture_hierarchical_compaction){
+        AT_ASSERTM(
+            num_layers == 1 && cur_layer == 0,
+            "hierarchical compaction currently requires one sampling layer"
+        );
+        hierarchical_thread_blocks = std::move(tgb_i);
+        ret[0].tot_time += omp_get_wtime() - tot_start_time;
+        ret[0].sample_edge_num += size;
+        py::gil_scoped_acquire acquire;
+        return;
+    }
     if(policy == "boundery_recent_decay")
         ret[cur_layer].sample_weight.resize(size);
     ret[cur_layer].eid.resize(size);
@@ -456,4 +479,323 @@ void ParallelSampler::sample_unique(th::Tensor seed, th::Tensor seed_ts,
     array = th::arange(first_index.size(0),torch::TensorOptions().dtype(unq_id.dtype()).device(device));
     first_block_id.index_copy_(0,first_index,array);
     first_block_id = first_block_id.index_select(0,unq_id).contiguous();
+}
+
+vector<th::Tensor> ParallelSampler::sample_and_compact_hierarchical(
+        th::Tensor seed,
+        th::Tensor seed_ts,
+        double boundary_probability,
+        th::Tensor nid_mapper,
+        th::Tensor eid_mapper,
+        int64_t num_parts,
+        bool pin_memory){
+    AT_ASSERTM(num_layers == 1,
+               "hierarchical compaction currently requires one sampling layer");
+    AT_ASSERTM(tnb.with_timestamp,
+               "hierarchical compaction requires temporal sampling");
+    AT_ASSERTM(num_parts > 0, "num_parts must be positive");
+    AT_ASSERTM(seed.device().is_cpu() && seed_ts.device().is_cpu(),
+               "hierarchical compaction requires CPU seed tensors");
+    AT_ASSERTM(nid_mapper.device().is_cpu() && eid_mapper.device().is_cpu(),
+               "hierarchical compaction requires CPU ID mappers");
+    AT_ASSERTM(seed.scalar_type() == th::kInt64
+               && seed_ts.scalar_type() == th::kInt64
+               && nid_mapper.scalar_type() == th::kInt64
+               && eid_mapper.scalar_type() == th::kInt64,
+               "hierarchical compaction requires int64 inputs");
+    AT_ASSERTM(seed.numel() == seed_ts.numel(),
+               "seed nodes and timestamps must align");
+
+    seed = seed.contiguous();
+    seed_ts = seed_ts.contiguous();
+    nid_mapper = nid_mapper.contiguous();
+    eid_mapper = eid_mapper.contiguous();
+
+    capture_hierarchical_compaction = true;
+    hierarchical_thread_blocks.clear();
+    try {
+        neighbor_sample_from_nodes(
+            seed,
+            seed_ts,
+            nullopt,
+            optional<double>(boundary_probability)
+        );
+    } catch (...) {
+        capture_hierarchical_compaction = false;
+        hierarchical_thread_blocks.clear();
+        throw;
+    }
+    capture_hierarchical_compaction = false;
+    hierarchical_sampling_time = ret[0].tot_time;
+
+    vector<th::Tensor> output;
+    {
+        py::gil_scoped_release release;
+        const double compact_started = omp_get_wtime();
+        const int64_t root_count = seed.numel();
+        const int64_t *seed_ptr = seed.data_ptr<int64_t>();
+        const int64_t *seed_ts_ptr = seed_ts.data_ptr<int64_t>();
+        const int64_t *nid_mapper_ptr = nid_mapper.data_ptr<int64_t>();
+        const int64_t *eid_mapper_ptr = eid_mapper.data_ptr<int64_t>();
+
+        struct LocalCompact {
+            vector<pair<NodeIDType, TimeStampType>> states;
+            vector<EdgeIDType> edges;
+            vector<int32_t> occurrence_to_state;
+            vector<int32_t> occurrence_to_edge;
+        };
+        vector<LocalCompact> local(threads);
+
+        for(int tid = 0; tid < threads; ++tid){
+            const auto &block = hierarchical_thread_blocks[tid];
+            const size_t count = block.eid.size();
+            AT_ASSERTM(block.sample_nodes.size() == count
+                       && block.sample_nodes_ts.size() == count
+                       && block.src_index.size() == count
+                       && block.delta_ts.size() == count,
+                       "sampled occurrence fields must align");
+            for(const int64_t source_index : block.src_index){
+                AT_ASSERTM(source_index >= 0 && source_index < root_count,
+                           "sample source index is outside root occurrences");
+            }
+        }
+
+#pragma omp parallel for schedule(static, 1)
+        for(int tid = 0; tid < threads; ++tid){
+            auto &block = hierarchical_thread_blocks[tid];
+            auto &result = local[tid];
+            const size_t count = block.eid.size();
+            phmap::flat_hash_map<
+                pair<NodeIDType, TimeStampType>, int32_t
+            > state_slots;
+            phmap::flat_hash_map<EdgeIDType, int32_t> edge_slots;
+            state_slots.reserve(count);
+            edge_slots.reserve(count);
+            result.states.reserve(count);
+            result.edges.reserve(count);
+            result.occurrence_to_state.resize(count);
+            result.occurrence_to_edge.resize(count);
+            for(size_t index = 0; index < count; ++index){
+                const pair<NodeIDType, TimeStampType> state{
+                    block.sample_nodes[index],
+                    block.sample_nodes_ts[index]
+                };
+                auto state_result = state_slots.emplace(
+                    state, static_cast<int32_t>(result.states.size())
+                );
+                if(state_result.second){
+                    result.states.push_back(state);
+                }
+                result.occurrence_to_state[index] = state_result.first->second;
+
+                const EdgeIDType edge = block.eid[index];
+                auto edge_result = edge_slots.emplace(
+                    edge, static_cast<int32_t>(result.edges.size())
+                );
+                if(edge_result.second){
+                    result.edges.push_back(edge);
+                }
+                result.occurrence_to_edge[index] = edge_result.first->second;
+            }
+        }
+
+        size_t local_state_count = 0;
+        size_t local_edge_count = 0;
+        int64_t edge_occurrences = 0;
+        for(int tid = 0; tid < threads; ++tid){
+            local_state_count += local[tid].states.size();
+            local_edge_count += local[tid].edges.size();
+            edge_occurrences += static_cast<int64_t>(
+                hierarchical_thread_blocks[tid].eid.size()
+            );
+        }
+        AT_ASSERTM(root_count + local_state_count
+                       < static_cast<size_t>(INT32_MAX)
+                   && local_edge_count < static_cast<size_t>(INT32_MAX),
+                   "hierarchical compaction exceeds int32 local slots");
+
+        phmap::flat_hash_map<
+            pair<NodeIDType, TimeStampType>, int32_t
+        > state_slots;
+        phmap::flat_hash_map<NodeIDType, int32_t> node_slots;
+        phmap::flat_hash_map<EdgeIDType, int32_t> edge_slots;
+        state_slots.reserve(root_count + local_state_count);
+        node_slots.reserve(root_count + local_state_count);
+        edge_slots.reserve(local_edge_count);
+        vector<pair<NodeIDType, TimeStampType>> states;
+        vector<NodeIDType> nodes;
+        vector<EdgeIDType> edges;
+        states.reserve(root_count + local_state_count);
+        nodes.reserve(root_count + local_state_count);
+        edges.reserve(local_edge_count);
+        vector<int64_t> root_to_state(root_count);
+
+        auto add_state = [&](const pair<NodeIDType, TimeStampType> &state){
+            auto result = state_slots.emplace(
+                state, static_cast<int32_t>(states.size())
+            );
+            if(result.second){
+                states.push_back(state);
+                auto node_result = node_slots.emplace(
+                    state.first, static_cast<int32_t>(nodes.size())
+                );
+                if(node_result.second){
+                    nodes.push_back(state.first);
+                }
+            }
+            return result.first->second;
+        };
+
+        for(int64_t index = 0; index < root_count; ++index){
+            root_to_state[index] = add_state(
+                {seed_ptr[index], seed_ts_ptr[index]}
+            );
+        }
+        const int64_t num_dst = static_cast<int64_t>(states.size());
+
+        vector<vector<int32_t>> local_state_to_global(threads);
+        for(int tid = 0; tid < threads; ++tid){
+            auto &mapping = local_state_to_global[tid];
+            mapping.resize(local[tid].states.size());
+            for(size_t index = 0; index < local[tid].states.size(); ++index){
+                mapping[index] = add_state(local[tid].states[index]);
+            }
+        }
+
+        for(int tid = 0; tid < threads; ++tid){
+            for(const EdgeIDType edge : local[tid].edges){
+                auto result = edge_slots.emplace(
+                    edge, static_cast<int32_t>(edges.size())
+                );
+                if(result.second){
+                    edges.push_back(edge);
+                }
+            }
+        }
+
+        auto finalize_objects = [num_parts](
+                const auto &objects,
+                const int64_t *mapper,
+                int64_t mapper_size,
+                auto &slots,
+                const th::TensorOptions &options){
+            vector<vector<pair<int64_t, int64_t>>> buckets(num_parts);
+            for(const int64_t object : objects){
+                AT_ASSERTM(object >= 0 && object < mapper_size,
+                           "sampled object ID is outside mapper");
+                const int64_t distributed_id = mapper[object];
+                const int64_t owner = static_cast<int64_t>(
+                    (static_cast<uint64_t>(distributed_id) >> 50) & 0xFFFFULL
+                );
+                AT_ASSERTM(owner >= 0 && owner < num_parts,
+                           "distributed ID owner is outside num_parts");
+                buckets[owner].push_back({distributed_id, object});
+            }
+            th::Tensor compact = th::empty(
+                {static_cast<int64_t>(objects.size())}, options
+            );
+            int64_t *compact_ptr = compact.data_ptr<int64_t>();
+            int64_t position = 0;
+            for(int64_t owner = 0; owner < num_parts; ++owner){
+                for(const auto &item : buckets[owner]){
+                    compact_ptr[position] = item.first;
+                    slots[item.second] = static_cast<int32_t>(position++);
+                }
+            }
+            return compact;
+        };
+
+        auto int64_options = th::TensorOptions()
+            .dtype(th::kInt64)
+            .device(th::kCPU)
+            .pinned_memory(pin_memory);
+        th::Tensor dist_nodes = finalize_objects(
+            nodes, nid_mapper_ptr, nid_mapper.numel(), node_slots,
+            int64_options
+        );
+        th::Tensor dist_edges = finalize_objects(
+            edges, eid_mapper_ptr, eid_mapper.numel(), edge_slots,
+            int64_options
+        );
+
+        th::Tensor state_to_node = th::empty(
+            {static_cast<int64_t>(states.size())}, int64_options
+        );
+        th::Tensor state_timestamps = th::empty(
+            {static_cast<int64_t>(states.size())}, int64_options
+        );
+        int64_t *state_to_node_ptr = state_to_node.data_ptr<int64_t>();
+        int64_t *state_ts_ptr = state_timestamps.data_ptr<int64_t>();
+        const auto &final_node_slots = node_slots;
+#pragma omp parallel for schedule(static)
+        for(int64_t index = 0;
+            index < static_cast<int64_t>(states.size());
+            ++index){
+            state_to_node_ptr[index] = final_node_slots.at(
+                states[index].first
+            );
+            state_ts_ptr[index] = states[index].second;
+        }
+
+        th::Tensor root_mapping = th::empty({root_count}, int64_options);
+        std::copy(
+            root_to_state.begin(), root_to_state.end(),
+            root_mapping.data_ptr<int64_t>()
+        );
+        th::Tensor row = th::empty({edge_occurrences}, int64_options);
+        th::Tensor col = th::empty({edge_occurrences}, int64_options);
+        th::Tensor edge_mapping = th::empty(
+            {edge_occurrences}, int64_options
+        );
+        th::Tensor delta_ts = th::empty({edge_occurrences}, int64_options);
+        vector<int64_t> thread_offsets(threads + 1, 0);
+        for(int tid = 0; tid < threads; ++tid){
+            thread_offsets[tid + 1] = thread_offsets[tid]
+                + hierarchical_thread_blocks[tid].eid.size();
+        }
+        int64_t *row_ptr = row.data_ptr<int64_t>();
+        int64_t *col_ptr = col.data_ptr<int64_t>();
+        int64_t *edge_mapping_ptr = edge_mapping.data_ptr<int64_t>();
+        int64_t *delta_ptr = delta_ts.data_ptr<int64_t>();
+        const auto &final_edge_slots = edge_slots;
+#pragma omp parallel for schedule(static, 1)
+        for(int tid = 0; tid < threads; ++tid){
+            const auto &block = hierarchical_thread_blocks[tid];
+            const auto &result = local[tid];
+            const int64_t offset = thread_offsets[tid];
+            for(size_t index = 0; index < block.eid.size(); ++index){
+                const int64_t output_index = offset + index;
+                row_ptr[output_index] = local_state_to_global[tid][
+                    result.occurrence_to_state[index]
+                ];
+                const int64_t source_index = block.src_index[index];
+                col_ptr[output_index] = root_to_state[source_index];
+                const EdgeIDType edge = result.edges[
+                    result.occurrence_to_edge[index]
+                ];
+                edge_mapping_ptr[output_index] = final_edge_slots.at(edge);
+                delta_ptr[output_index] = block.delta_ts[index];
+            }
+        }
+
+        th::Tensor sizes = th::tensor(
+            {static_cast<int64_t>(states.size()), num_dst},
+            int64_options
+        );
+        output = {
+            dist_nodes,
+            dist_edges,
+            state_to_node,
+            state_timestamps,
+            root_mapping,
+            row,
+            col,
+            edge_mapping,
+            delta_ts,
+            sizes,
+        };
+        hierarchical_compaction_time = omp_get_wtime() - compact_started;
+        hierarchical_thread_blocks.clear();
+    }
+    return output;
 }

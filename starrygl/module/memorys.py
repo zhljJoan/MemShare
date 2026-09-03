@@ -5,6 +5,14 @@ import time
 from os.path import abspath, join, dirname
 import os
 from starrygl.distributed.context import DistributedContext
+from starrygl.module.compact_memory_ops import (
+    attach_node_features,
+    compact_transformer_memory,
+    latest_object_selection,
+    normalize_transition,
+    shared_object_plan,
+)
+from starrygl.module.compact_gru import compact_gru_cell, compact_rnn_cell
 from starrygl.module.Filter import Filter
 from starrygl.sample.count_static import time_count
 import sys
@@ -22,6 +30,96 @@ from starrygl.sample.count_static import time_count as tt
 
 cnt_local = 0
 cnt_all_node = 0
+
+
+class _MemoryUpdaterPhaseProfiler:
+    def __init__(self, enabled=False, cuda_warmup=32, cuda_stride=8):
+        self.enabled = bool(enabled)
+        self.cuda_warmup = max(0, int(cuda_warmup))
+        self.cuda_stride = max(1, int(cuda_stride))
+        self.reset()
+
+    def reset(self):
+        self.calls = 0
+        self.cuda_profiled_calls = 0
+        self._sample_cuda = False
+        self._host_seconds = {}
+        self._host_calls = {}
+        self._cuda_events = {}
+
+    def begin_call(self):
+        if not self.enabled:
+            return
+        call = self.calls
+        self.calls += 1
+        self._sample_cuda = (
+            torch.cuda.is_available()
+            and call >= self.cuda_warmup
+            and (call - self.cuda_warmup) % self.cuda_stride == 0
+        )
+        if self._sample_cuda:
+            self.cuda_profiled_calls += 1
+
+    def start(self, phase):
+        if not self.enabled:
+            return None
+        cuda_start = None
+        if self._sample_cuda:
+            cuda_start = torch.cuda.Event(enable_timing=True)
+            cuda_start.record()
+        return time.perf_counter(), cuda_start
+
+    def stop(self, phase, token):
+        if token is None:
+            return
+        host_start, cuda_start = token
+        self._host_seconds[phase] = (
+            self._host_seconds.get(phase, 0.0)
+            + time.perf_counter() - host_start
+        )
+        self._host_calls[phase] = self._host_calls.get(phase, 0) + 1
+        if cuda_start is not None:
+            cuda_end = torch.cuda.Event(enable_timing=True)
+            cuda_end.record()
+            self._cuda_events.setdefault(phase, []).append(
+                (cuda_start, cuda_end)
+            )
+
+    def stats(self):
+        if not self.enabled:
+            return {}
+        phases = {}
+        for phase in sorted(set(self._host_seconds) | set(self._cuda_events)):
+            events = self._cuda_events.get(phase, [])
+            if events:
+                events[-1][1].synchronize()
+            cuda_seconds = sum(
+                start.elapsed_time(end) for start, end in events
+            ) / 1000.0
+            host_calls = self._host_calls.get(phase, 0)
+            host_seconds = self._host_seconds.get(phase, 0.0)
+            phases[phase] = {
+                'host_calls': host_calls,
+                'host_seconds': host_seconds,
+                'host_mean_ms': (
+                    host_seconds * 1000.0 / host_calls if host_calls else 0.0
+                ),
+                'cuda_sample_calls': len(events),
+                'cuda_sample_seconds': cuda_seconds,
+                'cuda_sample_mean_ms': (
+                    cuda_seconds * 1000.0 / len(events) if events else 0.0
+                ),
+            }
+        return {
+            'enabled': True,
+            'calls': self.calls,
+            'cuda_profiled_calls': self.cuda_profiled_calls,
+            'cuda_warmup': self.cuda_warmup,
+            'cuda_stride': self.cuda_stride,
+            'phases': phases,
+        }
+
+
 def get_cnt_local():
     global cnt_local
     print('local {}'.format(cnt_local))
@@ -208,7 +306,7 @@ class HistoricalMemeoryUpdater(torch.nn.Module):
                     else:
                         transition_dense = self.filter.get_incretment(DistIndex(b.srcdata['ID']).loc)
                     transition_dense[DistIndex(b.srcdata['ID']).is_shared]*=2
-                    if not (transition_dense.max().item() == 0):      
+                    if transition_dense.numel() > 0 and not (transition_dense.max().item() == 0):
                         transition_dense -= transition_dense.min()
                         transition_dense /=transition_dense.max() 
                         transition_dense = 2*transition_dense - 1
@@ -261,7 +359,26 @@ class TransformerMemoryUpdater(torch.nn.Module):
         self.att_dropout = torch.nn.Dropout(train_param['att_dropout'])
         
 
-    def forward(self, b, param = None):
+    def forward(self, b, param = None, compact=False):
+        if (
+            compact
+            and not b.srcdata['mem'].requires_grad
+            and hasattr(b, '_memshare_mailbox_object')
+            and hasattr(b, '_memshare_mailbox_ts_object')
+            and hasattr(b, '_memshare_memory_object')
+            and not b._memshare_mailbox_object.requires_grad
+            and not b._memshare_mailbox_ts_object.requires_grad
+            and not b._memshare_memory_object.requires_grad
+        ):
+            return compact_transformer_memory(
+                self,
+                b._memshare_mailbox_object,
+                b._memshare_memory_object,
+                b._memshare_mailbox_ts_object,
+                b.srcdata['__ID'],
+                b.srcdata['ts'],
+                b.srcdata['mem'],
+            )
         Q = self.w_q(b.srcdata['mem']).reshape((b.num_src_nodes(), self.att_h, -1))
         mails = b.srcdata['mem_input'].reshape((b.num_src_nodes(), self.memory_param['mailbox_size'], -1))
         if self.dim_time > 0:
@@ -293,8 +410,21 @@ class TransformerMemoryUpdater(torch.nn.Module):
                               update_cross_mm = False)
 """
 class AsyncMemeoryUpdater(torch.nn.Module):
+
+    def _phase_start(self, phase):
+        return self._memory_phase_profiler.start(phase)
+
+    def _phase_stop(self, phase, token):
+        self._memory_phase_profiler.stop(phase, token)
+
+    def reset_phase_timing(self):
+        self._memory_phase_profiler.reset()
+
+    def phase_timing_stats(self):
+        return self._memory_phase_profiler.stats()
     
     def all_update_func(self,index,memory,memory_ts,mail_index,mail,mail_ts,nxt_fetch_func,spread_mail=False):
+        phase = self._phase_start('shared_update_submit')
         self.mailbox.set_memory_all_reduce(
                                            index,memory,memory_ts,
                                            mail_index,mail,mail_ts,
@@ -303,17 +433,23 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                                            wait_submit=False,spread_mail=spread_mail,
                                            update_cross_mm=True,
                                            )
+        self._phase_stop('shared_update_submit', phase)
         
         if nxt_fetch_func is not None:
+            phase = self._phase_start('next_batch_fetch_launch')
             nxt_fetch_func()
+            self._phase_stop('next_batch_fetch_launch', phase)
     def historical_func(self,index,memory,memory_ts,mail_index,mail,mail_ts,nxt_fetch_func,spread_mail=False):
+        phase = self._phase_start('previous_shared_sync')
         self.ada_param.update_memory_update_time(self.ada_param.last_start_event_memory_update)
         self.mailbox.sychronize_shared()
         self.mailbox.handle_last_async()
+        self._phase_stop('previous_shared_sync', phase)
 
         submit_to_queue = False
         if nxt_fetch_func is not None:
             submit_to_queue = True
+        phase = self._phase_start('shared_update_submit')
         self.mailbox.set_memory_all_reduce(
                                            index,memory,memory_ts,
                                            mail_index,mail,mail_ts,
@@ -322,19 +458,47 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                                            wait_submit=submit_to_queue,spread_mail=spread_mail,
                                            update_cross_mm=False,
                                            )
+        self._phase_stop('shared_update_submit', phase)
         
         if nxt_fetch_func is not None:
+            phase = self._phase_start('next_batch_fetch_launch')
             nxt_fetch_func()
+            self._phase_stop('next_batch_fetch_launch', phase)
 
     def local_func(self,index,memory,memory_ts,mail_index,mail,mail_ts,nxt_fetch_func,spread_mail=False):
         if nxt_fetch_func is not None:
+            phase = self._phase_start('next_batch_fetch_launch')
             nxt_fetch_func()
+            self._phase_stop('next_batch_fetch_launch', phase)
     def transformer_updater(self,b):
-        return self.ceil_updater(b)
+        return self.ceil_updater(b, compact=self.compact_memory_ops)
     def rnn_updater(self,b):
         if self.dim_time > 0:
                 #print(b.srcdata['ts'].shape,b.srcdata['mem_ts'].shape)
             time_feat = self.time_enc(b.srcdata['ts'] - b.srcdata['mem_ts'])
+            if self.compact_gru_update:
+                return compact_gru_cell(
+                    self.ceil_updater,
+                    b._memshare_mailbox_object,
+                    b._memshare_memory_object,
+                    time_feat,
+                    b.srcdata['__ID'],
+                    b.srcdata['mem'],
+                )
+            if (
+                self.compact_memory_ops
+                and self.memory_param['memory_update'] == 'rnn'
+                and hasattr(b, '_memshare_mailbox_object')
+                and hasattr(b, '_memshare_memory_object')
+            ):
+                return compact_rnn_cell(
+                    self.ceil_updater,
+                    b._memshare_mailbox_object,
+                    b._memshare_memory_object,
+                    time_feat,
+                    b.srcdata['__ID'],
+                    b.srcdata['mem'],
+                )
             #print(b.srcdata['mem_input'].dtype,b.srcdata['mem_ts'].dtype,b.srcdata['ts'].dtype,time_feat.dtype)
             b.srcdata['mem_input'] = torch.cat([b.srcdata['mem_input'], time_feat], dim=1)
 
@@ -344,6 +508,11 @@ class AsyncMemeoryUpdater(torch.nn.Module):
         self.dim_hid = dim_hid
         self.dim_node_feat = dim_node_feat
         self.memory_param = memory_param
+        self._memory_phase_profiler = _MemoryUpdaterPhaseProfiler(
+            enabled=memory_param.get('profile_memory_updater', False),
+            cuda_warmup=memory_param.get('memory_updater_profile_warmup', 32),
+            cuda_stride=memory_param.get('memory_updater_profile_stride', 8),
+        )
         self.dim_time = dim_time
         if memory_param['memory_update'] == 'transformer':
             self.ceil_updater = updater(memory_param, dim_in, dim_hid, dim_time, train_param)
@@ -351,6 +520,18 @@ class AsyncMemeoryUpdater(torch.nn.Module):
         else: 
             self.ceil_updater = updater(dim_in + dim_time, dim_hid)
             self.updater = self.rnn_updater
+        self.compact_gru_update = memory_param.get('compact_gru_update', False)
+        self.compact_memory_ops = memory_param.get('compact_memory_ops', False)
+        if self.compact_gru_update and (
+            memory_param['memory_update'] != 'gru' or dim_time <= 0
+        ):
+            raise ValueError('compact GRU update requires a time-aware GRU memory updater')
+        os.environ['MEMSHARE_COMPACT_GRU_UPDATE'] = (
+            'on' if self.compact_gru_update else 'off'
+        )
+        os.environ['MEMSHARE_COMPACT_MEMORY_OPS'] = (
+            'on' if self.compact_memory_ops else 'off'
+        )
         self.last_updated_memory = None
         self.last_updated_ts = None
         self.last_updated_nid = None
@@ -383,50 +564,145 @@ class AsyncMemeoryUpdater(torch.nn.Module):
             self.gamma = 1   
     def forward(self, mfg, param = None):
         for b in mfg:
+            self._memory_phase_profiler.begin_call()
+            phase = self._phase_start('raw_memory_update')
             updated_memory0 = self.updater(b)
-            mask = DistIndex(b.srcdata['ID']).is_shared
+            self._phase_stop('raw_memory_update', phase)
+
+            phase = self._phase_start('shared_mask_prepare')
+            compact_historical = (
+                self.compact_memory_ops
+                and self.mode == 'historical'
+                and hasattr(b, '_memshare_historical_memory_object')
+            )
+            if compact_historical:
+                state_to_uid = b.srcdata['__ID']
+                object_ids = b._memshare_dist_nid_object
+                shared_object_mask = DistIndex(object_ids).is_shared
+                shared_object_mask, mask, shared_rows = shared_object_plan(
+                    state_to_uid, shared_object_mask)
+            elif self.mode == 'historical':
+                mask = DistIndex(b.srcdata['ID']).is_shared
+            self._phase_stop('shared_mask_prepare', phase)
+
+            phase = self._phase_start('smooth_prediction')
             with torch.no_grad():
-                upd0 = torch.zeros_like(updated_memory0)
-                #print(upd0.dtype)
-                if self.mode == 'historical':
+                if compact_historical:
+                    shared_object_ids = object_ids[shared_object_mask]
+                    shared_ind_object = self.mailbox.is_shared_mask[
+                        DistIndex(shared_object_ids).loc]
+                    historical_object = (
+                        b._memshare_historical_memory_object[shared_object_mask])
+                    transition_object = normalize_transition(
+                        historical_object
+                        + self.filter.get_incretment(shared_ind_object))
+                    transition_state = transition_object.index_select(
+                        0, shared_rows)
+                    historical_state = historical_object.index_select(
+                        0, shared_rows)
+                    shared_ind = shared_ind_object.index_select(
+                        0, shared_rows)
+                elif self.mode == 'historical':
+                    upd0 = torch.zeros_like(updated_memory0)
+                    #print(upd0.dtype)
+                if self.mode == 'historical' and not compact_historical:
                     shared_ind = self.mailbox.is_shared_mask[DistIndex(b.srcdata['ID'][mask]).loc]
                     transition_dense = b.srcdata['his_mem'][mask] + self.filter.get_incretment(shared_ind)
-                    if not (transition_dense.max().item() == 0):      
+                    if transition_dense.numel() > 0 and not (transition_dense.max().item() == 0):
                         transition_dense -= transition_dense.min()
                         transition_dense /= transition_dense.max() 
                         transition_dense = 2*transition_dense - 1
                     upd0[mask] = transition_dense#b.srcdata['his_mem'][mask] + transition_dense
-                else:
-                    upd0[mask] = updated_memory0[mask]
-                    #updated_memory = updated_memory0
-            updated_memory = torch.where(mask.unsqueeze(1),torch.sigmoid(self.gamma)*updated_memory0 + (1-torch.sigmoid(self.gamma))*(upd0),updated_memory0)
+            self._phase_stop('smooth_prediction', phase)
+
+            phase = self._phase_start('smooth_blend')
+            if self.mode != 'historical':
+                updated_memory = updated_memory0
+            elif compact_historical:
+                updated_memory = updated_memory0.clone()
+                gamma = torch.sigmoid(self.gamma)
+                updated_memory[mask] = (
+                    gamma * updated_memory0[mask]
+                    + (1 - gamma) * transition_state)
+            else:
+                updated_memory = torch.where(mask.unsqueeze(1),torch.sigmoid(self.gamma)*updated_memory0 + (1-torch.sigmoid(self.gamma))*(upd0),updated_memory0)
+            self._phase_stop('smooth_blend', phase)
+
+            phase = self._phase_start('smooth_filter_update')
             with torch.no_grad():
                 if self.mode == 'historical':
-                    change = updated_memory[mask] - b.srcdata['his_mem'][mask]
+                    if compact_historical:
+                        change = updated_memory[mask] - historical_state
+                    else:
+                        change = updated_memory[mask] - b.srcdata['his_mem'][mask]
                     self.filter.update(shared_ind,change)
+            self._phase_stop('smooth_filter_update', phase)
+
+            phase = self._phase_start('state_snapshot')
             self.last_updated_ts = b.srcdata['ts'].detach().clone()
             self.last_updated_memory = updated_memory.detach().clone()
             self.last_updated_nid = b.srcdata['ID'].detach().clone()
+            self._phase_stop('state_snapshot', phase)
             
             with torch.no_grad():
                 if param is not None:
+                    phase = self._phase_start('mail_memory_prepare')
                     _,src,dst,ts,edge_feats,nxt_fetch_func = param
                     indx = torch.cat((src,dst))
-                    index, memory, memory_ts = self.mailbox.get_update_memory(self.last_updated_nid[indx],
-                                                                    self.last_updated_memory[indx],
-                                                                    self.last_updated_ts[indx],
-                                                                    None)
-                    #print(index.shape[0])
-                    if param[0]:
+                    compact_persistent = (
+                        self.compact_memory_ops
+                        and param[0]
+                        and self.mailbox.deliver_to == 'self'
+                        and getattr(
+                            b, '_memshare_hierarchical_compaction', False)
+                        and hasattr(b, '_memshare_dist_nid_object')
+                    )
+                    if compact_persistent:
+                        mail_candidate_ts = torch.cat((ts, ts), -1).to(
+                            device=b.srcdata['__ID'].device,
+                            dtype=self.mailbox.mailbox_ts.dtype,
+                        )
+                        index, memory_selected = latest_object_selection(
+                            b.srcdata['__ID'], indx,
+                            self.last_updated_ts.index_select(0, indx),
+                            b._memshare_dist_nid_object)
+                        index0, mail_selected = latest_object_selection(
+                            b.srcdata['__ID'], indx, mail_candidate_ts,
+                            b._memshare_dist_nid_object)
+                        selected_states = indx.index_select(
+                            0, memory_selected)
+                        memory = self.last_updated_memory.index_select(
+                            0, selected_states)
+                        memory_ts = self.last_updated_ts.index_select(
+                            0, selected_states)
                         index0, mail, mail_ts = self.mailbox.get_update_mail(
                                                     b.srcdata['ID'],src,dst,ts,edge_feats,
                                                     self.last_updated_memory, 
-                                                    None,False,False,block=b
+                                                    None,False,False,block=b,
+                                                    selection=(index0, mail_selected),
                                                 )
+                    else:
+                        index, memory, memory_ts = self.mailbox.get_update_memory(self.last_updated_nid[indx],
+                                                                        self.last_updated_memory[indx],
+                                                                        self.last_updated_ts[indx],
+                                                                        None)
+                        #print(index.shape[0])
+                        if param[0]:
+                            index0, mail, mail_ts = self.mailbox.get_update_mail(
+                                                        b.srcdata['ID'],src,dst,ts,edge_feats,
+                                                        self.last_updated_memory,
+                                                        None,False,False,block=b
+                                                    )
                     local_mask = (DistIndex(index).part==torch.distributed.get_rank())
                     local_mask_mail = (DistIndex(index0).part==torch.distributed.get_rank())
-                    self.mailbox.set_mailbox_local(DistIndex(index0[local_mask_mail]).loc,mail[local_mask_mail],mail_ts[local_mask_mail],Reduce_Op = 'max')
-                    self.mailbox.set_memory_local(DistIndex(index[local_mask]).loc,memory[local_mask],memory_ts[local_mask], Reduce_Op = 'max')
+                    local_mail_index = DistIndex(index0[local_mask_mail]).loc
+                    local_index = DistIndex(index[local_mask]).loc
+                    self._phase_stop('mail_memory_prepare', phase)
+
+                    phase = self._phase_start('local_mail_memory_write')
+                    self.mailbox.set_mailbox_local(local_mail_index,mail[local_mask_mail],mail_ts[local_mask_mail])
+                    self.mailbox.set_memory_local(local_index,memory[local_mask],memory_ts[local_mask])
+                    self._phase_stop('local_mail_memory_write', phase)
                     is_deliver=(self.mailbox.deliver_to == 'neighbors')
                     self.update_hunk(index,memory,memory_ts,index0,mail,mail_ts,nxt_fetch_func,spread_mail= is_deliver)
 
@@ -435,13 +711,26 @@ class AsyncMemeoryUpdater(torch.nn.Module):
                 self.ada_param.last_start_event_gnn_aggregate = self.ada_param.start_event()
                 
 
+            phase = self._phase_start('feature_attach')
             if self.memory_param['combine_node_feature'] and self.dim_node_feat > 0:
-                if self.dim_node_feat == self.dim_hid:
+                if self.compact_memory_ops and hasattr(
+                        b, '_memshare_node_feat_object'):
+                    projection = (
+                        None if self.dim_node_feat == self.dim_hid
+                        else self.node_feat_map)
+                    b.srcdata['h'] = attach_node_features(
+                        updated_memory,
+                        b._memshare_node_feat_object,
+                        b.srcdata['__ID'],
+                        projection,
+                    )
+                elif self.dim_node_feat == self.dim_hid:
                     b.srcdata['h'] += updated_memory
                 else:
                     b.srcdata['h'] = updated_memory + self.node_feat_map(b.srcdata['h'])
             else:
                 b.srcdata['h'] = updated_memory
+            self._phase_stop('feature_attach', phase)
 
     def empty_cache(self):
         if self.mode == 'historical':

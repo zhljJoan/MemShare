@@ -1,0 +1,39 @@
+{
+  "baseline_median_ms": 2.8283575439453124,
+  "fused_median_ms": 2.3779225158691406,
+  "fused_reduction_pct": 15.925674921843655,
+  "speedup": 1.1894237617374743,
+  "baseline_rounds_ms": [
+    2.8287179565429685,
+    2.8283786010742187,
+    2.827795104980469,
+    2.8283575439453124,
+    2.828197326660156
+  ],
+  "fused_rounds_ms": [
+    2.3788748168945313,
+    2.3779225158691406,
+    2.377840270996094,
+    2.377881622314453,
+    2.378792572021484
+  ],
+  "kernel": "projected_segment_attention_edge_ids",
+  "baseline_variant": "preordered_index_select",
+  "fused_variant": "direct_edge_ids",
+  "shape": {
+    "destinations": 4096,
+    "edges": 65536,
+    "states": 8192,
+    "edge_objects": 4096,
+    "heads": 2,
+    "head_dim": 50,
+    "degree": 16,
+    "edge_id_adjacent_fraction": 0.9843900203704834
+  },
+  "gpu": "NVIDIA A40",
+  "dtype": "float32",
+  "warmup": 25,
+  "repeat": 100,
+  "rounds": 5,
+  "correctness": true
+}
