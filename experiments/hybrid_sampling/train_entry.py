@@ -16,5 +16,12 @@ if mode in ("hybrid", "fixed", "graph"):
     install(fixed=mode != "hybrid", replay=mode == "graph")
 elif mode != "native":
     raise ValueError(mode)
+if os.getenv("MEMSHARE_PACKED_BLOCK") == "1":
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).resolve().parent / "training_step"))
+    from packed_block import install
+
+    install()
 sys.path.insert(0, ".")
 runpy.run_path("train_boundery.py", run_name="__main__")

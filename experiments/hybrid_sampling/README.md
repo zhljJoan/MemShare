@@ -36,3 +36,5 @@ Wall time includes routing, launch, host/device copies and ordered host output. 
 The [four-GPU training experiment](training_results/README.md) measures the sampler in the existing pipeline and evaluates a one-batch static edge-feature cache.
 
 The [host submission experiment](dispatch_results/README.md) compares the original launch path to a precompiled fixed-tile sampler and to CUDA Graph replay.
+
+The [four-dataset training experiment](training_step/README.md) measures packing the sampler's CPU outputs into ordinary, reverse and identity blocks.
