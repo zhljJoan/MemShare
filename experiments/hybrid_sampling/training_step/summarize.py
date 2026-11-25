@@ -27,6 +27,15 @@ def read(path, dataset, model, epochs):
     return rows
 
 
+def paired(paths, dataset, model, epochs):
+    a, b = [read(p, dataset, model, epochs) for p in paths]
+    for x, y in zip(a, b):
+        for key in ("remote_nodes", "remote_edges"):
+            assert x[key] == y[key], (dataset, model, key, x[key], y[key])
+        assert [r["batches"] for r in x["ranks"]] == [r["batches"] for r in y["ranks"]]
+    return a, b
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("raw", type=Path)
@@ -55,13 +64,7 @@ def main():
                         / "epochs.jsonl"
                         for mode in (0, 1)
                     ]
-                a, b = [read(p, dataset, model, epochs) for p in paths]
-                for x, y in zip(a, b):
-                    for key in ("remote_nodes", "remote_edges"):
-                        assert x[key] == y[key], (dataset, model, key, x[key], y[key])
-                    assert [r["batches"] for r in x["ranks"]] == [
-                        r["batches"] for r in y["ranks"]
-                    ]
+                a, b = paired(paths, dataset, model, epochs)
                 baseline.append([r["critical_train_seconds"] for r in a])
                 packed.append([r["critical_train_seconds"] for r in b])
             base = mean(x[0] for x in baseline)
@@ -90,6 +93,23 @@ def main():
         writer = csv.DictWriter(f, fieldnames=list(records[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(records)
+
+    extra = []
+    for case in sorted((args.raw / "steady_check").glob("*")):
+        dataset, model = case.name.split(".")
+        paths = [case / arm / "epochs.jsonl" for arm in ("0", "1")]
+        baseline, packed = paired(paths, dataset, model, 2)
+        base, opt = (arm[1]["critical_train_seconds"] for arm in (baseline, packed))
+        extra.append(dict(
+            dataset=dataset, model=model, epoch=1,
+            batches_per_rank=baseline[1]["ranks"][0]["batches"],
+            base_s=base, packed_s=opt, reduction_pct=100 * (1 - opt / base),
+        ))
+    if extra:
+        with (args.out / "steady_check.csv").open("w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=list(extra[0]), lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(extra)
 
 
 if __name__ == "__main__":

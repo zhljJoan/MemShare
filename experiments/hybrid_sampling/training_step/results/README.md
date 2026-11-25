@@ -28,3 +28,11 @@ An independent CUDA runtime trace on gpu07 counted launches for 20 warmed constr
 GDELT uses the actual 413-dimensional node and 182-dimensional edge feature files. The manuscript dataset summary lists 186 edge features. For the other datasets these runs use the training loader’s generated 172-dimensional features. The large graph measurements cover one full epoch per arm. Validation and test evaluation were disabled. There are no measured effects on time to target accuracy or a separate gain attributable to cross-batch caching. The [earlier LASTFM/TGN trace](../../training_results/README.md) reports reuse and remote feature-cache hits separately.
 
 [Machine-readable table](matrix.csv) · [Run provenance](provenance.json) · [Paired raw records](matrix/) · [LASTFM/TGN pilot records](pilot/)
+
+## StackOverflow/TGN steady confirmation
+
+A second independent pair on gpu07 ran two complete epochs in reverse launch order (packed first, then baseline). After both samplers had initialized, epoch 1 took 123.563 s with the baseline and 123.354 s with packing (+0.17% time saved). Each rank processed 3,704 batches and both arms had equal logical remote demand in each epoch. This confirmatory run is reported separately from the twelve epoch-0 comparisons. [Raw steady confirmation](steady_check/StackOverflow.TGN/)
+
+## GDELT/APAN steady confirmation
+
+A second independent pair on gpu06 ran two complete epochs in reverse launch order (packed first, then baseline). After both samplers had initialized, epoch 1 took 241.823 s with the baseline and 240.015 s with packing (+0.75% time saved). Each rank processed 10,714 batches and both arms had equal logical remote demand in each epoch. This confirmatory run is reported separately from the twelve epoch-0 comparisons. [Raw steady confirmation](steady_check/GDELT.APAN/)
