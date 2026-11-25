@@ -1,0 +1,43 @@
+{
+  "dataset": "/mnt/nfs/fzz/TGL-DATA/WikiTalk/edges.csv",
+  "partition": "WikiTalk_4parts_top0.1",
+  "gpu": "NVIDIA A40",
+  "torch": "2.1.1+cu118",
+  "queries_per_batch": 6000,
+  "matched_batches": 21,
+  "measurements_per_mode": 105,
+  "results": {
+    "0": {
+      "wall_ms": 1.006884,
+      "cpu_core_ms": 4.231275,
+      "gpu_kernel_ms": 0.0,
+      "gpu_queries": 0.0,
+      "cache_MiB": 0.0,
+      "wall_p95_ms": 1.2629383999999997
+    },
+    "0.1": {
+      "wall_ms": 1.13175,
+      "cpu_core_ms": 2.991189,
+      "gpu_kernel_ms": 0.08396799862384796,
+      "gpu_queries": 2371.0,
+      "cache_MiB": 25.532312393188477,
+      "wall_p95_ms": 1.4369328
+    },
+    "0.3": {
+      "wall_ms": 0.776617,
+      "cpu_core_ms": 1.873415,
+      "gpu_kernel_ms": 0.09932799637317657,
+      "gpu_queries": 3537.0,
+      "cache_MiB": 76.31587791442871,
+      "wall_p95_ms": 0.8366598
+    },
+    "1": {
+      "wall_ms": 0.424988,
+      "cpu_core_ms": 0.426968,
+      "gpu_kernel_ms": 0.12268800288438797,
+      "gpu_queries": 6000.0,
+      "cache_MiB": 280.0848979949951,
+      "wall_p95_ms": 0.4523894
+    }
+  }
+}
