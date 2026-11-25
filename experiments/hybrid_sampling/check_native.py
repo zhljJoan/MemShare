@@ -3,7 +3,7 @@
 import numpy as np
 import torch
 
-from probe import SplitSampler
+from probe import FixedWorkspace, SplitSampler
 from starrygl import sampler_ops as ops
 
 
@@ -44,21 +44,35 @@ def main():
         )
         if coordinated:
             native.configure_coordinated_sampling(8, 6773)
-        split = SplitSampler(
-            ptr, neighbor, times, remote, [0, 1, 3, 5], coordinated=coordinated
-        )
+        samplers = [
+            SplitSampler(
+                ptr,
+                neighbor,
+                times,
+                remote,
+                [0, 1, 3, 5],
+                coordinated=coordinated,
+                workspace=workspace,
+            )
+            for workspace in (
+                None,
+                FixedWorkspace(20, coordinated),
+                FixedWorkspace(20, coordinated, replay=True),
+            )
+        ]
         for batch in range(24):
-            roots = rng.integers(6, size=128)
+            roots = rng.integers(6, size=[1, 128, 511, 1537, 2, 64][batch % 6])
             stamp = rng.integers(0, 54, size=len(roots))
             beta = [0.0, 0.1, 0.5, 1.0][batch % 4]
             native.neighbor_sample_from_nodes(
                 torch.from_numpy(roots), torch.from_numpy(stamp), None, beta
             )
             block = native.get_ret()[0]
-            result, _ = split.sample(roots, stamp, batch=batch, beta=beta)
-            row, slot = np.where(result >= 0)
-            np.testing.assert_array_equal(row, block.src_index().numpy())
-            np.testing.assert_array_equal(result[row, slot], block.eid().numpy())
+            for split in samplers:
+                result, _ = split.sample(roots, stamp, batch=batch, beta=beta)
+                row, slot = np.where(result >= 0)
+                np.testing.assert_array_equal(row, block.src_index().numpy())
+                np.testing.assert_array_equal(result[row, slot], block.eid().numpy())
     print("48 batches match native root occurrence order and edge IDs")
 
 

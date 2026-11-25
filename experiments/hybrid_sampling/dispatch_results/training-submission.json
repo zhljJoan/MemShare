@@ -1,0 +1,68 @@
+{
+  "hybrid": {
+    "0": {
+      "batches": 152,
+      "host_submit_us": 433.6685,
+      "dispatch_us": 106.21950000000001
+    },
+    "1": {
+      "batches": 152,
+      "host_submit_us": 414.588,
+      "dispatch_us": 98.274
+    },
+    "2": {
+      "batches": 152,
+      "host_submit_us": 415.53049999999996,
+      "dispatch_us": 105.8395
+    },
+    "3": {
+      "batches": 152,
+      "host_submit_us": 420.9895,
+      "dispatch_us": 111.9545
+    }
+  },
+  "fixed": {
+    "0": {
+      "batches": 152,
+      "host_submit_us": 342.59799999999996,
+      "dispatch_us": 96.0135
+    },
+    "1": {
+      "batches": 152,
+      "host_submit_us": 340.39149999999995,
+      "dispatch_us": 89.499
+    },
+    "2": {
+      "batches": 152,
+      "host_submit_us": 371.129,
+      "dispatch_us": 67.9485
+    },
+    "3": {
+      "batches": 152,
+      "host_submit_us": 314.611,
+      "dispatch_us": 55.852
+    }
+  },
+  "graph": {
+    "0": {
+      "batches": 152,
+      "host_submit_us": 252.44400000000002,
+      "dispatch_us": 65.566
+    },
+    "1": {
+      "batches": 152,
+      "host_submit_us": 314.61249999999995,
+      "dispatch_us": 70.7645
+    },
+    "2": {
+      "batches": 152,
+      "host_submit_us": 340.63599999999997,
+      "dispatch_us": 79.33600000000001
+    },
+    "3": {
+      "batches": 152,
+      "host_submit_us": 265.626,
+      "dispatch_us": 70.328
+    }
+  }
+}

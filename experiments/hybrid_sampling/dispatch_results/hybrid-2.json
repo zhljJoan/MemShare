@@ -1,0 +1,170 @@
+{
+  "mode": "hybrid",
+  "run": 2,
+  "epochs": [
+    {
+      "dataset": "LASTFM",
+      "model": "TGN_large",
+      "sample_type": "boundery_recent_decay_coordinated",
+      "coordinated_group_size": 8,
+      "epoch": 0,
+      "ranks": [
+        {
+          "rank": 0,
+          "epoch": 0,
+          "train_seconds": 3.7417943477630615,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 174.1449432373047,
+          "batches": 76,
+          "peak_cuda_bytes": 1802128896
+        },
+        {
+          "rank": 1,
+          "epoch": 0,
+          "train_seconds": 3.7417871952056885,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 176.45455932617188,
+          "batches": 76,
+          "peak_cuda_bytes": 1906002944
+        },
+        {
+          "rank": 2,
+          "epoch": 0,
+          "train_seconds": 3.741495370864868,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 176.82302856445312,
+          "batches": 76,
+          "peak_cuda_bytes": 1834882048
+        },
+        {
+          "rank": 3,
+          "epoch": 0,
+          "train_seconds": 3.740657091140747,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 176.03024291992188,
+          "batches": 76,
+          "peak_cuda_bytes": 1758826496
+        }
+      ],
+      "critical_train_seconds": 3.7417943477630615,
+      "remote_nodes": 220314,
+      "remote_edges": 924066,
+      "memory_comm": 0,
+      "shared_comm": 39635
+    },
+    {
+      "dataset": "LASTFM",
+      "model": "TGN_large",
+      "sample_type": "boundery_recent_decay_coordinated",
+      "coordinated_group_size": 8,
+      "epoch": 1,
+      "ranks": [
+        {
+          "rank": 0,
+          "epoch": 1,
+          "train_seconds": 2.1459479331970215,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 135.7452850341797,
+          "batches": 76,
+          "peak_cuda_bytes": 1802128896
+        },
+        {
+          "rank": 1,
+          "epoch": 1,
+          "train_seconds": 2.147165298461914,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 135.75802612304688,
+          "batches": 76,
+          "peak_cuda_bytes": 1906002944
+        },
+        {
+          "rank": 2,
+          "epoch": 1,
+          "train_seconds": 2.1478493213653564,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 134.21707153320312,
+          "batches": 76,
+          "peak_cuda_bytes": 1844697088
+        },
+        {
+          "rank": 3,
+          "epoch": 1,
+          "train_seconds": 2.145763874053955,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 134.96009826660156,
+          "batches": 76,
+          "peak_cuda_bytes": 1766899712
+        }
+      ],
+      "critical_train_seconds": 2.1478493213653564,
+      "remote_nodes": 220553,
+      "remote_edges": 926602,
+      "memory_comm": 0,
+      "shared_comm": 37926
+    },
+    {
+      "dataset": "LASTFM",
+      "model": "TGN_large",
+      "sample_type": "boundery_recent_decay_coordinated",
+      "coordinated_group_size": 8,
+      "epoch": 2,
+      "ranks": [
+        {
+          "rank": 0,
+          "epoch": 2,
+          "train_seconds": 2.1660892963409424,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 125.34124755859375,
+          "batches": 76,
+          "peak_cuda_bytes": 1802128896
+        },
+        {
+          "rank": 1,
+          "epoch": 2,
+          "train_seconds": 2.167163372039795,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 125.14742279052734,
+          "batches": 76,
+          "peak_cuda_bytes": 1906002944
+        },
+        {
+          "rank": 2,
+          "epoch": 2,
+          "train_seconds": 2.1625773906707764,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 122.49227142333984,
+          "batches": 76,
+          "peak_cuda_bytes": 1844697088
+        },
+        {
+          "rank": 3,
+          "epoch": 2,
+          "train_seconds": 2.167497396469116,
+          "alpha": 0.3,
+          "beta": 0.1,
+          "loss": 123.26732635498047,
+          "batches": 76,
+          "peak_cuda_bytes": 1766899712
+        }
+      ],
+      "critical_train_seconds": 2.167497396469116,
+      "remote_nodes": 220268,
+      "remote_edges": 925649,
+      "memory_comm": 0,
+      "shared_comm": 33608
+    }
+  ],
+  "precompile_s_by_rank": {},
+  "captures_and_replays_by_rank": {}
+}

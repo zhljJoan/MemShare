@@ -1,5 +1,6 @@
 """Experimental adapter for the single-layer training path with ordinary blocks."""
 
+import atexit
 import json
 import os
 import time
@@ -9,7 +10,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from probe import SplitSampler
+from probe import FixedWorkspace, SplitSampler
 from starrygl.sample.sample_core.neighbor_sampler import NeighborSampler
 
 
@@ -38,7 +39,7 @@ class Block:
         return self.delta
 
 
-def install():
+def install(fixed=False, replay=False):
     init = NeighborSampler.__init__
     native = NeighborSampler.sample_from_nodes
 
@@ -51,6 +52,24 @@ def install():
         self.batch_number = 0
         self.calibration = []
         self.policy_args = kwargs
+        self.train_device = torch.cuda.current_device()
+        self.workspace = None
+        if fixed:
+            started = time.perf_counter()
+            self.workspace = FixedWorkspace(self.fanout[0], True, replay=replay)
+            if replay:
+
+                def report_graph():
+                    print(
+                        f"sampling_graph rank={kwargs['local_part']} captures={self.workspace.captures} replays={self.workspace.replays}",
+                        flush=True,
+                    )
+
+                atexit.register(report_graph)
+            print(
+                f"sampling_precompile rank={kwargs['local_part']} seconds={time.perf_counter() - started:.4f}",
+                flush=True,
+            )
         self.history = deque(maxlen=4)
 
     def sample(self, nodes, ts, **kwargs):
@@ -63,6 +82,8 @@ def install():
             self.calibration.append(roots.copy())
             return native(self, nodes, ts, **kwargs)
         options = self.policy_args
+        if torch.cuda.current_device() != self.train_device:
+            torch.cuda.set_device(self.train_device)
         if batch == 5:
             start = time.perf_counter()
             data = self.graph_data
@@ -96,6 +117,7 @@ def install():
                 cached,
                 fanout=self.fanout[0],
                 threads=self.workers,
+                workspace=self.workspace,
             )
             print(
                 f"split_setup rank={rank} seconds={time.perf_counter() - start:.3f} bytes={self.split.cache_bytes}",
@@ -111,7 +133,7 @@ def install():
         )
         rows, cols = np.where(result >= 0)
         block = Block(rows, result[rows, cols], self.split.graph, self.eids, ts.numpy())
-        if os.getenv("MEMSHARE_REUSE_TRACE") and batch < 30:
+        if os.getenv("MEMSHARE_REUSE_TRACE"):
             reference, _ = native(self, nodes, ts, **kwargs)
             for name in (
                 "src_index",
@@ -123,6 +145,8 @@ def install():
                 assert torch.equal(
                     getattr(reference[0], name)(), getattr(block, name)()
                 ), name
+            if batch >= 30:
+                return [block], {}
             keys = [
                 np.unique(roots),
                 np.unique(block.edges.numpy()),

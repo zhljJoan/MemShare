@@ -34,3 +34,5 @@ Wall time includes routing, launch, host/device copies and ordered host output. 
 | WikiTalk | 100% | 0.425 | 0.427 | 0.122 | 280.08 | 6000 |
 
 The [four-GPU training experiment](training_results/README.md) measures the sampler in the existing pipeline and evaluates a one-batch static edge-feature cache.
+
+The [host submission experiment](dispatch_results/README.md) compares the original launch path to a precompiled fixed-tile sampler and to CUDA Graph replay.

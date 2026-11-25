@@ -1,0 +1,45 @@
+{
+  "hybrid": {
+    "sample_wall_us": 1094.195,
+    "host_submit_us": 238.207,
+    "dispatch_us": 56.631,
+    "precompile_and_load_ms": null,
+    "gpu_kernel_us": 42.5,
+    "traced_host_calls_per_batch": {
+      "cudaLaunchKernel": 0.0,
+      "cuLaunchKernel": 1.0,
+      "cudaGraphLaunch": 0.0,
+      "cudaMemcpyAsync": 4.0
+    },
+    "matched_batches": 21
+  },
+  "fixed": {
+    "sample_wall_us": 785.528,
+    "host_submit_us": 185.045,
+    "dispatch_us": 29.181,
+    "precompile_and_load_ms": 313.470879,
+    "gpu_kernel_us": 43.0,
+    "traced_host_calls_per_batch": {
+      "cudaLaunchKernel": 0.0,
+      "cuLaunchKernel": 1.0,
+      "cudaGraphLaunch": 0.0,
+      "cudaMemcpyAsync": 2.0
+    },
+    "matched_batches": 21
+  },
+  "graph": {
+    "sample_wall_us": 760.118,
+    "host_submit_us": 157.434,
+    "dispatch_us": 52.385,
+    "precompile_and_load_ms": 0.070319,
+    "gpu_kernel_us": 42.5,
+    "traced_host_calls_per_batch": {
+      "cudaLaunchKernel": 2.0,
+      "cuLaunchKernel": 0.0,
+      "cudaGraphLaunch": 1.0,
+      "cudaMemcpyAsync": 0.0
+    },
+    "matched_batches": 21
+  },
+  "fixed_compiled_signatures": 1
+}

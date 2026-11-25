@@ -1,5 +1,8 @@
 """Isolated one-layer CPU/GPU query split; never imported by production training."""
 
+import threading
+from time import perf_counter_ns
+
 import numpy as np
 import torch
 import triton
@@ -17,28 +20,26 @@ def _mix(x):
 
 
 @triton.jit
-def _sample(
+def _sample_row(
     starts,
     ends,
     bias,
     nbr,
     ts,
     remote,
-    roots,
-    times,
-    ids,
+    i,
+    node,
+    query_time,
+    query_id,
     out,
     F: tl.constexpr,
     COORD: tl.constexpr,
-    BETA: tl.constexpr,
-    GROUP: tl.constexpr,
-    SEED: tl.constexpr,
+    BETA,
+    GROUP,
+    SEED,
     BATCH,
     B: tl.constexpr,
 ):
-    i = tl.program_id(0)
-    node = tl.load(roots + i)
-    query_time = tl.load(times + i)
     begin = tl.load(starts + node)
     end = tl.load(ends + node)
     offset = tl.load(bias + node)
@@ -70,7 +71,7 @@ def _sample(
         total = tl.where(total < 1.0e-6, 1.0, total)
         rem = tl.sum(r.to(tl.int32), 0)
         obj = tl.load(nbr + pos, mask=valid, other=0).to(tl.uint64)
-        group = (tl.load(ids + i) // GROUP).to(tl.uint64)
+        group = (query_id // GROUP).to(tl.uint64)
         key = (
             SEED
             ^ _mix(obj)
@@ -97,10 +98,199 @@ def _sample(
             cursor -= B
 
 
+@triton.jit
+def _sample(
+    starts,
+    ends,
+    bias,
+    nbr,
+    ts,
+    remote,
+    roots,
+    times,
+    ids,
+    out,
+    F: tl.constexpr,
+    COORD: tl.constexpr,
+    BETA: tl.constexpr,
+    GROUP: tl.constexpr,
+    SEED: tl.constexpr,
+    BATCH,
+    B: tl.constexpr,
+):
+    i = tl.program_id(0)
+    node = tl.load(roots + i)
+    query_time = tl.load(times + i)
+    _sample_row(
+        starts,
+        ends,
+        bias,
+        nbr,
+        ts,
+        remote,
+        i,
+        node,
+        query_time,
+        tl.load(ids + i),
+        out,
+        F,
+        COORD,
+        BETA,
+        GROUP,
+        SEED,
+        BATCH,
+        B,
+    )
+
+
+@triton.jit
+def _fixed_sample(
+    starts,
+    ends,
+    bias,
+    nbr,
+    ts,
+    remote,
+    packed,
+    out,
+    F: tl.constexpr,
+    COORD: tl.constexpr,
+    B: tl.constexpr,
+):
+    i = tl.program_id(0)
+    if i < tl.load(packed):
+        batch = tl.load(packed + 1)
+        group = tl.load(packed + 2)
+        seed = tl.load(packed + 3).to(tl.uint64)
+        beta = tl.load(packed + 4).to(tl.float64, bitcast=True)
+        query = packed + 5 + 3 * i
+        _sample_row(
+            starts,
+            ends,
+            bias,
+            nbr,
+            ts,
+            remote,
+            i,
+            tl.load(query),
+            tl.load(query + 1),
+            tl.load(query + 2),
+            out,
+            F,
+            COORD,
+            beta,
+            group,
+            seed,
+            batch,
+            B,
+        )
+
+
+class FixedWorkspace:
+    """A single in-flight batch, used by the serial training sampler."""
+
+    grain = 256
+
+    def __init__(self, fanout, coordinated, replay=False):
+        self.replay = replay
+        self.graph_exec = None
+        self.bound = False
+        self.lock = threading.Lock()
+        self.replays = 0
+        self.captures = 0
+        self.constants = (
+            fanout,
+            coordinated,
+            triton.next_power_of_2(max(32, fanout + 1)),
+        )
+        self.capacity = 0
+        self.done = torch.cuda.Event()
+        # Pointer types and constexpr parameters fully determine this signature.
+        self.kernel = _fixed_sample.warmup(
+            *([torch.int64] * 5),
+            torch.uint8,
+            torch.int64,
+            torch.int64,
+            *self.constants,
+            grid=(self.grain,),
+            num_warps=1,
+        )
+
+        # Resolve the CUDA module and its host launcher before the first batch.
+        self.kernel[(1, 1, 1)]
+
+    def submit(self, graph, slots, times, gid, batch, beta, group, seed, profile):
+        n = len(gid)
+        grid = triton.cdiv(n, self.grain) * self.grain
+        if grid > self.capacity:
+            if self.replay:
+                grid = triton.next_power_of_2(grid)
+            self.graph_exec = None
+            self.host = torch.empty(5 + 3 * grid, dtype=torch.int64, pin_memory=True)
+            self.packed = torch.empty_like(self.host, device="cuda")
+            self.out = torch.empty(
+                (grid, self.constants[0] + 1), dtype=torch.int64, device="cuda"
+            )
+            self.received = torch.empty_like(self.out, device="cpu", pin_memory=True)
+            self.capacity = grid
+        size = 5 + 3 * n
+        buf = self.host.numpy()
+        buf[:5] = (
+            n,
+            np.uint64(batch).view(np.int64),
+            group,
+            np.uint64(seed).view(np.int64),
+            np.float64(beta).view(np.int64),
+        )
+        queries = buf[5:size].reshape(n, 3)
+        queries[:, 0], queries[:, 1], queries[:, 2] = slots[gid], times[gid], gid
+        # PyTorch 2.1 capture touches the default CUDA generator. Only capture
+        # on the training thread, when model dropout cannot run concurrently.
+        use_graph = self.replay and (
+            self.graph_exec is not None
+            or threading.current_thread() is threading.main_thread()
+        )
+        if use_graph:
+            if self.graph_exec is None:
+                self.graph_exec = torch.cuda.CUDAGraph()
+                run = self.kernel[(self.capacity, 1, 1)]
+                self.graph_exec.capture_begin(capture_error_mode="thread_local")
+                self.packed.copy_(self.host, non_blocking=True)
+                run(*graph, self.packed, self.out)
+                self.received.copy_(self.out, non_blocking=True)
+                self.graph_exec.capture_end()
+                self.captures += 1
+            start = perf_counter_ns() if profile else 0
+            self.graph_exec.replay()
+            self.replays += 1
+        else:
+            self.packed[:size].copy_(self.host[:size], non_blocking=True)
+            run = self.kernel[(grid, 1, 1)]
+            start = perf_counter_ns() if profile else 0
+            run(*graph, self.packed, self.out)
+        dispatch = (perf_counter_ns() - start) / 1000 if profile else None
+        if not use_graph:
+            self.received[:n].copy_(self.out[:n], non_blocking=True)
+        self.done.record()
+        return self.received[:n], self.done, dispatch
+
+
 class SplitSampler:
     def __init__(
-        self, ptr, nbr, ts, remote, gpu_nodes, fanout=20, threads=10, coordinated=True
+        self,
+        ptr,
+        nbr,
+        ts,
+        remote,
+        gpu_nodes,
+        fanout=20,
+        threads=10,
+        coordinated=True,
+        workspace=None,
     ):
+        self.workspace = workspace
+        if workspace and workspace.constants[:2] != (fanout, coordinated):
+            raise ValueError("workspace policy must match sampler")
         self.cpu = memshare_hybrid_cpu
         self.graph = tuple(
             np.ascontiguousarray(x, dtype=np.int64) for x in (ptr, nbr, ts, remote)
@@ -162,7 +352,20 @@ class SplitSampler:
             sum(x.numel() * x.element_size() for x in self.gpu) if self.gpu else 0
         )
 
-    def sample(self, roots, times, batch=0, beta=0.1, group=8, seed=6773):
+        if workspace:
+            if workspace.bound:
+                raise ValueError("a fixed workspace belongs to one adjacency cache")
+            workspace.bound = True
+
+    def sample(
+        self, roots, times, batch=0, beta=0.1, group=8, seed=6773, profile=False
+    ):
+        if self.workspace is None:
+            return self._sample(roots, times, batch, beta, group, seed, profile)
+        with self.workspace.lock:
+            return self._sample(roots, times, batch, beta, group, seed, profile)
+
+    def _sample(self, roots, times, batch, beta, group, seed, profile):
         roots = np.ascontiguousarray(roots, dtype=np.int64)
         times = np.ascontiguousarray(times, dtype=np.int64)
         if roots.ndim != 1 or times.shape != roots.shape:
@@ -198,45 +401,57 @@ class SplitSampler:
                 batch,
             )
             return result, dict(gpu_queries=0, cpu_queries=len(cid), gpu_kernel_ms=0.0)
+        submit_start = perf_counter_ns() if profile else 0
+        dispatch = None
         ready = None
         event_start = None
         event_end = None
         # GPU launch first; native CPU sampling releases the GIL and overlaps it.
         if len(gid):
             with torch.cuda.stream(self.stream):
-                gq = torch.from_numpy(np.ascontiguousarray(slots[gid])).to(
-                    "cuda", non_blocking=True
-                )
-                gt = torch.from_numpy(np.ascontiguousarray(times[gid])).to(
-                    "cuda", non_blocking=True
-                )
-                gi = torch.from_numpy(gid).to("cuda", non_blocking=True)
-                out = torch.empty(
-                    (len(gid), self.fanout + 1), dtype=torch.int64, device="cuda"
-                )
-                host = torch.empty_like(out, device="cpu", pin_memory=True)
-                event_start = torch.cuda.Event(enable_timing=True)
-                event_end = torch.cuda.Event(enable_timing=True)
-                event_start.record()
-                _sample[(len(gid),)](
-                    *self.gpu,
-                    gq,
-                    gt,
-                    gi,
-                    out,
-                    self.fanout,
-                    self.coordinated,
-                    beta,
-                    group,
-                    seed,
-                    batch,
-                    triton.next_power_of_2(max(32, self.fanout + 1)),
-                    num_warps=1,
-                )
-                event_end.record()
-                host.copy_(out, non_blocking=True)
-                ready = torch.cuda.Event()
-                ready.record()
+                if self.workspace is not None:
+                    host, ready, dispatch = self.workspace.submit(
+                        self.gpu, slots, times, gid, batch, beta, group, seed, profile
+                    )
+                else:
+                    gq = torch.from_numpy(np.ascontiguousarray(slots[gid])).to(
+                        "cuda", non_blocking=True
+                    )
+                    gt = torch.from_numpy(np.ascontiguousarray(times[gid])).to(
+                        "cuda", non_blocking=True
+                    )
+                    gi = torch.from_numpy(gid).to("cuda", non_blocking=True)
+                    out = torch.empty(
+                        (len(gid), self.fanout + 1), dtype=torch.int64, device="cuda"
+                    )
+                    host = torch.empty_like(out, device="cpu", pin_memory=True)
+                    event_start = torch.cuda.Event(enable_timing=True)
+                    event_end = torch.cuda.Event(enable_timing=True)
+                    event_start.record()
+                    dispatch_start = perf_counter_ns() if profile else 0
+                    _sample[(len(gid),)](
+                        *self.gpu,
+                        gq,
+                        gt,
+                        gi,
+                        out,
+                        self.fanout,
+                        self.coordinated,
+                        beta,
+                        group,
+                        seed,
+                        batch,
+                        triton.next_power_of_2(max(32, self.fanout + 1)),
+                        num_warps=1,
+                    )
+                    dispatch = (
+                        (perf_counter_ns() - dispatch_start) / 1000 if profile else None
+                    )
+                    event_end.record()
+                    host.copy_(out, non_blocking=True)
+                    ready = torch.cuda.Event()
+                    ready.record()
+        submit_us = (perf_counter_ns() - submit_start) / 1000 if profile else None
         cpu_out = np.empty((len(cid), self.fanout + 1), dtype=np.int64)
         if len(cid):
             self.cpu.sample(
@@ -260,8 +475,12 @@ class SplitSampler:
             if len(cid):
                 result[gid] = host.numpy()
             else:
-                result = host.numpy()
-            gpu_ms = event_start.elapsed_time(event_end)
+                result = host.numpy().copy() if self.workspace else host.numpy()
+            gpu_ms = event_start.elapsed_time(event_end) if event_start else None
         return result, dict(
-            gpu_queries=len(gid), cpu_queries=len(cid), gpu_kernel_ms=gpu_ms
+            gpu_queries=len(gid),
+            cpu_queries=len(cid),
+            gpu_kernel_ms=gpu_ms,
+            host_submit_us=submit_us,
+            dispatch_us=dispatch,
         )

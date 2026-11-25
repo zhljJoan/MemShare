@@ -2,7 +2,7 @@
 set -eu
 experiment=$(cd "$(dirname "$0")" && pwd)
 root=${MEMSHARE_TRAIN_ROOT:?set to the coordinated-sampling training checkout}
-mode=${1:?native or hybrid}
+mode=${1:?native, hybrid, fixed or graph}
 output=$(realpath -m "${2:?fresh absolute output directory}")
 mkdir "$output"
 # The coordinated training checkout contains the native extension and the
