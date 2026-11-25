@@ -1,4 +1,4 @@
-"""Verify complete paired epochs before writing results to CSV and Markdown."""
+"""Verify complete paired epochs before writing results to CSV."""
 
 import argparse
 import csv
@@ -17,7 +17,7 @@ def read(path, dataset, model, epochs):
     for row in rows:
         ranks = row["ranks"]
         assert row["dataset"] == dataset and row["model"] == model + "_large"
-        assert {r["rank"] for r in ranks} == set(range(4))
+        assert sorted(r["rank"] for r in ranks) == list(range(4))
         assert len({r["batches"] for r in ranks}) == 1 and ranks[0]["batches"] > 0
         assert all(
             math.isfinite(r["loss"]) and r["alpha"] == 0.3 and r["beta"] == 0.1
@@ -87,7 +87,7 @@ def main():
             records.append(row)
     args.out.mkdir(parents=True, exist_ok=True)
     with (args.out / "matrix.csv").open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=list(records[0]))
+        writer = csv.DictWriter(f, fieldnames=list(records[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(records)
 

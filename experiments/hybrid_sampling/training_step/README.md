@@ -22,3 +22,7 @@ The study uses four A40s per run, batch size 3,000 per rank before filtering, on
 The two large datasets use the journal's complete epoch-0 timing protocol. The small datasets also have two subsequent steady epochs. Only LASTFM/TGN has two independent launches per arm. Comparing the first epoch across all 12 cells uses the same boundary. The independent loss/Adam pilot did not pass the timing gate and is excluded from the matrix. No validation, inference or time-to-accuracy measurements were taken.
 
 The optional large_input.py operates on an isolated training snapshot. It reads the existing per-column NumPy caches of the event CSV, omits a diagnostic distinct-edge count, and reads GDELT's immutable boolean edge feature file by memory mapping before converting the selected rank-local rows to float32. With evaluation disabled it avoids constructing a duplicate evaluation sampler. Both timed arms use the same input loader per dataset. Reruns require the actual data and partitions.
+
+## Measurements
+
+[Paired training results](results/README.md) include the per-rank epoch records and the complete comparison in CSV. From this directory, regenerate the CSV with `python summarize.py results results`. To collect CUDA runtime API counts and host time averaged across 20 warmed block constructions in each layout, run `PYTHONPATH="$MEMSHARE_TRAIN_ROOT" python check_blocks.py --profile /tmp/block-api.json`.

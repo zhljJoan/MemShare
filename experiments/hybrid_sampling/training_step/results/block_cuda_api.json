@@ -1,0 +1,80 @@
+[
+  {
+    "layout": "forward",
+    "packed": false,
+    "iterations": 20,
+    "calls_per_block": {
+      "cudaMemcpyAsync": 16.0,
+      "cudaLaunchKernel": 88.0
+    },
+    "host_us_per_block": {
+      "cudaMemcpyAsync": 193.95,
+      "cudaLaunchKernel": 476.3
+    }
+  },
+  {
+    "layout": "forward",
+    "packed": true,
+    "iterations": 20,
+    "calls_per_block": {
+      "cudaMemcpyAsync": 3.0,
+      "cudaLaunchKernel": 5.0
+    },
+    "host_us_per_block": {
+      "cudaMemcpyAsync": 58.95,
+      "cudaLaunchKernel": 43.8
+    }
+  },
+  {
+    "layout": "reverse",
+    "packed": false,
+    "iterations": 20,
+    "calls_per_block": {
+      "cudaMemcpyAsync": 15.0,
+      "cudaLaunchKernel": 65.0
+    },
+    "host_us_per_block": {
+      "cudaMemcpyAsync": 161.05,
+      "cudaLaunchKernel": 364.4
+    }
+  },
+  {
+    "layout": "reverse",
+    "packed": true,
+    "iterations": 20,
+    "calls_per_block": {
+      "cudaMemcpyAsync": 3.0,
+      "cudaLaunchKernel": 6.0
+    },
+    "host_us_per_block": {
+      "cudaMemcpyAsync": 72.9,
+      "cudaLaunchKernel": 48.25
+    }
+  },
+  {
+    "layout": "identity",
+    "packed": false,
+    "iterations": 20,
+    "calls_per_block": {
+      "cudaMemcpyAsync": 11.0,
+      "cudaLaunchKernel": 61.0
+    },
+    "host_us_per_block": {
+      "cudaMemcpyAsync": 129.7,
+      "cudaLaunchKernel": 284.6
+    }
+  },
+  {
+    "layout": "identity",
+    "packed": true,
+    "iterations": 20,
+    "calls_per_block": {
+      "cudaMemcpyAsync": 1.0,
+      "cudaLaunchKernel": 3.0
+    },
+    "host_us_per_block": {
+      "cudaMemcpyAsync": 35.4,
+      "cudaLaunchKernel": 32.5
+    }
+  }
+]

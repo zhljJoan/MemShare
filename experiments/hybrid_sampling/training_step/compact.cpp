@@ -84,7 +84,8 @@ py::object compact(Array roots, Array rt, Array nbr, Array nt, Array edge,
         row[i] = state(node, ts(i));
         col[i] = root[src];
         edge_ref[i] = edges.add(em(e(i)));
-        delta[i] = t(src) - ts(i);
+        if (exact_in_double)
+          delta[i] = t(src) - ts(i);
       }
     }
     nodes.sort_and_remap(uid);

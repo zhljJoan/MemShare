@@ -1,0 +1,25 @@
+{
+  "training_snapshot": "/mnt/nfs/zlj/memshare_step_20261126a/source",
+  "training_source_sha256": {
+    "examples/train_boundery.py": "e4ac75514586f0e82b4f7cba57143c787668b51758f572f73d1ae3994de6ba35",
+    "examples/link_loss.py": "5d50972f66ea140aa80401e4e9f04456d6faad56643f2679dd9e80a9889e8a1e",
+    "examples/packed_block.py": "0bfc95250b3920bd377dd82295a263c29e943dca56c1d74b6c4b47f19269c3ba",
+    "examples/memshare_packed_block.so": "97da89346036ae2c9796f39623221ddcd373942c7335c393562d8ed357f93c6a",
+    "examples/train_adapter.py": "54012c11cac88dde24100c3714ca9021465f711791326b290125856e1e83c1c5",
+    "examples/probe.py": "cb5080dfd7e5f12f8df0f065816bb2721284bb61481bd96bc4c5b5fe7ac5f470",
+    "starrygl/sample/batch_data.py": "e5e1b32f6b80e88ede4f5e1795e7f4030e115adbe7fcb10eb1654f140d7085c5",
+    "starrygl/sample/part_utils/transformer_from_speed.py": "8e693640aa019d8176219135cf6e0af7b526bee0b456e80ad20c1e274665c0d2",
+    "starrygl/lib/libstarrygl_sampler.so": "1519eece2e011424c5835694f8b053951fb4f89fb9775d584ae19a640d67f124",
+    "config/TGN_large.yml": "f5da43432ca826df9dbf63ba7c311f6604ba7b6519940131f7ef07aaa4e09d4e",
+    "config/JODIE_large.yml": "7bcec6834293e8a9643c31e5c7b5a39a0e90a4b796ad59ed0f069f935628de6d",
+    "config/APAN_large.yml": "8b57747a425d3fe438e71699e73954369a787ae00682f5027932f9c6f90f03a6"
+  },
+  "pilot_host": "gpu07",
+  "dataset_source": "/mnt/nfs/fzz/TGL-DATA",
+  "notes": [
+    "Input column caches used on StackOverflow and GDELT in both arms.",
+    "The pilot snapshot predates the shared large-input loader adjustment.",
+    "Fusion of the loss and optimizer was disabled in both matrix arms.",
+    "Final published adapter adds input eligibility checks and fallback for timestamps outside the float64 exact integer range."
+  ]
+}
