@@ -32,3 +32,5 @@ Wall time includes routing, launch, host/device copies and ordered host output. 
 | WikiTalk | 10% | 1.132 | 2.991 | 0.083 | 25.53 | 2371 |
 | WikiTalk | 30% | 0.777 | 1.873 | 0.099 | 76.32 | 3537 |
 | WikiTalk | 100% | 0.425 | 0.427 | 0.122 | 280.08 | 6000 |
+
+The [four-GPU training experiment](training_results/README.md) measures the sampler in the existing pipeline and evaluates a one-batch static edge-feature cache.

@@ -160,6 +160,11 @@ class DistributedDataLoader:
         self.device =  device
         self.is_pipeline = is_pipeline
         self.is_train = (mode == 'train')
+        self.previous_edges = None
+        if self.is_train and os.getenv("MEMSHARE_PREVIOUS_EDGE_FEATURES") == "1" and graph.efeat is not None:
+            from starrygl.sample.previous_edge_features import PreviousEdgeFeatures
+            self.previous_edges = PreviousEdgeFeatures(
+                sorted_ids=not getattr(sampler, "hierarchical_compaction", False))
         self.mode = mode
         self.cache_mask = cache_mask
         #if self.is_train is True:
@@ -278,7 +283,8 @@ class DistributedDataLoader:
         self.result_queue.popleft()
         
         nind,ndata = get_node_all_to_all_route(self.graph,self.mailbox,dist_nid,out_device=self.device)
-        eind,edata = get_edge_all_to_all_route(self.graph,dist_eid,out_device=self.device)
+        requested, plan = (self.previous_edges.lookup(dist_eid) if self.previous_edges is not None else (dist_eid, None))
+        eind,edata = get_edge_all_to_all_route(self.graph,requested,out_device=self.device)
         
         if nind is not None:
             node_feat = DistributedTensor.all_to_all_get_data(ndata,send_ptr=nind['send_ptr'],recv_ptr=nind['recv_ptr'],is_async=True)
@@ -289,6 +295,8 @@ class DistributedDataLoader:
             edge_feat = DistributedTensor.all_to_all_get_data(edata,send_ptr=eind['send_ptr'],recv_ptr=eind['recv_ptr'],is_async=True)
         else:
             edge_feat = None
+        if self.previous_edges is not None and edge_feat is not None:
+            edge_feat = (*edge_feat, plan)
         self.result_queue.append((batch_data,dist_nid,dist_eid,edge_feat,node_feat))
         self.submit()
         if self.ada_param is not None:
@@ -343,6 +351,8 @@ class DistributedDataLoader:
                                     )
                 edge_feat = get_edge_feature_by_dist(self.graph,dist_eid,is_local,out_device=self.device)
                 node_feat,mem = get_node_feature_by_dist(self.graph,self.mailbox,dist_nid,  is_local,out_device=self.device)
+                if self.previous_edges is not None and edge_feat is not None:
+                    self.previous_edges.complete(dist_eid, edge_feat, None)
                 prepare_input(node_feat,edge_feat,mem,batch_data[1],dist_nid,dist_eid)
                 if(self.mailbox is not None and self.mailbox.historical_cache is not None):
                     _prepare_historical_input(
@@ -362,8 +372,20 @@ class DistributedDataLoader:
                         self.result_queue.popleft()
 
                         if edge_feat is not None:
+                            plan = edge_feat[2] if self.previous_edges is not None else None
                             edge_feat[1].wait()
                             edge_feat = edge_feat[0]
+                            if self.previous_edges is not None:
+                                edge_feat = self.previous_edges.complete(dist_eid, edge_feat, plan)
+                                if os.getenv("MEMSHARE_VERIFY_EDGE_CACHE") == "1":
+                                    ref = get_edge_feature_by_dist(self.graph, dist_eid, False, out_device=self.device)
+                                    assert torch.equal(ref, edge_feat)
+                                    rank = dist.get_rank()
+                                    remote = DistIndex(dist_eid).part != rank
+                                    hits = plan[1] if plan is not None else dist_eid[:0]
+                                    path = os.path.join(os.environ["MEMSHARE_CACHE_TRACE_DIR"], f"edge-{rank}.tsv")
+                                    with open(path, "a") as out:
+                                        print(len(dist_eid), len(hits), remote.sum().item(), remote[hits].sum().item(), file=out)
                         node_feat = None
                         mem = None
                         if self.graph.nfeat is not None:
