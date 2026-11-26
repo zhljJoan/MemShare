@@ -23,5 +23,9 @@ if os.getenv("MEMSHARE_PACKED_BLOCK") == "1":
     from packed_block import install
 
     install()
+if route_mode := os.getenv("MEMSHARE_MEMORY_ROUTE"):
+    from memory_forward.route import install as install_route
+
+    install_route(route_mode, os.getenv("MEMSHARE_VERIFY_ROUTE"))
 sys.path.insert(0, ".")
 runpy.run_path("train_boundery.py", run_name="__main__")

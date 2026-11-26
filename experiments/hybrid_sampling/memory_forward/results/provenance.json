@@ -1,0 +1,15 @@
+{
+  "training_root": "/home/zlj/MemShare-public/MemShare",
+  "files": {
+    "examples/train_boundery.py": "8e299f1057e3d49be00bbb9d701c06ef70843e541b5ac0081e1cef90c906a63f",
+    "starrygl/sample/data_loader.py": "5c36d35d52adf5473d8c6661feb79385bd5cd6bae56684cb6820583424147222",
+    "starrygl/sample/batch_data.py": "e5e1b32f6b80e88ede4f5e1795e7f4030e115adbe7fcb10eb1654f140d7085c5",
+    "starrygl/module/memorys.py": "fe8b3fd5df9379979ccac4fe3d653eb733ba3d728d7e687603a29d235d83c952",
+    "starrygl/sample/memory/shared_mailbox.py": "497a899ea45bfe2383d8de63ca1fd7e91fad17a27fb4ad9d289dd950ad29aa55",
+    "starrygl/lib/libstarrygl_sampler.so": "1519eece2e011424c5835694f8b053951fb4f89fb9775d584ae19a640d67f124",
+    "config/TGN_large.yml": "f5da43432ca826df9dbf63ba7c311f6604ba7b6519940131f7ef07aaa4e09d4e"
+  },
+  "partitions": "/mnt/nfs/zlj/memshare_step_20261126a/part",
+  "host": "gpu07",
+  "baseline_experiment": "109a1fe"
+}
